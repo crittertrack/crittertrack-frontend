@@ -1099,36 +1099,9 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
-    // Beta Feedback Survey — pop up once per session for pending/skipped users,
-    // throttled to once per calendar day once skipped (no date-window gating yet).
-    useEffect(() => {
-        if (!authToken || !userProfile) return;
-
-        const status = userProfile.betaSurveyStatus;
-        if (!status || status === 'dismissed' || status === 'completed') return;
-
-        const sessionKey = 'betaSurveyPromptedThisSession';
-        if (sessionStorage.getItem(sessionKey)) return;
-
-        if (status === 'pending') {
-            sessionStorage.setItem(sessionKey, 'true');
-            setShowBetaSurvey(true);
-            return;
-        }
-
-        if (status === 'skipped') {
-            const last = userProfile.betaSurveyLastPromptedAt ? new Date(userProfile.betaSurveyLastPromptedAt) : null;
-            const now = new Date();
-            const isSameDay = last &&
-                last.getFullYear() === now.getFullYear() &&
-                last.getMonth() === now.getMonth() &&
-                last.getDate() === now.getDate();
-            if (!isSameDay) {
-                sessionStorage.setItem(sessionKey, 'true');
-                setShowBetaSurvey(true);
-            }
-        }
-    }, [authToken, userProfile]);
+    // Beta Feedback Survey — auto-popup disabled (been running long enough).
+    // Pending/skipped/dismissed users can still reach it via the NewsTickerBanner link,
+    // which sets showBetaSurvey via onReopenBetaSurvey.
 
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
