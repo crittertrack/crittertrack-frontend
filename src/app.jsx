@@ -268,6 +268,19 @@ const App = () => {
     const userProfile = userProfileAuth;
     const setUserProfile = setUserProfileAuth;
     const fetchUserProfile = fetchUserProfileAuth;
+
+    // Keeps local userProfile state in sync right after a Customize-tab hidden-sections save,
+    // so reopening the Animal Form for the same species in this session shows the latest choice
+    // without waiting for a full profile refetch.
+    const handleHiddenSectionsUpdate = useCallback((updatedSpecies, data) => {
+        setUserProfile(prev => prev ? ({
+            ...prev,
+            uiPreferences: {
+                ...prev.uiPreferences,
+                hiddenFormSections: { ...(prev.uiPreferences?.hiddenFormSections || {}), [updatedSpecies]: data }
+            }
+        }) : prev);
+    }, [setUserProfile]);
     
     // Setup idle timeout with auth
     useIdleTimeout(authToken, () => handleLogout(), (title, message) => {
@@ -501,6 +514,9 @@ const App = () => {
 
     // Add Sibling: open blank form pre-filled with same species/birthdate/parents
     const [siblingTemplate, setSiblingTemplate] = React.useState(null);
+    // Bumped to force-remount the sibling form (fresh blank fields) after "Save & Add Another".
+    const [siblingFormKey, setSiblingFormKey] = React.useState(0);
+    const [siblingsAddedCount, setSiblingsAddedCount] = React.useState(0);
     const handleAddSibling = React.useCallback((sourceAnimal) => {
         if (!sourceAnimal) return;
         const birthDate = sourceAnimal.birthDate
@@ -512,6 +528,7 @@ const App = () => {
             fatherId_public: sourceAnimal.fatherId_public || sourceAnimal.sireId_public || null,
             motherId_public: sourceAnimal.motherId_public || sourceAnimal.damId_public || null,
         });
+        setSiblingsAddedCount(0);
         setAnimalToView(null);
     }, [setAnimalToView]);
 
@@ -2270,6 +2287,7 @@ const App = () => {
                                     handleWithdrawTransfer={transferWorkflow.handleWithdrawTransfer}
                                     GENDER_OPTIONS={GENDER_OPTIONS}
                                     STATUS_OPTIONS={STATUS_OPTIONS}
+                                    onHiddenSectionsUpdate={handleHiddenSectionsUpdate}
                                 />
                             ) : (
                                 <Suspense fallback={<LoadingSpinner />}>
@@ -2289,6 +2307,7 @@ const App = () => {
                                         GENDER_OPTIONS={GENDER_OPTIONS}
                                         STATUS_OPTIONS={STATUS_OPTIONS}
                                         AnimalImageUpload={AnimalImageUpload}
+                                        onHiddenSectionsUpdate={handleHiddenSectionsUpdate}
                                     />
                                 </Suspense>
                             )}
@@ -2302,15 +2321,18 @@ const App = () => {
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                     <Suspense fallback={<LoadingSpinner />}>
                     <AnimalForm
-                        formTitle={`Add Sibling (${siblingTemplate.species})`}
+                        key={`sibling-${siblingFormKey}`}
+                        formTitle={`Add Sibling (${siblingTemplate.species})${siblingsAddedCount > 0 ? ` \u2014 ${siblingsAddedCount} added` : ''}`}
                         animalToEdit={null}
                         species={siblingTemplate.species}
                         initialValues={siblingTemplate}
-                        onSave={async (...args) => {
-                            await handleSaveAnimalWithRefresh(...args);
-                            setSiblingTemplate(null);
-                        }}
+                        onSave={handleSaveAnimalWithRefresh}
                         onCancel={() => setSiblingTemplate(null)}
+                        onSaveAndAddAnother={() => {
+                            setSiblingsAddedCount(c => c + 1);
+                            setSiblingFormKey(k => k + 1);
+                        }}
+                        addAnotherLabel="Save & Add Another Sibling"
                         onDelete={null}
                         authToken={authToken}
                         showModalMessage={showModalMessage}
@@ -2328,6 +2350,7 @@ const App = () => {
                         GENDER_OPTIONS={GENDER_OPTIONS}
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
+                        onHiddenSectionsUpdate={handleHiddenSectionsUpdate}
                     />
                     </Suspense>
                 </div>
