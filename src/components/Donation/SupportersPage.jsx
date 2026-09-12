@@ -37,7 +37,7 @@ const SupportersPage = () => {
             </div>
 
             <p className="text-gray-600 dark:text-dark-text-secondary text-sm mt-4 mb-6">
-                Thank you to every one of our supporters, whether listed here or not — this list only
+                Thank you to every one of our supporters, whether listed here or not: this list only
                 includes supporters who chose to be shown publicly on Ko-fi.
             </p>
 
@@ -76,9 +76,9 @@ const SupportersPage = () => {
                             )}
                             <div className="min-w-0">
                                 <p className="font-semibold text-gray-800 dark:text-dark-text truncate">{supporter.name}</p>
-                                {supporter.tierName && (
-                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{supporter.tierName}</p>
-                                )}
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
+                                    {supporter.isSubscription ? (supporter.tierName || 'Monthly Supporter') : 'One-time donation'}
+                                </p>
                             </div>
                         </li>
                     ))}

@@ -44,3 +44,12 @@ export const formatFundraiserAmount = (amount) => {
         return `€${amount}`;
     }
 };
+
+// Once pledges exceed the goal, celebrate the real total instead of just capping at "goal of goal".
+export const getFundraiserStatusText = (total) => {
+    const amount = total || 0;
+    if (amount >= GOAL_MONTHLY_TOTAL) {
+        return `🎉 Goal reached! ${formatFundraiserAmount(amount)} pledged in monthly support (goal was ${formatFundraiserAmount(GOAL_MONTHLY_TOTAL)})`;
+    }
+    return `${formatFundraiserAmount(amount)} of ${formatFundraiserAmount(GOAL_MONTHLY_TOTAL)} in monthly support pledged so far`;
+};
