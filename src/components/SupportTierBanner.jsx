@@ -36,7 +36,7 @@ const SupportTierBanner = () => {
         >
             <div className="flex-1">
                 <span>
-                    📱 Users have asked for an <strong>iOS version</strong> of CritterTrack! Apple charges an ongoing yearly fee just to publish and maintain an app on the App Store — before starting that work, we'd like at least <strong>{GOAL_SUPPORTERS} continuing monthly Gentle Supporter</strong> (or higher tier) subscriptions, so it stays sustainable rather than relying on one or two people. This covers the developer program fee plus the extra ongoing work of maintaining CritterTrack across three platforms — web, Android, and iOS. Click here to become one on Ko-fi! 💜
+                    📱 Users have asked for an <strong>iOS version</strong> of CritterTrack! Apple charges a hefty ongoing yearly fee just to publish and maintain an app on the App Store, so before starting that work, we'd like at least <strong>{GOAL_SUPPORTERS} continuing monthly Gentle Supporter</strong> (or higher tier) subscriptions to make it sustainable. This covers the developer program fee plus the extra ongoing work of maintaining CritterTrack across three platforms: web, Android, and iOS. Click here to become one on Ko-fi! 💜
                 </span>
                 <div className="mt-2 flex items-center gap-2">
                     <div className="flex-1 bg-white/20 rounded-full h-1.5 max-w-xs">
