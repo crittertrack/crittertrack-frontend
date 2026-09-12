@@ -4,6 +4,7 @@ import { Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 // Lazy-loaded views — each page is only downloaded when first visited
 const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
+const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
@@ -277,6 +278,9 @@ export function AppRoutes({
 
       {/* Donation */}
       <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
+
+      {/* Supporters credits list */}
+      <Route path="/supporters" element={<SupportersPage />} />
 
       {/* Marketplace */}
       <Route path="/marketplace" element={

@@ -49,6 +49,7 @@ import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Im
 const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
+const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 // Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
 // must never be part of the main bundle every visitor downloads.
@@ -1499,6 +1500,29 @@ const App = () => {
                 </div>
             );
         }
+
+        // Supporters credits page for non-logged-in users
+        if (currentView === 'supporters') {
+            return (
+                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
+                    {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+
+                    <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                        <CustomAppLogo size="w-10 h-10" />
+                        <button
+                            onClick={() => navigate('/')}
+                            className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
+                        >
+                            <LogIn size={18} className="mr-1" /> Login
+                        </button>
+                    </header>
+
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <SupportersPage />
+                    </Suspense>
+                </div>
+            );
+        }
         
         // Default auth view with search button
         return (
@@ -1526,6 +1550,10 @@ const App = () => {
                         </button>
                     </div>
                 </header>
+
+                <div className="w-full max-w-7xl mb-6">
+                    <NewsTickerBanner authToken={null} API_BASE_URL={API_BASE_URL} />
+                </div>
                 
                 {showUserSearchModal && (
                     <UserSearchModal 
