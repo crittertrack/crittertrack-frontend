@@ -13,10 +13,11 @@ export const GENTLE_PRICE = 5;
 export const DEDICATED_PRICE = 10;
 export const MAJOR_PRICE = 15;
 
-// Monthly EUR goal needed in ongoing (recurring) Ko-fi support: covers both the iOS development
-// work itself (with a buffer for the unexpected) and Apple's ongoing yearly developer fee to
-// keep publishing and updating it afterward. Shown to users next to the progress bar.
-export const GOAL_MONTHLY_TOTAL = 30;
+// Monthly EUR goal needed in ongoing (recurring) Ko-fi support: covers the iOS development
+// work itself (with a buffer for the unexpected), Apple's ongoing yearly developer fee to keep
+// publishing and updating it afterward, and moving the server to a higher tier to keep up with
+// growing user numbers. Shown to users next to the progress bar.
+export const GOAL_MONTHLY_TOTAL = 50;
 
 // Fetches the live pledged total from the backend (real Ko-fi + manually-tracked pledges),
 // instead of a hand-maintained constant. Returns null while loading.
