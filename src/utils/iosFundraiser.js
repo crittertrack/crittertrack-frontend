@@ -17,14 +17,27 @@ export const CURRENT_GENTLE_SUPPORTERS = 0;
 export const CURRENT_DEDICATED_SUPPORTERS = 0;
 export const CURRENT_MAJOR_SUPPORTERS = 0;
 
-// Internal monthly euro goal used only to compute the progress bar, not shown to users.
+// Monthly EUR goal needed in ongoing (recurring) Ko-fi support: covers both the iOS development
+// work itself (with a buffer for the unexpected) and Apple's ongoing yearly developer fee to
+// keep publishing and updating it afterward. Shown to users next to the progress bar.
 export const GOAL_MONTHLY_TOTAL = 30;
 
-export const getIosFundraiserPercentage = () => {
-    const currentMonthlyTotal =
-        CURRENT_MINI_SUPPORTERS * MINI_PRICE +
-        CURRENT_GENTLE_SUPPORTERS * GENTLE_PRICE +
-        CURRENT_DEDICATED_SUPPORTERS * DEDICATED_PRICE +
-        CURRENT_MAJOR_SUPPORTERS * MAJOR_PRICE;
-    return Math.min(100, Math.round((currentMonthlyTotal / GOAL_MONTHLY_TOTAL) * 100));
+export const getIosFundraiserCurrentTotal = () => (
+    CURRENT_MINI_SUPPORTERS * MINI_PRICE +
+    CURRENT_GENTLE_SUPPORTERS * GENTLE_PRICE +
+    CURRENT_DEDICATED_SUPPORTERS * DEDICATED_PRICE +
+    CURRENT_MAJOR_SUPPORTERS * MAJOR_PRICE
+);
+
+export const getIosFundraiserPercentage = () => Math.min(100, Math.round((getIosFundraiserCurrentTotal() / GOAL_MONTHLY_TOTAL) * 100));
+
+// Ko-fi shows each visitor amounts in their own local currency/format. We don't have a live
+// exchange rate source, so rather than guess a converted number (and risk showing something
+// wrong), we keep the real EUR figure but format it using the visitor's own locale conventions.
+export const formatFundraiserAmount = (amount) => {
+    try {
+        return new Intl.NumberFormat(navigator.language, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount);
+    } catch {
+        return `€${amount}`;
+    }
 };

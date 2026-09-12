@@ -80,7 +80,7 @@ import { downloadBlob } from './utils/nativeDownload';
 import { openExternalLink } from './utils/externalLink';
 import {
     MINI_SUPPORTER_URL, GENTLE_SUPPORTER_URL, DEDICATED_SUPPORTER_URL, MAJOR_SUPPORTER_URL,
-    getIosFundraiserPercentage,
+    GOAL_MONTHLY_TOTAL, getIosFundraiserCurrentTotal, getIosFundraiserPercentage, formatFundraiserAmount,
 } from './utils/iosFundraiser';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
@@ -1582,11 +1582,14 @@ const App = () => {
                                 </p>
                                 
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-2">
-                                    Separately, we're raising ongoing monthly support to help bring CritterTrack to the Apple App Store (Apple charges a yearly fee just to publish there, unlike Android's one-time cost). The website and web app will stay completely free either way:
+                                    Separately, we're raising ongoing monthly support to fund a dedicated iOS app for the Apple App Store, covering both the development work (with a buffer for the unexpected) and Apple's ongoing yearly developer fee to keep it updated. The website and web app will stay completely free either way:
                                 </p>
                                 <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
                                     <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage()}%` }} />
                                 </div>
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
+                                    {formatFundraiserAmount(getIosFundraiserCurrentTotal())} of {formatFundraiserAmount(GOAL_MONTHLY_TOTAL)} in monthly support pledged so far
+                                </p>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-6">
                                     Pick a tier{' '}
                                     <button type="button" onClick={() => openExternalLink(MINI_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Mini</button>,{' '}
