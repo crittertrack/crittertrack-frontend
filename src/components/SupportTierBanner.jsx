@@ -1,26 +1,10 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { openExternalLink } from '../utils/externalLink';
-
-const MINI_SUPPORTER_URL = 'https://ko-fi.com/summary/7c3baac5-0a8b-4d13-bb94-148065db7506';
-const GENTLE_SUPPORTER_URL = 'https://ko-fi.com/summary/e1ecabb4-94c1-4ade-98f7-6e56339b1653';
-const DEDICATED_SUPPORTER_URL = 'https://ko-fi.com/summary/d534a92a-edb3-440d-8a0d-47f52ad71615';
-const MAJOR_SUPPORTER_URL = 'https://ko-fi.com/summary/e5616750-e310-4bc1-a69a-1024857d3560';
-
-const MINI_PRICE = 2.5;
-const GENTLE_PRICE = 5;
-const DEDICATED_PRICE = 10;
-const MAJOR_PRICE = 15;
-
-// Manually update these as new qualifying continuing monthly Ko-fi subscribers sign up in each
-// tier — there's no backend tracking for this, it's a hand-maintained count.
-const CURRENT_MINI_SUPPORTERS = 0;
-const CURRENT_GENTLE_SUPPORTERS = 0;
-const CURRENT_DEDICATED_SUPPORTERS = 0;
-const CURRENT_MAJOR_SUPPORTERS = 0;
-
-// Internal monthly euro goal used only to compute the progress bar, not shown to users.
-const GOAL_MONTHLY_TOTAL = 30;
+import {
+    MINI_SUPPORTER_URL, GENTLE_SUPPORTER_URL, DEDICATED_SUPPORTER_URL, MAJOR_SUPPORTER_URL,
+    getIosFundraiserPercentage,
+} from '../utils/iosFundraiser';
 
 const DISMISS_KEY = 'ct_dismissed_ios_fundraiser_banner_v1';
 
@@ -39,12 +23,7 @@ const SupportTierBanner = () => {
         setDismissed(true);
     };
 
-    const currentMonthlyTotal =
-        CURRENT_MINI_SUPPORTERS * MINI_PRICE +
-        CURRENT_GENTLE_SUPPORTERS * GENTLE_PRICE +
-        CURRENT_DEDICATED_SUPPORTERS * DEDICATED_PRICE +
-        CURRENT_MAJOR_SUPPORTERS * MAJOR_PRICE;
-    const percentage = Math.min(100, Math.round((currentMonthlyTotal / GOAL_MONTHLY_TOTAL) * 100));
+    const percentage = getIosFundraiserPercentage();
 
     return (
         <div className="max-w-7xl mx-auto mb-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-3 flex items-center justify-between gap-3">

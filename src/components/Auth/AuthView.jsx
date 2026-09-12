@@ -795,7 +795,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                 <span className="truncate">Lite</span>
                             </div>
                         </div>
-                        <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-2">iOS (If we reach the goal above)</p>
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-2">iOS (Depends on ongoing support)</p>
                         <div className="grid grid-cols-2 gap-1.5 mt-1">
                             <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
                                 <Apple size={13} className="flex-shrink-0" />

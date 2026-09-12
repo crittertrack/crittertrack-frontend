@@ -78,6 +78,10 @@ import FinanceDropdown from './components/FinanceDropdown';
 import { API_BASE_URL } from './utils/apiConfig';
 import { downloadBlob } from './utils/nativeDownload';
 import { openExternalLink } from './utils/externalLink';
+import {
+    MINI_SUPPORTER_URL, GENTLE_SUPPORTER_URL, DEDICATED_SUPPORTER_URL, MAJOR_SUPPORTER_URL,
+    getIosFundraiserPercentage,
+} from './utils/iosFundraiser';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 
@@ -1575,6 +1579,20 @@ const App = () => {
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-6">
                                     Your support helps cover server costs and enables continuous improvements. Every contribution, 
                                     no matter the size, makes a difference!
+                                </p>
+                                
+                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-2">
+                                    We're also raising ongoing monthly support to bring CritterTrack to iOS:
+                                </p>
+                                <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
+                                    <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage()}%` }} />
+                                </div>
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-6">
+                                    Pick a tier:{' '}
+                                    <button type="button" onClick={() => openExternalLink(MINI_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Mini</button>,{' '}
+                                    <button type="button" onClick={() => openExternalLink(GENTLE_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Gentle</button>,{' '}
+                                    <button type="button" onClick={() => openExternalLink(DEDICATED_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Dedicated</button>, or{' '}
+                                    <button type="button" onClick={() => openExternalLink(MAJOR_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Major</button>.
                                 </p>
                             </>
                         )}
