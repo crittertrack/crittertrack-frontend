@@ -784,7 +784,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     <div className="mt-4">
                         <InstallPWA />
-                        <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-3">Coming soon</p>
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-3">Android (Coming soon)</p>
                         <div className="grid grid-cols-2 gap-1.5 mt-1">
                             <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
                                 <Smartphone size={13} className="flex-shrink-0" />
@@ -794,6 +794,9 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                 <Smartphone size={13} className="flex-shrink-0" />
                                 <span className="truncate">Lite</span>
                             </div>
+                        </div>
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-2">iOS (If we reach the goal above)</p>
+                        <div className="grid grid-cols-2 gap-1.5 mt-1">
                             <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
                                 <Apple size={13} className="flex-shrink-0" />
                                 <span className="truncate">CritterTrack</span>
