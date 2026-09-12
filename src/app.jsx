@@ -81,7 +81,7 @@ import { downloadBlob } from './utils/nativeDownload';
 import { openExternalLink } from './utils/externalLink';
 import {
     MINI_SUPPORTER_URL, GENTLE_SUPPORTER_URL, DEDICATED_SUPPORTER_URL, MAJOR_SUPPORTER_URL,
-    GOAL_MONTHLY_TOTAL, getIosFundraiserCurrentTotal, getIosFundraiserPercentage, formatFundraiserAmount,
+    GOAL_MONTHLY_TOTAL, useIosFundraiserTotal, getIosFundraiserPercentage, formatFundraiserAmount,
 } from './utils/iosFundraiser';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
@@ -223,6 +223,9 @@ const App = () => {
     // Phase 10a: Auth & Idle Timeout (will be called later after showModalMessage defined)
     const [authTokenTemp, setAuthTokenTemp] = useState(null);
     const [userProfileTemp, setUserProfileTemp] = useState(null);
+
+    // Live iOS fundraiser total, shown in the Support CritterTrack panel (both logged-in and out)
+    const iosFundraiserTotal = useIosFundraiserTotal();
     
     // Phase 10c: Animal Navigation
     const publicAnimalNav = usePublicAnimalNavigation();
@@ -1056,7 +1059,7 @@ const App = () => {
             localStorage.removeItem('authToken');
             setUserProfile(null);
             // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
-            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources'];
+            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources', 'supporters'];
             const currentPath = location.pathname.split('/')[1] || '';
             if (!publicRoutes.includes(currentPath)) {
                 navigate('/');
@@ -1529,7 +1532,7 @@ const App = () => {
             <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6 font-sans">
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
 
-                <div className="w-full max-w-7xl mb-6">
+                <div className="w-full max-w-7xl mx-auto">
                     <NewsTickerBanner authToken={null} API_BASE_URL={API_BASE_URL} />
                 </div>
 
@@ -1613,10 +1616,10 @@ const App = () => {
                                     Separately, we're raising ongoing monthly support to fund a dedicated iOS app for the Apple App Store, covering both the development work (with a buffer for the unexpected) and Apple's ongoing yearly developer fee to keep it updated. The website and web app will stay completely free either way:
                                 </p>
                                 <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
-                                    <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage()}%` }} />
+                                    <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage(iosFundraiserTotal)}%` }} />
                                 </div>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
-                                    {formatFundraiserAmount(getIosFundraiserCurrentTotal())} of {formatFundraiserAmount(GOAL_MONTHLY_TOTAL)} in monthly support pledged so far
+                                    {formatFundraiserAmount(iosFundraiserTotal || 0)} of {formatFundraiserAmount(GOAL_MONTHLY_TOTAL)} in monthly support pledged so far
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-6">
                                     Pick a tier{' '}

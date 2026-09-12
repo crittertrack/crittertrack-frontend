@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { openExternalLink } from '../utils/externalLink';
 import {
     MINI_SUPPORTER_URL, GENTLE_SUPPORTER_URL, DEDICATED_SUPPORTER_URL, MAJOR_SUPPORTER_URL,
-    GOAL_MONTHLY_TOTAL, getIosFundraiserCurrentTotal, getIosFundraiserPercentage, formatFundraiserAmount,
+    GOAL_MONTHLY_TOTAL, useIosFundraiserTotal, getIosFundraiserPercentage, formatFundraiserAmount,
 } from '../utils/iosFundraiser';
 
 const DISMISS_KEY = 'ct_dismissed_ios_fundraiser_banner_v1';
@@ -16,6 +16,8 @@ const SupportTierBanner = () => {
         try { return localStorage.getItem(DISMISS_KEY) === 'true'; } catch { return false; }
     });
 
+    const total = useIosFundraiserTotal();
+
     if (dismissed) return null;
 
     const dismiss = () => {
@@ -23,7 +25,7 @@ const SupportTierBanner = () => {
         setDismissed(true);
     };
 
-    const percentage = getIosFundraiserPercentage();
+    const percentage = getIosFundraiserPercentage(total);
 
     return (
         <div className="max-w-7xl mx-auto mb-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-3 flex items-center justify-between gap-3">
@@ -39,7 +41,7 @@ const SupportTierBanner = () => {
                     <div className="bg-white h-1.5 rounded-full transition-all duration-300" style={{ width: `${percentage}%` }} />
                 </div>
                 <p className="mt-1 text-xs text-blue-100">
-                    {formatFundraiserAmount(getIosFundraiserCurrentTotal())} of {formatFundraiserAmount(GOAL_MONTHLY_TOTAL)} in monthly support pledged so far
+                    {formatFundraiserAmount(total || 0)} of {formatFundraiserAmount(GOAL_MONTHLY_TOTAL)} in monthly support pledged so far
                 </p>
             </div>
             <button
