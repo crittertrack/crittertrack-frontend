@@ -50,6 +50,7 @@ const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'))
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
+const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 // Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
 // must never be part of the main bundle every visitor downloads.
@@ -1059,7 +1060,7 @@ const App = () => {
             localStorage.removeItem('authToken');
             setUserProfile(null);
             // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
-            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources', 'supporters'];
+            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources', 'supporters', 'ios-fundraiser'];
             const currentPath = location.pathname.split('/')[1] || '';
             if (!publicRoutes.includes(currentPath)) {
                 navigate('/');
@@ -1526,6 +1527,29 @@ const App = () => {
                 </div>
             );
         }
+
+        // Full iOS fundraiser story for non-logged-in users
+        if (currentView === 'ios-fundraiser') {
+            return (
+                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
+                    {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+
+                    <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                        <CustomAppLogo size="w-10 h-10" />
+                        <button
+                            onClick={() => navigate('/')}
+                            className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
+                        >
+                            <LogIn size={18} className="mr-1" /> Login
+                        </button>
+                    </header>
+
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <IosFundraiserPage />
+                    </Suspense>
+                </div>
+            );
+        }
         
         // Default auth view with search button
         return (
@@ -1613,7 +1637,8 @@ const App = () => {
                                 </p>
                                 
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-2">
-                                    Separately, you guys asked me for an <strong>iOS version</strong> of CritterTrack! Here's the thing: I've managed to work my way through web and Android myself, and thanks to how forgiving those platforms are, I can keep providing that for free (yes, that stays)! iOS is a whole different story: I have zero iOS experience, so to actually build it, I need to hire some extra hands on deck. On top of that, Apple charges a hefty yearly developer fee just to publish anything. And adding another platform means a lot more data traffic, so I'd also need to upgrade our server tier to keep everything running smoothly. This applies to both the full website and our upcoming Lite app:
+                                    Separately, we're raising support to bring a dedicated <strong>iOS version</strong> of CritterTrack to life.{' '}
+                                    <button type="button" onClick={() => navigate('/ios-fundraiser')} className="underline font-medium hover:text-gray-800 dark:hover:text-dark-text">Read more</button>
                                 </p>
                                 <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
                                     <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage(iosFundraiserTotal)}%` }} />

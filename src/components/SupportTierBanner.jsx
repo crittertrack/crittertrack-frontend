@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { openExternalLink } from '../utils/externalLink';
 import {
@@ -12,6 +13,7 @@ const DISMISS_KEY = 'ct_dismissed_ios_fundraiser_banner_v1';
 // minimum amount of continuing monthly support, in any mix of tiers, before committing to an
 // Apple Developer Program subscription (a real ongoing cost, unlike the one-time Google Play fee).
 const SupportTierBanner = () => {
+    const navigate = useNavigate();
     const [dismissed, setDismissed] = useState(() => {
         try { return localStorage.getItem(DISMISS_KEY) === 'true'; } catch { return false; }
     });
@@ -31,11 +33,13 @@ const SupportTierBanner = () => {
         <div className="max-w-7xl mx-auto mb-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex-1">
                 <span>
-                    📱 You guys asked me for an <strong>iOS version</strong> of CritterTrack! Here's the thing: I've managed to work my way through web and Android myself, and thanks to how forgiving those platforms are, I can keep providing that for free (yes, that stays)! iOS is a whole different story: I have zero iOS experience, so to actually build it, I need to hire some extra hands on deck. On top of that, Apple charges a hefty yearly developer fee just to publish <strong>anything</strong>. And adding <strong>another</strong> platform means a lot more data traffic, so I'd also need to upgrade our server tier to keep everything running smoothly. This is where you guys can make the magic happen, and we can make this work together, pick a tier and help get iOS launched:{' '}
+                    📱 We're raising support to bring CritterTrack to <strong>iOS</strong>!{' '}
+                    <button type="button" onClick={() => navigate('/ios-fundraiser')} className="underline font-medium hover:text-blue-100">Read more</button>{' '}
+                    Pick a tier:{' '}
                     <button type="button" onClick={() => openExternalLink(MINI_SUPPORTER_URL)} className="underline font-medium hover:text-blue-100">Mini</button>,{' '}
                     <button type="button" onClick={() => openExternalLink(GENTLE_SUPPORTER_URL)} className="underline font-medium hover:text-blue-100">Gentle</button>,{' '}
                     <button type="button" onClick={() => openExternalLink(DEDICATED_SUPPORTER_URL)} className="underline font-medium hover:text-blue-100">Dedicated</button>, or{' '}
-                    <button type="button" onClick={() => openExternalLink(MAJOR_SUPPORTER_URL)} className="underline font-medium hover:text-blue-100">Major</button>! 💜 This applies to both the full website and our upcoming Lite app.
+                    <button type="button" onClick={() => openExternalLink(MAJOR_SUPPORTER_URL)} className="underline font-medium hover:text-blue-100">Major</button>. 💜
                 </span>
                 <div className="mt-2 bg-white/20 rounded-full h-1.5 max-w-md">
                     <div className="bg-white h-1.5 rounded-full transition-all duration-300" style={{ width: `${percentage}%` }} />

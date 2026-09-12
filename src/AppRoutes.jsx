@@ -5,6 +5,7 @@ import { Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
+const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
@@ -281,6 +282,9 @@ export function AppRoutes({
 
       {/* Supporters credits list */}
       <Route path="/supporters" element={<SupportersPage />} />
+
+      {/* Full iOS fundraiser story, linked from the banner/login-panel "Read more" */}
+      <Route path="/ios-fundraiser" element={<IosFundraiserPage />} />
 
       {/* Marketplace */}
       <Route path="/marketplace" element={

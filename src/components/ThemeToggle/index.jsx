@@ -45,7 +45,7 @@ const ThemeToggle = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg shadow-lg z-50">
+                <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg shadow-lg z-50">
                     {themeOptions.map((option) => {
                         const Icon = option.icon;
                         const isSelected = theme === option.value;
