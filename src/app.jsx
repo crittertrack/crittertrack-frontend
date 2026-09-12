@@ -1613,7 +1613,7 @@ const App = () => {
                                 </p>
                                 
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-2">
-                                    Separately, we're raising ongoing monthly support to fund a dedicated iOS app for the Apple App Store: the development work itself (with a buffer for the unexpected), Apple's ongoing yearly developer fee, and a higher server tier, since iOS would be a third platform running off the same server already handling growing user numbers. The website and web app will stay completely free either way:
+                                    Separately, you guys asked me for an <strong>iOS version</strong> of CritterTrack! Here's the thing: I've managed to work my way through web and Android myself, and thanks to how forgiving those platforms are, I can keep providing that for free (yes, that stays)! iOS is a whole different story: I have zero iOS experience, so to actually build it, I need to hire some extra hands on deck. On top of that, Apple charges a hefty yearly developer fee just to publish anything. And adding another platform means a lot more data traffic, so I'd also need to upgrade our server tier to keep everything running smoothly. This applies to both the full website and our upcoming Lite app:
                                 </p>
                                 <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
                                     <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage(iosFundraiserTotal)}%` }} />
