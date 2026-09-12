@@ -55,8 +55,11 @@ const InstallPWA = () => {
         }`}
       >
         <Download size={20} />
-        Install Desktop/Mobile App
+        Install CritterTrack (Web)
       </button>
+      <p className="text-xs text-gray-400 text-center mt-1.5">
+        Adds CritterTrack to your home screen or desktop so it opens like a regular app, works offline, and skips typing the web address every time.
+      </p>
 
       {showIOSGuide && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4" onClick={() => setShowIOSGuide(false)}>

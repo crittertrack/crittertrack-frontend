@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
 import {
-    AlertCircle, Ban, Bean, Cat, CheckCircle, Eye, EyeOff,
-    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users, Wrench
+    AlertCircle, Apple, Ban, Bean, Cat, CheckCircle, Eye, EyeOff,
+    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, Smartphone, UserPlus, Users, Wrench
 } from 'lucide-react';
 import InstallPWA from '../InstallPWA';
 
@@ -784,6 +784,28 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     <div className="mt-4">
                         <InstallPWA />
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
+                                <Smartphone size={18} />
+                                <span>CritterTrack</span>
+                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
+                                <Smartphone size={18} />
+                                <span>CritterTrack Lite</span>
+                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
+                                <Apple size={18} />
+                                <span>CritterTrack</span>
+                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
+                                <Apple size={18} />
+                                <span>CritterTrack Lite</span>
+                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            </div>
+                        </div>
                     </div>
                 </>
             )}
