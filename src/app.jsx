@@ -21,6 +21,7 @@ import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import AuthView from './components/Auth/AuthView';
 import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationBar from './components/Notifications/NotificationBar';
+import SupportTierBanner from './components/SupportTierBanner';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -2054,6 +2055,8 @@ const App = () => {
                     </nav>
                 </div>
             </header>
+
+            <SupportTierBanner />
 
             {/* Unified alerts/notifications banner — unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}
