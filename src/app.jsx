@@ -1588,11 +1588,12 @@ const App = () => {
                                     <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage()}%` }} />
                                 </div>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-6">
-                                    Pick a tier:{' '}
+                                    Pick a tier{' '}
                                     <button type="button" onClick={() => openExternalLink(MINI_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Mini</button>,{' '}
                                     <button type="button" onClick={() => openExternalLink(GENTLE_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Gentle</button>,{' '}
                                     <button type="button" onClick={() => openExternalLink(DEDICATED_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Dedicated</button>, or{' '}
-                                    <button type="button" onClick={() => openExternalLink(MAJOR_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Major</button>.
+                                    <button type="button" onClick={() => openExternalLink(MAJOR_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Major</button>{' '}
+                                    to support.
                                 </p>
                             </>
                         )}
