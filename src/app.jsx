@@ -1582,7 +1582,7 @@ const App = () => {
                                 </p>
                                 
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-2">
-                                    Separately, we're raising ongoing monthly support to help bring CritterTrack to the Apple App Store (Apple charges a yearly fee just to publish there, unlike Android's one-time cost). The website and app will stay completely free either way:
+                                    Separately, we're raising ongoing monthly support to help bring CritterTrack to the Apple App Store (Apple charges a yearly fee just to publish there, unlike Android's one-time cost). The website and web app will stay completely free either way:
                                 </p>
                                 <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
                                     <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage()}%` }} />
