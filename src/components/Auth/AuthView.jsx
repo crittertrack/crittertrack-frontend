@@ -784,26 +784,23 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     <div className="mt-4">
                         <InstallPWA />
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
-                                <Smartphone size={18} />
-                                <span>CritterTrack</span>
-                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-3">Coming soon</p>
+                        <div className="grid grid-cols-2 gap-1.5 mt-1">
+                            <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
+                                <Smartphone size={13} className="flex-shrink-0" />
+                                <span className="truncate">CritterTrack</span>
                             </div>
-                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
-                                <Smartphone size={18} />
-                                <span>CritterTrack Lite</span>
-                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
+                                <Smartphone size={13} className="flex-shrink-0" />
+                                <span className="truncate">Lite</span>
                             </div>
-                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
-                                <Apple size={18} />
-                                <span>CritterTrack</span>
-                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
+                                <Apple size={13} className="flex-shrink-0" />
+                                <span className="truncate">CritterTrack</span>
                             </div>
-                            <div className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg border-2 border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-xs font-medium text-center">
-                                <Apple size={18} />
-                                <span>CritterTrack Lite</span>
-                                <span className="text-[10px] uppercase tracking-wide">Coming soon</span>
+                            <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
+                                <Apple size={13} className="flex-shrink-0" />
+                                <span className="truncate">Lite</span>
                             </div>
                         </div>
                     </div>
