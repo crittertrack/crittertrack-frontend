@@ -1528,7 +1528,11 @@ const App = () => {
         return (
             <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6 font-sans">
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-                
+
+                <div className="w-full max-w-7xl mb-6">
+                    <NewsTickerBanner authToken={null} API_BASE_URL={API_BASE_URL} />
+                </div>
+
                 {/* Public navigation header */}
                 <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <div className="flex-shrink-0">
@@ -1551,10 +1555,6 @@ const App = () => {
                     </div>
                 </header>
 
-                <div className="w-full max-w-7xl mb-6">
-                    <NewsTickerBanner authToken={null} API_BASE_URL={API_BASE_URL} />
-                </div>
-                
                 {showUserSearchModal && (
                     <UserSearchModal 
                         onClose={() => setShowUserSearchModal(false)} 

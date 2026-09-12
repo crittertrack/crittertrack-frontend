@@ -95,26 +95,30 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
           </a>
           <span className="mx-4">|</span>
         </span>
-        <span className="inline-flex items-center px-4 font-semibold">
-          <button
-            onClick={() => navigate('/report')}
-            className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
-          >
-            <AlertTriangle size={14} className="inline-block mr-1.5 text-yellow-300 flex-shrink-0" />
-            Report a Bug or Issue
-          </button>
-          <span className="mx-4">|</span>
-        </span>
-        <span className="inline-flex items-center px-4 font-semibold">
-          <button
-            onClick={() => navigate('/resources')}
-            className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
-          >
-            <BookOpen size={14} className="inline-block mr-1.5 text-green-300 flex-shrink-0" />
-            Helpful Resources
-          </button>
-          <span className="mx-4">|</span>
-        </span>
+        {authToken && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={() => navigate('/report')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <AlertTriangle size={14} className="inline-block mr-1.5 text-yellow-300 flex-shrink-0" />
+              Report a Bug or Issue
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        )}
+        {authToken && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={() => navigate('/resources')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <BookOpen size={14} className="inline-block mr-1.5 text-green-300 flex-shrink-0" />
+              Helpful Resources
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        )}
         {betaSurveyStatus === 'pending' && onReopenBetaSurvey && (
           <span className="inline-flex items-center px-4 font-semibold">
             <button
