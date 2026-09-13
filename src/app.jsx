@@ -42,6 +42,9 @@ import PushToggleButton from './components/PushToggleButton';
 import { registerNativePush, initNativePushListeners } from './utils/nativePush';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
+import LiteAnimalModal from './components/AnimalDetail/LiteAnimalModal';
+import LiteViewAnimalModal from './components/AnimalDetail/LiteViewAnimalModal';
+import LiteAnimalFormModal from './components/AnimalForm/LiteAnimalFormModal';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
@@ -1924,6 +1927,7 @@ const App = () => {
 
                         <button
                             onClick={() => {
+                                if (isLiteModeActive) { navigate('/notifications'); return; }
                                 setShowNotifications(true);
                                 setNotificationCount(0);
                                 fetchNotificationCount();
@@ -2022,6 +2026,7 @@ const App = () => {
 
                             <button
                                 onClick={() => {
+                                    if (isLiteModeActive) { navigate('/notifications'); return; }
                                     setShowNotifications(true);
                                     setNotificationCount(0);
                                     fetchNotificationCount();
@@ -2318,8 +2323,9 @@ const App = () => {
                 // Only show editable modal if: user created it AND it's not marked as view-only
                 const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && !animalToView.isViewOnly;
                 if (iCurrentlyOwn) {
+                    const AnimalModalComponent = isLiteModeActive ? LiteAnimalModal : AnimalModalV2;
                     return (
-                        <AnimalModalV2
+                        <AnimalModalComponent
                             animal={animalToView}
                             onClose={handleBackFromAnimal}
                             onEdit={handleEditAnimal}
@@ -2345,8 +2351,9 @@ const App = () => {
                         />
                     );
                 } else {
+                    const ViewAnimalModalComponent = isLiteModeActive ? LiteViewAnimalModal : ViewAnimalModalV2;
                     return (
-                        <ViewAnimalModalV2
+                        <ViewAnimalModalComponent
                                 animal={animalToView}
                                 mode="private"
                                 onClose={handleBackFromAnimal}
@@ -2367,10 +2374,11 @@ const App = () => {
             {animalToEdit && (
                 (() => {
                     const iCurrentlyOwn = animalToEdit.creatorId_public === userProfile?.id_public;
+                    const AnimalFormComponent = isLiteModeActive ? LiteAnimalFormModal : AnimalFormModalV2;
                     return (
                         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                             {iCurrentlyOwn ? (
-                                <AnimalFormModalV2
+                                <AnimalFormComponent
                                     formTitle={`Edit ${animalToEdit.name}`}
                                     animalToEdit={animalToEdit}
                                     species={animalToEdit.species}

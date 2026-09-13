@@ -37,6 +37,7 @@ import { getUserKey } from '../../utils/userKey';
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
 import GeneralTaskModal from '../GeneralTaskModal';
+import QuickAddAnimalModal from '../QuickAddAnimalModal';
 import { API_BASE_URL } from '../../utils/apiConfig';
 
 const FAMILY_TREE_MIN_WIDTH = 900;
@@ -688,6 +689,7 @@ const AnimalList = ({
 
     // Mating form state
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
+    const [showQuickAdd, setShowQuickAdd] = useState(false); // Lite mode's Add Animal flow (see QuickAddAnimalModal)
     const [editingMatingId, setEditingMatingId] = useState(null);
     const [matingData, setMatingData] = useState({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
 
@@ -6323,7 +6325,7 @@ useEffect(() => {
                         {/* Add Animal (only on list/collections views, or just list in Lite mode) — desktop only, mobile is in title row */}
                         {(isLiteModeActive ? animalView === 'list' : isListLikeView) && !showArchiveScreen && (
                             <button
-                                onClick={() => navigate('/select-species')}
+                                onClick={() => (isLiteModeActive ? setShowQuickAdd(true) : navigate('/select-species'))}
                                 className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                                 data-tutorial-target="add-animal-btn"
                             >
@@ -6333,7 +6335,7 @@ useEffect(() => {
                         {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
                         {(isLiteModeActive ? animalView === 'list' : isListLikeView) && !showArchiveScreen && (
                         <button
-                            onClick={() => navigate('/select-species')}
+                            onClick={() => (isLiteModeActive ? setShowQuickAdd(true) : navigate('/select-species'))}
                             className="sm:hidden bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
@@ -6937,6 +6939,13 @@ useEffect(() => {
                         if (editingGeneralTask) generalTasksState?.updateGeneralTask(editingGeneralTask.id, taskData);
                         else generalTasksState?.addGeneralTask(taskData);
                     }}
+                />
+            )}
+            {showQuickAdd && (
+                <QuickAddAnimalModal
+                    authToken={authToken}
+                    onClose={() => setShowQuickAdd(false)}
+                    onCreated={async () => { setShowQuickAdd(false); await handleRefresh(); }}
                 />
             )}
             {showAddMatingForm && (
