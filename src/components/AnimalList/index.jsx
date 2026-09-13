@@ -2,6 +2,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
+import { getCachedUiMode } from '../../utils/uiModeCache';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
@@ -800,7 +801,9 @@ const AnimalList = ({
     const isListLikeView = animalView === 'list' || isCollectionsView;
     // Lite mode (web-only, see docs/lite-web-toggle-brainstorm.md): Reproduction/Health/Feeding &
     // Care/Supplies are dropped entirely, navigated instead via LiteBottomNav's fixed routes.
-    const isLiteModeActive = userProfile?.uiMode === 'lite' && !Capacitor.isNativePlatform();
+    // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
+    // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
+    const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
 
     // Lite mode's bottom nav routes (/, /collections, /enclosures) all render this same
     // AnimalList instance without remounting it, so a route change only shows up here as

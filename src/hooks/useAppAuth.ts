@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 import apiClient from '../utils/apiClient';
+import { setCachedUiMode } from '../utils/uiModeCache';
 
 const decodeJwtPayload = (token: string) => {
     try {
@@ -77,6 +78,7 @@ export function useAppAuth(
     const clearAuthState = useCallback((showExpiredMessage = false) => {
         setAuthToken(null);
         setUserProfile(null);
+        setCachedUiMode(null);
 
         try {
             localStorage.removeItem('authToken');
@@ -156,6 +158,7 @@ export function useAppAuth(
                 }
 
                 setUserProfile(user);
+                setCachedUiMode(user.uiMode || null);
             } catch (error: any) {
                 console.error('Failed to fetch user profile:', error);
 

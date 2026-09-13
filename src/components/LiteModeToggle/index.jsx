@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Feather } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
+import { setCachedUiMode } from '../../utils/uiModeCache';
 
 // Compact header toggle for switching the account's uiMode between 'full' and 'lite'.
 // Mirrors PushToggleButton's layout/style so it slots in alongside the other header icons.
@@ -27,6 +28,7 @@ const LiteModeToggle = ({ userProfile, setUserProfile, showModalMessage }) => {
             const res = await apiClient.put('/users/profile', { uiMode: next });
             const updatedUser = res?.data?.user || res?.data || null;
             setUserProfile(prev => (updatedUser ? { ...prev, ...updatedUser } : { ...prev, uiMode: next }));
+            setCachedUiMode(next);
         } catch (error) {
             showModalMessage && showModalMessage('Lite Mode', error.response?.data?.message || 'Something went wrong. Please try again.');
         } finally {

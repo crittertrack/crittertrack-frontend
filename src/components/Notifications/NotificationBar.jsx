@@ -12,6 +12,7 @@ import { ALERT_CATEGORIES } from '../../utils/alertCategories';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { parseLocalDate } from '../../utils/dateFormatter';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
+import { getCachedUiMode } from '../../utils/uiModeCache';
 import '../NewsTickerBanner.css';
 
 // Day-based "is this overdue" check (grooming/training/maintenance schedules).
@@ -89,7 +90,9 @@ const defaultAlertSettings = () =>
 const NOTIFICATIONS_PAGE_ITEM_IDS = new Set(['feeding', 'grooming', 'training', 'careTasks', 'reproduction', 'health', 'maintenance', 'supplies', 'birthdays', 'notifications']);
 
 const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifications, setShowMessages }) => {
-  const isLiteModeActive = userProfile?.uiMode === 'lite' && !Capacitor.isNativePlatform();
+  // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
+  // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
+  const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
   const navigate = useNavigate();
   const userKey = useMemo(() => getUserKey(authToken), [authToken]);
 
