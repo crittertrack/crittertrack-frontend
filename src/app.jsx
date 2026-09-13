@@ -28,6 +28,7 @@ import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
+import LiteModeToggle from './components/LiteModeToggle';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
 import SyncFailureBanner from './components/shared/SyncFailureBanner';
@@ -303,6 +304,10 @@ const App = () => {
     
     // Derive currentView from URL path
     const currentView = location.pathname.split('/')[1] || 'list';
+
+    // Lite mode is desktop/PWA web only — never on the native Android/iOS full app (that has
+    // its own separate crittertrack-lite app already). See docs/lite-web-toggle-brainstorm.md.
+    const isLiteModeActive = userProfile?.uiMode === 'lite' && !Capacitor.isNativePlatform();
     
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
@@ -1858,9 +1863,11 @@ const App = () => {
                 </div>
                 
                 <div className="hidden md:flex justify-between items-center">
-                    <CustomAppLogo size="w-10 h-10" />
+                    <CustomAppLogo size="w-10 h-10" lite={isLiteModeActive} />
                     
                     <nav className="flex space-x-3">
+                        {!isLiteModeActive && (
+                        <>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
@@ -1903,12 +1910,16 @@ const App = () => {
                                 <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
                             )}
                         </div>
+                        </>
+                        )}
                     </nav>
 
                     <div className="flex items-center space-x-3">
                         <ThemeToggle />
 
                         <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
+
+                        <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
 
                         <button
                             onClick={() => {
@@ -1999,12 +2010,14 @@ const App = () => {
                     
                     {/* Second row: Logo and action buttons */}
                     <div className="flex justify-between items-center mb-3 gap-2">
-                        <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
+                        <CustomAppLogo size="w-8 h-8" lite={isLiteModeActive} className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
                             <ThemeToggle />
 
                             <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
+
+                            <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
 
                             <button
                                 onClick={() => {
@@ -2082,7 +2095,9 @@ const App = () => {
                         </div>
                     </div>
 
-                    {/* Third row: Navigation row 1 (4 buttons) */}
+                    {/* Third & Fourth rows: legacy nav — hidden entirely in Lite mode, replaced by LiteBottomNav */}
+                    {!isLiteModeActive && (
+                    <>
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
@@ -2102,7 +2117,6 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Fourth row: Navigation row 2 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Calendar size={18} className="mb-0.5" />
@@ -2131,6 +2145,8 @@ const App = () => {
                             )}
                         </div>
                     </nav>
+                    </>
+                    )}
                 </div>
             </header>
 
