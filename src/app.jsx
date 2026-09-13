@@ -1969,7 +1969,7 @@ const App = () => {
                         {/* Avatar / Profile Dropdown */}
                         <div className="relative" ref={profileMenuDesktopRef}>
                             <button
-                                onClick={() => setShowProfileMenu(p => !p)}
+                                onClick={() => isLiteModeActive ? navigate('/lite-settings') : setShowProfileMenu(p => !p)}
                                 className="w-10 h-10 rounded-full bg-primary dark:bg-dark-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                 title="Account"
                             >
@@ -1984,21 +1984,27 @@ const App = () => {
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
                                     </button>
-                                    <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        <MessageSquare size={15} /> Report an Issue
-                                    </button>
+                                    {!isLiteModeActive && (
+                                        <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <MessageSquare size={15} /> Report an Issue
+                                        </button>
+                                    )}
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                                             <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
                                         </button>
                                     )}
-                                    <hr className="my-1 border-gray-200" />
-                                    <button onClick={() => handleLogout(false)}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-                                        <LogOut size={15} /> Logout
-                                    </button>
+                                    {!isLiteModeActive && (
+                                        <>
+                                            <hr className="my-1 border-gray-200" />
+                                            <button onClick={() => handleLogout(false)}
+                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                                <LogOut size={15} /> Logout
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -2068,7 +2074,7 @@ const App = () => {
                             {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
-                                    onClick={() => setShowProfileMenu(p => !p)}
+                                    onClick={() => isLiteModeActive ? navigate('/lite-settings') : setShowProfileMenu(p => !p)}
                                     className="w-9 h-9 rounded-full bg-primary dark:bg-dark-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                     title="Account"
                                 >
@@ -2083,21 +2089,27 @@ const App = () => {
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
                                         </button>
-                                        <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
-                                            <MessageSquare size={15} /> Report an Issue
-                                        </button>
+                                        {!isLiteModeActive && (
+                                            <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
+                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <MessageSquare size={15} /> Report an Issue
+                                            </button>
+                                        )}
                                         {['admin', 'moderator'].includes(userProfile?.role) && (
                                             <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                                                 <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
                                             </button>
                                         )}
-                                        <hr className="my-1 border-gray-200" />
-                                        <button onClick={() => handleLogout(false)}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-                                            <LogOut size={15} /> Logout
-                                        </button>
+                                        {!isLiteModeActive && (
+                                            <>
+                                                <hr className="my-1 border-gray-200" />
+                                                <button onClick={() => handleLogout(false)}
+                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                                    <LogOut size={15} /> Logout
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -2472,6 +2484,7 @@ const App = () => {
                   setUserProfile={setUserProfile}
                   fetchUserProfile={fetchUserProfile}
                   showModalMessage={showModalMessage}
+                  handleLogout={handleLogout}
                   modals={modals}
                   setShowMessages={setShowMessages}
                   setSelectedConversation={setSelectedConversation}

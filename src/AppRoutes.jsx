@@ -116,6 +116,7 @@ export function AppRoutes({
   setUserProfile,
   fetchUserProfile,
   showModalMessage,
+  handleLogout,
   
   // Modals
   modals,
@@ -387,6 +388,7 @@ export function AppRoutes({
           userProfile={userProfile}
           authToken={authToken}
           showModalMessage={showModalMessage}
+          handleLogout={handleLogout}
           onProfileUpdated={(updatedUser) => {
             if (updatedUser && setUserProfile) {
               setUserProfile(updatedUser);

@@ -1,16 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, User, Camera, Check, KeyRound, Eye, EyeOff, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Loader2, User, Camera, Check, KeyRound, Eye, EyeOff, ArrowLeft, ExternalLink, MessageSquare, LogOut, Sun, Moon, Monitor } from 'lucide-react';
 import apiClient from '../../utils/apiClient';
-import ThemeToggle from '../ThemeToggle';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Lite mode's own trimmed settings page (avatar-click destination there instead of the full
 // 7-tab ProfileEditForm/Settings) — mirrors native crittertrack-lite's Profile.jsx scope:
 // basic info, privacy toggles, profile image, change password. No bio/social links/directory/
 // ratings/breeding-lines/data-portability tabs.
-const LiteProfileSettings = ({ userProfile, authToken, showModalMessage, onProfileUpdated }) => {
+const LiteProfileSettings = ({ userProfile, authToken, showModalMessage, onProfileUpdated, handleLogout }) => {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
+    const { theme, setTheme } = useTheme();
     const [personalName, setPersonalName] = useState(userProfile?.personalName || '');
     const [breederName, setBreederName] = useState(userProfile?.breederName || '');
     const [showPersonalName, setShowPersonalName] = useState(userProfile?.showPersonalName ?? true);
@@ -90,6 +91,10 @@ const LiteProfileSettings = ({ userProfile, authToken, showModalMessage, onProfi
         } finally {
             setPasswordSaving(false);
         }
+    };
+
+    const handleReportIssue = () => {
+        navigate('/report');
     };
 
     return (
@@ -174,9 +179,29 @@ const LiteProfileSettings = ({ userProfile, authToken, showModalMessage, onProfi
                     </button>
                 </form>
 
-                <div className="bg-white dark:bg-dark-card-bg rounded-2xl shadow-sm p-4 flex items-center justify-between">
+                <div className="bg-white dark:bg-dark-card-bg rounded-2xl shadow-sm p-4 space-y-2">
                     <h2 className="text-sm font-bold text-gray-800 dark:text-dark-text">Appearance</h2>
-                    <ThemeToggle />
+                    <div className="grid grid-cols-3 gap-2">
+                        {[
+                            { value: 'light', label: 'Light', icon: Sun },
+                            { value: 'dark', label: 'Dark', icon: Moon },
+                            { value: 'auto', label: 'Auto', icon: Monitor },
+                        ].map(({ value, label, icon: Icon }) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => setTheme(value)}
+                                className={`flex flex-col items-center gap-1 py-2.5 rounded-lg border text-xs font-medium transition ${
+                                    theme === value
+                                        ? 'border-primary bg-primary/10 text-primary'
+                                        : 'border-gray-200 dark:border-dark-border text-gray-500 dark:text-dark-text-muted'
+                                }`}
+                            >
+                                <Icon size={18} />
+                                {label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <form onSubmit={handleChangePassword} className="bg-white dark:bg-dark-card-bg rounded-2xl shadow-sm p-4 space-y-4">
@@ -226,6 +251,20 @@ const LiteProfileSettings = ({ userProfile, authToken, showModalMessage, onProfi
                         {passwordSaving ? 'Changing…' : 'Change Password'}
                     </button>
                 </form>
+
+                <button
+                    onClick={handleReportIssue}
+                    className="w-full flex items-center justify-center gap-2 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-2xl shadow-sm py-2.5 text-sm font-semibold text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition"
+                >
+                    <MessageSquare size={16} /> Report an Issue
+                </button>
+
+                <button
+                    onClick={() => handleLogout?.(false)}
+                    className="w-full flex items-center justify-center gap-2 bg-white dark:bg-dark-card-bg border border-red-200 dark:border-red-700/60 rounded-2xl shadow-sm py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                >
+                    <LogOut size={16} /> Log Out
+                </button>
             </div>
         </div>
     );
