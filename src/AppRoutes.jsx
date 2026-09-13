@@ -8,6 +8,7 @@ const SupportersPage = lazy(() => import('./components/Donation/SupportersPage')
 const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
+const LiteProfileSettings = lazy(() => import('./components/Profile/LiteProfileSettings'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
@@ -377,6 +378,21 @@ export function AppRoutes({
           saveBreedingLineDefs={saveBreedingLineDefs} 
           toggleAnimalBreedingLine={toggleAnimalBreedingLine} 
           BL_PRESETS_APP={BL_PRESETS_APP} 
+        />
+      } />
+
+      {/* Lite mode's own trimmed settings page — avatar-click destination there instead of /settings */}
+      <Route path="/lite-settings" element={
+        <LiteProfileSettings
+          userProfile={userProfile}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
+          onProfileUpdated={(updatedUser) => {
+            if (updatedUser && setUserProfile) {
+              setUserProfile(updatedUser);
+            }
+            fetchUserProfile(authToken);
+          }}
         />
       } />
 
