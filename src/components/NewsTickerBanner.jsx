@@ -156,7 +156,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
           </span>
         )}
         {news.map((item, index) => (
-          <span key={item._id} className="inline-flex items-center px-4">
+          <span key={item._id} className="inline-flex items-center px-4 font-semibold">
             <button
               onClick={() => navigate('/community')}
               className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
@@ -164,7 +164,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
               {getBroadcastIcon(item)}
               {item.pollQuestion || item.title}
             </button>
-            {index < news.length - 1 && <span className="mx-2">|</span>}
+            {(index < news.length - 1 || supporters.length > 0) && <span className="mx-4">|</span>}
           </span>
         ))}
         {supporters.map((supporter, index) => (
