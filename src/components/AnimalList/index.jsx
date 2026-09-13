@@ -6188,17 +6188,10 @@ useEffect(() => {
                 sits directly on the pink page background, matching crittertrack-lite's pages. */}
             <div className={isLiteModeActive ? 'w-full max-w-7xl px-4 pt-4' : 'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
                 {/* Lite mode: header row itself becomes the gradient bar mirroring crittertrack-lite's
-                    TopBar (from-accent to-primary), with the info/refresh/action buttons stacked inside
-                    it instead of in a separate white row below. */}
+                    TopBar (from-accent to-primary), with title/info/refresh/action buttons all in one row. */}
                 <div className={isLiteModeActive
-                    ? 'w-full bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white rounded-xl px-4 py-3 mb-4 shadow-sm flex flex-col gap-2'
+                    ? 'w-full bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white rounded-xl px-4 py-3 mb-4 shadow-sm flex items-center gap-2'
                     : 'flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4'}>
-                    {isLiteModeActive && (
-                        <div className="flex items-center gap-2">
-                            <ClipboardList size={20} className="shrink-0" />
-                            <h2 className="text-lg font-bold truncate flex-1 min-w-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
-                        </div>
-                    )}
                     <div className="flex items-center gap-2 min-w-0 flex-wrap w-full sm:w-auto sm:flex-1">
                         {!isLiteModeActive && (
                             <>
@@ -6206,6 +6199,12 @@ useEffect(() => {
                                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate min-w-0" data-tutorial-target="my-animals-title">
                                     {liteViewTitle}
                                 </h2>
+                            </>
+                        )}
+                        {isLiteModeActive && (
+                            <>
+                                <ClipboardList size={20} className="shrink-0" />
+                                <h2 className="text-lg font-bold truncate shrink-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
                             </>
                         )}
                         {ANIMAL_VIEW_INFO[animalView] && (

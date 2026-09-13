@@ -10,7 +10,7 @@ const CustomAppLogo = ({ size = "w-10 h-10", lite = false }) => (
         className={`${size} ${lite ? 'rounded-md object-contain' : ''} shadow-md`}
       />
       <div className="absolute -top-1 -right-1 bg-purple-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-lg transform rotate-12">
-        BETA
+        {lite ? 'ALPHA' : 'BETA'}
       </div>
     </div>
     {lite && (
