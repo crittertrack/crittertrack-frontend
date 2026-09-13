@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
@@ -795,6 +796,9 @@ const AnimalList = ({
     const isCollectionsView = animalView === 'collections';
     const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
     const isListLikeView = animalView === 'list' || isCollectionsView;
+    // Lite mode (web-only, see docs/lite-web-toggle-brainstorm.md): Reproduction/Health/Feeding &
+    // Care/Supplies are dropped entirely, navigated instead via LiteBottomNav's fixed routes.
+    const isLiteModeActive = userProfile?.uiMode === 'lite' && !Capacitor.isNativePlatform();
 
     useEffect(() => {
         // Only override if the caller explicitly passed a non-default view (e.g. deep-link)
@@ -803,6 +807,14 @@ const AnimalList = ({
             setAnimalView(normalizeAnimalView(initialAnimalView));
         }
     }, [initialAnimalView]);
+
+    // Defensive: these tabs no longer have a way to be reached in Lite mode, but if anything
+    // (e.g. a stale deep-link) sets animalView to one anyway, fall back to the main list.
+    useEffect(() => {
+        if (isLiteModeActive && ['reproduction', 'health', 'feeding', 'supplies'].includes(animalView)) {
+            setAnimalView('list');
+        }
+    }, [isLiteModeActive, animalView]);
 
     // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })) — react-router
     // clears location.state on its own once consumed, so this doesn't fight the pinned-default logic above.
@@ -5736,7 +5748,8 @@ useEffect(() => {
                         </div>
                     </div>
 
-                    {/* Column 2: Owned */}
+                    {/* Column 2: Owned — bulk owned/unowned setter, not shown in Lite mode */}
+                    {!isLiteModeActive && (
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Heart size={32} className="text-red-800 dark:text-red-200" />}
@@ -5759,8 +5772,10 @@ useEffect(() => {
                             <HeartOff size={14} /> Set All Unowned
                         </button>
                     </div>
+                    )}
 
-                    {/* Column 3: Public */}
+                    {/* Column 3: Public — bulk public/private setter, not shown in Lite mode */}
+                    {!isLiteModeActive && (
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Eye size={32} className="text-green-800 dark:text-green-200" />}
@@ -5783,6 +5798,7 @@ useEffect(() => {
                             <EyeOff size={14} /> Set All Private
                         </button>
                     </div>
+                    )}
 
                     {/* Column 4: Sold/Archived */}
                     <div className="flex flex-col gap-2">
@@ -5804,7 +5820,8 @@ useEffect(() => {
                         )}
                     </div>
 
-                    {/* Column 5: Needs Attention */}
+                    {/* Column 5: Needs Attention — mostly Feeding/Health/Reproduction alerts, dropped tabs in Lite mode */}
+                    {!isLiteModeActive && (
                     <div className="flex flex-col gap-2">
                         {(() => {
                             const totalAttention = feedingCareDueDashboard.length + generalTaskDue.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
@@ -5932,6 +5949,7 @@ useEffect(() => {
                             )}
                         </div>
                     </div>
+                    )}
                 </div>
             </div>
         );
@@ -6108,7 +6126,9 @@ useEffect(() => {
                 </div>
 
                 {/* Conditional Dashboards */}
-                {animalView === 'enclosures' ? (
+                {isLiteModeActive ? (
+                    animalView === 'enclosures' ? renderEnclosureDashboard() : renderDashboard()
+                ) : animalView === 'enclosures' ? (
                     renderEnclosureDashboard()
                 ) : animalView === 'reproduction' ? (
                     renderReproductionDashboard()
@@ -6120,8 +6140,9 @@ useEffect(() => {
                     renderDashboard()
                 )}
 
-                {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
-            {!showArchiveScreen && (
+                {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies
+                    — hidden in Lite mode, where LiteBottomNav switches between these views instead. */}
+            {!showArchiveScreen && !isLiteModeActive && (
             <div className="mb-4 border border-gray-200 dark:border-dark-text-muted rounded-xl overflow-hidden shadow-sm">
                 <div className="grid grid-cols-3 sm:hidden">
                                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},

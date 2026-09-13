@@ -201,11 +201,15 @@ as-is, rather than re-deriving it:
   switching, matching decision 4) wired into both the desktop and mobile header icon rows in
   `app.jsx`, next to `PushToggleButton`. This is inert so far — flipping it only persists the
   preference, it doesn't change any UI yet. Verified with `get_errors` + `npm run build:ci`.
-- Not started: build the actual Lite-mode rendering — the new bottom nav bar, the logo swap,
-  promoting Collections/Enclosures out of the Animals page's internal tabs, dropping
+- Not started: build the actual Lite-mode rendering — the logo swap, dropping
   Reproduction/Health/Feeding & Care sub-tabs, hiding Contacts/Marketplace/Calendar/Community/
   Tools/Finance, and the Animal detail tab consolidation — all gated behind
   `userProfile?.uiMode === 'lite'`.
+- ✅ **Done (2026-09-13)**: `LiteBottomNav.jsx` built — fixed full-width bottom bar with the 4
+  buttons (Animals/Collections/Enclosures/Litters, full-site icons per Decision #7), rendered
+  in `app.jsx` only when `isLiteModeActive`. `/collections` and `/enclosures` promoted to
+  standalone routes in `AppRoutes.jsx` (both just deep-link into `AnimalList` via its existing
+  `initialAnimalView` prop, same component/tabs as today).
 - Not started: add the onboarding mentions (`WelcomeGuideModal.jsx`,
   `tutorialLessonsNew.js`'s `getting-started-layout-tour` step 6) once the toggle has visible
   effects worth mentioning.

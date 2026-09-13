@@ -29,6 +29,7 @@ import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import LiteModeToggle from './components/LiteModeToggle';
+import LiteBottomNav from './components/LiteBottomNav';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
 import SyncFailureBanner from './components/shared/SyncFailureBanner';
@@ -1779,7 +1780,7 @@ const App = () => {
     }
 
      return (
-        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
+        <div className={`min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 ${isLiteModeActive ? 'pb-20' : ''}`}>
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
@@ -2531,6 +2532,8 @@ const App = () => {
                   API_BASE_URL={API_BASE_URL}
                 />
             </main>
+
+            {isLiteModeActive && <LiteBottomNav />}
 
             {/* Image Enlarge Modal */}
             {showImageModal && enlargedImageUrl && (

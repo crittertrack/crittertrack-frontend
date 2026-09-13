@@ -277,6 +277,61 @@ export function AppRoutes({
         />
       } />
 
+      {/* Collections / Enclosures — standalone routes for Lite mode's bottom nav (same
+          AnimalList component/tabs, just deep-linked straight to that internal tab). */}
+      <Route path="/collections" element={
+        <AnimalList 
+          authToken={authToken}
+          userProfile={userProfile}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage} 
+          onEditAnimal={handleEditAnimal} 
+          onViewAnimal={handleViewAnimal}
+          navigate={navigate}
+          showArchiveScreen={showArchiveScreen}
+          setShowArchiveScreen={setShowArchiveScreen}
+          archivedAnimals={archivedAnimals}
+          setArchivedAnimals={setArchivedAnimals}
+          soldTransferredAnimals={soldTransferredAnimals}
+          setSoldTransferredAnimals={setSoldTransferredAnimals}
+          archiveLoading={archiveLoading}
+          setArchiveLoading={setArchiveLoading}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
+          locations={locations}
+          fetchLocations={fetchLocations}
+          generalTasksState={generalTasksState}
+          initialAnimalView="collections"
+        />
+      } />
+      <Route path="/enclosures" element={
+        <AnimalList 
+          authToken={authToken}
+          userProfile={userProfile}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage} 
+          onEditAnimal={handleEditAnimal} 
+          onViewAnimal={handleViewAnimal}
+          navigate={navigate}
+          showArchiveScreen={showArchiveScreen}
+          setShowArchiveScreen={setShowArchiveScreen}
+          archivedAnimals={archivedAnimals}
+          setArchivedAnimals={setArchivedAnimals}
+          soldTransferredAnimals={soldTransferredAnimals}
+          setSoldTransferredAnimals={setSoldTransferredAnimals}
+          archiveLoading={archiveLoading}
+          setArchiveLoading={setArchiveLoading}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
+          locations={locations}
+          fetchLocations={fetchLocations}
+          generalTasksState={generalTasksState}
+          initialAnimalView="enclosures"
+        />
+      } />
+
       {/* Donation */}
       <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
 
