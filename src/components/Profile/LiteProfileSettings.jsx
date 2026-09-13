@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, User, Camera, Check, KeyRound, Eye, EyeOff, ArrowLeft, ExternalLink, MessageSquare, LogOut, Sun, Moon, Monitor } from 'lucide-react';
 import apiClient from '../../utils/apiClient';
@@ -21,6 +21,20 @@ const LiteProfileSettings = ({ userProfile, authToken, showModalMessage, onProfi
     const [saving, setSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState('');
     const [saveError, setSaveError] = useState('');
+
+    // userProfile can still be null on first mount (fetch still in-flight, e.g. right after a
+    // fresh page load) — the useState defaults above would then stay empty forever, so
+    // re-hydrate once the real profile actually arrives.
+    const hydratedRef = useRef(false);
+    useEffect(() => {
+        if (!userProfile || hydratedRef.current) return;
+        hydratedRef.current = true;
+        setPersonalName(userProfile.personalName || '');
+        setBreederName(userProfile.breederName || '');
+        setShowPersonalName(userProfile.showPersonalName ?? true);
+        setShowBreederName(userProfile.showBreederName ?? false);
+        setImagePreview(userProfile.profileImage || userProfile.profileImageUrl || null);
+    }, [userProfile]);
 
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
