@@ -8,6 +8,7 @@ const SupportersPage = lazy(() => import('./components/Donation/SupportersPage')
 const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
+const LiteProfileSettings = lazy(() => import('./components/Profile/LiteProfileSettings'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
@@ -21,6 +22,7 @@ const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
+const LiteNotificationsPage = lazy(() => import('./components/Notifications/LiteNotificationsPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
@@ -114,6 +116,7 @@ export function AppRoutes({
   setUserProfile,
   fetchUserProfile,
   showModalMessage,
+  handleLogout,
   
   // Modals
   modals,
@@ -277,6 +280,61 @@ export function AppRoutes({
         />
       } />
 
+      {/* Collections / Enclosures — standalone routes for Lite mode's bottom nav (same
+          AnimalList component/tabs, just deep-linked straight to that internal tab). */}
+      <Route path="/collections" element={
+        <AnimalList 
+          authToken={authToken}
+          userProfile={userProfile}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage} 
+          onEditAnimal={handleEditAnimal} 
+          onViewAnimal={handleViewAnimal}
+          navigate={navigate}
+          showArchiveScreen={showArchiveScreen}
+          setShowArchiveScreen={setShowArchiveScreen}
+          archivedAnimals={archivedAnimals}
+          setArchivedAnimals={setArchivedAnimals}
+          soldTransferredAnimals={soldTransferredAnimals}
+          setSoldTransferredAnimals={setSoldTransferredAnimals}
+          archiveLoading={archiveLoading}
+          setArchiveLoading={setArchiveLoading}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
+          locations={locations}
+          fetchLocations={fetchLocations}
+          generalTasksState={generalTasksState}
+          initialAnimalView="collections"
+        />
+      } />
+      <Route path="/enclosures" element={
+        <AnimalList 
+          authToken={authToken}
+          userProfile={userProfile}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage} 
+          onEditAnimal={handleEditAnimal} 
+          onViewAnimal={handleViewAnimal}
+          navigate={navigate}
+          showArchiveScreen={showArchiveScreen}
+          setShowArchiveScreen={setShowArchiveScreen}
+          archivedAnimals={archivedAnimals}
+          setArchivedAnimals={setArchivedAnimals}
+          soldTransferredAnimals={soldTransferredAnimals}
+          setSoldTransferredAnimals={setSoldTransferredAnimals}
+          archiveLoading={archiveLoading}
+          setArchiveLoading={setArchiveLoading}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
+          locations={locations}
+          fetchLocations={fetchLocations}
+          generalTasksState={generalTasksState}
+          initialAnimalView="enclosures"
+        />
+      } />
+
       {/* Donation */}
       <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
 
@@ -321,6 +379,22 @@ export function AppRoutes({
           saveBreedingLineDefs={saveBreedingLineDefs} 
           toggleAnimalBreedingLine={toggleAnimalBreedingLine} 
           BL_PRESETS_APP={BL_PRESETS_APP} 
+        />
+      } />
+
+      {/* Lite mode's own trimmed settings page — avatar-click destination there instead of /settings */}
+      <Route path="/lite-settings" element={
+        <LiteProfileSettings
+          userProfile={userProfile}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
+          handleLogout={handleLogout}
+          onProfileUpdated={(updatedUser) => {
+            if (updatedUser && setUserProfile) {
+              setUserProfile(updatedUser);
+            }
+            fetchUserProfile(authToken);
+          }}
         />
       } />
 
@@ -418,6 +492,16 @@ export function AppRoutes({
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           showModalMessage={showModalMessage}
+        />
+      } />
+
+      {/* Notifications quick-actions page (Lite web's equivalent of crittertrack-lite's bell page) */}
+      <Route path="/notifications" element={
+        <LiteNotificationsPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          navigate={navigate}
+          onViewAnimal={handleViewAnimal}
         />
       } />
 

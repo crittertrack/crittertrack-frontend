@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,6 +12,7 @@ import { ALERT_CATEGORIES } from '../../utils/alertCategories';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { parseLocalDate } from '../../utils/dateFormatter';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
+import { getCachedUiMode } from '../../utils/uiModeCache';
 import '../NewsTickerBanner.css';
 
 // Day-based "is this overdue" check (grooming/training/maintenance schedules).
@@ -82,7 +84,15 @@ const defaultAlertSettings = () =>
 // Single global banner shown on every page: unread messages/notifications, moderator
 // warnings/notices, and the user's optional care/breeding alert categories. Auto-scrolls
 // (ticker-style, matching NewsTickerBanner's motion) when there's more than one item.
+// Ids of ticker items covered by the Lite web Notifications quick-actions page — in Lite mode
+// these route there instead of their normal onClick (mostly navigate('/', {state:{animalView}})
+// calls that Lite's defensive animalView guard just bounces back to 'list', making them no-ops).
+const NOTIFICATIONS_PAGE_ITEM_IDS = new Set(['feeding', 'grooming', 'training', 'careTasks', 'reproduction', 'health', 'maintenance', 'supplies', 'birthdays', 'notifications']);
+
 const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifications, setShowMessages }) => {
+  // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
+  // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
+  const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
   const navigate = useNavigate();
   const userKey = useMemo(() => getUserKey(authToken), [authToken]);
 
@@ -354,7 +364,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
 
   const renderItem = (item) => (
     <button
-      onClick={item.onClick}
+      onClick={(isLiteModeActive && NOTIFICATIONS_PAGE_ITEM_IDS.has(item.id)) ? () => navigate('/notifications') : item.onClick}
       className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center font-semibold"
     >
       <item.icon size={14} className={`inline-block mr-1.5 flex-shrink-0 ${item.iconColor}`} />

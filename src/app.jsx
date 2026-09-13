@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle, lazy, Suspense } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import apiClient from './utils/apiClient';
+import { getCachedUiMode } from './utils/uiModeCache';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Droplet, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import 'flag-icons/css/flag-icons.min.css';
@@ -28,6 +29,8 @@ import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
+import LiteModeToggle from './components/LiteModeToggle';
+import LiteBottomNav from './components/LiteBottomNav';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
 import SyncFailureBanner from './components/shared/SyncFailureBanner';
@@ -40,6 +43,9 @@ import PushToggleButton from './components/PushToggleButton';
 import { registerNativePush, initNativePushListeners } from './utils/nativePush';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
+import LiteAnimalModal from './components/AnimalDetail/LiteAnimalModal';
+import LiteViewAnimalModal from './components/AnimalDetail/LiteViewAnimalModal';
+import LiteAnimalFormModal from './components/AnimalForm/LiteAnimalFormModal';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
@@ -303,6 +309,12 @@ const App = () => {
     
     // Derive currentView from URL path
     const currentView = location.pathname.split('/')[1] || 'list';
+
+    // Lite mode is desktop/PWA web only — never on the native Android/iOS full app (that has
+    // its own separate crittertrack-lite app already). See docs/lite-web-toggle-brainstorm.md.
+    // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
+    // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
+    const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
     
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
@@ -1774,7 +1786,7 @@ const App = () => {
     }
 
      return (
-        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
+        <div className={`min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 ${isLiteModeActive ? 'pb-24' : ''}`}>
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
@@ -1858,9 +1870,11 @@ const App = () => {
                 </div>
                 
                 <div className="hidden md:flex justify-between items-center">
-                    <CustomAppLogo size="w-10 h-10" />
+                    <CustomAppLogo size="w-10 h-10" lite={isLiteModeActive} />
                     
                     <nav className="flex space-x-3">
+                        {!isLiteModeActive && (
+                        <>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
@@ -1903,6 +1917,8 @@ const App = () => {
                                 <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
                             )}
                         </div>
+                        </>
+                        )}
                     </nav>
 
                     <div className="flex items-center space-x-3">
@@ -1910,8 +1926,11 @@ const App = () => {
 
                         <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
+                        <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
+
                         <button
                             onClick={() => {
+                                if (isLiteModeActive) { navigate('/notifications'); return; }
                                 setShowNotifications(true);
                                 setNotificationCount(0);
                                 fetchNotificationCount();
@@ -1950,7 +1969,7 @@ const App = () => {
                         {/* Avatar / Profile Dropdown */}
                         <div className="relative" ref={profileMenuDesktopRef}>
                             <button
-                                onClick={() => setShowProfileMenu(p => !p)}
+                                onClick={() => isLiteModeActive ? navigate('/lite-settings') : setShowProfileMenu(p => !p)}
                                 className="w-10 h-10 rounded-full bg-primary dark:bg-dark-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                 title="Account"
                             >
@@ -1961,25 +1980,31 @@ const App = () => {
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
-                                    <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
+                                    <button onClick={() => { navigate(isLiteModeActive ? '/lite-settings' : `/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
                                     </button>
-                                    <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        <MessageSquare size={15} /> Report an Issue
-                                    </button>
+                                    {!isLiteModeActive && (
+                                        <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <MessageSquare size={15} /> Report an Issue
+                                        </button>
+                                    )}
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                                             <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
                                         </button>
                                     )}
-                                    <hr className="my-1 border-gray-200" />
-                                    <button onClick={() => handleLogout(false)}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-                                        <LogOut size={15} /> Logout
-                                    </button>
+                                    {!isLiteModeActive && (
+                                        <>
+                                            <hr className="my-1 border-gray-200" />
+                                            <button onClick={() => handleLogout(false)}
+                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                                <LogOut size={15} /> Logout
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -1999,15 +2024,18 @@ const App = () => {
                     
                     {/* Second row: Logo and action buttons */}
                     <div className="flex justify-between items-center mb-3 gap-2">
-                        <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
+                        <CustomAppLogo size="w-8 h-8" lite={isLiteModeActive} className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
                             <ThemeToggle />
 
                             <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
+                            <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
+
                             <button
                                 onClick={() => {
+                                    if (isLiteModeActive) { navigate('/notifications'); return; }
                                     setShowNotifications(true);
                                     setNotificationCount(0);
                                     fetchNotificationCount();
@@ -2046,7 +2074,7 @@ const App = () => {
                             {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
-                                    onClick={() => setShowProfileMenu(p => !p)}
+                                    onClick={() => isLiteModeActive ? navigate('/lite-settings') : setShowProfileMenu(p => !p)}
                                     className="w-9 h-9 rounded-full bg-primary dark:bg-dark-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                     title="Account"
                                 >
@@ -2057,32 +2085,40 @@ const App = () => {
                                 </button>
                                 {showProfileMenu && (
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
-                                        <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
+                                        <button onClick={() => { navigate(isLiteModeActive ? '/lite-settings' : `/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
                                         </button>
-                                        <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
-                                            <MessageSquare size={15} /> Report an Issue
-                                        </button>
+                                        {!isLiteModeActive && (
+                                            <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
+                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <MessageSquare size={15} /> Report an Issue
+                                            </button>
+                                        )}
                                         {['admin', 'moderator'].includes(userProfile?.role) && (
                                             <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                                                 <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
                                             </button>
                                         )}
-                                        <hr className="my-1 border-gray-200" />
-                                        <button onClick={() => handleLogout(false)}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-                                            <LogOut size={15} /> Logout
-                                        </button>
+                                        {!isLiteModeActive && (
+                                            <>
+                                                <hr className="my-1 border-gray-200" />
+                                                <button onClick={() => handleLogout(false)}
+                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                                    <LogOut size={15} /> Logout
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Third row: Navigation row 1 (4 buttons) */}
+                    {/* Third & Fourth rows: legacy nav — hidden entirely in Lite mode, replaced by LiteBottomNav */}
+                    {!isLiteModeActive && (
+                    <>
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
@@ -2102,7 +2138,6 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Fourth row: Navigation row 2 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Calendar size={18} className="mb-0.5" />
@@ -2131,6 +2166,8 @@ const App = () => {
                             )}
                         </div>
                     </nav>
+                    </>
+                    )}
                 </div>
             </header>
 
@@ -2301,8 +2338,9 @@ const App = () => {
                 // Only show editable modal if: user created it AND it's not marked as view-only
                 const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && !animalToView.isViewOnly;
                 if (iCurrentlyOwn) {
+                    const AnimalModalComponent = isLiteModeActive ? LiteAnimalModal : AnimalModalV2;
                     return (
-                        <AnimalModalV2
+                        <AnimalModalComponent
                             animal={animalToView}
                             onClose={handleBackFromAnimal}
                             onEdit={handleEditAnimal}
@@ -2328,8 +2366,9 @@ const App = () => {
                         />
                     );
                 } else {
+                    const ViewAnimalModalComponent = isLiteModeActive ? LiteViewAnimalModal : ViewAnimalModalV2;
                     return (
-                        <ViewAnimalModalV2
+                        <ViewAnimalModalComponent
                                 animal={animalToView}
                                 mode="private"
                                 onClose={handleBackFromAnimal}
@@ -2350,10 +2389,11 @@ const App = () => {
             {animalToEdit && (
                 (() => {
                     const iCurrentlyOwn = animalToEdit.creatorId_public === userProfile?.id_public;
+                    const AnimalFormComponent = isLiteModeActive ? LiteAnimalFormModal : AnimalFormModalV2;
                     return (
                         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                             {iCurrentlyOwn ? (
-                                <AnimalFormModalV2
+                                <AnimalFormComponent
                                     formTitle={`Edit ${animalToEdit.name}`}
                                     animalToEdit={animalToEdit}
                                     species={animalToEdit.species}
@@ -2444,6 +2484,7 @@ const App = () => {
                   setUserProfile={setUserProfile}
                   fetchUserProfile={fetchUserProfile}
                   showModalMessage={showModalMessage}
+                  handleLogout={handleLogout}
                   modals={modals}
                   setShowMessages={setShowMessages}
                   setSelectedConversation={setSelectedConversation}
@@ -2515,6 +2556,8 @@ const App = () => {
                   API_BASE_URL={API_BASE_URL}
                 />
             </main>
+
+            {isLiteModeActive && <LiteBottomNav />}
 
             {/* Image Enlarge Modal */}
             {showImageModal && enlargedImageUrl && (
