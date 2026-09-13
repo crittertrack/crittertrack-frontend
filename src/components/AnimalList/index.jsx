@@ -800,12 +800,23 @@ const AnimalList = ({
     // Care/Supplies are dropped entirely, navigated instead via LiteBottomNav's fixed routes.
     const isLiteModeActive = userProfile?.uiMode === 'lite' && !Capacitor.isNativePlatform();
 
+    // Lite mode's bottom nav routes (/, /collections, /enclosures) all render this same
+    // AnimalList instance without remounting it, so a route change only shows up here as
+    // `initialAnimalView` changing on an already-mounted component.
+    const initialAnimalViewAppliedRef = useRef(false);
     useEffect(() => {
-        // Only override if the caller explicitly passed a non-default view (e.g. deep-link)
-        // Otherwise respect the user's pinned default from localStorage
-        if (initialAnimalView && initialAnimalView !== 'list') {
-            setAnimalView(normalizeAnimalView(initialAnimalView));
+        if (!initialAnimalViewAppliedRef.current) {
+            // First mount: only override if the caller explicitly passed a non-default view
+            // (e.g. deep-link). Otherwise respect the user's pinned default from localStorage.
+            initialAnimalViewAppliedRef.current = true;
+            if (initialAnimalView && initialAnimalView !== 'list') {
+                setAnimalView(normalizeAnimalView(initialAnimalView));
+            }
+            return;
         }
+        // Subsequent changes are real in-app navigation (e.g. LiteBottomNav) — always sync,
+        // otherwise navigating back to "Animals" gets stuck showing the previous tab until refresh.
+        setAnimalView(normalizeAnimalView(initialAnimalView));
     }, [initialAnimalView]);
 
     // Defensive: these tabs no longer have a way to be reached in Lite mode, but if anything
