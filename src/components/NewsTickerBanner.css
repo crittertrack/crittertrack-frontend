@@ -11,6 +11,9 @@
 }
 
 @keyframes ticker-scroll {
-  0% { transform: translateX(100%); }
+  /* Start at 100vw (viewport-relative), not 100% (this element's own huge content
+     width) — otherwise the first item can take minutes to scroll into view once
+     there are enough ticker entries to make the container thousands of px wide. */
+  0% { transform: translateX(100vw); }
   100% { transform: translateX(-100%); }
 }

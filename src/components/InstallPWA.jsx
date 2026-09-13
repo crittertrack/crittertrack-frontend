@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Share, X } from 'lucide-react';
+import { Download, Info, Share, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -9,6 +9,7 @@ const InstallPWA = () => {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -45,18 +46,33 @@ const InstallPWA = () => {
 
   return (
     <>
-      <button
-        onClick={handleInstallClick}
-        disabled={!installPrompt && !isIOSSafari}
-        className={`w-full font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border-2 ${
-          installPrompt || isIOSSafari
-            ? 'bg-purple-100 hover:bg-purple-200 text-purple-800 border-purple-300 cursor-pointer'
-            : 'bg-gray-100 text-gray-500 border-gray-200 cursor-default'
-        }`}
-      >
-        <Download size={20} />
-        Install Desktop/Mobile App
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleInstallClick}
+          disabled={!installPrompt && !isIOSSafari}
+          className={`flex-1 font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border-2 ${
+            installPrompt || isIOSSafari
+              ? 'bg-purple-100 hover:bg-purple-200 text-purple-800 border-purple-300 cursor-pointer'
+              : 'bg-gray-100 text-gray-500 border-gray-200 cursor-default'
+          }`}
+        >
+          <Download size={20} />
+          Install CritterTrack (Web)
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowInfo(prev => !prev)}
+          className="flex-shrink-0 p-2 rounded-lg border-2 border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition"
+          title="What does this do?"
+        >
+          <Info size={18} />
+        </button>
+      </div>
+      {showInfo && (
+        <p className="text-xs text-gray-400 text-center mt-1.5">
+          Adds CritterTrack to your home screen or desktop so it opens like a regular app instead of a browser tab. Once you're using it, your data stays available offline and any changes you make will sync automatically when you're back online.
+        </p>
+      )}
 
       {showIOSGuide && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4" onClick={() => setShowIOSGuide(false)}>

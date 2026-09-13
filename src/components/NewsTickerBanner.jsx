@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
-import { Rss, BarChart2, Info, Heart, AlertTriangle, BookOpen, ClipboardList } from 'lucide-react';
+import { Rss, BarChart2, Info, Heart, AlertTriangle, BookOpen, ClipboardList, Users, Gem, Flame } from 'lucide-react';
 import './NewsTickerBanner.css';
 
 const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenBetaSurvey }) => {
   const [news, setNews] = useState([]);
+  const [supporters, setSupporters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -42,6 +43,20 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
     fetchNews();
   }, [authToken, API_BASE_URL]);
 
+  // Public endpoint, works whether or not the visitor is logged in (shown on the login screen too)
+  useEffect(() => {
+    const fetchSupporters = async () => {
+      try {
+        const response = await apiClient.get(`/kofi/supporters`);
+        const list = Array.isArray(response.data) ? response.data : [];
+        setSupporters(list.slice(0, 5));
+      } catch (err) {
+        console.error('Failed to fetch supporters for ticker:', err);
+      }
+    };
+    fetchSupporters();
+  }, [API_BASE_URL]);
+
   if (loading) {
     return null; // Don't render the banner while loading to prevent content/animation jumps
   }
@@ -60,7 +75,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
     return <Info size={14} className="inline-block mr-1.5 text-blue-300 flex-shrink-0" />;
   };
 
-  const animationDuration = (news.length + 2) * 20; // Increased to make it slightly slower
+  const animationDuration = (news.length + supporters.length + 2) * 20; // Increased to make it slightly slower
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white text-sm py-1 overflow-hidden relative rounded-lg">
@@ -80,26 +95,30 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
           </a>
           <span className="mx-4">|</span>
         </span>
-        <span className="inline-flex items-center px-4 font-semibold">
-          <button
-            onClick={() => navigate('/report')}
-            className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
-          >
-            <AlertTriangle size={14} className="inline-block mr-1.5 text-yellow-300 flex-shrink-0" />
-            Report a Bug or Issue
-          </button>
-          <span className="mx-4">|</span>
-        </span>
-        <span className="inline-flex items-center px-4 font-semibold">
-          <button
-            onClick={() => navigate('/resources')}
-            className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
-          >
-            <BookOpen size={14} className="inline-block mr-1.5 text-green-300 flex-shrink-0" />
-            Helpful Resources
-          </button>
-          <span className="mx-4">|</span>
-        </span>
+        {authToken && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={() => navigate('/report')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <AlertTriangle size={14} className="inline-block mr-1.5 text-yellow-300 flex-shrink-0" />
+              Report a Bug or Issue
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        )}
+        {authToken && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={() => navigate('/resources')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <BookOpen size={14} className="inline-block mr-1.5 text-green-300 flex-shrink-0" />
+              Helpful Resources
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        )}
         {betaSurveyStatus === 'pending' && onReopenBetaSurvey && (
           <span className="inline-flex items-center px-4 font-semibold">
             <button
@@ -137,7 +156,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
           </span>
         )}
         {news.map((item, index) => (
-          <span key={item._id} className="inline-flex items-center px-4">
+          <span key={item._id} className="inline-flex items-center px-4 font-semibold">
             <button
               onClick={() => navigate('/community')}
               className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
@@ -145,9 +164,41 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
               {getBroadcastIcon(item)}
               {item.pollQuestion || item.title}
             </button>
-            {index < news.length - 1 && <span className="mx-2">|</span>}
+            {(index < news.length - 1 || supporters.length > 0) && <span className="mx-4">|</span>}
           </span>
         ))}
+        {supporters.map((supporter, index) => (
+          <span key={`supporter-${index}`} className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={() => navigate('/supporters')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              {supporter.isSubscription ? (
+                <>
+                  <Gem size={14} className="inline-block mr-1.5 text-cyan-300 flex-shrink-0" />
+                  Thank you, {supporter.name}, for being a {supporter.tierName || 'Monthly Supporter'}!
+                </>
+              ) : (
+                <>
+                  <Flame size={14} className="inline-block mr-1.5 text-orange-300 flex-shrink-0" />
+                  Thank you, {supporter.name}, for supporting CritterTrack!
+                </>
+              )}
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        ))}
+        {supporters.length > 0 && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={() => navigate('/supporters')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <Users size={14} className="inline-block mr-1.5 text-pink-200 flex-shrink-0" />
+              See All Supporters
+            </button>
+          </span>
+        )}
       </div>
     </div>
   );
