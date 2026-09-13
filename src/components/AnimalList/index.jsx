@@ -866,6 +866,9 @@ const AnimalList = ({
     const [showReproNeedsAttentionBreakdown, setShowReproNeedsAttentionBreakdown] = useState(false);
     const [showHealthNeedsAttentionBreakdown, setShowHealthNeedsAttentionBreakdown] = useState(false);
     const [showFeedingCareNeedsAttentionBreakdown, setShowFeedingCareNeedsAttentionBreakdown] = useState(false);
+    // Lite mode: which collection/enclosure row is expanded to show its animals inline (see docs/lite-web-toggle-brainstorm.md)
+    const [liteExpandedCollectionId, setLiteExpandedCollectionId] = useState(null);
+    const [liteExpandedEnclosureId, setLiteExpandedEnclosureId] = useState(null);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -5298,53 +5301,55 @@ useEffect(() => {
 
     // Lite mode: compact row cards mirroring crittertrack-lite's own AnimalCard/Enclosures list style,
     // in place of the full site's grid/table views (see docs/lite-web-toggle-brainstorm.md).
+    const renderLiteAnimalRow = (animal) => {
+        const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
+        const variety = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || animal.species;
+        let reproState = null;
+        if (animal.isPregnant) reproState = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300' };
+        else if (animal.isNursing) reproState = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300' };
+        else if (animal.isInMating) reproState = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300' };
+        else if (animal.isPlannedMating) reproState = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300' };
+        return (
+            <button
+                key={animal.id_public || animal._id}
+                onClick={() => onViewAnimal(animal)}
+                className="w-full flex items-center gap-3 bg-white dark:bg-dark-card-bg rounded-xl p-2.5 shadow-sm text-left active:scale-[0.99] transition"
+            >
+                <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface">
+                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate flex items-center gap-1">
+                        {animal.gender === 'Male' ? <Mars size={13} className="text-primary dark:text-dark-primary shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} className="text-accent shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} className="text-purple-500 shrink-0" /> : null}
+                        <span className="truncate">{[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{variety}</p>
+                    {ageStr && <p className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</p>}
+                </div>
+                {(reproState || animal.status) && (
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        {reproState && (
+                            <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${reproState.color}`}>
+                                {reproState.label}
+                            </span>
+                        )}
+                        {animal.status && (
+                            <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary">
+                                {animal.status}
+                            </span>
+                        )}
+                    </div>
+                )}
+            </button>
+        );
+    };
+
     const renderLiteAnimalsList = () => (
         <div className="space-y-2">
             {displayedAnimalsForList.length === 0 ? (
                 <div className="text-center py-16 text-gray-400 dark:text-dark-text-muted text-sm">No animals found.</div>
             ) : (
-                displayedAnimalsForList.map(animal => {
-                    const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                    const variety = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || animal.species;
-                    let reproState = null;
-                    if (animal.isPregnant) reproState = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300' };
-                    else if (animal.isNursing) reproState = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300' };
-                    else if (animal.isInMating) reproState = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300' };
-                    else if (animal.isPlannedMating) reproState = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300' };
-                    return (
-                        <button
-                            key={animal.id_public || animal._id}
-                            onClick={() => onViewAnimal(animal)}
-                            className="w-full flex items-center gap-3 bg-white dark:bg-dark-card-bg rounded-xl p-2.5 shadow-sm text-left active:scale-[0.99] transition"
-                        >
-                            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface">
-                                <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate flex items-center gap-1">
-                                    {animal.gender === 'Male' ? <Mars size={13} className="text-primary dark:text-dark-primary shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} className="text-accent shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} className="text-purple-500 shrink-0" /> : null}
-                                    <span className="truncate">{[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}</span>
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{variety}</p>
-                                {ageStr && <p className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</p>}
-                            </div>
-                            {(reproState || animal.status) && (
-                                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                    {reproState && (
-                                        <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${reproState.color}`}>
-                                            {reproState.label}
-                                        </span>
-                                    )}
-                                    {animal.status && (
-                                        <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary">
-                                            {animal.status}
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-                        </button>
-                    );
-                })
+                displayedAnimalsForList.map(animal => renderLiteAnimalRow(animal))
             )}
         </div>
     );
@@ -5357,27 +5362,88 @@ useEffect(() => {
                 enclosures.map(enc => {
                     const occupants = enclosureAnimalMap[enc._id] || [];
                     const capacity = parseInt(enc.capacity, 10);
+                    const isExpanded = liteExpandedEnclosureId === enc._id;
                     return (
-                        <button
-                            key={enc._id}
-                            onClick={() => openEnclosureModal(enc)}
-                            className="w-full flex items-center gap-3 bg-white dark:bg-dark-card-bg rounded-xl p-2.5 shadow-sm text-left active:scale-[0.99] transition"
-                        >
-                            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                {enc.imageUrl ? <img src={enc.imageUrl} alt={enc.name} className="w-full h-full object-cover" /> : <Home size={20} />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">{enc.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
-                                    {enc.enclosureType || 'Enclosure'} • {occupants.length}{capacity > 0 ? `/${capacity}` : ''} animals
-                                </p>
-                            </div>
-                        </button>
+                        <div key={enc._id} className="bg-white dark:bg-dark-card-bg rounded-xl shadow-sm overflow-hidden">
+                            <button
+                                onClick={() => setLiteExpandedEnclosureId(prev => prev === enc._id ? null : enc._id)}
+                                className="w-full flex items-center gap-3 p-2.5 text-left active:scale-[0.99] transition"
+                            >
+                                <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                    {enc.imageUrl ? <img src={enc.imageUrl} alt={enc.name} className="w-full h-full object-cover" /> : <Home size={20} />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">{enc.name}</p>
+                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
+                                        {enc.enclosureType || 'Enclosure'} • {occupants.length}{capacity > 0 ? `/${capacity}` : ''} animals
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); openEnclosureModal(enc); }}
+                                    className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-primary dark:hover:text-dark-primary rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover shrink-0"
+                                    title="Edit Enclosure"
+                                >
+                                    <Edit size={15} />
+                                </button>
+                                {isExpanded ? <ChevronUp size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" /> : <ChevronDown size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" />}
+                            </button>
+                            {isExpanded && (
+                                <div className="p-2 pt-0 space-y-2 bg-gray-50 dark:bg-dark-surface">
+                                    {occupants.length === 0 ? (
+                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals assigned yet.</p>
+                                    ) : (
+                                        occupants.map(a => renderLiteAnimalRow(a))
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     );
                 })
             )}
         </div>
     );
+
+    const renderLiteCollectionsList = () => {
+        const allOwnedAnimals = displayedAnimalsForList.filter(a => !a.archived);
+        return (
+            <div className="space-y-2">
+                {userCollections.length === 0 ? (
+                    <div className="text-center py-16 text-gray-400 dark:text-dark-text-muted text-sm">No collections yet.</div>
+                ) : (
+                    userCollections.map(col => {
+                        const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
+                        const isExpanded = liteExpandedCollectionId === col.id;
+                        return (
+                            <div key={col.id} className="bg-white dark:bg-dark-card-bg rounded-xl shadow-sm overflow-hidden">
+                                <button
+                                    onClick={() => setLiteExpandedCollectionId(prev => prev === col.id ? null : col.id)}
+                                    className="w-full flex items-center gap-3 p-2.5 text-left active:scale-[0.99] transition"
+                                >
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${col.color || DEFAULT_COLLECTION_COLOR}22`, color: col.color || DEFAULT_COLLECTION_COLOR }}>
+                                        {React.createElement(getCollectionIcon(col.icon), { size: 20 })}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">{col.name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{colAnimals.length} animal{colAnimals.length === 1 ? '' : 's'}</p>
+                                    </div>
+                                    {isExpanded ? <ChevronUp size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" /> : <ChevronDown size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" />}
+                                </button>
+                                {isExpanded && (
+                                    <div className="p-2 pt-0 space-y-2 bg-gray-50 dark:bg-dark-surface">
+                                        {colAnimals.length === 0 ? (
+                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals in this collection yet.</p>
+                                        ) : (
+                                            colAnimals.map(a => renderLiteAnimalRow(a))
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        );
+    };
 
     const renderEnclosuresTab = () => { // --- Filtering ---
         let filteredEnclosures = [...enclosures];
@@ -6206,7 +6272,7 @@ useEffect(() => {
                             <button onClick={() => { setEditingGeneralTask(null); setShowGeneralTaskModal(true); }} className="flex bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Custom Task">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Custom Task</span>
                             </button>
-                        ) : (
+                        ) : (!isLiteModeActive || animalView === 'enclosures') ? (
                             <button
                                 onClick={() => openEnclosureModal()}
                                 className="flex bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -6214,9 +6280,9 @@ useEffect(() => {
                             >
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span><span className="hidden sm:inline">Add </span>Enclosure</span>
                             </button>
-                        )}
-                        {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
-                        {isListLikeView && !showArchiveScreen && (
+                        ) : null}
+                        {/* Add Animal (only on list/collections views, or just list in Lite mode) — desktop only, mobile is in title row */}
+                        {(isLiteModeActive ? animalView === 'list' : isListLikeView) && !showArchiveScreen && (
                             <button
                                 onClick={() => navigate('/select-species')}
                                 className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -6226,7 +6292,7 @@ useEffect(() => {
                             </button>
                         )}
                         {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
-                        {isListLikeView && !showArchiveScreen && (
+                        {(isLiteModeActive ? animalView === 'list' : isListLikeView) && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
                             className="sm:hidden bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
@@ -6460,7 +6526,7 @@ useEffect(() => {
                     </div>
             </div>
             )}
-             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : (isLiteModeActive && animalView === 'enclosures') ? renderLiteEnclosuresList() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
+             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : (isLiteModeActive && animalView === 'enclosures') ? renderLiteEnclosuresList() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : (isLiteModeActive && animalView === 'collections') ? renderLiteCollectionsList() : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : isLiteModeActive ? renderLiteAnimalsList() : myAnimalsViewMode === 'list' ? (
                 <div className="relative">
