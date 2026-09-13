@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import ArchiveScreen from '../ArchiveScreen';
@@ -827,15 +827,19 @@ const AnimalList = ({
         }
     }, [isLiteModeActive, animalView]);
 
-    // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })) — react-router
-    // clears location.state on its own once consumed, so this doesn't fight the pinned-default logic above.
+    // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })). The browser
+    // keeps history.state for an entry across reloads/remounts, so the state must be explicitly cleared
+    // here once consumed — otherwise it keeps re-forcing this view (e.g. after a Lite/full mode switch
+    // or a page refresh), fighting the user's pinned default view.
     const routerLocation = useLocation();
+    const routerNavigate = useNavigate();
     useEffect(() => {
         const requestedView = routerLocation.state?.animalView;
         if (requestedView) {
             setAnimalView(normalizeAnimalView(requestedView));
+            routerNavigate(routerLocation.pathname, { replace: true, state: null });
         }
-    }, [routerLocation.state]);
+    }, [routerLocation.state, routerLocation.pathname, routerNavigate]);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
     const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
     const [enclosures, setEnclosures] = useState([]);
@@ -6183,15 +6187,18 @@ useEffect(() => {
             {/* Animal List section — Lite mode drops the white card shell entirely so content
                 sits directly on the pink page background, matching crittertrack-lite's pages. */}
             <div className={isLiteModeActive ? 'w-full max-w-7xl px-4 pt-4' : 'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
-                {/* Lite mode: dedicated gradient title bar mirroring crittertrack-lite's TopBar
-                    (from-accent to-primary), instead of the plain dark-text heading below. */}
-                {isLiteModeActive && (
-                    <div className="w-full bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white rounded-xl px-4 py-3 mb-3 shadow-sm flex items-center gap-2">
-                        <ClipboardList size={20} className="shrink-0" />
-                        <h2 className="text-lg font-bold truncate flex-1 min-w-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
-                    </div>
-                )}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4">
+                {/* Lite mode: header row itself becomes the gradient bar mirroring crittertrack-lite's
+                    TopBar (from-accent to-primary), with the info/refresh/action buttons stacked inside
+                    it instead of in a separate white row below. */}
+                <div className={isLiteModeActive
+                    ? 'w-full bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white rounded-xl px-4 py-3 mb-4 shadow-sm flex flex-col gap-2'
+                    : 'flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4'}>
+                    {isLiteModeActive && (
+                        <div className="flex items-center gap-2">
+                            <ClipboardList size={20} className="shrink-0" />
+                            <h2 className="text-lg font-bold truncate flex-1 min-w-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
+                        </div>
+                    )}
                     <div className="flex items-center gap-2 min-w-0 flex-wrap w-full sm:w-auto sm:flex-1">
                         {!isLiteModeActive && (
                             <>
@@ -6202,7 +6209,7 @@ useEffect(() => {
                             </>
                         )}
                         {ANIMAL_VIEW_INFO[animalView] && (
-                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} className="shrink-0">
+                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} variant={isLiteModeActive ? 'light' : 'default'} className="shrink-0">
                                 {ANIMAL_VIEW_INFO[animalView].body}
                             </InfoButton>
                         )}
@@ -6210,7 +6217,9 @@ useEffect(() => {
                         <button
                             onClick={handleRefresh}
                             disabled={loading}
-                            className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium"
+                            className={isLiteModeActive
+                                ? 'text-white/85 hover:text-white transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-white/10 text-xs font-medium'
+                                : 'text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium'}
                             title="Refresh"
                         >
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -6224,7 +6233,9 @@ useEffect(() => {
                                 </span>
                                 <button
                                     onClick={handleClearFilters}
-                                    className="hidden sm:flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0"
+                                    className={isLiteModeActive
+                                        ? 'hidden sm:flex items-center gap-1 text-white/90 hover:text-white hover:bg-white/10 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0'
+                                        : 'hidden sm:flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0'}
                                     title="Clear all filters"
                                 >
                                     <X size={14} />
