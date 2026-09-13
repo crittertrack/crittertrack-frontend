@@ -21,6 +21,7 @@ const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
+const LiteNotificationsPage = lazy(() => import('./components/Notifications/LiteNotificationsPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
@@ -473,6 +474,16 @@ export function AppRoutes({
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           showModalMessage={showModalMessage}
+        />
+      } />
+
+      {/* Notifications quick-actions page (Lite web's equivalent of crittertrack-lite's bell page) */}
+      <Route path="/notifications" element={
+        <LiteNotificationsPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          navigate={navigate}
+          onViewAnimal={handleViewAnimal}
         />
       } />
 

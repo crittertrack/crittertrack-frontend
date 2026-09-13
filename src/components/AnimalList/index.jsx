@@ -5312,7 +5312,10 @@ useEffect(() => {
 
     // Lite mode: compact row cards mirroring crittertrack-lite's own AnimalCard/Enclosures list style,
     // in place of the full site's grid/table views (see docs/lite-web-toggle-brainstorm.md).
-    const renderLiteAnimalRow = (animal) => {
+    // `nested` = true for rows shown inside an Enclosure/Collection group card (white/light-gray
+    // background instead of the pink page bg), which needs a stronger border for separation —
+    // the main animals list sits directly on the pink bg and doesn't need one, matching native.
+    const renderLiteAnimalRow = (animal, nested = false) => {
         const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
         const variety = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || animal.species;
         let reproState = null;
@@ -5324,7 +5327,7 @@ useEffect(() => {
             <button
                 key={animal.id_public || animal._id}
                 onClick={() => onViewAnimal(animal)}
-                className="w-full flex items-center gap-3 bg-white dark:bg-dark-card-bg rounded-xl p-2.5 shadow-sm text-left active:scale-[0.99] transition"
+                className={`w-full flex items-center gap-3 bg-white dark:bg-dark-card-bg rounded-xl p-2.5 shadow-sm text-left active:scale-[0.99] transition ${nested ? 'border-2 border-gray-300 dark:border-dark-text-muted' : ''}`}
             >
                 <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface">
                     <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
@@ -5335,7 +5338,7 @@ useEffect(() => {
                         <span className="truncate">{[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}</span>
                     </p>
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{variety}</p>
-                    {ageStr && <p className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</p>}
+                    {ageStr && <p className="text-xs text-gray-400 dark:text-dark-text-muted">{animal.birthDate ? `${formatDateShort(animal.birthDate)} - ` : ''}{ageStr}</p>}
                 </div>
                 {(reproState || animal.status) && (
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -5403,7 +5406,7 @@ useEffect(() => {
                                     {occupants.length === 0 ? (
                                         <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals assigned yet.</p>
                                     ) : (
-                                        occupants.map(a => renderLiteAnimalRow(a))
+                                        occupants.map(a => renderLiteAnimalRow(a, true))
                                     )}
                                 </div>
                             )}
@@ -5444,7 +5447,7 @@ useEffect(() => {
                                         {colAnimals.length === 0 ? (
                                             <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals in this collection yet.</p>
                                         ) : (
-                                            colAnimals.map(a => renderLiteAnimalRow(a))
+                                            colAnimals.map(a => renderLiteAnimalRow(a, true))
                                         )}
                                     </div>
                                 )}
@@ -6173,16 +6176,31 @@ useEffect(() => {
         }
     }, [allAnimalsRaw, onViewAnimal, navigate, showModalMessageRef]);
 
+    const liteViewTitle = animalView === 'list' ? 'My Animals' : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals';
+
     return (
         <>
-            {/* Animal List section */}
-            <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
+            {/* Animal List section — Lite mode drops the white card shell entirely so content
+                sits directly on the pink page background, matching crittertrack-lite's pages. */}
+            <div className={isLiteModeActive ? 'w-full max-w-7xl px-4 pt-4' : 'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
+                {/* Lite mode: dedicated gradient title bar mirroring crittertrack-lite's TopBar
+                    (from-accent to-primary), instead of the plain dark-text heading below. */}
+                {isLiteModeActive && (
+                    <div className="w-full bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white rounded-xl px-4 py-3 mb-3 shadow-sm flex items-center gap-2">
+                        <ClipboardList size={20} className="shrink-0" />
+                        <h2 className="text-lg font-bold truncate flex-1 min-w-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
+                    </div>
+                )}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4">
                     <div className="flex items-center gap-2 min-w-0 flex-wrap w-full sm:w-auto sm:flex-1">
-                        <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate min-w-0" data-tutorial-target="my-animals-title">
-                            {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
-                        </h2>
+                        {!isLiteModeActive && (
+                            <>
+                                <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
+                                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate min-w-0" data-tutorial-target="my-animals-title">
+                                    {liteViewTitle}
+                                </h2>
+                            </>
+                        )}
                         {ANIMAL_VIEW_INFO[animalView] && (
                             <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} className="shrink-0">
                                 {ANIMAL_VIEW_INFO[animalView].body}
@@ -6393,6 +6411,9 @@ useEffect(() => {
                 // Filter bar
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg">
                     <div className="flex flex-wrap items-center gap-2">
+                        {/* Cards/List toggle has no effect in Lite mode (it always renders its own fixed
+                            row layout), so showing it there would just be a dead control. */}
+                        {!isLiteModeActive && (
                         <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
                             <button onClick={() => {
                                 if (isCollectionsView) { setCollectionsViewMode('cards'); } else {
@@ -6434,6 +6455,7 @@ useEffect(() => {
                                     ? 'currentColor' : 'none'} />
                             </button>
                         </div>
+                        )}
                         {isCollectionsView && (
                             <button
                                 onClick={() => setShowCollectionManager(prev => !prev)}
