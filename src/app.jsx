@@ -1780,7 +1780,7 @@ const App = () => {
     }
 
      return (
-        <div className={`min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 ${isLiteModeActive ? 'pb-20' : ''}`}>
+        <div className={`min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 ${isLiteModeActive ? 'pb-24' : ''}`}>
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 

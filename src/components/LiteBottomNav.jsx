@@ -13,14 +13,14 @@ const NAV_ITEMS = [
 ];
 
 const LiteBottomNav = () => (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card-bg border-t border-gray-200 dark:border-dark-border flex items-stretch z-30 shadow-lg pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card-bg border-t-2 border-gray-300 dark:border-dark-border flex items-stretch z-30 shadow-[0_-4px_12px_rgba(0,0,0,0.12)] pb-[env(safe-area-inset-bottom)]">
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
             <NavLink
                 key={to}
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                    `flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-xs font-medium transition ${
+                    `flex-1 flex flex-col items-center justify-center gap-1 py-3.5 text-xs font-medium transition ${
                         isActive ? 'text-primary dark:text-dark-primary' : 'text-gray-500 dark:text-dark-text-muted'
                     }`
                 }
