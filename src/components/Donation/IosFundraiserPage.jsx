@@ -51,7 +51,7 @@ const IosFundraiserPage = () => {
                 <p>
                     AND adding <strong>another</strong> platform means a lot more data traffic. You and I both know
                     that sometimes we already need to have a little bit of patience when many users are busy-bees at
-                    the same time, and that's even with our current Production server tier. To keep everything
+                    the same time, and that's even with our current Pro server tier. To keep everything
                     running smoothly once the iOS app drops, we will have to scale our server infrastructure up yet
                     another level to absorb all those new iPhone users.
                 </p>
@@ -72,9 +72,9 @@ const IosFundraiserPage = () => {
                     What it costs to run CritterTrack right now:
                 </h2>
                 <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-700 dark:text-dark-text-secondary">
-                    <li>Yearly Domain Fee: €18</li>
-                    <li>Monthly Web Hosting: €20 / month</li>
-                    <li>Current Monthly Server: €20 / month</li>
+                    <li>Domain: €18 / Year</li>
+                    <li>Web Hosting: €20 / month</li>
+                    <li>Server: €20 / month</li>
                 </ul>
                 <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-3 italic">
                     Note: Releasing the Android Play Store apps also collected a one-time fee of €25 for the
@@ -88,7 +88,7 @@ const IosFundraiserPage = () => {
                 </h2>
                 <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-700 dark:text-dark-text-secondary">
                     <li>MacInCloud Emulator for development: €25 / month</li>
-                    <li>Apple's yearly developer fee: €99 / year</li>
+                    <li>Apple's developer fee: €99 / year</li>
                     <li>Hiring an iOS Developer for fact-checking and bug-fixing: €25 to €45 / hour</li>
                     <li>Future Server Upgrade (for iOS traffic sync): €40 / month</li>
                 </ul>
