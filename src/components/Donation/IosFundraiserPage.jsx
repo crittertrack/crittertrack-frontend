@@ -33,19 +33,75 @@ const IosFundraiserPage = () => {
 
             <div className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed space-y-4 mt-4 mb-6">
                 <p>
-                    You guys asked me for an <strong>iOS version</strong> of CritterTrack! I already cover the costs of
-                    the web and Android versions myself, and thanks to how forgiving those platforms are, I can keep
-                    providing that for free (yes, that stays).
+                    You guys asked me for an <strong>iOS version</strong> of CritterTrack!
                 </p>
                 <p>
-                    iOS is a whole different story. I have zero iOS experience, so to actually build it, I need to
-                    hire some extra hands on deck. On top of that, Apple charges a hefty yearly developer fee just to
-                    publish <strong>anything</strong>. And adding <strong>another</strong> platform means a lot more
-                    data traffic, so I'd also need to upgrade our server tier to keep everything running smoothly.
+                    Everything you're using today on the web, the web-app, and on the Android apps coming soon, is
+                    built and maintained solely by me, in my own time. I don't take a salary from this project: what
+                    comes in through Ko-fi goes straight to hosting and running costs, and the difference is directly
+                    paid out of my own pocket. I pledged to provide CritterTrack as a completely free service, and
+                    with my current financial status, I can and will continue doing so.
                 </p>
                 <p>
-                    This applies to both the full website and our upcoming Lite app. This is where you guys can make
-                    the magic happen, and we can make this work together!
+                    Adding iOS is a whole different story. I have zero iOS experience, so to actually build it, I'd
+                    need to hire some extra hands on deck, and that's not something I can cover with my own labor the
+                    way I do for web and Android. On top of that, Apple charges a hefty yearly developer fee just to
+                    publish <strong>anything</strong>.
+                </p>
+                <p>
+                    AND adding <strong>another</strong> platform means a lot more data traffic. You and I both know
+                    that sometimes we already need to have a little bit of patience when many users are busy-bees at
+                    the same time, and that's even with our current Production server tier. To keep everything
+                    running smoothly once the iOS app drops, we will have to scale our server infrastructure up yet
+                    another level to absorb all those new iPhone users.
+                </p>
+                <p>
+                    So, while I would love to pay all of the above with just love and dedication, I need your help to
+                    make it happen. New monthly pledges apply to bringing both the full website and our upcoming Lite
+                    app to iOS.
+                </p>
+                <p>
+                    I have set our goal to €50/month with the ability to overfund, solely because asking for pledges
+                    is not something in my nature. I also want to provide a honest run-down of our current annual
+                    costs and the financial situation we are looking at:
+                </p>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-dark-surface rounded-lg p-5 mb-4">
+                <h2 className="text-sm font-bold text-gray-800 dark:text-dark-text mb-3">
+                    What it costs to run CritterTrack right now:
+                </h2>
+                <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-700 dark:text-dark-text-secondary">
+                    <li>Yearly Domain Fee: €18</li>
+                    <li>Monthly Web Hosting: €20 / month</li>
+                    <li>Current Monthly Server: €20 / month</li>
+                </ul>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-3 italic">
+                    Note: Releasing the Android Play Store apps also collected a one-time fee of €25 for the
+                    developer account (which I have already covered).
+                </p>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-dark-surface rounded-lg p-5 mb-6">
+                <h2 className="text-sm font-bold text-gray-800 dark:text-dark-text mb-3">
+                    What is needed in order to create, test, and release iOS smoothly and safely:
+                </h2>
+                <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-700 dark:text-dark-text-secondary">
+                    <li>MacInCloud Emulator for development: €25 / month</li>
+                    <li>Apple's yearly developer fee: €99 / year</li>
+                    <li>Hiring an iOS Developer for fact-checking and bug-fixing: €25 to €45 / hour</li>
+                    <li>Future Server Upgrade (for iOS traffic sync): €40 / month</li>
+                </ul>
+            </div>
+
+            <div className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed space-y-4 mb-6">
+                <p>
+                    If we hit or pass our €50/month goal, it directly offsets these baseline operational costs, builds
+                    a rainy-day fund to pay our iOS freelancer, and secures the future server bandwidth we need to
+                    keep CritterTrack fast and stable for everyone.
+                </p>
+                <p className="italic text-gray-500 dark:text-dark-text-muted">
+                    Thank you so much for tracking your critters with me and helping expand our community.
                 </p>
             </div>
 
@@ -68,7 +124,7 @@ const IosFundraiserPage = () => {
                         key={label}
                         type="button"
                         onClick={() => openExternalLink(url)}
-                        className="px-4 py-2 rounded-lg bg-blue-50 dark:bg-dark-surface text-blue-700 dark:text-dark-text font-semibold hover:bg-blue-100 dark:hover:bg-dark-surface-hover transition"
+                        className="px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold transition shadow-md"
                     >
                         {label}
                     </button>
