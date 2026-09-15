@@ -1032,7 +1032,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-1 h-36">
+                                                <div className="flex items-center justify-center w-full px-2 mt-4 h-32">
                                                     <div className="relative w-32 h-32">
                                                         {imgSrc ? (
                                                             <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain rounded-md" />
