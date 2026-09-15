@@ -7,7 +7,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
-import DeceasedBanner from '../shared/DeceasedBanner';
+import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import {
@@ -2846,7 +2846,7 @@ useEffect(() => {
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-20 sm:h-20 md:h-28">
+                    <div className="relative flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-20 sm:h-20 md:h-28">
                         {imgSrc ? (
                             <img src={imgSrc} alt={animal.name} className="max-w-20 max-h-20 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
@@ -2854,6 +2854,7 @@ useEffect(() => {
                                 <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
                             </div>
                         )}
+                        {animal.status === 'Deceased' && <DeceasedCornerBadge />}
                     </div>
                     
                     {/* Reproductive State Pill */}

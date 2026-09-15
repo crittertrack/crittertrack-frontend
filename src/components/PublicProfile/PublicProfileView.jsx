@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import apiClient from '../../utils/apiClient';
-import DeceasedBanner from '../shared/DeceasedBanner';
+import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, ArrowDown, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
@@ -1032,7 +1032,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
+                                                <div className="relative flex items-center justify-center w-full px-2 mt-1 h-28">
                                                     {imgSrc ? (
                                                         <img src={imgSrc} alt={animal.name} className="max-w-24 max-h-24 w-auto h-auto object-contain rounded-md" />
                                                     ) : (
@@ -1040,6 +1040,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                             <Cat size={36} />
                                                         </div>
                                                     )}
+                                                    {animal.status === 'Deceased' && <DeceasedCornerBadge />}
                                                 </div>
                                                 
                                                 {/* Icon row */}
