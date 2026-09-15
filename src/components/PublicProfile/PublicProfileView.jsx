@@ -1032,15 +1032,17 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="relative flex items-center justify-center w-full px-2 mt-1 h-28">
-                                                    {imgSrc ? (
-                                                        <img src={imgSrc} alt={animal.name} className="max-w-24 max-h-24 w-auto h-auto object-contain rounded-md" />
-                                                    ) : (
-                                                        <div className="w-24 h-24 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                                            <Cat size={36} />
-                                                        </div>
-                                                    )}
-                                                    {animal.status === 'Deceased' && <DeceasedCornerBadge />}
+                                                <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
+                                                    <div className="relative w-24 h-24">
+                                                        {imgSrc ? (
+                                                            <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain rounded-md" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                                <Cat size={36} />
+                                                            </div>
+                                                        )}
+                                                        {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" />}
+                                                    </div>
                                                 </div>
                                                 
                                                 {/* Icon row */}
