@@ -1,10 +1,7 @@
 import React from 'react';
-import { Ribbon } from 'lucide-react';
 
-// lucide's Ribbon icon, styled as a grey-filled badge with a black outline.
-const RibbonIcon = ({ className = 'w-8 h-8' }) => (
-    <Ribbon className={className} stroke="black" fill="#9ca3af" strokeWidth={2} />
-);
+// User-provided dove silhouette (public domain memorial motif) for the photo corner badge.
+const DOVE_IMG = '/images/peace-dove.png';
 
 // Hand-drawn rainbow (not lucide's single-tone icon) so each arc gets its own hue -- a
 // "Rainbow Bridge" memorial motif, deliberately not a ribbon, to avoid resembling SimpleBreed's.
@@ -20,7 +17,7 @@ const RainbowIcon = ({ size = 16, className }) => (
 // corner point, so it partially overlaps the image and partially hangs off it.
 const DeceasedCornerBadge = ({ iconClassName = 'w-8 h-8' }) => (
     <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2">
-        <RibbonIcon className={iconClassName} />
+        <img src={DOVE_IMG} alt="" className={`${iconClassName} object-contain drop-shadow-md`} />
     </div>
 );
 
