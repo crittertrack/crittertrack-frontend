@@ -154,8 +154,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             
             visited.add(id);
 
-            const fatherId = animalData.fatherId_public || animalData.sireId_public;
-            const motherId = animalData.motherId_public || animalData.damId_public;
+            const fatherId = animalData.sireId_public;
+            const motherId = animalData.damId_public;
 
             return {
                 ...animalData,
@@ -190,8 +190,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
                 resultCache.set(id, { fetchedAtDepth: currentDepth, data: animalInfo });
 
                 // Queue parents for next generation
-                const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
-                const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+                const fatherId = animalInfo.sireId_public;
+                const motherId = animalInfo.damId_public;
                 const childPath = new Set([...path, id]);
 
                 if (currentDepth < BREADTH_FIRST_DEPTH) {
@@ -533,9 +533,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
 
                     // Recursively fetch parents — each branch gets its own path copy so that
                     // an ancestor appearing on BOTH sides (inbreeding) isn't blocked.
-                    const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
-                    const motherId = animalInfo.motherId_public || animalInfo.damId_public;
-                    console.log(`[PEDIGREE] depth=${depth} id=${id} name=${animalInfo.name} | fatherId=${fatherId} motherId=${motherId} | raw: sireId_public=${animalInfo.sireId_public} damId_public=${animalInfo.damId_public} fatherId_public=${animalInfo.fatherId_public} motherId_public=${animalInfo.motherId_public}`);
+                    const fatherId = animalInfo.sireId_public;
+                    const motherId = animalInfo.damId_public;
+                    console.log(`[PEDIGREE] depth=${depth} id=${id} name=${animalInfo.name} | fatherId=${fatherId} motherId=${motherId}`);
                     const childPath = new Set([...pathIds, id]);
 
                     const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
@@ -734,8 +734,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 } catch (error) {}
             }
 
-            const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
-            const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+            const fatherId = animalInfo.sireId_public;
+            const motherId = animalInfo.damId_public;
             const childPath = new Set([...pathIds, id]);
             const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
             const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;

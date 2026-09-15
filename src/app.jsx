@@ -547,8 +547,8 @@ const App = () => {
         setSiblingTemplate({
             species: sourceAnimal.species,
             birthDate,
-            fatherId_public: sourceAnimal.fatherId_public || sourceAnimal.sireId_public || null,
-            motherId_public: sourceAnimal.motherId_public || sourceAnimal.damId_public || null,
+            sireId_public: sourceAnimal.sireId_public || null,
+            damId_public: sourceAnimal.damId_public || null,
         });
         setSiblingsAddedCount(0);
         setAnimalToView(null);
@@ -623,8 +623,8 @@ const App = () => {
         
         const fetchPedigreeData = async () => {
             try {
-                const sireId = animalToView.sireId_public || animalToView.fatherId_public;
-                const damId = animalToView.damId_public || animalToView.motherId_public;
+                const sireId = animalToView.sireId_public;
+                const damId = animalToView.damId_public;
                 
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {

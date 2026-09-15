@@ -8,9 +8,7 @@ interface Animal {
     archived?: boolean;
     status?: string;
     sireId_public?: string;
-    fatherId_public?: string; // Alias for sireId_public
     damId_public?: string;
-    motherId_public?: string; // Alias for damId_public
     isOwned?: boolean;
     creatorId_public?: string;
     vetVisits?: any;
@@ -428,8 +426,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
         const fetchPedigreeData = async () => {
             try {
-                const sireId = animalToView.sireId_public || animalToView.fatherId_public;
-                const damId = animalToView.damId_public || animalToView.motherId_public; // Corrected variable name
+                const sireId = animalToView.sireId_public;
+                const damId = animalToView.damId_public;
 
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {

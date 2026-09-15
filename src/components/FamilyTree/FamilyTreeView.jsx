@@ -183,8 +183,8 @@ const FamilyTreeView = ({
                 const animalData = await fetchAnimalData(currentId);
                 if (animalData) {
                     nodes[currentId] = animalData;
-                    const sireId = animalData.sireId_public || animalData.fatherId_public;
-                    const damId = animalData.damId_public || animalData.motherId_public;
+                    const sireId = animalData.sireId_public;
+                    const damId = animalData.damId_public;
                     if (sireId) ancestorQueue.push(sireId);
                     if (damId) ancestorQueue.push(damId);
                 }
@@ -197,9 +197,7 @@ const FamilyTreeView = ({
             if (focusAnimalData) {
                 const parents = [
                     focusAnimalData.sireId_public,
-                    focusAnimalData.fatherId_public,
-                    focusAnimalData.damId_public,
-                    focusAnimalData.motherId_public
+                    focusAnimalData.damId_public
                 ].filter(Boolean);
 
                 parents.forEach(pId => idsToFetchOffspringFor.add(pId));
@@ -209,9 +207,7 @@ const FamilyTreeView = ({
                     if (parentNode) {
                         const grandparents = [
                             parentNode.sireId_public,
-                            parentNode.fatherId_public,
-                            parentNode.damId_public,
-                            parentNode.motherId_public
+                            parentNode.damId_public
                         ].filter(Boolean);
                         grandparents.forEach(gpId => idsToFetchOffspringFor.add(gpId));
                     }
@@ -310,8 +306,8 @@ const FamilyTreeView = ({
                   nodes[currentId] = animalData;
 
                   // Enqueue parents
-                  const sireId = animalData.sireId_public || animalData.fatherId_public;
-                  const damId = animalData.damId_public || animalData.motherId_public;
+                  const sireId = animalData.sireId_public;
+                  const damId = animalData.damId_public;
                   if (sireId && !enqueued.has(sireId)) { enqueued.add(sireId); queue.push(sireId); }
                   if (damId && !enqueued.has(damId)) { enqueued.add(damId); queue.push(damId); }
 
@@ -372,7 +368,7 @@ const FamilyTreeView = ({
         });
 
         Object.values(allById).forEach(a => {
-            const parents = [a.fatherId_public || a.sireId_public, a.motherId_public || a.damId_public].filter(Boolean);
+            const parents = [a.sireId_public, a.damId_public].filter(Boolean);
             parentLinksByChildAll[a.id_public] = parents.filter(pid => allById[pid]);
             parentLinksByChildAll[a.id_public].forEach(pid => {
                 if (!childrenByParentAll[pid]) childrenByParentAll[pid] = [];

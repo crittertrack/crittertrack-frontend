@@ -844,7 +844,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Start COI calculations in background without blocking
             Promise.resolve().then(async () => {
                 for (const animal of animalsData) {
-                    if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
+                    if ((animal.sireId_public || animal.damId_public)) {
                         try {
                             const coiResponse = await apiClient.get(`/animals/${animal.id_public}/inbreeding`, {
                                 params: { generations: 50 }
@@ -1422,8 +1422,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 // Skip if already linked to this litter
                 if (linkedIds.includes(animal.id_public)) return false;
                 
-                const matchesSire = animal.fatherId_public === litter.sireId_public || animal.sireId_public === litter.sireId_public;
-                const matchesDam = animal.motherId_public === litter.damId_public || animal.damId_public === litter.damId_public;
+                const matchesSire = animal.sireId_public === litter.sireId_public;
+                const matchesDam = animal.damId_public === litter.damId_public;
                 const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(litter.birthDate).toDateString();
                 return matchesSire && matchesDam && matchesBirthDate;
             });
@@ -3033,8 +3033,8 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                             <div className="space-y-2">
                                                 {myAnimals
                                                     .filter(animal => {
-                                                        const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
-                                                        const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                                        const matchesSire = animal.sireId_public === formData.sireId_public;
+                                                        const matchesDam = animal.damId_public === formData.damId_public;
                                                         
                                                         // If litter has birthdate, only show animals with matching birthdate
                                                         if (formData.birthDate && animal.birthDate) {
@@ -3103,8 +3103,8 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     ))
                                                 }
                                                 {myAnimals.filter(animal => {
-                                                    const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
-                                                    const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                                    const matchesSire = animal.sireId_public === formData.sireId_public;
+                                                    const matchesDam = animal.damId_public === formData.damId_public;
                                                     
                                                     // If litter has birthdate, only show animals with matching birthdate
                                                     if (formData.birthDate && animal.birthDate) {

@@ -132,22 +132,6 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
-    const handleAcceptViewOnly = async (transferId) => {
-        setProcessing(transferId);
-        try {
-            await apiClient.post(`/transfers/${transferId}/accept-view-only`, {});
-            showModalMessage('Success', 'View-only access accepted');
-            fetchNotifications();
-            if (onNotificationChange) onNotificationChange();
-            window.dispatchEvent(new Event('animals-changed'));
-        } catch (error) {
-            console.error('Error accepting view-only:', error);
-            showModalMessage('Error', 'Failed to accept view-only access');
-        } finally {
-            setProcessing(null);
-        }
-    };
-
     const handleDelete = async (notificationId) => {
         try {
             console.log('[handleDelete] Deleting notification:', notificationId);
@@ -311,51 +295,8 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         </button>
                                                     </>
                                                 )}
-                                                {/* View-Only Offer */}
-                                                {notification.type === 'view_only_offer' && notification.transferId && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleAcceptViewOnly(notification.transferId)}
-                                                            disabled={processing === notification.transferId}
-                                                            className="flex items-center space-x-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-                                                        >
-                                                            <CheckCircle size={14} />
-                                                            <span>Accept</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeclineTransfer(notification.transferId)}
-                                                            disabled={processing === notification.transferId}
-                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-                                                        >
-                                                            <XCircle size={14} />
-                                                            <span>Decline</span>
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {/* Link Request (old functionality) */}
-                                                {notification.type === 'link_request' && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleReject(notification._id)}
-                                                            disabled={processing === notification._id}
-                                                            className="flex items-center space-x-1 bg-primary dark:bg-dark-primary border-2 border-black text-black hover:bg-primary/90 px-3 py-1 rounded text-sm disabled:opacity-50"
-                                                        >
-                                                            <XCircle size={14} />
-                                                            <span>Reject</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleApprove(notification._id)}
-                                                            disabled={processing === notification._id}
-                                                            title="The link is already in effect — this just clears it from your pending list."
-                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-                                                        >
-                                                            <CheckCircle size={14} />
-                                                            <span>Acknowledge</span>
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {/* Breeder and Parent Requests */}
-                                                {(notification.type === 'breeder_request' || notification.type === 'parent_request') && (
+                                                {/* Breeder, Owner, and Parent Requests */}
+                                                {(notification.type === 'breeder_request' || notification.type === 'owner_request' || notification.type === 'parent_request') && (
                                                     <>
                                                         <button
                                                             onClick={() => handleReject(notification._id)}
@@ -387,8 +328,29 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         <span>Acknowledge</span>
                                                     </button>
                                                 )}
-                                                {/* Litter Assignment / Mating Reminder - informational only, just needs to be clearable */}
-                                                {(notification.type === 'litter_assignment' || notification.type === 'mating_reminder') && (
+                                                {/* Litter Assignment - owner can reject to unassign their animal from the litter */}
+                                                {notification.type === 'litter_assignment' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleReject(notification._id)}
+                                                            disabled={processing === notification._id}
+                                                            className="flex items-center space-x-1 bg-accent hover:bg-accent/80 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <XCircle size={14} />
+                                                            <span>Reject</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleApprove(notification._id)}
+                                                            disabled={processing === notification._id}
+                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <CheckCircle size={14} />
+                                                            <span>Acknowledge</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {/* Mating Reminder - informational only, just needs to be clearable */}
+                                                {notification.type === 'mating_reminder' && (
                                                     <button
                                                         onClick={() => handleApprove(notification._id)}
                                                         disabled={processing === notification._id}
@@ -399,11 +361,10 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                     </button>
                                                 )}
                                                 {/* Delete button for other notifications */}
-                                                {notification.type !== 'link_request' && 
-                                                 notification.type !== 'breeder_request' &&
+                                                {notification.type !== 'breeder_request' &&
+                                                 notification.type !== 'owner_request' &&
                                                  notification.type !== 'parent_request' &&
                                                  notification.type !== 'transfer_request' && 
-                                                 notification.type !== 'view_only_offer' &&
                                                  notification.type !== 'content_edited' &&
                                                  notification.type !== 'litter_assignment' &&
                                                  notification.type !== 'mating_reminder' && (

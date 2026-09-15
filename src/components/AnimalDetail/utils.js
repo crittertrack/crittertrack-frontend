@@ -61,9 +61,9 @@ export const computeRelationships = (animal, collection = []) => {
         let rel = null;
         
         // Parent-level relationships
-        if (a.id_public === animal.sireId_public || a.id_public === animal.fatherId_public) {
+        if (a.id_public === animal.sireId_public) {
             rel = `${a.gender === 'Male' ? 'Sire' : 'Father'}`;
-        } else if (a.id_public === animal.damId_public || a.id_public === animal.motherId_public) {
+        } else if (a.id_public === animal.damId_public) {
             rel = `${a.gender === 'Female' ? 'Dam' : 'Mother'}`;
         }
         

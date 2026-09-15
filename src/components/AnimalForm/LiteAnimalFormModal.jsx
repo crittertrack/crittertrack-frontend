@@ -2500,8 +2500,6 @@ const LiteAnimalFormModal = ({
             tags: animalToEdit.tags || [],
             geneticCode: animalToEdit.geneticCode || '',
             possibleHets: animalToEdit.possibleHets || [],
-            fatherId_public: getIdValue(animalToEdit, 'fatherId_public', 'sireId_public'),
-            motherId_public: getIdValue(animalToEdit, 'motherId_public', 'damId_public'),
             breederId_public: animalToEdit.breederId_public || null,
             manualBreederName: animalToEdit.manualBreederName || '',
             ownerId_public: getIdValue(animalToEdit, 'ownerId_public', 'ownerId'),
@@ -2704,8 +2702,8 @@ const LiteAnimalFormModal = ({
             tags: [],
             geneticCode: '',
             possibleHets: [],
-            fatherId_public: initialValues?.fatherId_public || null,
-            motherId_public: initialValues?.motherId_public || null,
+            sireId_public: initialValues?.sireId_public || null,
+            damId_public: initialValues?.damId_public || null,
             breederId_public: initialValues?.breederId_public || null,
             manualownerName: '',
             groupRole: '',
@@ -3488,8 +3486,8 @@ const LiteAnimalFormModal = ({
             const { animal: cur, slot } = queue.shift();
             const children = MP_SLOT_CHILDREN[slot];
             if (!children) continue;
-            const fatherId = cur.fatherId_public || cur.sireId_public;
-            const motherId = cur.motherId_public || cur.damId_public;
+            const fatherId = cur.sireId_public;
+            const motherId = cur.damId_public;
             if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
             if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
         }
@@ -3528,8 +3526,8 @@ const LiteAnimalFormModal = ({
 
         allSlots.forEach(k => { if (pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId) enqueue(k, pedigree[k].ctcId, pedigree[k].notes || ''); });
 
-        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public || initialValues?.fatherId_public;
-        const damId  = animalToEdit?.motherId_public || animalToEdit?.damId_public || initialValues?.motherId_public;
+        const sireId = animalToEdit?.sireId_public || initialValues?.sireId_public;
+        const damId  = animalToEdit?.damId_public || initialValues?.damId_public;
         if (sireId && !pedigree.sire?.ctcId) enqueue('sire', sireId);
         if (damId  && !pedigree.dam?.ctcId)  enqueue('dam',  damId);
 
@@ -3544,8 +3542,8 @@ const LiteAnimalFormModal = ({
                     updates[slotKey] = toSlot(a, notes);
                     const children = MP_SLOT_CHILDREN[slotKey];
                     if (!children) return;
-                    const fId = a.fatherId_public || a.sireId_public;
-                    const mId = a.motherId_public || a.damId_public;
+                    const fId = a.sireId_public;
+                    const mId = a.damId_public;
                     if (fId && !pedigree[children.father]?.ctcId) enqueue(children.father, fId);
                     if (mId && !pedigree[children.mother]?.ctcId) enqueue(children.mother, mId);
                 }));

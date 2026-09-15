@@ -53,24 +53,24 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
 
             // Fetch up to 3 generations
             const [sire, dam] = await Promise.all([
-                fetchOne(animal?.sireId_public || animal?.fatherId_public),
-                fetchOne(animal?.damId_public  || animal?.motherId_public),
+                fetchOne(animal?.sireId_public),
+                fetchOne(animal?.damId_public),
             ]);
             if (cancelled) return;
 
             const [ss, sd, ds, dd] = await Promise.all([
-                fetchOne(sire?.sireId_public || sire?.fatherId_public),
-                fetchOne(sire?.damId_public  || sire?.motherId_public),
-                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
-                fetchOne(dam?.damId_public   || dam?.motherId_public),
+                fetchOne(sire?.sireId_public),
+                fetchOne(sire?.damId_public),
+                fetchOne(dam?.sireId_public),
+                fetchOne(dam?.damId_public),
             ]);
             if (cancelled) return;
 
             const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
-                fetchOne(ss?.sireId_public || ss?.fatherId_public), fetchOne(ss?.damId_public  || ss?.motherId_public),
-                fetchOne(sd?.sireId_public || sd?.fatherId_public), fetchOne(sd?.damId_public  || sd?.motherId_public),
-                fetchOne(ds?.sireId_public || ds?.fatherId_public), fetchOne(ds?.damId_public  || ds?.motherId_public),
-                fetchOne(dd?.sireId_public || dd?.fatherId_public), fetchOne(dd?.damId_public  || dd?.motherId_public),
+                fetchOne(ss?.sireId_public), fetchOne(ss?.damId_public),
+                fetchOne(sd?.sireId_public), fetchOne(sd?.damId_public),
+                fetchOne(ds?.sireId_public), fetchOne(ds?.damId_public),
+                fetchOne(dd?.sireId_public), fetchOne(dd?.damId_public),
             ]);
             if (cancelled) return;
 

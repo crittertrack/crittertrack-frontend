@@ -166,8 +166,8 @@ const LiteViewAnimalModal = ({
 
     useEffect(() => {
         const fetchCOI = async () => {
-            const sireId = animal?.fatherId_public || animal?.sireId_public;
-            const damId = animal?.motherId_public || animal?.damId_public;
+            const sireId = animal?.sireId_public;
+            const damId = animal?.damId_public;
             
             if (animal?.id_public && sireId && damId) {
                 const cached = getCachedInbreeding(animal.id_public);
@@ -209,7 +209,7 @@ const LiteViewAnimalModal = ({
             }
         };
         fetchCOI();
-    }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL, authToken]);
+    }, [animal?.id_public, animal?.sireId_public, animal?.damId_public, API_BASE_URL, authToken]);
 
     // Fetch own collection first, then global relationships sequentially
     useEffect(() => {
@@ -280,7 +280,7 @@ const LiteViewAnimalModal = ({
             const updatedAnimal = event.detail; // detail IS the animal object
             if (!updatedAnimal?.id_public || !animal) return;
 
-            const shouldRefetch = updatedAnimal.id_public === animal.id_public || updatedAnimal.id_public === animal.sireId_public || updatedAnimal.id_public === animal.damId_public || updatedAnimal.id_public === animal.fatherId_public || updatedAnimal.id_public === animal.motherId_public;
+            const shouldRefetch = updatedAnimal.id_public === animal.id_public || updatedAnimal.id_public === animal.sireId_public || updatedAnimal.id_public === animal.damId_public;
 
             if (shouldRefetch) {
                 setAnimalLitters(null);
@@ -626,11 +626,11 @@ const LiteViewAnimalModal = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Dam Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Health Summary Card */}
                             <div>

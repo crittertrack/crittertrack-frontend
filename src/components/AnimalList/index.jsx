@@ -2847,7 +2847,7 @@ useEffect(() => {
 
                     {/* Centered profile image */}
                     <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36">
-                        <div className="relative w-28 h-28 sm:w-28 sm:h-28 md:w-32 md:h-32">
+                        <div className="relative w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28">
                             {/* Visible tile background so the corner badge always anchors to a real edge, even when object-contain letterboxes the photo */}
                             <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted overflow-hidden">
                                 {imgSrc ? (
@@ -3241,9 +3241,9 @@ useEffect(() => {
                                                             <span className="text-gray-400 dark:text-dark-text-muted">Born:</span> {new Date(animal.birthDate).toLocaleDateString()}
                                                         </div>
                                                     )}
-                                                    {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                                                    {(animal.sireId_public || animal.damId_public) && (
                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                                                            <span className="text-gray-400 dark:text-dark-text-muted">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' • ')}
+                                                            <span className="text-gray-400 dark:text-dark-text-muted">Parents:</span> {[animal.sireId_public, animal.damId_public].filter(Boolean).join(' • ')}
                                                         </div>
                                                     )}
                                                     <div className="text-xs"><span className="text-gray-400 dark:text-dark-text-muted">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500 dark:text-dark-text-muted' : 'text-green-600 dark:text-green-400'}>{animal.status || 'N/A'}</span></div>
