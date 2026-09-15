@@ -3492,6 +3492,10 @@ const LiteAnimalFormModal = ({
             if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
         }
         setMpEditForm(f => ({ ...f, ...updates }));
+        // Gen-1 sire/dam slots are the real parent relationship, not just pedigree-display data —
+        // keep sireId_public/damId_public in sync so the Dashboard parent cards reflect it too.
+        if (slotKey === 'sire') setFormData(f => ({ ...f, sireId_public: a.id_public }));
+        if (slotKey === 'dam') setFormData(f => ({ ...f, damId_public: a.id_public }));
     };
 
     // Auto-fill pedigree when tab opens
@@ -6411,6 +6415,8 @@ const LiteAnimalFormModal = ({
                                                     <button type="button"
                                                         onClick={() => {
                                                             setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'ctc', ctcId: '' } }));
+                                                            if (slotKey === 'sire') setFormData(f => ({ ...f, sireId_public: null }));
+                                                            if (slotKey === 'dam') setFormData(f => ({ ...f, damId_public: null }));
                                                         }}
                                                         className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
                                             </div>

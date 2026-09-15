@@ -658,11 +658,11 @@ const LiteAnimalModal = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} manualData={animal.manualPedigree?.sire} />
                             </div>
                             {/* Dam Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} manualData={animal.manualPedigree?.dam} />
                             </div>
                             {/* Health Summary Card */}
                             <div>
