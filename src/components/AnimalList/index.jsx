@@ -2850,8 +2850,8 @@ useEffect(() => {
                         <div className="relative w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className="relative inline-block max-w-full max-h-full">
-                                    <img src={imgSrc} alt={animal.name} className="block max-w-full max-h-full w-auto h-auto object-contain rounded-md" />
+                                <div className="relative inline-block max-w-24 max-h-24 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-24 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (

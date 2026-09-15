@@ -1036,8 +1036,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     <div className="relative w-32 h-28 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                                            <div className="relative inline-block max-w-full max-h-full">
-                                                                <img src={imgSrc} alt={animal.name} className="block max-w-full max-h-full w-auto h-auto object-contain rounded-md" />
+                                                            <div className="relative inline-block max-w-32 max-h-28">
+                                                                <img src={imgSrc} alt={animal.name} className="block max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
                                                                 {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                                             </div>
                                                         ) : (
