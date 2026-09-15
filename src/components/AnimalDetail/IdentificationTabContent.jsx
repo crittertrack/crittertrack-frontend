@@ -81,8 +81,8 @@ export const IdentificationTabContent = ({
                     const assignedIds = animalBreedingLines[animal.id_public] || [];
                     
                     // Compute lines inherited from parents
-                    const sireId = animal.sireId_public || animal.fatherId_public;
-                    const damId = animal.damId_public || animal.motherId_public;
+                    const sireId = animal.sireId_public;
+                    const damId = animal.damId_public;
                     const parentLineIds = [...new Set([
                         ...(sireId ? (animalBreedingLines[sireId] || []) : []),
                         ...(damId ? (animalBreedingLines[damId] || []) : []),

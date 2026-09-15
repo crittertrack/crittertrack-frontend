@@ -7,7 +7,6 @@ import {
     Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, ScanHeart, Cake, Baby, Dumbbell,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
-import { RainbowIcon } from '../shared/DeceasedBanner';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { openExternalLink } from '../../utils/externalLink';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -166,8 +165,8 @@ const LiteAnimalModal = ({
 
     useEffect(() => {
         const fetchCOI = async () => {
-            const sireId = animal?.fatherId_public || animal?.sireId_public;
-            const damId = animal?.motherId_public || animal?.damId_public;
+            const sireId = animal?.sireId_public;
+            const damId = animal?.damId_public;
             
             if (animal?.id_public && sireId && damId) {
                 const cached = getCachedInbreeding(animal.id_public);
@@ -209,7 +208,7 @@ const LiteAnimalModal = ({
             }
         };
         fetchCOI();
-    }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL, authToken]);
+    }, [animal?.id_public, animal?.sireId_public, animal?.damId_public, API_BASE_URL, authToken]);
 
     // Fetch own collection first, then global relationships sequentially
     useEffect(() => {
@@ -280,7 +279,7 @@ const LiteAnimalModal = ({
             const updatedAnimal = event.detail; // detail IS the animal object
             if (!updatedAnimal?.id_public || !animal) return;
 
-            const shouldRefetch = updatedAnimal.id_public === animal.id_public || updatedAnimal.id_public === animal.sireId_public || updatedAnimal.id_public === animal.damId_public || updatedAnimal.id_public === animal.fatherId_public || updatedAnimal.id_public === animal.motherId_public;
+            const shouldRefetch = updatedAnimal.id_public === animal.id_public || updatedAnimal.id_public === animal.sireId_public || updatedAnimal.id_public === animal.damId_public;
 
             if (shouldRefetch) {
                 setAnimalLitters(null);
@@ -417,7 +416,7 @@ const LiteAnimalModal = ({
                                                     {animal.isDisplay ? 'Public' : 'Private'}
                                                 </span>
                                                 {animal.status && (animal.status === 'Deceased' ? (
-                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><RainbowIcon size={12} />{animal.status}</span>
+                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5">{animal.status}</span>
                                                 ) : (
                                                     <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>
                                                 ))}
@@ -659,11 +658,11 @@ const LiteAnimalModal = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Dam Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Health Summary Card */}
                             <div>

@@ -2847,16 +2847,19 @@ useEffect(() => {
 
                     {/* Centered profile image */}
                     <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36">
-                        <div className="relative w-28 h-28 sm:w-28 sm:h-28 md:w-32 md:h-32">
-                            {/* Visible tile background so the corner badge always anchors to a real edge, even when object-contain letterboxes the photo */}
-                            <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted overflow-hidden">
-                                {imgSrc ? (
-                                    <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain" />
-                                ) : (
+                        <div className="relative w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                            {imgSrc ? (
+                                // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
+                                <div className="relative inline-block max-w-24 max-h-24 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-24 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28 w-auto h-auto object-contain rounded-md" />
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-0 right-0" />}
+                                </div>
+                            ) : (
+                                <>
                                     <Cat className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10" />
-                                )}
-                            </div>
-                            {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-3 right-0" />}
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-3 right-0" />}
+                                </>
+                            )}
                         </div>
                     </div>
                     
@@ -3241,9 +3244,9 @@ useEffect(() => {
                                                             <span className="text-gray-400 dark:text-dark-text-muted">Born:</span> {new Date(animal.birthDate).toLocaleDateString()}
                                                         </div>
                                                     )}
-                                                    {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                                                    {(animal.sireId_public || animal.damId_public) && (
                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                                                            <span className="text-gray-400 dark:text-dark-text-muted">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' • ')}
+                                                            <span className="text-gray-400 dark:text-dark-text-muted">Parents:</span> {[animal.sireId_public, animal.damId_public].filter(Boolean).join(' • ')}
                                                         </div>
                                                     )}
                                                     <div className="text-xs"><span className="text-gray-400 dark:text-dark-text-muted">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500 dark:text-dark-text-muted' : 'text-green-600 dark:text-green-400'}>{animal.status || 'N/A'}</span></div>

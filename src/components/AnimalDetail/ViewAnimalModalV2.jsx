@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
-import { RainbowIcon, DeceasedCornerBadge } from '../shared/DeceasedBanner';
+import { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { openExternalLink } from '../../utils/externalLink';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -166,8 +166,8 @@ const ViewAnimalModalV2 = ({
 
     useEffect(() => {
         const fetchCOI = async () => {
-            const sireId = animal?.fatherId_public || animal?.sireId_public;
-            const damId = animal?.motherId_public || animal?.damId_public;
+            const sireId = animal?.sireId_public;
+            const damId = animal?.damId_public;
             
             if (animal?.id_public && sireId && damId) {
                 const cached = getCachedInbreeding(animal.id_public);
@@ -209,7 +209,7 @@ const ViewAnimalModalV2 = ({
             }
         };
         fetchCOI();
-    }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL, authToken]);
+    }, [animal?.id_public, animal?.sireId_public, animal?.damId_public, API_BASE_URL, authToken]);
 
     // Fetch own collection first, then global relationships sequentially
     useEffect(() => {
@@ -280,7 +280,7 @@ const ViewAnimalModalV2 = ({
             const updatedAnimal = event.detail; // detail IS the animal object
             if (!updatedAnimal?.id_public || !animal) return;
 
-            const shouldRefetch = updatedAnimal.id_public === animal.id_public || updatedAnimal.id_public === animal.sireId_public || updatedAnimal.id_public === animal.damId_public || updatedAnimal.id_public === animal.fatherId_public || updatedAnimal.id_public === animal.motherId_public;
+            const shouldRefetch = updatedAnimal.id_public === animal.id_public || updatedAnimal.id_public === animal.sireId_public || updatedAnimal.id_public === animal.damId_public;
 
             if (shouldRefetch) {
                 setAnimalLitters(null);
@@ -368,13 +368,15 @@ const ViewAnimalModalV2 = ({
                 <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 dark:border-dark-border gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
                     <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-80 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
-                        <div className="relative flex-grow">
-                            <div className="w-full h-full bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-dark-border">
-                                {mainImage ? (
+                        <div className={`relative flex-grow rounded-lg flex items-center justify-center ${mainImage ? '' : 'bg-gray-100 dark:bg-dark-surface border border-gray-300 dark:border-dark-border'}`}>
+                            {mainImage ? (
+                                // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
+                                // Cap also subtracts the badge's own overhang (half its height) so it never crosses the reserved image area's bottom edge.
+                                <div className={`relative inline-block max-w-full ${allImages.length > 1 ? 'max-h-[180px] sm:max-h-[196px] md:max-h-[228px]' : 'max-h-[236px] sm:max-h-[268px] md:max-h-[300px]'}`}>
                                     <img 
                                         src={mainImage} 
                                         alt={animal.name} 
-                                        className="w-full h-full object-contain cursor-pointer"
+                                        className={`block max-w-full w-auto h-auto object-contain cursor-pointer rounded-lg ${allImages.length > 1 ? 'max-h-[180px] sm:max-h-[196px] md:max-h-[228px]' : 'max-h-[236px] sm:max-h-[268px] md:max-h-[300px]'}`}
                                         onClick={() => {
                                             if (setShowImageModal && setEnlargedImageUrl) {
                                                 setEnlargedImageUrl(mainImage);
@@ -382,11 +384,14 @@ const ViewAnimalModalV2 = ({
                                             }
                                         }}
                                     />
-                                ) : (
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                </div>
+                            ) : (
+                                <>
                                     <Cat size={64} className="text-gray-300 dark:text-dark-border" />
-                                )}
-                            </div>
-                            {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                </>
+                            )}
                         </div>
                         {allImages.length > 1 && (
                             <div className="flex-shrink-0 flex gap-2">
@@ -422,7 +427,7 @@ const ViewAnimalModalV2 = ({
                                                     {animal.isDisplay ? 'Public' : 'Private'}
                                                 </span>
                                                 {animal.status && (animal.status === 'Deceased' ? (
-                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><RainbowIcon size={12} />{animal.status}</span>
+                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5">{animal.status}</span>
                                                 ) : (
                                                     <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>
                                                 ))}
@@ -629,11 +634,11 @@ const ViewAnimalModalV2 = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Dam Card */}
                             <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
-                                <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Health Summary Card */}
                             <div>

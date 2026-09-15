@@ -1033,16 +1033,19 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
                                                 {/* Centered profile image */}
                                                 <div className="flex items-center justify-center w-full px-2 mt-6 h-28">
-                                                    <div className="relative w-32 h-28">
-                                                        {/* Visible tile background so the corner badge always anchors to a real edge, even when object-contain letterboxes the photo */}
-                                                        <div className="w-full h-full bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted overflow-hidden">
-                                                            {imgSrc ? (
-                                                                <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain" />
-                                                            ) : (
+                                                    <div className="relative w-32 h-28 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                        {imgSrc ? (
+                                                            // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
+                                                            <div className="relative inline-block max-w-32 max-h-28">
+                                                                <img src={imgSrc} alt={animal.name} className="block max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
+                                                                {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
+                                                            </div>
+                                                        ) : (
+                                                            <>
                                                                 <Cat size={36} />
-                                                            )}
-                                                        </div>
-                                                        {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
+                                                                {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 
