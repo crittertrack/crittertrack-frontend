@@ -2846,8 +2846,8 @@ useEffect(() => {
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-24 sm:h-24 md:h-32">
-                        <div className="relative w-28 h-24 sm:w-28 sm:h-24 md:w-32 md:h-28">
+                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36">
+                        <div className="relative w-28 h-28 sm:w-28 sm:h-28 md:w-32 md:h-32">
                             {imgSrc ? (
                                 <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain rounded-md" />
                             ) : (
@@ -2859,8 +2859,8 @@ useEffect(() => {
                         </div>
                     </div>
                     
-                    {/* Reproductive State Pill */}
-                    <div className="w-full flex justify-center items-center py-1 sm:py-1.5 px-1">
+                    {/* Reproductive State Pill -- negative margin lets it overlap the taller image; relative positioning keeps it painted above */}
+                    <div className="relative w-full flex justify-center items-center py-1 sm:py-1.5 px-1 -mt-3 sm:-mt-4">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
