@@ -7,7 +7,7 @@ import {
     Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, ScanHeart, Cake, Baby, Dumbbell,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
-import { RainbowIcon } from '../shared/DeceasedBanner';
+import { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { openExternalLink } from '../../utils/externalLink';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -366,21 +366,28 @@ const AnimalModalV2 = ({
                 <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 dark:border-dark-border gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
                     <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-80 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
-                        <div className="flex-grow bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-dark-border">
+                        <div className="relative flex-grow bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center border border-gray-300 dark:border-dark-border">
                             {mainImage ? (
-                                <img 
-                                    src={mainImage} 
-                                    alt={animal.name} 
-                                    className="w-full h-full object-contain cursor-pointer"
-                                    onClick={() => {
-                                        if (setShowImageModal && setEnlargedImageUrl) {
-                                            setEnlargedImageUrl(mainImage);
-                                            setShowImageModal(true);
-                                        }
-                                    }}
-                                />
+                                // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
+                                <div className="relative inline-block max-w-full max-h-full">
+                                    <img 
+                                        src={mainImage} 
+                                        alt={animal.name} 
+                                        className="block max-w-full max-h-full w-auto h-auto object-contain cursor-pointer rounded-lg"
+                                        onClick={() => {
+                                            if (setShowImageModal && setEnlargedImageUrl) {
+                                                setEnlargedImageUrl(mainImage);
+                                                setShowImageModal(true);
+                                            }
+                                        }}
+                                    />
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                </div>
                             ) : (
-                                <Cat size={64} className="text-gray-300 dark:text-dark-border" />
+                                <>
+                                    <Cat size={64} className="text-gray-300 dark:text-dark-border" />
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                </>
                             )}
                         </div>
                         {allImages.length > 1 && (
@@ -417,7 +424,7 @@ const AnimalModalV2 = ({
                                                     {animal.isDisplay ? 'Public' : 'Private'}
                                                 </span>
                                                 {animal.status && (animal.status === 'Deceased' ? (
-                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><RainbowIcon size={12} />{animal.status}</span>
+                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5">{animal.status}</span>
                                                 ) : (
                                                     <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>
                                                 ))}
