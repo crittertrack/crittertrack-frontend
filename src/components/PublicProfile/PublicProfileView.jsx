@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import apiClient from '../../utils/apiClient';
+import DeceasedBanner from '../shared/DeceasedBanner';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, ArrowDown, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
@@ -1057,9 +1058,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 </div>
                                                 
                                                 {/* Status bar at bottom */}
-                                                <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
-                                                    <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
-                                                </div>
+                                                {animal.status === 'Deceased' ? (
+                                                    <DeceasedBanner />
+                                                ) : (
+                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                        <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );

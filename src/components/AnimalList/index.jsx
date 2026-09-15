@@ -7,6 +7,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
+import DeceasedBanner from '../shared/DeceasedBanner';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import {
@@ -2957,11 +2958,15 @@ useEffect(() => {
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto bg-gray-100 dark:bg-dark-card-bg">
-                        <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
-                            {animal.status || 'Unknown'}
+                    {animal.status === 'Deceased' ? (
+                        <DeceasedBanner size="sm" />
+                    ) : (
+                        <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto bg-gray-100 dark:bg-dark-card-bg">
+                            <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
+                                {animal.status || 'Unknown'}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );
