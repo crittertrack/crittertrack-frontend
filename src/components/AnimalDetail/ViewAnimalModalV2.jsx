@@ -368,14 +368,15 @@ const ViewAnimalModalV2 = ({
                 <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 dark:border-dark-border gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
                     <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-80 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
-                        <div className="relative flex-grow bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center border border-gray-300 dark:border-dark-border">
+                        <div className={`relative flex-grow rounded-lg flex items-center justify-center ${mainImage ? '' : 'bg-gray-100 dark:bg-dark-surface border border-gray-300 dark:border-dark-border'}`}>
                             {mainImage ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className={`relative inline-block max-w-full ${allImages.length > 1 ? 'max-h-[200px] sm:max-h-[216px] md:max-h-[248px]' : 'max-h-64 sm:max-h-72 md:max-h-80'}`}>
+                                // Cap also subtracts the badge's own overhang (half its height) so it never crosses the reserved image area's bottom edge.
+                                <div className={`relative inline-block max-w-full ${allImages.length > 1 ? 'max-h-[180px] sm:max-h-[196px] md:max-h-[228px]' : 'max-h-[236px] sm:max-h-[268px] md:max-h-[300px]'}`}>
                                     <img 
                                         src={mainImage} 
                                         alt={animal.name} 
-                                        className={`block max-w-full w-auto h-auto object-contain cursor-pointer rounded-lg ${allImages.length > 1 ? 'max-h-[200px] sm:max-h-[216px] md:max-h-[248px]' : 'max-h-64 sm:max-h-72 md:max-h-80'}`}
+                                        className={`block max-w-full w-auto h-auto object-contain cursor-pointer rounded-lg ${allImages.length > 1 ? 'max-h-[180px] sm:max-h-[196px] md:max-h-[228px]' : 'max-h-[236px] sm:max-h-[268px] md:max-h-[300px]'}`}
                                         onClick={() => {
                                             if (setShowImageModal && setEnlargedImageUrl) {
                                                 setEnlargedImageUrl(mainImage);
