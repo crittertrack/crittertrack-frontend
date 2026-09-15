@@ -2855,7 +2855,7 @@ useEffect(() => {
                                     <Cat className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10" />
                                 </div>
                             )}
-                            {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" />}
+                            {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-3 right-0" />}
                         </div>
                     </div>
                     

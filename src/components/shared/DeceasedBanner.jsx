@@ -14,9 +14,10 @@ const RainbowIcon = ({ size = 16, className }) => (
 );
 
 // Straddles the photo's bottom-right corner -- the badge's own center sits exactly on the
-// corner point, so it partially overlaps the image and partially hangs off it.
-const DeceasedCornerBadge = ({ iconClassName = 'w-8 h-8' }) => (
-    <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2">
+// corner point, so it partially overlaps the image and partially hangs off it. `positionClassName`
+// lets a caller nudge the anchor point (e.g. raise it above the true corner) when other UI overlaps.
+const DeceasedCornerBadge = ({ iconClassName = 'w-8 h-8', positionClassName = 'bottom-0 right-0' }) => (
+    <div className={`absolute translate-x-1/2 translate-y-1/2 ${positionClassName}`}>
         <img src={DOVE_IMG} alt="" className={`${iconClassName} object-contain drop-shadow-md`} />
     </div>
 );
