@@ -2846,13 +2846,13 @@ useEffect(() => {
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-20 sm:h-20 md:h-28">
-                        <div className="relative w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24">
+                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-24 sm:h-24 md:h-32">
+                        <div className="relative w-28 h-24 sm:w-28 sm:h-24 md:w-32 md:h-28">
                             {imgSrc ? (
                                 <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain rounded-md" />
                             ) : (
                                 <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                    <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
+                                    <Cat className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10" />
                                 </div>
                             )}
                             {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" />}

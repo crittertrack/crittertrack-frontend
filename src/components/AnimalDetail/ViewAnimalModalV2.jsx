@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
-import { RainbowIcon } from '../shared/DeceasedBanner';
+import { RainbowIcon, DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { openExternalLink } from '../../utils/externalLink';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -368,22 +368,25 @@ const ViewAnimalModalV2 = ({
                 <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 dark:border-dark-border gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
                     <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-80 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
-                        <div className="flex-grow bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-dark-border">
-                            {mainImage ? (
-                                <img 
-                                    src={mainImage} 
-                                    alt={animal.name} 
-                                    className="w-full h-full object-contain cursor-pointer"
-                                    onClick={() => {
-                                        if (setShowImageModal && setEnlargedImageUrl) {
-                                            setEnlargedImageUrl(mainImage);
-                                            setShowImageModal(true);
-                                        }
-                                    }}
-                                />
-                            ) : (
-                                <Cat size={64} className="text-gray-300 dark:text-dark-border" />
-                            )}
+                        <div className="relative flex-grow">
+                            <div className="w-full h-full bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-dark-border">
+                                {mainImage ? (
+                                    <img 
+                                        src={mainImage} 
+                                        alt={animal.name} 
+                                        className="w-full h-full object-contain cursor-pointer"
+                                        onClick={() => {
+                                            if (setShowImageModal && setEnlargedImageUrl) {
+                                                setEnlargedImageUrl(mainImage);
+                                                setShowImageModal(true);
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <Cat size={64} className="text-gray-300 dark:text-dark-border" />
+                                )}
+                            </div>
+                            {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
                         </div>
                         {allImages.length > 1 && (
                             <div className="flex-shrink-0 flex gap-2">
