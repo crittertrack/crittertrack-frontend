@@ -2848,13 +2848,14 @@ useEffect(() => {
                     {/* Centered profile image */}
                     <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36">
                         <div className="relative w-28 h-28 sm:w-28 sm:h-28 md:w-32 md:h-32">
-                            {imgSrc ? (
-                                <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain rounded-md" />
-                            ) : (
-                                <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                            {/* Visible tile background so the corner badge always anchors to a real edge, even when object-contain letterboxes the photo */}
+                            <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted overflow-hidden">
+                                {imgSrc ? (
+                                    <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain" />
+                                ) : (
                                     <Cat className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10" />
-                                </div>
-                            )}
+                                )}
+                            </div>
                             {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-3 right-0" />}
                         </div>
                     </div>
