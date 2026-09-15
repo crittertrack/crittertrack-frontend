@@ -174,6 +174,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             if (onNotificationChange) onNotificationChange();
         } catch (error) {
             console.error('Error acknowledging notification:', error);
+            showModalMessage('Error', 'Failed to acknowledge notification');
         } finally {
             setProcessing(null);
         }
@@ -386,13 +387,26 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         <span>Acknowledge</span>
                                                     </button>
                                                 )}
+                                                {/* Litter Assignment / Mating Reminder - informational only, just needs to be clearable */}
+                                                {(notification.type === 'litter_assignment' || notification.type === 'mating_reminder') && (
+                                                    <button
+                                                        onClick={() => handleApprove(notification._id)}
+                                                        disabled={processing === notification._id}
+                                                        className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                    >
+                                                        <CheckCircle size={14} />
+                                                        <span>Acknowledge</span>
+                                                    </button>
+                                                )}
                                                 {/* Delete button for other notifications */}
                                                 {notification.type !== 'link_request' && 
                                                  notification.type !== 'breeder_request' &&
                                                  notification.type !== 'parent_request' &&
                                                  notification.type !== 'transfer_request' && 
                                                  notification.type !== 'view_only_offer' &&
-                                                 notification.type !== 'content_edited' && (
+                                                 notification.type !== 'content_edited' &&
+                                                 notification.type !== 'litter_assignment' &&
+                                                 notification.type !== 'mating_reminder' && (
                                                     <button
                                                         onClick={() => handleDelete(notification._id)}
                                                         className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"

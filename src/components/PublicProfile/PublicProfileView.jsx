@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import apiClient from '../../utils/apiClient';
+import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, ArrowDown, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
@@ -1014,7 +1015,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                         <div key={animal.id_public} className="w-full flex justify-center">
                                             <div
                                                 onClick={() => onViewAnimal(animal)}
-                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
+                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-44 min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
                                             >
                                                 {/* Birthdate top-left */}
                                                 {birth && (
@@ -1031,14 +1032,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
-                                                    {imgSrc ? (
-                                                        <img src={imgSrc} alt={animal.name} className="max-w-24 max-h-24 w-auto h-auto object-contain rounded-md" />
-                                                    ) : (
-                                                        <div className="w-24 h-24 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                                            <Cat size={36} />
+                                                <div className="flex items-center justify-center w-full px-2 mt-6 h-28">
+                                                    <div className="relative w-32 h-28">
+                                                        {/* Visible tile background so the corner badge always anchors to a real edge, even when object-contain letterboxes the photo */}
+                                                        <div className="w-full h-full bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted overflow-hidden">
+                                                            {imgSrc ? (
+                                                                <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain" />
+                                                            ) : (
+                                                                <Cat size={36} />
+                                                            )}
                                                         </div>
-                                                    )}
+                                                        {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
+                                                    </div>
                                                 </div>
                                                 
                                                 {/* Icon row */}
@@ -1057,9 +1062,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 </div>
                                                 
                                                 {/* Status bar at bottom */}
-                                                <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
-                                                    <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
-                                                </div>
+                                                {animal.status === 'Deceased' ? (
+                                                    <DeceasedBanner />
+                                                ) : (
+                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                        <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );

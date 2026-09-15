@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
+import { RainbowIcon } from '../shared/DeceasedBanner';
 import { openExternalLink } from '../../utils/externalLink';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -417,7 +418,11 @@ const LiteViewAnimalModal = ({
                                                     {animal.isDisplay ? <Eye size={12} /> : <EyeOff size={12} />}
                                                     {animal.isDisplay ? 'Public' : 'Private'}
                                                 </span>
-                                                {animal.status && <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
+                                                {animal.status && (animal.status === 'Deceased' ? (
+                                                    <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><RainbowIcon size={12} />{animal.status}</span>
+                                                ) : (
+                                                    <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>
+                                                ))}
                                                 {animal.lifeStage && <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
                                                 <StatusIndicator status={remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy'} icon={<HeartPulse size={12} />} />
                                                 {isPrivate && (() => {

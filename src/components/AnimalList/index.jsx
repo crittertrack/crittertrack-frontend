@@ -7,6 +7,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
+import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import {
@@ -2845,18 +2846,22 @@ useEffect(() => {
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-20 sm:h-20 md:h-28">
-                        {imgSrc ? (
-                            <img src={imgSrc} alt={animal.name} className="max-w-20 max-h-20 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
-                        ) : (
-                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
+                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36">
+                        <div className="relative w-28 h-28 sm:w-28 sm:h-28 md:w-32 md:h-32">
+                            {/* Visible tile background so the corner badge always anchors to a real edge, even when object-contain letterboxes the photo */}
+                            <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted overflow-hidden">
+                                {imgSrc ? (
+                                    <img src={imgSrc} alt={animal.name} className="w-full h-full object-contain" />
+                                ) : (
+                                    <Cat className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+                                )}
                             </div>
-                        )}
+                            {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-3 right-0" />}
+                        </div>
                     </div>
                     
-                    {/* Reproductive State Pill */}
-                    <div className="w-full flex justify-center items-center py-1 sm:py-1.5 px-1">
+                    {/* Reproductive State Pill -- negative margin lets it overlap the taller image; relative positioning keeps it painted above */}
+                    <div className="relative w-full flex justify-center items-center py-1 sm:py-1.5 px-1 -mt-3 sm:-mt-4">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
@@ -2957,11 +2962,15 @@ useEffect(() => {
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto bg-gray-100 dark:bg-dark-card-bg">
-                        <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
-                            {animal.status || 'Unknown'}
+                    {animal.status === 'Deceased' ? (
+                        <DeceasedBanner size="sm" />
+                    ) : (
+                        <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto bg-gray-100 dark:bg-dark-card-bg">
+                            <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
+                                {animal.status || 'Unknown'}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );
