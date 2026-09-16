@@ -14,7 +14,8 @@ import { Network } from '@capacitor/network';
 // A momentary blip (one failed request, a Wi-Fi handoff) shouldn't flash the offline banner —
 // only treat the connection as actually down if it stays down this long. Coming back online is
 // still reported instantly, no debounce needed for that direction.
-const OFFLINE_DELAY_MS = 2000;
+// 2 seconds was too short for real-world Wi-Fi handoffs; keep the banner hidden for brief blips.
+const OFFLINE_DELAY_MS = 10000;
 
 export default function useOnlineStatus() {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
