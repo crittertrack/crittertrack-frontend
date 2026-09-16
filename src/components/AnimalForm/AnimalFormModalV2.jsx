@@ -19,6 +19,7 @@ import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
+import { buildChangedSaveFields } from '../../utils/saveDiff';
 import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
@@ -3777,7 +3778,17 @@ const AnimalFormModalV2 = ({
                 payloadToSave.extraImages = [];
             }
 
-            const saveResponse = await onSave(method, url, payloadToSave, initialFormDataRef.current);
+            const payloadForRequest = animalToEdit
+                ? buildChangedSaveFields(payloadToSave, initialFormDataRef.current || {})
+                : payloadToSave;
+
+            if (animalToEdit && Object.keys(payloadForRequest).length === 0) {
+                showModalMessage('No changes to save', 'There are no edits to save for this animal.');
+                setLoading(false);
+                return;
+            }
+
+            const saveResponse = await onSave(method, url, payloadForRequest, initialFormDataRef.current);
 
             // Persist any brand-new appearance values into the user's per-species dropdown
             // lists, so they're offered as suggestions next time (fire-and-forget — never
