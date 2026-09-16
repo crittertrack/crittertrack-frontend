@@ -44,8 +44,8 @@ const calculateAge = (birthDate) => {
 
     let ageStr = '';
     if (years > 0) ageStr += `${years}y `;
-    if (months > 0) ageStr += `${months}m `;
-    if (days > 0 || ageStr === '') ageStr += `${days}d`; // Show days even if 0 if no years/months
+    if (months > 0 || years > 0) ageStr += `${months}m `;
+    if (days > 0 || ageStr === '') ageStr += `${days}d`;
     return ageStr.trim();
 };
 

@@ -242,7 +242,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   // Build genetic code string from genotype object
   const buildGeneticCode = (genotype) => {
     // Define the correct order of genes (matching GENE_LOCI keys)
-    const geneOrder = ['A', 'B', 'C', 'D', 'E', 'Ln', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
+    const geneOrder = ['A', 'B', 'C', 'D', 'E', 'Ln', 'P', 'S', 'U', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
     
     return geneOrder
       .filter(locus => genotype[locus] && genotype[locus] !== '')
@@ -480,7 +480,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3">All Genes</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {['A', 'B', 'C', 'D', 'E', 'Ln', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
+                      {['A', 'B', 'C', 'D', 'E', 'Ln', 'P', 'S', 'U', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
                         <div key={locus} className="bg-white dark:bg-dark-surface p-3 rounded border border-gray-200 dark:border-dark-border h-48 flex flex-col">
                           <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">
                             {GENE_LOCI[locus].name} ({locus})

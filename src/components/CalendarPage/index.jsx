@@ -135,8 +135,10 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const ageDays = Math.max(0, Math.round((now - born) / 86400000));
         const years = Math.floor(ageDays / 365);
         const months = Math.floor((ageDays % 365) / 30);
-        if (years > 0) return `${years}y`;
-        return null;
+        const days = ageDays % 30;
+        if (years > 0) return `${years}y ${months}m ${days}d`;
+        if (months > 0) return `${months}m ${days}d`;
+        return `${days}d`;
     };
     const getDueStatusText = (expectedDueDate) => {
         if (!expectedDueDate) return 'Due';
@@ -715,7 +717,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                             const ageDays = Math.round((now - born) / 86400000);
                                             const years = Math.floor(ageDays / 365);
                                             const months = Math.floor((ageDays % 365) / 30);
-                                            const ageStr = years > 0 ? `${years}y ${months}m` : `${months} month${months !== 1 ? 's' : ''}`;
+                                            const days = ageDays % 30;
+                                            const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
                                             return (<>
                                                 <TooltipRow label="Birthday:" value={fmtD(a.birthDate)} />
                                                 <TooltipRow label="Age (today):" value={ageStr} />

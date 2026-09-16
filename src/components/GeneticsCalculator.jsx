@@ -80,6 +80,14 @@ const GENE_LOCI = {
       'S/s', 'S/S', 'S/-', 'S/s+'
     ]
   },
+  U: {
+    name: 'Umbrous',
+    description: 'Dominant darkening modifier. Contributes to Sable when combined with Tan (at/-)',
+    combinations: [
+      'u/u',
+      'U/u', 'U/U'
+    ]
+  },
   W: {
     name: 'Dominant Spotting',
     description: 'Dominant. White spotting patterns. e.g. Banded (W/w), Variegated (Wsh/-), Rumpwhite (Rw/-)',
@@ -127,14 +135,6 @@ const GENE_LOCI = {
     maleCombinations: [
       'mobr/Y',
       'Mobr/Y'
-    ]
-  },
-  U: {
-    name: 'Umbrous',
-    description: 'Dominant darkening modifier. Contributes to Sable when combined with Tan (at/-)',
-    combinations: [
-      'u/u',
-      'U/u', 'U/U'
     ]
   },
   Go: {
@@ -604,7 +604,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.Ln === 'Ln/ln' || genotype.Ln === 'ln/Ln') carriers.push('Leaden');
   
   // S-locus carriers (Pied)
-  if (genotype.S === 'S/s' || genotype.S === 's/S') carriers.push('Pied');
   if (genotype.S === 'S/s' || genotype.S === 's/S') {
     carriers.push('Pied');
   } else if (genotype.S === 'S/s+') {
@@ -1156,8 +1155,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // S locus alone
     if (originalGenotype.S) {
       if (genotype.S === 'S/s') {
-        // Add to carriers so it shows in "Carried genes" for parents
-        carriers.push('Pied');
+        // carriers already contains 'Pied' from the unconditional S-locus check above
         return { phenotype: '', carriers, hidden, notes: [] };
       } else if (genotype.S === 'S/S') {
         return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
@@ -1167,7 +1165,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Rn locus alone
     if (originalGenotype.Rn) {
       if (genotype.Rn === 'Rn/rn') {
-        carriers.push('Roan');
         return { phenotype: '', carriers, hidden, notes: [] };
       } else if (genotype.Rn === 'Rn/Rn') {
         return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
@@ -1177,7 +1174,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Si locus alone
     if (originalGenotype.Si) {
       if (genotype.Si === 'Si/si') {
-        carriers.push('Silvered');
         return { phenotype: '', carriers, hidden, notes: [] };
       } else if (genotype.Si === 'Si/Si') {
         return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
@@ -1202,7 +1198,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Ln locus alone
     if (originalGenotype.Ln) {
       if (genotype.Ln === 'Ln/ln') {
-        carriers.push('Leaden');
         return { phenotype: '', carriers, hidden, notes: [] };
       } else if (genotype.Ln === 'Ln/Ln') {
         return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
