@@ -320,8 +320,8 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                                                 />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text text-left">
+                                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" textClassName="break-words leading-snug text-left" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
                                                 </p>
                                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
                                                     {animal.species} · {animal.gender} · {animal.id_public}

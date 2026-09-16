@@ -76,7 +76,7 @@ export const formatAnimalDisplayName = (animal = {}) => {
     return displayText || 'Unnamed';
 };
 
-export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'inline-flex items-center gap-1.5' }) => {
+export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'inline-flex items-start gap-1.5' }) => {
     const { flagCode, displayText } = getAnimalDisplayParts(animal);
     const text = displayText || [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ') || 'Unnamed';
 
@@ -86,30 +86,33 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
             style={{
                 direction: 'ltr',
                 display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start',
+                gap: '0.25rem',
                 maxWidth: '100%',
                 minWidth: 0,
                 verticalAlign: 'baseline',
                 flexShrink: 0,
+                textAlign: 'left',
             }}
         >
             {flagCode && (
                 <span
                     className={`fi fi-${flagCode} ${flagClassName}`.trim()}
                     aria-label={`${flagCode.toUpperCase()} flag`}
-                    style={{ display: 'inline-block', flex: '0 0 auto', order: 0 }}
+                    style={{ display: 'inline-block', flex: '0 0 auto', marginTop: '0.1rem' }}
                 />
             )}
             <span
                 className={textClassName}
                 style={{
-                    order: 1,
                     minWidth: 0,
-                    flex: '1 1 auto',
+                    maxWidth: '100%',
                     overflowWrap: 'anywhere',
                     wordBreak: 'break-word',
                     whiteSpace: 'normal',
+                    display: 'block',
+                    textAlign: 'left',
                 }}
             >
                 {text}

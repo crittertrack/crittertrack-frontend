@@ -2887,8 +2887,10 @@ useEffect(() => {
                     </div>
                     
                     {/* Prefix / Name under image */}
-                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow">
-                        <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2 leading-tight"><AnimalNameWithFlag animal={animal} /></div>
+                    <div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow">
+                        <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight text-left">
+                            <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" textClassName="break-words leading-tight text-left" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                        </div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
