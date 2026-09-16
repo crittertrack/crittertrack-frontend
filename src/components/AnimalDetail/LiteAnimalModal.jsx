@@ -562,55 +562,75 @@ const LiteAnimalModal = ({
                                                 </InfoItem>
                                                 <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
                                             </dl>
-                                            <div className="pt-2 border-t border-gray-200 dark:border-dark-border">
-                                                <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2">
-                                                    {(() => {
-                                                        const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
-                                                        const idParts = [
-                                                            animal.id_public,
-                                                            animal.breederAssignedId,
-                                                            animal.microchipNumber,
-                                                            animal.pedigreeRegistrationId,
-                                                            animal.colonyId,
-                                                            animal.tattooId,
-                                                            animal.ringId,
-                                                            animal.eartagNumber,
-                                                            ...parseJsonArrayField(animal.identifiers).map(id => id.value)
-                                                        ];
-                                                        const idString = idParts.filter(Boolean).join(' • ');
-                                                        const linesComponent = lines.length > 0 ? (
-                                                            <span className="flex items-center gap-1">
-                                                                {lines.map(line => (
-                                                                    <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
-                                                                ))}
-                                                            </span>
-                                                        ) : null;
-                                                        const idComponent = idString ? <span>{idString}</span> : null;
-                                                        
-                                                        return (
-                                                            <>
-                                                                {linesComponent}
-                                                                {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
-                                                                {idComponent}
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </p>
-                                                {animal.tags && animal.tags.length > 0 && (
-                                                    <div className="text-center mt-2">
-                                                        <div className="flex flex-wrap gap-2 justify-center">
-                                                            {animal.tags.map(tag => (
-                                                                <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
-                                                            ))}
+                                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-border">
+                                                <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
+                                                    <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-3">
+                                                        <div className="text-center">
+                                                            <div className="text-[10px] uppercase tracking-[0.18em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
+                                                            <div className="mt-1 text-xl font-bold text-gray-900 dark:text-dark-text">
+                                                                {(() => {
+                                                                    const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
+                                                                    if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
+                                                                    const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
+                                                                    const computedTotal = sourceItems.reduce((sum, item) => {
+                                                                        const fromLitter = Number(item?.litterSizeBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
+                                                                        return sum + (Number.isFinite(fromLitter) ? fromLitter : 0);
+                                                                    }, 0);
+                                                                    return computedTotal || 0;
+                                                                })()}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                )}
+                                                    <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-2">
+                                                        <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap">
+                                                            {(() => {
+                                                                const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
+                                                                const idParts = [
+                                                                    animal.id_public,
+                                                                    animal.breederAssignedId,
+                                                                    animal.microchipNumber,
+                                                                    animal.pedigreeRegistrationId,
+                                                                    animal.colonyId,
+                                                                    animal.tattooId,
+                                                                    animal.ringId,
+                                                                    animal.eartagNumber,
+                                                                    ...parseJsonArrayField(animal.identifiers).map(id => id.value)
+                                                                ];
+                                                                const idString = idParts.filter(Boolean).join(' • ');
+                                                                const linesComponent = lines.length > 0 ? (
+                                                                    <span className="flex items-center gap-1">
+                                                                        {lines.map(line => (
+                                                                            <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
+                                                                        ))}
+                                                                    </span>
+                                                                ) : null;
+                                                                const idComponent = idString ? <span>{idString}</span> : null;
+                                                                return (
+                                                                    <>
+                                                                        {linesComponent}
+                                                                        {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
+                                                                        {idComponent}
+                                                                    </>
+                                                                );
+                                                            })()}
+                                                        </p>
+                                                        {animal.tags && animal.tags.length > 0 && (
+                                                            <div className="text-center mt-2">
+                                                                <div className="flex flex-wrap gap-2 justify-center">
+                                                                    {animal.tags.map(tag => (
+                                                                        <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="hidden md:w-1/3 md:flex flex-col">
-                                            <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400 dark:text-dark-text-muted" />} className="flex-1" contentClassName="overflow-y-auto">
+                                            <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400 dark:text-dark-text-muted" />} className="h-[132px]" contentClassName="overflow-y-auto py-1">
                                                 <p className="text-xs text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
-                                            </InfoCard> {/* Remarks are now on the Dashboard tab */}
+                                            </InfoCard>
                                         </div>
                                     </div>
                                 </>
