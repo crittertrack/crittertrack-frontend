@@ -530,10 +530,10 @@ const LiteViewAnimalModal = ({
                                             </dl>
                                             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-border">
                                                 <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
-                                                    <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-3">
-                                                        <div className="text-center">
-                                                            <div className="text-[10px] uppercase tracking-[0.18em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
-                                                            <div className="mt-1 text-xl font-bold text-gray-900 dark:text-dark-text">
+                                                    <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
+                                                        <div className="text-center leading-none">
+                                                            <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
+                                                            <div className="mt-1 text-lg font-bold text-gray-900 dark:text-dark-text">
                                                                 {(() => {
                                                                     const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
                                                                     if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
@@ -625,11 +625,6 @@ const LiteViewAnimalModal = ({
                                 {tab.icon} {tab.label}
                             </button>
                         ))}
-                        {ANIMAL_VIEW_TAB_INFO[activeTab] && (
-                            <InfoButton title={ANIMAL_VIEW_TAB_INFO[activeTab].title} lessonId={ANIMAL_VIEW_TAB_INFO[activeTab].lessonId} className="shrink-0">
-                                <p>{ANIMAL_VIEW_TAB_INFO[activeTab].body}</p>
-                            </InfoButton>
-                        )}
                     </nav>
                 </div>
 
