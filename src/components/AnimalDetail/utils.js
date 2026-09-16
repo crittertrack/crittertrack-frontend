@@ -5,7 +5,7 @@ import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatte
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getCachedParent, setCachedParent } from '../../utils/animalDataCache';
-import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 // Utility to safely parse JSON fields
 export const parseJsonField = (data) => {
@@ -168,7 +168,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                 </div>
             );
         }
-        const fullName = [manualData.prefix, manualData.name, manualData.suffix].filter(Boolean).join(' ');
+        const fullName = formatAnimalDisplayName(manualData) || `Unnamed ${parentType.toLowerCase()}`;
         return (
             <div className="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg overflow-hidden">
                 <div className="bg-gray-50 dark:bg-dark-surface px-3 py-2 border-b border-dashed border-gray-300 dark:border-dark-border flex items-center justify-between">
@@ -185,7 +185,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             </div>
                         )}
                         <div className="flex-grow min-w-0">
-                            <p className="font-semibold text-gray-800 dark:text-dark-text">{fullName || `Unnamed ${parentType.toLowerCase()}`}</p>
+                            <AnimalNameWithFlag animal={manualData} className="w-full justify-start" textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                             {manualData.variety && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{manualData.variety}</p>}
                             {manualData.genCode && <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">{manualData.genCode}</p>}
                             {manualData.birthDate && <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5">{formatDate(manualData.birthDate)}</p>}
@@ -244,10 +244,8 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             <Cat size={32} className="text-gray-400 dark:text-dark-text-muted" />
                         </div>
                     )}
-                    <div className="flex-grow">
-                        <p className="font-semibold text-gray-800 dark:text-dark-text">
-                            {parentData.prefix && `${parentData.prefix} `}{parentData.name}{parentData.suffix && ` ${parentData.suffix}`}
-                        </p>
+                    <div className="flex-grow min-w-0">
+                        <AnimalNameWithFlag animal={parentData} className="w-full justify-start" textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                         {[parentData.color, parentData.markings, parentData.coat, parentData.earset].filter(Boolean).join(' ') && (
                             <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{[parentData.color, parentData.markings, parentData.coat, parentData.earset].filter(Boolean).join(' ')}</p>
                         )}
@@ -304,10 +302,7 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                     </div>
                 )}
                 <div className="flex-grow min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 dark:text-dark-text truncate">
-                        {parent.prefix && `${parent.prefix} `}
-                        {parent.name}
-                    </p>
+                    <AnimalNameWithFlag animal={parent} className="w-full justify-start" textClassName="text-xs font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-3.5 w-5 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                     <p className="text-xs text-gray-600 dark:text-dark-text-secondary font-mono">
                         {parent.id_public}
                     </p>

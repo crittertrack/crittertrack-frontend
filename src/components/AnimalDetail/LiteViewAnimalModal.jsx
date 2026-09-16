@@ -480,123 +480,126 @@ const LiteViewAnimalModal = ({
 
                             {!isHeaderCollapsed && (
                                 <>
-                                    <div className="mt-3 flex flex-col md:flex-row gap-4 flex-grow">
-                                        <div className="w-full md:w-2/3 space-y-4">
-                                            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
-                                                {/* Row 1 */}
-                                                <InfoItem compact label="Variety">
-                                                    {[animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
-                                                </InfoItem>
-                                                <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
-                                                <InfoItem compact label="Genetics">
-                                                    {animal.geneticCode && (
-                                                        animal.species === 'Ball Python'
-                                                            ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
-                                                            : <code className="font-mono">{animal.geneticCode}</code>
-                                                    )}
-                                                </InfoItem>
-
-                                                {/* Row 2 */}
-                                                <InfoItem compact label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
-                                                <InfoItem compact label="Birthdate">
-                                                    {animal.birthDate ? (
-                                                        <>
-                                                            {formatDate(animal.birthDate)}
-                                                            <span className="text-gray-500 dark:text-dark-text-muted ml-1">
-                                                                {(() => {
-                                                                    const birth = new Date(animal.birthDate);
-                                                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                                                    let years = endDate.getFullYear() - birth.getFullYear();
-                                                                    let months = endDate.getMonth() - birth.getMonth();
-                                                                    let days = endDate.getDate() - birth.getDate();
-                                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
-                                                                    if (months < 0) { years--; months += 12; }
-                                                                    const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                                                    return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
-                                                                })()}
-                                                            </span>
-                                                        </>
-                                                    ) : null}
-                                                </InfoItem>
-                                                <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
-
-                                                {/* Row 3 */}
-                                                <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
-                                                <InfoItem compact label="Owner">
-                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || 'N/A'}</span>
-                                                    {animal.coOwnership && <span className="text-gray-500 dark:text-dark-text-muted ml-1">({animal.coOwnership})</span>}
-                                                </InfoItem>
-                                                <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
-                                            </dl>
-                                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-border">
-                                                <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
-                                                    <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
-                                                        <div className="text-center leading-none">
-                                                            <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
-                                                            <div className="mt-1 text-lg font-bold text-gray-900 dark:text-dark-text">
-                                                                {(() => {
-                                                                    const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
-                                                                    if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
-                                                                    const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
-                                                                    const computedTotal = sourceItems.reduce((sum, item) => {
-                                                                        const fromLitter = Number(item?.litterSizeBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
-                                                                        return sum + (Number.isFinite(fromLitter) ? fromLitter : 0);
-                                                                    }, 0);
-                                                                    return computedTotal || 0;
-                                                                })()}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-2">
-                                                        <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap">
-                                                            {(() => {
-                                                                const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
-                                                                const idParts = [
-                                                                    animal.id_public,
-                                                                    animal.breederAssignedId,
-                                                                    animal.microchipNumber,
-                                                                    animal.pedigreeRegistrationId,
-                                                                    animal.colonyId,
-                                                                    animal.tattooId,
-                                                                    animal.ringId,
-                                                                    animal.eartagNumber,
-                                                                    ...parseJsonArrayField(animal.identifiers).map(id => id.value)
-                                                                ];
-                                                                const idString = idParts.filter(Boolean).join(' • ');
-                                                                const linesComponent = lines.length > 0 ? (
-                                                                    <span className="flex items-center gap-1">
-                                                                        {lines.map(line => (
-                                                                            <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
-                                                                        ))}
-                                                                    </span>
-                                                                ) : null;
-                                                                const idComponent = idString ? <span>{idString}</span> : null;
-                                                                return (
-                                                                    <>
-                                                                        {linesComponent}
-                                                                        {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
-                                                                        {idComponent}
-                                                                    </>
-                                                                );
-                                                            })()}
-                                                        </p>
-                                                        {animal.tags && animal.tags.length > 0 && (
-                                                            <div className="text-center mt-2">
-                                                                <div className="flex flex-wrap gap-2 justify-center">
-                                                                    {animal.tags.map(tag => (
-                                                                        <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
+                                    <div className="mt-3 flex flex-col gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-4">
+                                            <div className="min-w-0 space-y-4">
+                                                <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
+                                                    {/* Row 1 */}
+                                                    <InfoItem compact label="Variety">
+                                                        {[animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    </InfoItem>
+                                                    <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
+                                                    <InfoItem compact label="Genetics">
+                                                        {animal.geneticCode && (
+                                                            animal.species === 'Ball Python'
+                                                                ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
+                                                                : <code className="font-mono">{animal.geneticCode}</code>
                                                         )}
-                                                    </div>
-                                                </div>
+                                                    </InfoItem>
+
+                                                    {/* Row 2 */}
+                                                    <InfoItem compact label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
+                                                    <InfoItem compact label="Birthdate">
+                                                        {animal.birthDate ? (
+                                                            <>
+                                                                {formatDate(animal.birthDate)}
+                                                                <span className="text-gray-500 dark:text-dark-text-muted ml-1">
+                                                                    {(() => {
+                                                                        const birth = new Date(animal.birthDate);
+                                                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                                        let years = endDate.getFullYear() - birth.getFullYear();
+                                                                        let months = endDate.getMonth() - birth.getMonth();
+                                                                        let days = endDate.getDate() - birth.getDate();
+                                                                        if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                                        if (months < 0) { years--; months += 12; }
+                                                                        const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                                        return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
+                                                                    })()}
+                                                                </span>
+                                                            </>
+                                                        ) : null}
+                                                    </InfoItem>
+                                                    <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+
+                                                    {/* Row 3 */}
+                                                    <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
+                                                    <InfoItem compact label="Owner">
+                                                        <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || 'N/A'}</span>
+                                                        {animal.coOwnership && <span className="text-gray-500 dark:text-dark-text-muted ml-1">({animal.coOwnership})</span>}
+                                                    </InfoItem>
+                                                    <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                                </dl>
+                                            </div>
+                                            <div className="hidden md:flex flex-col">
+                                                <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400 dark:text-dark-text-muted" />} className="h-[104px]" contentClassName="overflow-y-auto py-1">
+                                                    <p className="text-xs text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
+                                                </InfoCard>
                                             </div>
                                         </div>
-                                        <div className="hidden md:w-1/3 md:flex flex-col">
-                                            <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400 dark:text-dark-text-muted" />} className="h-[132px]" contentClassName="overflow-y-auto py-1">
-                                                <p className="text-xs text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
-                                            </InfoCard>
+
+                                        <div className="w-full">
+                                            <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
+                                                <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
+                                                    <div className="text-center leading-none">
+                                                        <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
+                                                        <div className="mt-1 text-lg font-bold text-gray-900 dark:text-dark-text">
+                                                            {(() => {
+                                                                const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
+                                                                if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
+                                                                const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
+                                                                const computedTotal = sourceItems.reduce((sum, item) => {
+                                                                    const fromLitter = Number(item?.litterSizeBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
+                                                                    return sum + (Number.isFinite(fromLitter) ? fromLitter : 0);
+                                                                }, 0);
+                                                                return computedTotal || 0;
+                                                            })()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-2">
+                                                    <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap">
+                                                        {(() => {
+                                                            const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
+                                                            const idParts = [
+                                                                animal.id_public,
+                                                                animal.breederAssignedId,
+                                                                animal.microchipNumber,
+                                                                animal.pedigreeRegistrationId,
+                                                                animal.colonyId,
+                                                                animal.tattooId,
+                                                                animal.ringId,
+                                                                animal.eartagNumber,
+                                                                ...parseJsonArrayField(animal.identifiers).map(id => id.value)
+                                                            ];
+                                                            const idString = idParts.filter(Boolean).join(' • ');
+                                                            const linesComponent = lines.length > 0 ? (
+                                                                <span className="flex items-center gap-1">
+                                                                    {lines.map(line => (
+                                                                        <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
+                                                                    ))}
+                                                                </span>
+                                                            ) : null;
+                                                            const idComponent = idString ? <span>{idString}</span> : null;
+                                                            return (
+                                                                <>
+                                                                    {linesComponent}
+                                                                    {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
+                                                                    {idComponent}
+                                                                </>
+                                                            );
+                                                        })()}
+                                                    </p>
+                                                    {animal.tags && animal.tags.length > 0 && (
+                                                        <div className="text-center mt-2">
+                                                            <div className="flex flex-wrap gap-2 justify-center">
+                                                                {animal.tags.map(tag => (
+                                                                    <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </>
