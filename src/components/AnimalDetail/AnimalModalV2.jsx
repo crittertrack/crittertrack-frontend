@@ -553,7 +553,7 @@ const AnimalModalV2 = ({
                                                                     let days = endDate.getDate() - birth.getDate();
                                                                     if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
                                                                     if (months < 0) { years--; months += 12; }
-                                                                    const age = years > 0 ? `${years}y ${months}m` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                                    const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
                                                                     return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
                                                                 })()}
                                                             </span>
