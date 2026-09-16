@@ -1292,7 +1292,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         }
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const variety = [animal.color, animal.markings, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
-        const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+        const fullName = formatAnimalDisplayName(animal);
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
@@ -1494,7 +1494,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.isSire === false);
                     const borderColor = isUnknown ? '#9ca3af' : isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : '#64748b';
                     const bgColor = isUnknown ? '#e5e7eb' : '#f9fafb';
-                    const fullName = a && !a.isHidden ? [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') : 'Unknown';
+                    const fullName = a && !a.isHidden ? formatAnimalDisplayName(a) : 'Unknown';
                     const clickable = !!(a && !a.isHidden && a.id_public);
 
                     return (

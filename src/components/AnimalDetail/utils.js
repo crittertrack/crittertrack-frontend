@@ -185,7 +185,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             </div>
                         )}
                         <div className="flex-grow min-w-0">
-                            <AnimalNameWithFlag animal={manualData} className="w-full justify-start" textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
+                            <AnimalNameWithFlag animal={manualData} className="w-full justify-start" wrapperClassName="inline-flex items-center justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                             {manualData.variety && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{manualData.variety}</p>}
                             {manualData.genCode && <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">{manualData.genCode}</p>}
                             {manualData.birthDate && <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5">{formatDate(manualData.birthDate)}</p>}
@@ -245,7 +245,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                         </div>
                     )}
                     <div className="flex-grow min-w-0">
-                        <AnimalNameWithFlag animal={parentData} className="w-full justify-start" textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
+                        <AnimalNameWithFlag animal={parentData} className="w-full justify-start" wrapperClassName="inline-flex items-center justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                         {[parentData.color, parentData.markings, parentData.coat, parentData.earset].filter(Boolean).join(' ') && (
                             <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{[parentData.color, parentData.markings, parentData.coat, parentData.earset].filter(Boolean).join(' ')}</p>
                         )}
@@ -302,7 +302,7 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                     </div>
                 )}
                 <div className="flex-grow min-w-0">
-                    <AnimalNameWithFlag animal={parent} className="w-full justify-start" textClassName="text-xs font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-3.5 w-5 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
+                    <AnimalNameWithFlag animal={parent} className="w-full justify-start" wrapperClassName="inline-flex items-center justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="text-xs font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-3.5 w-5 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                     <p className="text-xs text-gray-600 dark:text-dark-text-secondary font-mono">
                         {parent.id_public}
                     </p>
