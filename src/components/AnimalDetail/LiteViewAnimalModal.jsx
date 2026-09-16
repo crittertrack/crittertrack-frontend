@@ -767,7 +767,14 @@ const LiteViewAnimalModal = ({
                                                                                 </div>
                                                                             )}
                                                                             <div className="min-w-0">
-                                                                                <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
+                                                                                <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate min-w-0">
+                                                                                    <AnimalNameWithFlag
+                                                                                        animal={rel}
+                                                                                        wrapperClassName="inline-flex max-w-full items-start gap-1 text-left"
+                                                                                        textClassName="truncate leading-tight text-left"
+                                                                                        flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                                                                                    />
+                                                                                </div>
                                                                                 <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>

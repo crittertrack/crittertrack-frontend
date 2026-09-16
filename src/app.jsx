@@ -10,6 +10,7 @@ import { formatDate, formatDateShort, formatDateDisplay, litterAge, formatTimeAg
 import { GENDER_OPTIONS, STATUS_OPTIONS, DEFAULT_SPECIES_OPTIONS } from './utils/constants';
 import { getSpeciesDisplayName, getSpeciesLatinName } from './utils/speciesUtils';
 import { getCountryFlag, getCountryName, US_STATES, getStateName, getCurrencySymbol } from './utils/locationUtils';
+import { AnimalNameWithFlag } from './utils/animalDisplayName';
 import { getDonationBadge, DonationBadge } from './utils/donationUtils';
 import { getActionLabel, getActionColor } from './utils/activityUtils';
 import TermsOfService from './components/TermsOfService';
@@ -195,9 +196,14 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
 
                 <div className="flex-1 min-w-0">
                     {/* Name */}
-                    <p className="text-sm font-semibold text-gray-800 truncate">
-                        {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}{parentData.suffix ? ` ${parentData.suffix}` : ''}
-                    </p>
+                    <div className="text-sm font-semibold text-gray-800 min-w-0">
+                        <AnimalNameWithFlag
+                            animal={parentData}
+                            wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left"
+                            textClassName="truncate leading-tight text-left"
+                            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                        />
+                    </div>
                     {/* ID */}
                     <p className="text-xs text-gray-500">{parentData.id_public}</p>
                     {/* Icon row */}
