@@ -83,16 +83,37 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
     return (
         <span
             className={`${wrapperClassName} ${className}`.trim()}
-            style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}
+            style={{
+                direction: 'ltr',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                maxWidth: '100%',
+                minWidth: 0,
+                verticalAlign: 'baseline',
+                flexShrink: 0,
+            }}
         >
             {flagCode && (
                 <span
                     className={`fi fi-${flagCode} ${flagClassName}`.trim()}
                     aria-label={`${flagCode.toUpperCase()} flag`}
-                    style={{ display: 'inline-block', flexShrink: 0, order: 0 }}
+                    style={{ display: 'inline-block', flex: '0 0 auto', order: 0 }}
                 />
             )}
-            <span className={textClassName} style={{ order: 1 }}>{text}</span>
+            <span
+                className={textClassName}
+                style={{
+                    order: 1,
+                    minWidth: 0,
+                    flex: '1 1 auto',
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal',
+                }}
+            >
+                {text}
+            </span>
         </span>
     );
 };
