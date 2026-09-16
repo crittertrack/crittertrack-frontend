@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import apiClient from '../../utils/apiClient';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import themeColors from '../../utils/themeColors';
 import AnimalImage from '../shared/AnimalImage';
 import {

@@ -3,6 +3,7 @@ import apiClient from '../../utils/apiClient';
 import { Loader2, ScrollText, Mars, Venus } from 'lucide-react';
 import { PedigreeChart } from '../AnimalForm';
 import { formatDate } from '../../utils/dateFormatter';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal }) => {
     const [generations, setGenerations] = useState(4); // Default to 4 generations for inline view
@@ -114,7 +115,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     const renderSlot = (slotKey, label) => {
         const d = getSlot(slotKey);
         const hasData = d && (d.ctcId || Object.entries(d).some(([fk, v]) => fk !== 'mode' && v && String(v).trim()));
-        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+        const fullName = formatAnimalDisplayName(d);
         const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
         const isSire = slotGender === 'Male';
         const GIcon = isSire ? Mars : Venus;

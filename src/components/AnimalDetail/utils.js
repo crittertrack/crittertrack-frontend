@@ -5,6 +5,7 @@ import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatte
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getCachedParent, setCachedParent } from '../../utils/animalDataCache';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 // Utility to safely parse JSON fields
 export const parseJsonField = (data) => {

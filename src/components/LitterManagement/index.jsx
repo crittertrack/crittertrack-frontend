@@ -17,6 +17,7 @@ import { PedigreeChart } from '../AnimalForm';
 import InfoButton from '../shared/InfoButton';
 import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 import { downloadBlob } from '../../utils/nativeDownload';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);

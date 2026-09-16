@@ -30,7 +30,7 @@ import { RecordsTabContent } from './RecordsTabContent';
 import InfoButton from '../shared/InfoButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
-import { AnimalNameWithFlag } from '../../utils/animalDisplayName';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -900,7 +900,7 @@ const AnimalModalV2 = ({
                                                                             {lIsMated && <span className="text-sky-600 dark:text-sky-400">{formatDate(litter.matingDate)}</span>}
                                                                             {lIsPregnant && <span className="text-pink-600 dark:text-pink-400">{formatDate(litter.pregnancyDate)}</span>}
                                                                             {lIsPlannedOnly && litter.matingDate && <span className="text-indigo-600 dark:text-indigo-400">{formatDate(litter.matingDate)}</span>}
-                                                                            {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                            {mate?.name && <span className="truncate max-w-[120px]">{formatAnimalDisplayName(mate)}</span>}
                                                                             {litter.inbreedingCoefficient != null && <span className="text-gray-500 dark:text-dark-text-muted">{litter.inbreedingCoefficient.toFixed(2)}%</span>}
                                                                             {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                                 <span className="inline-flex items-center gap-1 whitespace-nowrap">
@@ -947,7 +947,7 @@ const AnimalModalV2 = ({
                                                                         </div>
                                                                         <div className="min-w-0">
                                                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '•'}</span>
+                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{mate ? formatAnimalDisplayName(mate) : '•'}</span>
                                                                         </div>
                                                                         <div>
                                                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">COI</span>
@@ -1015,7 +1015,7 @@ const AnimalModalV2 = ({
                                                                                     </div>
                                                                                     <div className="flex-1 min-w-0">
                                                                                         <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Mate</div>
-                                                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</p>
+                                                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{formatAnimalDisplayName(mate)}</p>
                                                                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">{mate.species}</p>
                                                                                         <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">{mate.id_public}</p>
                                                                                     </div>
@@ -1130,7 +1130,7 @@ const AnimalModalV2 = ({
                                                                                                 </div>
                                                                                                 <div className="w-full text-center px-2 pb-1">
                                                                                                     <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                                                                        {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
+                                                                                                        {formatAnimalDisplayName(offspring)}
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div className="w-full px-2 pb-2 flex justify-end">
@@ -1169,7 +1169,7 @@ const AnimalModalV2 = ({
                                                                     <div className="flex-1 sm:hidden">
                                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary flex gap-2 flex-wrap items-center">
                                                                             {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
-                                                                            {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                            {mate?.name && <span className="truncate max-w-[120px]">{formatAnimalDisplayName(mate)}</span>}
                                                                             <span>{offspringList.length} born</span>
                                                                             {coi != null && <span className="text-gray-500 dark:text-dark-text-muted">COI {coi.toFixed(2)}%</span>}
                                                                             {offspringList.length > 0 && (
@@ -1191,7 +1191,7 @@ const AnimalModalV2 = ({
                                                                         </div>
                                                                         <div className="min-w-0">
                                                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '•'}</span>
+                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{mate ? formatAnimalDisplayName(mate) : '•'}</span>
                                                                         </div>
                                                                         <div>
                                                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">COI</span>
@@ -1238,7 +1238,7 @@ const AnimalModalV2 = ({
                                                                                     </div>
                                                                                     <div className="flex-1 min-w-0">
                                                                                         <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Mate</div>
-                                                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</p>
+                                                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{formatAnimalDisplayName(mate)}</p>
                                                                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">{mate.species}</p>
                                                                                         <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">{mate.id_public}</p>
                                                                                     </div>
@@ -1280,7 +1280,7 @@ const AnimalModalV2 = ({
                                                                                             </div>
                                                                                             <div className="w-full text-center px-2 pb-1">
                                                                                                 <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                                                                    {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
+                                                                                                    {formatAnimalDisplayName(offspring)}
                                                                                                 </div>
                                                                                             </div>
                                                                                             <div className="w-full px-2 pb-2 flex justify-end">
