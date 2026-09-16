@@ -1057,8 +1057,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full px-2 pb-1">
-                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text leading-snug text-left">
-                                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" textClassName="break-words leading-snug text-left" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text leading-snug text-center">
+                                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-center gap-1 text-center" textClassName="break-words leading-snug text-center" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
                                                     </div>
                                                 </div>
 
@@ -1123,8 +1123,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 )}
                             </div>
                             <div className="p-3 flex flex-col gap-1.5 flex-1">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text text-left">
-                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" textClassName="break-words leading-snug text-left" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text text-center">
+                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-center gap-1 text-center" textClassName="break-words leading-snug text-center" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species}{ageStr ? ` · ${ageStr}` : ''}</p>
                                 {isSale && priceLabel && (
