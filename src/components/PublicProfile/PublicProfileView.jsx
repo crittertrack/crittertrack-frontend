@@ -1033,7 +1033,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-6 h-28">
+                                                <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28">
                                                     <div className="relative w-32 h-28 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
@@ -1057,8 +1057,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full text-center px-2 pb-1">
-                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2">
-                                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center justify-center gap-1.5 text-center" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text leading-snug">
+                                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center justify-center gap-1.5 text-center" textClassName="break-words leading-snug" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
                                                     </div>
                                                 </div>
 
