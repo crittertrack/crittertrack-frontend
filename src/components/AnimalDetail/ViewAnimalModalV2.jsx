@@ -552,7 +552,7 @@ const ViewAnimalModalV2 = ({
                                                 <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
                                                     <div className="text-center leading-none">
                                                         <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
-                                                        <div className="mt-1 text-lg font-bold text-gray-900 dark:text-dark-text">
+                                                        <div className="mt-1 text-base font-bold text-gray-900 dark:text-dark-text">
                                                             {(() => {
                                                                 const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
                                                                 if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
