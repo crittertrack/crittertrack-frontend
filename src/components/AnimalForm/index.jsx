@@ -1007,7 +1007,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
 
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const variety = [animal.color, animal.markings, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
-        const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+        const fullName = formatAnimalDisplayName(animal);
         const handleClick = onClick && animal.id_public ? () => onClick(animal) : undefined;
 
         const isRowLayout = (genIndex === 2 && !stacked) || (stacked && (genIndex === 0 || genIndex === 1));
@@ -1353,7 +1353,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         if (!animal) return null;
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const variety = [animal.color, animal.markings, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
-        const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+        const fullName = formatAnimalDisplayName(animal);
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;

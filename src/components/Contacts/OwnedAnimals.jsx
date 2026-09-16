@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { Cat } from 'lucide-react';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const AnimalCard = ({ animal }) => (
     <Link
@@ -19,7 +20,7 @@ const AnimalCard = ({ animal }) => (
             )}
         </div>
         <h4 className="font-semibold text-gray-800 truncate">
-            {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+            {formatAnimalDisplayName(animal)}
         </h4>
         <p className="text-xs text-gray-500 mt-1 font-mono">
             {animal.id_public}

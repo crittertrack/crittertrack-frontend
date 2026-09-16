@@ -29,6 +29,7 @@ import { RecordsTabContent } from './RecordsTabContent';
 import InfoButton from '../shared/InfoButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
+import { AnimalNameWithFlag } from '../../utils/animalDisplayName';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -399,7 +400,7 @@ const LiteAnimalModal = ({
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text flex items-center gap-2 flex-wrap break-words">
-                                        {animal.prefix} {animal.name} {animal.suffix} {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
+                                        <AnimalNameWithFlag animal={animal} /> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
                                     </h2>
                                     {!isHeaderCollapsed && (
                                         <>

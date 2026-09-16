@@ -20,6 +20,7 @@ import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { buildChangedSaveFields } from '../../utils/saveDiff';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
@@ -384,7 +385,7 @@ const ParentSearchModal = ({
                 </div>
                 <div className="flex-grow">
                     <p className="font-semibold text-gray-800 dark:text-dark-text">
-                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                        {formatAnimalDisplayName(animal)}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary">

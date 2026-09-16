@@ -6,6 +6,7 @@ import ViewAnimalModalV2 from './AnimalDetail/ViewAnimalModalV2';
 import { getCountryFlag, getCountryName, US_STATES, getStateName } from '../utils/locationUtils';
 import InfoButton from './shared/InfoButton';
 import { API_BASE_URL } from '../utils/apiConfig';
+import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 
 // Currency symbols
 const currencySymbols = {
@@ -232,7 +233,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         
         // Pre-fill message with animal info
         const listingType = animal.isForSale ? 'for sale' : 'for stud';
-        const animalDisplayName = `${animal.prefix ? animal.prefix + ' ' : ''}${animal.name}${animal.suffix ? ' ' + animal.suffix : ''}`;
+        const animalDisplayName = formatAnimalDisplayName(animal);
         const defaultMessage = `Hi! I'm interested in your ${animal.species || 'animal'} "${animalDisplayName}" (${animal.id_public}) that you have listed ${listingType}. Could you please provide more information?`;
         
         setInquiryAnimal(animal);
@@ -776,7 +777,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                         className="font-semibold text-gray-800 dark:text-dark-text text-lg cursor-pointer hover:text-accent transition"
                         onClick={() => onViewAnimal && onViewAnimal(animal.id_public)}
                     >
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        {formatAnimalDisplayName(animal)}
                     </h3>
                     <span className="text-xs text-gray-500 dark:text-dark-text font-mono">
                         {animal.id_public}

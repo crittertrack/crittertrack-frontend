@@ -13,6 +13,7 @@ import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/sche
 import { parseLocalDate } from '../../utils/dateFormatter';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { getCachedUiMode } from '../../utils/uiModeCache';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import '../NewsTickerBanner.css';
 
 // Day-based "is this overdue" check (grooming/training/maintenance schedules).
@@ -69,7 +70,7 @@ const describeNotification = (n) => {
 };
 
 // Matches AnimalList's own [prefix, name, suffix] display convention.
-const animalDisplayName = (a) => [a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ');
+const animalDisplayName = (a) => formatAnimalDisplayName({ ...a, name: a?.name || 'Unnamed' });
 
 // "(Name1, Name2 +N more)" — keeps the ticker text from growing unbounded.
 const formatNameList = (names, max = 2) => {

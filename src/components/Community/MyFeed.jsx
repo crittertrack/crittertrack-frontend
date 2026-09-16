@@ -3,6 +3,7 @@ import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Users, Star, Edit, ShoppingBag, UserPlus, Search, Loader2, Cat, Mars, Venus, VenusAndMars, Circle, User } from 'lucide-react';
 import { getCurrencySymbol } from '../../utils/locationUtils';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const MyFeed = ({ authToken, API_BASE_URL }) => {
     const navigate = useNavigate();
@@ -112,12 +113,12 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                         {favoriteAnimals.filter(animal => {
                             if (!animalSearch.trim()) return true;
                             const q = animalSearch.toLowerCase();
-                            const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ').toLowerCase();
+                            const fullName = formatAnimalDisplayName(animal).toLowerCase();
                             return fullName.includes(q) || (animal.id_public || '').toLowerCase().includes(q) || (animal.species || '').toLowerCase().includes(q);
                         }).map(animal => {
                             const VARIETY_KEYS = ['color', 'markings', 'earset', 'coat'];
                             const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
-                            const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                            const fullName = formatAnimalDisplayName(animal);
                             const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
                             return (
                                 <div

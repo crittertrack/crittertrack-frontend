@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import AnimalImage from './shared/AnimalImage';
 import { formatDate, parseLocalDate } from '../utils/dateFormatter';
+import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 
 const TABS = [
     { id: 'dashboard', label: 'Dashboard', icon: Info },
@@ -101,7 +102,7 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">
-                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                            {formatAnimalDisplayName(animal)}
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">
                                             {animal.species} • {animal.gender} • {animal.id_public}

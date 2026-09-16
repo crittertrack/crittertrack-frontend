@@ -11,6 +11,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
 
@@ -601,7 +602,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         if (statusFilter && animal.status !== statusFilter) return false;
         if (animalSearch) {
             const q = animalSearch.toLowerCase();
-            const name = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ').toLowerCase();
+            const name = formatAnimalDisplayName(animal).toLowerCase();
             if (!name.includes(q) && !(animal.id_public || '').toLowerCase().includes(q)) return false;
         }
         return true;
@@ -1056,7 +1057,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full text-center px-2 pb-1">
-                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2">{formatAnimalDisplayName(animal)}</div>
                                                 </div>
 
                                                 {/* ID bottom-right */}
@@ -1120,7 +1121,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 )}
                             </div>
                             <div className="p-3 flex flex-col gap-1.5 flex-1">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-1">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-1">{formatAnimalDisplayName(animal)}</p>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species}{ageStr ? ` · ${ageStr}` : ''}</p>
                                 {isSale && priceLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/60 rounded-full px-2 py-0.5 w-fit">
@@ -1253,7 +1254,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const ParentMiniCard = ({ role, animal }) => {
                     if (!animal) return null;
                     const imgUrl = animal.imageUrl || animal.photoUrl || null;
-                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                    const fullName = formatAnimalDisplayName(animal);
                     const isSire = role === 'Sire';
                     return (
                         <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-dark-surface rounded-lg p-2 border border-gray-100 dark:border-dark-border min-w-0">

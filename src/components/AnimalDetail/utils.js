@@ -500,7 +500,7 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                         {/* Name */}
                                         <div className="w-full text-center px-2 pb-1">
                                             <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                                {formatAnimalDisplayName(animal)}
                                             </div>
                                         </div>
 
