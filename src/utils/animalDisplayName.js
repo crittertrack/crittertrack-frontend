@@ -81,9 +81,18 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
     const text = displayText || [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ') || 'Unnamed';
 
     return (
-        <span className={`${wrapperClassName} ${className}`.trim()}>
-            {flagCode && <span className={`fi fi-${flagCode} ${flagClassName}`.trim()} aria-label={`${flagCode.toUpperCase()} flag`} />}
-            <span className={textClassName}>{text}</span>
+        <span
+            className={`${wrapperClassName} ${className}`.trim()}
+            style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}
+        >
+            {flagCode && (
+                <span
+                    className={`fi fi-${flagCode} ${flagClassName}`.trim()}
+                    aria-label={`${flagCode.toUpperCase()} flag`}
+                    style={{ display: 'inline-block', flexShrink: 0, order: 0 }}
+                />
+            )}
+            <span className={textClassName} style={{ order: 1 }}>{text}</span>
         </span>
     );
 };

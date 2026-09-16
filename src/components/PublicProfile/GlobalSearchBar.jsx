@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import apiClient from '../../utils/apiClient';
+import { AnimalNameWithFlag } from '../../utils/animalDisplayName';
 import { Flame, Gem, Loader2, Search, User, Cat } from 'lucide-react';
 
 const getDonationBadge = (user) => {
@@ -320,7 +321,7 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
                                                 </p>
                                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
                                                     {animal.species} · {animal.gender} · {animal.id_public}

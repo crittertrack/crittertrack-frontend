@@ -11,7 +11,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
-import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
 
@@ -1057,7 +1057,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full text-center px-2 pb-1">
-                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2">{formatAnimalDisplayName(animal)}</div>
+                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2">
+                                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center justify-center gap-1.5 text-center" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                                    </div>
                                                 </div>
 
                                                 {/* ID bottom-right */}
@@ -1121,7 +1123,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 )}
                             </div>
                             <div className="p-3 flex flex-col gap-1.5 flex-1">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-1">{formatAnimalDisplayName(animal)}</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-1">
+                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                </p>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species}{ageStr ? ` · ${ageStr}` : ''}</p>
                                 {isSale && priceLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/60 rounded-full px-2 py-0.5 w-fit">
