@@ -287,6 +287,15 @@ useEffect(() => {
     };
 }, [animal?.id_public, authToken, API_BASE_URL]);
 
+useEffect(() => {
+    console.log("OFFSPRING DEBUG", {
+        animalId: animal?.id_public,
+        authToken: !!authToken,
+        animalLitters,
+        pedigreeOffspring
+    });
+}, [animal?.id_public, authToken, animalLitters, pedigreeOffspring]);
+
     // Listen for animal updates and refetch litters and pedigree data
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
@@ -808,6 +817,7 @@ useEffect(() => {
                                 </InfoCard>
                             </div>
                             </div>
+                            
                             <InfoCard title="Offspring & Litters" icon={<Users size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
     {(animalLitters === null || pedigreeOffspring === null) ? (
         <div className="text-sm text-gray-500 dark:text-dark-text-muted animate-pulse">
