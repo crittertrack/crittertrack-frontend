@@ -34,6 +34,7 @@ const FLAG_EMOJI_TO_CODE = {
     '🇭🇰': 'hk',
     '🇲🇾': 'my',
     '🇹🇭': 'th',
+    '🇫🇮': 'fi',
 };
 
 const FLAG_REGEX = /(\p{Regional_Indicator}{2})/u;
