@@ -185,7 +185,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             </div>
                         )}
                         <div className="flex-grow min-w-0">
-                            <AnimalNameWithFlag animal={manualData} className="w-full justify-start" wrapperClassName="inline-flex items-start justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
+                            <AnimalNameWithFlag animal={manualData} className="w-full justify-center" wrapperClassName="inline-flex items-start justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="font-semibold text-gray-800 dark:text-dark-text text-left" flagClassName="inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5" />
                             {manualData.variety && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{manualData.variety}</p>}
                             {manualData.genCode && <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">{manualData.genCode}</p>}
                             {manualData.birthDate && <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5">{formatDate(manualData.birthDate)}</p>}
