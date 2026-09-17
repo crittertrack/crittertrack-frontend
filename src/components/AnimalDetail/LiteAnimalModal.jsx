@@ -678,16 +678,54 @@ const LiteAnimalModal = ({
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
-                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
+                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-[260px]">
                                 <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} manualData={animal.manualPedigree?.sire} />
                             </div>
                             {/* Dam Card */}
-                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
+                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-[260px]">
                                 <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} manualData={animal.manualPedigree?.dam} />
                             </div>
+                            {(animalCOI != null || loadingCOI) && (
+                                <div className="h-[260px]">
+                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col divide-y divide-gray-200 dark:divide-dark-border overflow-hidden">
+                                        <div className="flex-1 p-3">
+                                            <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
+                                                <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding</h3>
+                                                <InfoButton title="Coefficient of Inbreeding (COI)" lessonId="animal-tab-view-only">
+                                                    <p>When both parents are linked via "Link CTC" (not manually entered), this is automatically calculated from shared ancestors in the pedigree, plus how many common ancestors it was calculated from.</p>
+                                                    <p>To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead.</p>
+                                                </InfoButton>
+                                            </div>
+                                            {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
+                                            {!loadingCOI && (
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                    {animalCOI != null ? `${animalCOI.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {commonAncestorCount != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">{commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''}</span>}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 p-3">
+                                            <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
+                                                <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
+                                                <InfoButton title="Average Kinship (AVK)">
+                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
+                                                    <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
+                                                </InfoButton>
+                                            </div>
+                                            {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
+                                            {!loadingCOI && (
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                    {avgKinship != null ? `${avgKinship.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {avkPopulationSize != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">vs. {avkPopulationSize} animal{avkPopulationSize !== 1 ? 's' : ''}</span>}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {/* Health Summary Card */}
-                            <div>
-                                <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                            <div className="h-[260px]">
+                                <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400 dark:text-dark-text-muted" />} className="h-full">
                                     <div className="space-y-3">
                                         <div>
                                             <label className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-dark-text-secondary">Health Status</label>
@@ -713,62 +751,7 @@ const LiteAnimalModal = ({
                                     </div>
                                 </InfoCard>
                             </div>
-                            {/* Recent Activity Card */}
-                            <div>
-                                <InfoCard title="Recent Activity" icon={<Clock size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
-                                    {(() => {
-                                        const recentEvents = animalTimelineEvents.slice(0, 5);
-                                        if (recentEvents.length === 0) return <p className="text-sm text-gray-400 dark:text-dark-text-muted">No recent activity.</p>;
-                                        return recentEvents.map((event) => (
-                                            <TimelineItem
-                                                key={event.id}
-                                                icon={getEventIcon(event.type)}
-                                                title={event.title}
-                                                description={event.description ? renderBoldText(event.description) : undefined}
-                                                date={event.date}
-                                            />
-                                        ));
-                                    })()}
-                                </InfoCard>
                             </div>
-                            
-                            </div>
-                            {(animalCOI != null || loadingCOI) && (
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg p-3 border border-gray-200 dark:border-dark-border">
-                                        <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
-                                            <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding</h3>
-                                            <InfoButton title="Coefficient of Inbreeding (COI)" lessonId="animal-tab-view-only">
-                                                <p>When both parents are linked via "Link CTC" (not manually entered), this is automatically calculated from shared ancestors in the pedigree, plus how many common ancestors it was calculated from.</p>
-                                                <p>To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead.</p>
-                                            </InfoButton>
-                                        </div>
-                                        {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
-                                        {!loadingCOI && (
-                                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
-                                                {animalCOI != null ? `${animalCOI.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
-                                                {commonAncestorCount != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">{commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''}</span>}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg p-3 border border-gray-200 dark:border-dark-border">
-                                        <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
-                                            <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
-                                            <InfoButton title="Average Kinship (AVK)">
-                                                <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
-                                                <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
-                                            </InfoButton>
-                                        </div>
-                                        {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
-                                        {!loadingCOI && (
-                                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
-                                                {avgKinship != null ? `${avgKinship.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
-                                                {avkPopulationSize != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">vs. {avkPopulationSize} animal{avkPopulationSize !== 1 ? 's' : ''}</span>}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/60">
                                 <button
                                     type="button"
