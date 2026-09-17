@@ -253,7 +253,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                         <AnimalNameWithFlag
     animal={parentData}
     wrapperClassName="flex w-full items-start justify-start gap-1 text-left"
-    textClassName="font-semibold text-gray-800 dark:text-dark-text"
+    textClassName="font-semibold text-gray-800 dark:text-dark-text !text-left"
     textStyle={{ textAlign: 'left' }}
     flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-0.5"
 />
