@@ -792,10 +792,40 @@ const AnimalModalV2 = ({
                                         Loading offspring & litters...
                                     </div>
                                 ) : (() => {
-                                    const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
-                                    const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
-                                    const _offspringToday = new Date();
-                                    const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
+                                    const litterItems = (animalLitters || []).map(l => ({
+    ...l,
+    _recordType: 'litter'
+}));
+
+const pedItems = (pedigreeOffspring || [])
+    .map(l => ({ ...l, _recordType: 'pedigree' }))
+    .filter(ped => {
+        // If this pedigree record corresponds to an existing litter-management
+        // record, don't render it separately.
+        return !(animalLitters || []).some(litter => {
+            const sameBirthDate =
+                litter.birthDate &&
+                ped.birthDate &&
+                new Date(litter.birthDate).toISOString().slice(0, 10) ===
+                new Date(ped.birthDate).toISOString().slice(0, 10);
+
+            const litterMateId =
+                litter.sireId_public === animal.id_public
+                    ? litter.dam?.id_public
+                    : litter.sire?.id_public;
+
+            const pedigreeMateId = ped.otherParent?.id_public;
+
+            const sameMate =
+                litterMateId &&
+                pedigreeMateId &&
+                litterMateId === pedigreeMateId;
+
+            return sameBirthDate && sameMate;
+        });
+    });
+
+const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
                                         // isPlanned only clears via the explicit "Mated Today" action, so a past
                                         // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
                                         const aIsMated = !a.isPlanned && !!a.matingDate && !a.pregnancyDate && !a.birthDate;
