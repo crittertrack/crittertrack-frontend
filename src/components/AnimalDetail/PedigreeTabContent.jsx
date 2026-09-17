@@ -137,7 +137,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
                         {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-dark-border self-start" />}
                         <div className="flex-1 min-w-0 space-y-0.5 pb-4">
                             {fullName && (
-                                <div className="text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-dark-text leading-tight">
+                                <div className="w-full text-left text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-dark-text leading-tight">
                                     <AnimalNameWithFlag
                                         animal={d}
                                         wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left"
