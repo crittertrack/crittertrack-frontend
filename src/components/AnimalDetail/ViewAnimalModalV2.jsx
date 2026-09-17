@@ -558,7 +558,9 @@ const ViewAnimalModalV2 = ({
                                                                 if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
                                                                 const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
                                                                 const computedTotal = sourceItems.reduce((sum, item) => {
-                                                                    const fromLitter = Number(item?.litterSizeBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
+                                                                    const directTotal = Number(item?.litterSizeBorn ?? item?.numberBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
+                                                                    const genderTotal = Number(item?.maleCount ?? 0) + Number(item?.femaleCount ?? 0) + Number(item?.unknownCount ?? 0);
+                                                                    const fromLitter = Number.isFinite(directTotal) && directTotal > 0 ? directTotal : genderTotal;
                                                                     return sum + (Number.isFinite(fromLitter) ? fromLitter : 0);
                                                                 }, 0);
                                                                 return computedTotal || 0;
