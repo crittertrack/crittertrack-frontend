@@ -408,6 +408,7 @@ useEffect(() => {
                         )}
                     </div>
 
+ 
                     {/* Right: Info & Actions */}
                     <div className="flex-1 flex flex-col min-w-0">
                         <div className="bg-white/70 dark:bg-dark-card-bg/70 backdrop-blur-sm rounded-lg border border-gray-300 dark:border-dark-border shadow-sm p-3 md:p-4 h-full flex flex-col">

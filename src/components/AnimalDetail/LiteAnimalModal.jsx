@@ -310,9 +310,6 @@ useEffect(() => {
     // Behavior/Breeding/legacy-Records all collapse into sections under this one Records tab, and
     // Timeline is dropped entirely since native Lite has no equivalent.
     const [openRecordSections, setOpenRecordSections] = useState({ identification: true, appearance: false, health: false, care: false, behavior: false, breeding: false, legalOther: false });
-
-    if (!animal) return null;
-
     const toggleRecordSection = (key) => setOpenRecordSections((s) => ({ ...s, [key]: !s[key] }));
 
     const TABS = [
@@ -372,6 +369,8 @@ useEffect(() => {
             return { label, items };
         }).filter(g => g.items.length > 0);
     }, [relationships, globalRels, animal?.id_public, animal?.sireId_public, animal?.damId_public]);
+
+    if (!animal) return null;
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-0 sm:p-4 z-[80] backdrop-blur-sm">

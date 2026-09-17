@@ -315,8 +315,6 @@ useEffect(() => {
 
     const allImages = useMemo(() => [animal?.imageUrl || animal?.photoUrl, ...(animal?.extraImages || [])].filter(Boolean), [animal]);
 
-    if (!animal) return null;
-
     const TABS = [
         { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
@@ -381,6 +379,8 @@ useEffect(() => {
             return { label, items };
         }).filter(g => g.items.length > 0);
     }, [relationships, globalRels, animal?.id_public, animal?.sireId_public, animal?.damId_public]);
+
+    if (!animal) return null;
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-0 sm:p-4 z-[80] backdrop-blur-sm">
