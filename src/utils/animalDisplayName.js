@@ -76,20 +76,31 @@ export const formatAnimalDisplayName = (animal = {}) => {
     return displayText || 'Unnamed';
 };
 
-export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'inline-flex items-start justify-center gap-1.5 text-center', wrapperStyle = {}, textStyle = {} }) => {
+export const AnimalNameWithFlag = ({
+    animal,
+    className = '',
+    textClassName = '',
+    flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden',
+    wrapperClassName = 'flex w-full items-start justify-center gap-1.5 text-center',
+    wrapperStyle = {},
+    textStyle = {}
+}) => {
     const { flagCode, displayText } = getAnimalDisplayParts(animal);
-    const text = displayText || [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ') || 'Unnamed';
+    const text =
+        displayText ||
+        [animal?.prefix, animal?.name, animal?.suffix]
+            .filter(Boolean)
+            .join(' ') ||
+        'Unnamed';
 
     const defaultStyle = {
         direction: 'ltr',
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
         gap: '0.25rem',
-        maxWidth: '100%',
+        width: '100%',
         minWidth: 0,
-        verticalAlign: 'baseline',
-        flexShrink: 0,
         textAlign: 'center',
     };
 
@@ -102,9 +113,16 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
                 <span
                     className={`fi fi-${flagCode} ${flagClassName}`.trim()}
                     aria-label={`${flagCode.toUpperCase()} flag`}
-                    style={{ display: 'inline-block', flex: '0 0 auto', alignSelf: 'flex-start', marginTop: '0.05rem', lineHeight: 1 }}
+                    style={{
+                        display: 'inline-block',
+                        flex: '0 0 auto',
+                        alignSelf: 'flex-start',
+                        marginTop: '0.05rem',
+                        lineHeight: 1
+                    }}
                 />
             )}
+
             <span
                 className={textClassName}
                 style={{
@@ -114,6 +132,7 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
                     wordBreak: 'break-word',
                     whiteSpace: 'normal',
                     display: 'block',
+                    flex: '0 1 auto',
                     textAlign: 'center',
                     ...textStyle,
                 }}
