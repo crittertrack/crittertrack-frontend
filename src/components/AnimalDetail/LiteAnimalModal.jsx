@@ -592,136 +592,41 @@ useEffect(() => {
         </div>
 
         <div className="mt-1 text-sm font-bold text-gray-900 dark:text-dark-text">
-            {(() => {
-                const explicitTotal = Number(
-                    animal.totalOffspringProduced ??
-                    animal.offspringCount ??
-                    animal.litterCount ??
-                    animal.viableOffspringCount ??
-                    0
-                );
+            ```jsx id="f5f1xq"
+{(() => {
+    const seenIds = new Set();
+    let computedTotal = 0;
 
-                if (Number.isFinite(explicitTotal) && explicitTotal > 0) {
-                    return explicitTotal;
+    for (const group of pedigreeOffspring || []) {
+        const offspring = Array.isArray(group?.offspring)
+            ? group.offspring
+            : [];
+
+        for (const child of offspring) {
+            if (!child) continue;
+
+            const isThisAnimalParent =
+                child.sireId_public === animal.id_public ||
+                child.damId_public === animal.id_public;
+
+            if (!isThisAnimalParent) {
+                continue;
+            }
+
+            if (child.id_public) {
+                if (seenIds.has(child.id_public)) {
+                    continue;
                 }
 
-                if (animalLitters === null || pedigreeOffspring === null) {
-                    return 0;
-                }
+                seenIds.add(child.id_public);
+            }
 
-                /*
-                 * Litter Management is authoritative.
-                 * Count its actual linked offspring first.
-                 */
-                const managedOffspringIds = new Set();
+            computedTotal += 1;
+        }
+    }
 
-                for (const litter of animalLitters || []) {
-                    for (const id of litter?.offspringIds_public || []) {
-                        if (id) {
-                            managedOffspringIds.add(id);
-                        }
-                    }
-
-                    const lid = litter?.litter_id_public;
-
-                    if (lid && breedingRecordOffspring?.[lid]) {
-                        for (const child of breedingRecordOffspring[lid]) {
-                            if (child?.id_public) {
-                                managedOffspringIds.add(child.id_public);
-                            }
-                        }
-                    }
-                }
-
-                const seenIds = new Set(managedOffspringIds);
-                let computedTotal = managedOffspringIds.size;
-
-                /*
-                 * Add only pedigree offspring that are NOT already
-                 * represented by a Litter Management litter.
-                 */
-                for (const group of pedigreeOffspring || []) {
-                    const offspring = Array.isArray(group?.offspring)
-                        ? group.offspring
-                        : [];
-
-                    for (const child of offspring) {
-                        if (!child) continue;
-
-                        // Exact offspring ID already belongs to a managed litter.
-                        if (
-                            child.id_public &&
-                            managedOffspringIds.has(child.id_public)
-                        ) {
-                            continue;
-                        }
-
-                        // Already counted elsewhere.
-                        if (
-                            child.id_public &&
-                            seenIds.has(child.id_public)
-                        ) {
-                            continue;
-                        }
-
-                        const childBirthDate = child.birthDate
-                            ? new Date(child.birthDate)
-                                .toISOString()
-                                .slice(0, 10)
-                            : null;
-
-                        const childOtherParentId =
-                            child.sireId_public === animal.id_public
-                                ? child.damId_public
-                                : child.sireId_public;
-
-                        /*
-                         * Same matching rule as the Offspring & Litters
-                         * display: birth date + other parent.
-                         */
-                        const matchesManagedLitter = (animalLitters || []).some(
-                            litter => {
-                                const litterBirthDate = litter?.birthDate
-                                    ? new Date(litter.birthDate)
-                                        .toISOString()
-                                        .slice(0, 10)
-                                    : null;
-
-                                if (
-                                    !childBirthDate ||
-                                    !litterBirthDate ||
-                                    childBirthDate !== litterBirthDate
-                                ) {
-                                    return false;
-                                }
-
-                                const litterOtherParentId =
-                                    litter.sireId_public === animal.id_public
-                                        ? litter.damId_public
-                                        : litter.sireId_public;
-
-                                return (
-                                    litterOtherParentId &&
-                                    childOtherParentId &&
-                                    litterOtherParentId === childOtherParentId
-                                );
-                            }
-                        );
-
-                        if (matchesManagedLitter) {
-                            continue;
-                        }
-
-                        if (child.id_public) {
-                            seenIds.add(child.id_public);
-                        }
-
-                        computedTotal += 1;
-                    }
-                }
-
-                return computedTotal;
-            })()}
+    return computedTotal;
+})()}
         </div>
     </div>
 </div>

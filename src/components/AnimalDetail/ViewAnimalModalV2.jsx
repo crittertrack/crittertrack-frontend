@@ -575,33 +575,41 @@ useEffect(() => {
                                                     <div className="text-center leading-none">
                                                         <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
                                                         <div className="mt-0.5 text-sm font-bold text-gray-900 dark:text-dark-text">
-                                                            {(() => {
-                                                                const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
-                                                                if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
-                                                                if (animalLitters === null || pedigreeOffspring === null) {
-                                                                    return Number.isFinite(explicitTotal) ? explicitTotal : 0;
-                                                                }
-                                                                const seenIds = new Set();
-                                                                let computedTotal = 0;
-                                                                const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
-                                                                for (const item of sourceItems) {
-                                                                    const groupedOffspring = Array.isArray(item?.offspring) ? item.offspring : [];
-                                                                    if (groupedOffspring.length > 0) {
-                                                                        for (const child of groupedOffspring) {
-                                                                            if (child?.id_public && !seenIds.has(child.id_public)) {
-                                                                                seenIds.add(child.id_public);
-                                                                                computedTotal += 1;
-                                                                            }
-                                                                        }
-                                                                        continue;
-                                                                    }
-                                                                    const directTotal = Number(item?.litterSizeBorn ?? item?.numberBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
-                                                                    const genderTotal = Number(item?.maleCount ?? 0) + Number(item?.femaleCount ?? 0) + Number(item?.unknownCount ?? 0);
-                                                                    const fromLitter = Number.isFinite(directTotal) && directTotal > 0 ? directTotal : genderTotal;
-                                                                    if (Number.isFinite(fromLitter) && fromLitter > 0) computedTotal += fromLitter;
-                                                                }
-                                                                return computedTotal || 0;
-                                                            })()}
+                                                            ```jsx id="f5f1xq"
+{(() => {
+    const seenIds = new Set();
+    let computedTotal = 0;
+
+    for (const group of pedigreeOffspring || []) {
+        const offspring = Array.isArray(group?.offspring)
+            ? group.offspring
+            : [];
+
+        for (const child of offspring) {
+            if (!child) continue;
+
+            const isThisAnimalParent =
+                child.sireId_public === animal.id_public ||
+                child.damId_public === animal.id_public;
+
+            if (!isThisAnimalParent) {
+                continue;
+            }
+
+            if (child.id_public) {
+                if (seenIds.has(child.id_public)) {
+                    continue;
+                }
+
+                seenIds.add(child.id_public);
+            }
+
+            computedTotal += 1;
+        }
+    }
+
+    return computedTotal;
+})()}
                                                         </div>
                                                     </div>
                                                 </div>
