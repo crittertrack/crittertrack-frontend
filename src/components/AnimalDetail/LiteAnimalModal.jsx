@@ -29,6 +29,7 @@ import { RecordsTabContent } from './RecordsTabContent';
 import InfoButton from '../shared/InfoButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -259,19 +260,31 @@ const LiteAnimalModal = ({
         return () => { cancelled = true; };
     }, [animal?.id_public, authToken, API_BASE_URL]);
 
-    // Fetch pedigree-based offspring (not in litter management)
-    useEffect(() => {
-        if (!animal?.id_public || !authToken) return;
-        let cancelled = false;
-        apiClient.get(`/animals/${animal.id_public}/offspring`)
-            .then(res => {
-                if (cancelled) return;
-                const unmanaged = (res.data || []).filter(l => !l.litter_id_public);
-                setPedigreeOffspring(unmanaged);
-            })
-            .catch(() => { if (!cancelled) setPedigreeOffspring([]); });
-        return () => { cancelled = true; };
-    }, [animal?.id_public, authToken, API_BASE_URL]);
+    // Fetch all known offspring.
+// Litter Management is handled separately by animalLitters.
+// This endpoint also returns managed offspring because the Family Tree
+// needs to know about every relative. The display logic below consolidates
+// managed offspring into their existing Litter Management record.
+useEffect(() => {
+    if (!animal?.id_public || !authToken) return;
+
+    let cancelled = false;
+
+    apiClient.get(`/animals/${animal.id_public}/offspring?includeManaged=true`)
+        .then(res => {
+            if (cancelled) return;
+
+            const offspring = Array.isArray(res.data) ? res.data : [];
+            setPedigreeOffspring(offspring);
+        })
+        .catch(() => {
+            if (!cancelled) setPedigreeOffspring([]);
+        });
+
+    return () => {
+        cancelled = true;
+    };
+}, [animal?.id_public, authToken, API_BASE_URL]);
 
     // Listen for animal updates and refetch litters and pedigree data
     useEffect(() => {
@@ -399,7 +412,7 @@ const LiteAnimalModal = ({
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text flex items-center gap-2 flex-wrap break-words">
-                                        {animal.prefix} {animal.name} {animal.suffix} {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
+                                        <AnimalNameWithFlag animal={animal} /> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
                                     </h2>
                                     {!isHeaderCollapsed && (
                                         <>
@@ -513,103 +526,153 @@ const LiteAnimalModal = ({
 
                             {!isHeaderCollapsed && (
                                 <>
-                                    <div className="mt-3 flex flex-col md:flex-row gap-4 flex-grow">
-                                        <div className="w-full md:w-2/3 space-y-4">
-                                            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
-                                                {/* Row 1 */}
-                                                <InfoItem compact label="Variety">
-                                                    {[animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
-                                                </InfoItem>
-                                                <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
-                                                <InfoItem compact label="Genetics">
-                                                    {animal.geneticCode && (
-                                                        animal.species === 'Ball Python'
-                                                            ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
-                                                            : <code className="font-mono">{animal.geneticCode}</code>
-                                                    )}
-                                                </InfoItem>
+                                    <div className="mt-3 flex flex-col gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-4">
+                                            <div className="min-w-0 space-y-4">
+                                                <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
+                                                    {/* Row 1 */}
+                                                    <InfoItem compact label="Variety">
+                                                        {[animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    </InfoItem>
+                                                    <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
+                                                    <InfoItem compact label="Genetics">
+                                                        {animal.geneticCode && (
+                                                            animal.species === 'Ball Python'
+                                                                ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
+                                                                : <code className="font-mono">{animal.geneticCode}</code>
+                                                        )}
+                                                    </InfoItem>
 
-                                                {/* Row 2 */}
-                                                <InfoItem compact label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
-                                                <InfoItem compact label="Birthdate">
-                                                    {animal.birthDate ? (
-                                                        <>
-                                                            {formatDate(animal.birthDate)}
-                                                            <span className="text-gray-500 dark:text-dark-text-muted ml-1">
-                                                                {(() => {
-                                                                    const birth = new Date(animal.birthDate);
-                                                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                                                    let years = endDate.getFullYear() - birth.getFullYear();
-                                                                    let months = endDate.getMonth() - birth.getMonth();
-                                                                    let days = endDate.getDate() - birth.getDate();
-                                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
-                                                                    if (months < 0) { years--; months += 12; }
-                                                                    const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                                                    return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
-                                                                })()}
-                                                            </span>
-                                                        </>
-                                                    ) : null}
-                                                </InfoItem>
-                                                <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
-
-                                                {/* Row 3 */}
-                                                <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
-                                                <InfoItem compact label="Owner">
-                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || 'N/A'}</span>
-                                                    {animal.coOwnership && <span className="text-gray-500 dark:text-dark-text-muted ml-1">({animal.coOwnership})</span>}
-                                                </InfoItem>
-                                                <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
-                                            </dl>
-                                            <div className="pt-2 border-t border-gray-200 dark:border-dark-border">
-                                                <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2">
-                                                    {(() => {
-                                                        const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
-                                                        const idParts = [
-                                                            animal.id_public,
-                                                            animal.breederAssignedId,
-                                                            animal.microchipNumber,
-                                                            animal.pedigreeRegistrationId,
-                                                            animal.colonyId,
-                                                            animal.tattooId,
-                                                            animal.ringId,
-                                                            animal.eartagNumber,
-                                                            ...parseJsonArrayField(animal.identifiers).map(id => id.value)
-                                                        ];
-                                                        const idString = idParts.filter(Boolean).join(' • ');
-                                                        const linesComponent = lines.length > 0 ? (
-                                                            <span className="flex items-center gap-1">
-                                                                {lines.map(line => (
-                                                                    <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
-                                                                ))}
-                                                            </span>
-                                                        ) : null;
-                                                        const idComponent = idString ? <span>{idString}</span> : null;
-                                                        
-                                                        return (
+                                                    {/* Row 2 */}
+                                                    <InfoItem compact label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
+                                                    <InfoItem compact label="Birthdate">
+                                                        {animal.birthDate ? (
                                                             <>
-                                                                {linesComponent}
-                                                                {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
-                                                                {idComponent}
+                                                                {formatDate(animal.birthDate)}
+                                                                <span className="text-gray-500 dark:text-dark-text-muted ml-1">
+                                                                    {(() => {
+                                                                        const birth = new Date(animal.birthDate);
+                                                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                                        let years = endDate.getFullYear() - birth.getFullYear();
+                                                                        let months = endDate.getMonth() - birth.getMonth();
+                                                                        let days = endDate.getDate() - birth.getDate();
+                                                                        if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                                        if (months < 0) { years--; months += 12; }
+                                                                        const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                                        return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
+                                                                    })()}
+                                                                </span>
                                                             </>
-                                                        );
-                                                    })()}
-                                                </p>
-                                                {animal.tags && animal.tags.length > 0 && (
-                                                    <div className="text-center mt-2">
-                                                        <div className="flex flex-wrap gap-2 justify-center">
-                                                            {animal.tags.map(tag => (
-                                                                <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                        ) : null}
+                                                    </InfoItem>
+                                                    <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+
+                                                    {/* Row 3 */}
+                                                    <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
+                                                    <InfoItem compact label="Owner">
+                                                        <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || 'N/A'}</span>
+                                                        {animal.coOwnership && <span className="text-gray-500 dark:text-dark-text-muted ml-1">({animal.coOwnership})</span>}
+                                                    </InfoItem>
+                                                    <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                                </dl>
+                                            </div>
+                                            <div className="hidden md:flex flex-col">
+                                                <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400 dark:text-dark-text-muted" />} className="h-[104px]" contentClassName="overflow-y-auto py-1">
+                                                    <p className="text-xs text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
+                                                </InfoCard>
                                             </div>
                                         </div>
-                                        <div className="hidden md:w-1/3 md:flex flex-col">
-                                            <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400 dark:text-dark-text-muted" />} className="flex-1" contentClassName="overflow-y-auto">
-                                                <p className="text-xs text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
-                                            </InfoCard> {/* Remarks are now on the Dashboard tab */}
+
+                                        <div className="w-full">
+                                            <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
+                                                <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
+    <div className="text-center leading-none">
+        <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">
+            Total offspring
+        </div>
+
+        <div className="mt-1 text-sm font-bold text-gray-900 dark:text-dark-text">
+{(() => {
+    const seenIds = new Set();
+    let computedTotal = 0;
+
+    for (const group of pedigreeOffspring || []) {
+        const offspring = Array.isArray(group?.offspring)
+            ? group.offspring
+            : [];
+
+        for (const child of offspring) {
+            if (!child) continue;
+
+            const isThisAnimalParent =
+                child.sireId_public === animal.id_public ||
+                child.damId_public === animal.id_public;
+
+            if (!isThisAnimalParent) {
+                continue;
+            }
+
+            if (child.id_public) {
+                if (seenIds.has(child.id_public)) {
+                    continue;
+                }
+
+                seenIds.add(child.id_public);
+            }
+
+            computedTotal += 1;
+        }
+    }
+
+    return computedTotal;
+})()}
+        </div>
+    </div>
+</div>
+                                                <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-2">
+                                                    <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap">
+                                                        {(() => {
+                                                            const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
+                                                            const idParts = [
+                                                                animal.id_public,
+                                                                animal.breederAssignedId,
+                                                                animal.microchipNumber,
+                                                                animal.pedigreeRegistrationId,
+                                                                animal.colonyId,
+                                                                animal.tattooId,
+                                                                animal.ringId,
+                                                                animal.eartagNumber,
+                                                                ...parseJsonArrayField(animal.identifiers).map(id => id.value)
+                                                            ];
+                                                            const idString = idParts.filter(Boolean).join(' • ');
+                                                            const linesComponent = lines.length > 0 ? (
+                                                                <span className="flex items-center gap-1">
+                                                                    {lines.map(line => (
+                                                                        <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
+                                                                    ))}
+                                                                </span>
+                                                            ) : null;
+                                                            const idComponent = idString ? <span>{idString}</span> : null;
+                                                            return (
+                                                                <>
+                                                                    {linesComponent}
+                                                                    {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
+                                                                    {idComponent}
+                                                                </>
+                                                            );
+                                                        })()}
+                                                    </p>
+                                                    {animal.tags && animal.tags.length > 0 && (
+                                                        <div className="text-center mt-2">
+                                                            <div className="flex flex-wrap gap-2 justify-center">
+                                                                {animal.tags.map(tag => (
+                                                                    <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </>
@@ -638,11 +701,6 @@ const LiteAnimalModal = ({
                                 {tab.icon} {tab.label}
                             </button>
                         ))}
-                        {ANIMAL_VIEW_TAB_INFO[activeTab] && (
-                            <InfoButton title={ANIMAL_VIEW_TAB_INFO[activeTab].title} lessonId={ANIMAL_VIEW_TAB_INFO[activeTab].lessonId} className="shrink-0">
-                                <p>{ANIMAL_VIEW_TAB_INFO[activeTab].body}</p>
-                            </InfoButton>
-                        )}
                     </nav>
                 </div>
 
@@ -657,16 +715,54 @@ const LiteAnimalModal = ({
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
-                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
+                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-[260px]">
                                 <ViewOnlyParentCard parentId={animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} manualData={animal.manualPedigree?.sire} />
                             </div>
                             {/* Dam Card */}
-                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full">
+                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-[260px]">
                                 <ViewOnlyParentCard parentId={animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} manualData={animal.manualPedigree?.dam} />
                             </div>
+                            {(animalCOI != null || loadingCOI) && (
+                                <div className="h-[260px]">
+                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col divide-y divide-gray-200 dark:divide-dark-border overflow-hidden">
+                                        <div className="flex-1 p-3">
+                                            <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
+                                                <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding</h3>
+                                                <InfoButton title="Coefficient of Inbreeding (COI)" lessonId="animal-tab-view-only">
+                                                    <p>When both parents are linked via "Link CTC" (not manually entered), this is automatically calculated from shared ancestors in the pedigree, plus how many common ancestors it was calculated from.</p>
+                                                    <p>To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead.</p>
+                                                </InfoButton>
+                                            </div>
+                                            {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
+                                            {!loadingCOI && (
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                    {animalCOI != null ? `${animalCOI.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {commonAncestorCount != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">{commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''}</span>}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 p-3">
+                                            <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
+                                                <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
+                                                <InfoButton title="Average Kinship (AVK)">
+                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
+                                                    <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
+                                                </InfoButton>
+                                            </div>
+                                            {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
+                                            {!loadingCOI && (
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                    {avgKinship != null ? `${avgKinship.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {avkPopulationSize != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">vs. {avkPopulationSize} animal{avkPopulationSize !== 1 ? 's' : ''}</span>}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {/* Health Summary Card */}
-                            <div>
-                                <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                            <div className="h-[260px]">
+                                <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400 dark:text-dark-text-muted" />} className="h-full">
                                     <div className="space-y-3">
                                         <div>
                                             <label className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-dark-text-secondary">Health Status</label>
@@ -692,63 +788,1570 @@ const LiteAnimalModal = ({
                                     </div>
                                 </InfoCard>
                             </div>
-                            {/* Recent Activity Card */}
-                            <div>
-                                <InfoCard title="Recent Activity" icon={<Clock size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
-                                    {(() => {
-                                        const recentEvents = animalTimelineEvents.slice(0, 5);
-                                        if (recentEvents.length === 0) return <p className="text-sm text-gray-400 dark:text-dark-text-muted">No recent activity.</p>;
-                                        return recentEvents.map((event) => (
-                                            <TimelineItem
-                                                key={event.id}
-                                                icon={getEventIcon(event.type)}
-                                                title={event.title}
-                                                description={event.description ? renderBoldText(event.description) : undefined}
-                                                date={event.date}
-                                            />
-                                        ));
-                                    })()}
-                                </InfoCard>
                             </div>
-                            
-                            </div>
-                            {(animalCOI != null || loadingCOI) && (
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg p-3 border border-gray-200 dark:border-dark-border">
-                                        <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
-                                            <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding</h3>
-                                            <InfoButton title="Coefficient of Inbreeding (COI)" lessonId="animal-tab-view-only">
-                                                <p>When both parents are linked via "Link CTC" (not manually entered), this is automatically calculated from shared ancestors in the pedigree, plus how many common ancestors it was calculated from.</p>
-                                                <p>To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead.</p>
-                                            </InfoButton>
-                                        </div>
-                                        {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
-                                        {!loadingCOI && (
-                                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
-                                                {animalCOI != null ? `${animalCOI.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
-                                                {commonAncestorCount != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">{commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''}</span>}
+                            <InfoCard title="Offspring & Litters" icon={<Users size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+    {(animalLitters === null || pedigreeOffspring === null) ? (
+        <div className="text-sm text-gray-500 dark:text-dark-text-muted animate-pulse">
+            Loading offspring & litters...
+        </div>
+    ) : (() => {
+        /*
+         * LITTER MANAGEMENT IS THE PRIMARY SOURCE
+         *
+         * Every litter returned by /litters/for-animal is rendered first.
+         * Pedigree offspring are only rendered separately when they are not
+         * already represented by one of those managed litters.
+         */
+
+        const litterItems = (animalLitters || []).map(litter => ({
+            ...litter,
+            _recordType: 'litter'
+        }));
+
+        /*
+         * Build a set containing every offspring already represented by
+         * Litter Management.
+         *
+         * We use both:
+         *   1. litter.offspringIds_public
+         *   2. breedingRecordOffspring[litterId]
+         *
+         * This makes the consolidation work even if one of those sources
+         * is populated while the other is not.
+         */
+        const managedOffspringIds = new Set();
+
+        (animalLitters || []).forEach(litter => {
+            // IDs stored directly on the litter
+            (litter.offspringIds_public || []).forEach(id => {
+                if (id) {
+                    managedOffspringIds.add(id);
+                }
+            });
+
+            // IDs returned by the litter offspring endpoint
+            const lid = litter.litter_id_public;
+
+            if (lid && breedingRecordOffspring?.[lid]) {
+                breedingRecordOffspring[lid].forEach(offspring => {
+                    if (offspring?.id_public) {
+                        managedOffspringIds.add(offspring.id_public);
+                    }
+                });
+            }
+        });
+
+        /*
+         * PEDIGREE-ONLY RECORDS
+         *
+         * The backend returns pedigree offspring grouped by:
+         *     birthDate + otherParent
+         *
+         * Do NOT throw away an entire pedigree group just because part of
+         * it belongs to a managed litter.
+         *
+         * Instead, remove only the individual offspring already represented
+         * by Litter Management.
+         *
+         * Anything left over remains visible as a pedigree-only record.
+         */
+        const pedItems = (pedigreeOffspring || [])
+            .map(group => {
+                const offspring = Array.isArray(group.offspring)
+                    ? group.offspring
+                    : [];
+
+                const remainingOffspring = offspring.filter(offspring => {
+                    /*
+                     * FIRST: exact offspring ID match.
+                     *
+                     * If this animal is already linked to a managed litter,
+                     * it must not appear again in the pedigree-only section.
+                     */
+                    if (
+                        offspring?.id_public &&
+                        managedOffspringIds.has(offspring.id_public)
+                    ) {
+                        return false;
+                    }
+
+                    /*
+                     * SECOND: fallback matching.
+                     *
+                     * If the ID isn't linked, check whether the offspring
+                     * belongs to a managed litter with the same:
+                     *
+                     *     birth date
+                     *     +
+                     *     other parent
+                     *
+                     * This handles cases where the pedigree contains the
+                     * offspring but the litter's offspringIds_public does
+                     * not contain its ID.
+                     */
+                    const offspringBirthDate = offspring?.birthDate
+                        ? new Date(offspring.birthDate).toISOString().slice(0, 10)
+                        : null;
+
+                    /*
+                     * Without a birth date we cannot safely perform the
+                     * fallback consolidation, so keep the pedigree record.
+                     */
+                    if (!offspringBirthDate) {
+                        return true;
+                    }
+
+                    const offspringOtherParentId =
+                        offspring.sireId_public === animal.id_public
+                            ? offspring.damId_public
+                            : offspring.sireId_public;
+
+                    const belongsToManagedLitter = (animalLitters || []).some(litter => {
+                        const litterBirthDate = litter?.birthDate
+                            ? new Date(litter.birthDate).toISOString().slice(0, 10)
+                            : null;
+
+                        if (
+                            !litterBirthDate ||
+                            litterBirthDate !== offspringBirthDate
+                        ) {
+                            return false;
+                        }
+
+                        const litterOtherParentId =
+                            litter.sireId_public === animal.id_public
+                                ? litter.damId_public
+                                : litter.sireId_public;
+
+                        return (
+                            litterOtherParentId &&
+                            offspringOtherParentId &&
+                            litterOtherParentId === offspringOtherParentId
+                        );
+                    });
+
+                    return !belongsToManagedLitter;
+                });
+
+                /*
+                 * If all offspring in this pedigree group are already
+                 * represented by Litter Management, don't render an empty
+                 * pedigree-only record.
+                 */
+                if (remainingOffspring.length === 0) {
+                    return null;
+                }
+
+                return {
+                    ...group,
+                    offspring: remainingOffspring,
+                    _recordType: 'pedigree'
+                };
+            })
+            .filter(Boolean);
+
+        /*
+         * COMBINED DISPLAY
+         *
+         * Litter Management records remain the authoritative records.
+         * Any genuinely unlinked pedigree records are displayed after them.
+         */
+        const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
+            // isPlanned only clears via the explicit "Mated Today" action,
+            // so a past matingDate alone must not be treated as "mated".
+            const aIsMated =
+                !a.isPlanned &&
+                !!a.matingDate &&
+                !a.pregnancyDate &&
+                !a.birthDate;
+
+            const bIsMated =
+                !b.isPlanned &&
+                !!b.matingDate &&
+                !b.pregnancyDate &&
+                !b.birthDate;
+
+            const aRank = aIsMated ? 0 : a.isPlanned ? 1 : 2;
+            const bRank = bIsMated ? 0 : b.isPlanned ? 1 : 2;
+
+            if (aRank !== bRank) {
+                return aRank - bRank;
+            }
+
+            const aDate = a.birthDate || a.matingDate;
+            const bDate = b.birthDate || b.matingDate;
+
+            if (!aDate) {
+                return 1;
+            }
+
+            if (!bDate) {
+                return -1;
+            }
+
+            return new Date(bDate) - new Date(aDate);
+        });
+
+        if (allRecords.length === 0) {
+            return (
+                <p className="text-center text-sm text-gray-400 dark:text-dark-text-muted">
+                    No known offspring/litters recorded.
+                </p>
+            );
+        }
+
+        return (
+            <div className="space-y-2">
+                {allRecords.map((litter) => {
+                    if (litter._recordType === 'litter') {
+                        const lid = litter.litter_id_public;
+                        const isSire = litter.sireId_public === animal.id_public;
+                        const mate = isSire ? litter.dam : litter.sire;
+                        const isExpanded = expandedBreedingRecords[lid];
+                        const displayName = litter.breedingPairCodeName;
+
+                        // isPlanned only clears via the explicit "Mated Today"
+                        // action, so a past matingDate alone must not be treated
+                        // as "mated".
+                        const lIsMated =
+                            !litter.isPlanned &&
+                            !!litter.matingDate &&
+                            !litter.pregnancyDate &&
+                            !litter.birthDate;
+
+                        const lIsPlannedOnly =
+                            !!litter.isPlanned &&
+                            !litter.pregnancyDate &&
+                            !litter.birthDate;
+
+                        const lIsPregnant =
+                            !!litter.pregnancyDate &&
+                            !litter.birthDate;
+
+                        return (
+                            <div
+                                key={lid}
+                                className={`bg-white dark:bg-dark-card-bg rounded border transition-all ${
+                                    isExpanded
+                                        ? 'border-purple-300 shadow-md'
+                                        : 'border-purple-100 dark:border-purple-700/60'
+                                }`}
+                            >
+                                <div
+                                    onClick={() =>
+                                        setExpandedBreedingRecords({
+                                            ...expandedBreedingRecords,
+                                            [lid]: !isExpanded
+                                        })
+                                    }
+                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition rounded"
+                                >
+                                    {/* Mobile: stacked */}
+                                    <div className="flex-1 sm:hidden">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <p className="font-bold text-gray-800 dark:text-dark-text text-sm">
+                                                {displayName || (
+                                                    <span className="text-gray-400 dark:text-dark-text-muted font-normal">
+                                                        Unnamed Litter
+                                                    </span>
+                                                )}
                                             </p>
-                                        )}
-                                    </div>
-                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg p-3 border border-gray-200 dark:border-dark-border">
-                                        <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
-                                            <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
-                                            <InfoButton title="Average Kinship (AVK)">
-                                                <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
-                                                <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
-                                            </InfoButton>
+
+                                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                                {lid && (
+                                                    <span className="text-xs font-mono bg-purple-100 dark:bg-purple-900/30 px-1.5 py-0.5 rounded text-purple-700 dark:text-purple-300">
+                                                        {lid}
+                                                    </span>
+                                                )}
+
+                                                {lIsPlannedOnly && (
+                                                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/60 rounded px-1.5 py-0.5">
+                                                        <Calendar size={12} className="inline-block align-middle mr-0.5" />
+                                                        Planned
+                                                    </span>
+                                                )}
+
+                                                {lIsMated && (
+                                                    <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700/60 rounded px-1.5 py-0.5">
+                                                        <Hourglass size={12} className="inline-block align-middle mr-0.5" />
+                                                        Mated
+                                                    </span>
+                                                )}
+
+                                                {lIsPregnant && (
+                                                    <span className="text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700/60 rounded px-1.5 py-0.5">
+                                                        <ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" />
+                                                        Pregnant
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                        {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
-                                        {!loadingCOI && (
-                                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
-                                                {avgKinship != null ? `${avgKinship.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
-                                                {avkPopulationSize != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">vs. {avkPopulationSize} animal{avkPopulationSize !== 1 ? 's' : ''}</span>}
-                                            </p>
-                                        )}
+
+                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary flex gap-2 flex-wrap items-center">
+                                            {!litter.isPlanned && litter.birthDate && (
+                                                <span>
+                                                    {formatDate(litter.birthDate)}
+                                                    {litterAge(litter.birthDate) && (
+                                                        <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">
+                                                            ~ {litterAge(litter.birthDate)}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            )}
+
+                                            {lIsMated && (
+                                                <span className="text-sky-600 dark:text-sky-400">
+                                                    {formatDate(litter.matingDate)}
+                                                </span>
+                                            )}
+
+                                            {lIsPregnant && (
+                                                <span className="text-pink-600 dark:text-pink-400">
+                                                    {formatDate(litter.pregnancyDate)}
+                                                </span>
+                                            )}
+
+                                            {lIsPlannedOnly && litter.matingDate && (
+                                                <span className="text-indigo-600 dark:text-indigo-400">
+                                                    {formatDate(litter.matingDate)}
+                                                </span>
+                                            )}
+
+                                            {mate?.name && (
+                                                <span className="truncate max-w-[120px]">
+                                                    {formatAnimalDisplayName(mate)}
+                                                </span>
+                                            )}
+
+                                            {litter.inbreedingCoefficient != null && (
+                                                <span className="text-gray-500 dark:text-dark-text-muted">
+                                                    {litter.inbreedingCoefficient.toFixed(2)}%
+                                                </span>
+                                            )}
+
+                                            {!litter.isPlanned &&
+                                                (litter.litterSizeBorn != null ||
+                                                    litter.maleCount != null ||
+                                                    litter.femaleCount != null ||
+                                                    litter.unknownCount != null) && (
+                                                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                                                        {litter.litterSizeBorn != null && (
+                                                            <span className="font-bold text-gray-900 dark:text-dark-text">
+                                                                {litter.litterSizeBorn}
+                                                            </span>
+                                                        )}
+
+                                                        {litter.litterSizeBorn != null &&
+                                                            (litter.maleCount != null ||
+                                                                litter.femaleCount != null ||
+                                                                litter.unknownCount != null) && (
+                                                                <span className="text-gray-400 dark:text-dark-text-muted">
+                                                                    •
+                                                                </span>
+                                                            )}
+
+                                                        {(litter.maleCount != null ||
+                                                            litter.femaleCount != null ||
+                                                            litter.unknownCount != null) && (
+                                                            <span className="inline-flex gap-0.5 font-semibold">
+                                                                <span className="text-blue-500">
+                                                                    {litter.maleCount ?? 0}M
+                                                                </span>
+                                                                <span className="text-gray-400 dark:text-dark-text-muted">
+                                                                    /
+                                                                </span>
+                                                                <span className="text-pink-500">
+                                                                    {litter.femaleCount ?? 0}F
+                                                                </span>
+                                                                <span className="text-gray-400 dark:text-dark-text-muted">
+                                                                    /
+                                                                </span>
+                                                                <span className="text-purple-500">
+                                                                    {litter.unknownCount ?? 0}U
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                )}
+                                        </div>
                                     </div>
+
+                                    {/* Desktop: 6-column grid */}
+                                    <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-gray-800 dark:text-dark-text text-sm truncate">
+                                                {displayName || (
+                                                    <span className="text-gray-400 dark:text-dark-text-muted font-normal text-xs">
+                                                        Unnamed
+                                                    </span>
+                                                )}
+                                            </p>
+
+                                            {lIsPlannedOnly && (
+                                                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/60 rounded px-1.5 py-0.5 inline-block mt-0.5">
+                                                    <Calendar size={12} className="inline-block align-middle mr-0.5" />
+                                                    Planned
+                                                </span>
+                                            )}
+
+                                            {lIsMated && (
+                                                <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700/60 rounded px-1.5 py-0.5 inline-block mt-0.5">
+                                                    <Hourglass size={12} className="inline-block align-middle mr-0.5" />
+                                                    Mated
+                                                </span>
+                                            )}
+
+                                            {lIsPregnant && (
+                                                <span className="text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700/60 rounded px-1.5 py-0.5 inline-block mt-0.5">
+                                                    <ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" />
+                                                    Pregnant
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            {lid ? (
+                                                <span className="text-xs font-mono bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded text-purple-700 dark:text-purple-300 block w-fit">
+                                                    {lid}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-gray-400 dark:text-dark-text-muted">
+                                                    •
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            {lIsPlannedOnly ? (
+                                                <>
+                                                    <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Planned
+                                                    </span>
+                                                    <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+                                                        {formatDate(litter.matingDate) || '?'}
+                                                    </span>
+                                                </>
+                                            ) : lIsMated ? (
+                                                <>
+                                                    <span className="text-sky-400 text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Mated
+                                                    </span>
+                                                    <span className="text-sm font-semibold text-sky-700 dark:text-sky-300">
+                                                        {formatDate(litter.matingDate) || '?'}
+                                                    </span>
+                                                </>
+                                            ) : lIsPregnant ? (
+                                                <>
+                                                    <span className="text-pink-400 text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Pregnant
+                                                    </span>
+                                                    <span className="text-sm font-semibold text-pink-700 dark:text-pink-300">
+                                                        {formatDate(litter.pregnancyDate) || '?'}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Birth
+                                                    </span>
+                                                    <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
+                                                        {formatDate(litter.birthDate) || '?'}
+                                                        {litter.birthDate &&
+                                                            litterAge(litter.birthDate) && (
+                                                                <span className="ml-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                                                    • {litterAge(litter.birthDate)}
+                                                                </span>
+                                                            )}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                Mate
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">
+                                                {mate
+                                                    ? formatAnimalDisplayName(mate)
+                                                    : '•'}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                COI
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
+                                                {litter.inbreedingCoefficient != null
+                                                    ? `${litter.inbreedingCoefficient.toFixed(2)}%`
+                                                    : '•'}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            {lIsPlannedOnly ? (
+                                                <>
+                                                    <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Due
+                                                    </span>
+                                                    <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+                                                        {formatDate(litter.expectedDueDate) || '•'}
+                                                    </span>
+                                                </>
+                                            ) : lIsMated ? (
+                                                <>
+                                                    <span className="text-sky-400 text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Status
+                                                    </span>
+                                                    <span className="text-xs font-semibold text-sky-500">
+                                                        Awaiting pregnancy
+                                                    </span>
+                                                </>
+                                            ) : lIsPregnant ? (
+                                                <>
+                                                    <span className="text-pink-400 text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Status
+                                                    </span>
+                                                    <span className="text-xs font-semibold text-pink-500">
+                                                        <ScanHeart
+                                                            size={12}
+                                                            className="inline-block align-middle mr-0.5 fill-current"
+                                                        />
+                                                        Awaiting birth
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                        Born
+                                                    </span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-sm font-bold text-gray-800 dark:text-dark-text">
+                                                            {litter.litterSizeBorn ??
+                                                                litter.numberBorn ??
+                                                                0}
+                                                        </span>
+
+                                                        {(litter.maleCount != null ||
+                                                            litter.femaleCount != null ||
+                                                            litter.unknownCount != null) && (
+                                                            <span className="text-xs ml-1">
+                                                                <span className="text-blue-500 font-semibold">
+                                                                    {litter.maleCount ?? 0}M
+                                                                </span>
+                                                                <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">
+                                                                    /
+                                                                </span>
+                                                                <span className="text-pink-500 font-semibold">
+                                                                    {litter.femaleCount ?? 0}F
+                                                                </span>
+                                                                <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">
+                                                                    /
+                                                                </span>
+                                                                <span className="text-purple-500 font-semibold">
+                                                                    {litter.unknownCount ?? 0}U
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <ChevronDown
+                                        size={18}
+                                        className={`text-gray-400 dark:text-dark-text-muted transition-transform flex-shrink-0 ml-2 ${
+                                            isExpanded ? 'rotate-180' : ''
+                                        }`}
+                                    />
                                 </div>
-                            )}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/60">
+
+                                {isExpanded && (
+                                    <div className="border-t border-purple-100 dark:border-purple-700/60 p-3 bg-purple-50 dark:bg-purple-900/20 space-y-3">
+
+                                        {/* Name + CTL | COI | Mate */}
+                                        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 dark:divide-dark-border gap-3">
+                                                <div>
+                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">
+                                                        Litter Name
+                                                    </div>
+
+                                                    {displayName ? (
+                                                        <div className="text-sm font-bold text-gray-800 dark:text-dark-text">
+                                                            {displayName}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">
+                                                            ?
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="pl-3">
+                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">
+                                                        CTL ID
+                                                    </div>
+
+                                                    {lid ? (
+                                                        <div className="font-mono text-sm font-bold text-purple-700 dark:text-purple-300">
+                                                            {lid}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">
+                                                            ?
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col items-center px-2">
+                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">
+                                                    COI
+                                                </div>
+
+                                                {litter.inbreedingCoefficient != null ? (
+                                                    <div className="text-base font-medium text-gray-800 dark:text-dark-text">
+                                                        {litter.inbreedingCoefficient.toFixed(2)}%
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-base font-medium text-gray-300 dark:text-dark-border">
+                                                        •
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {mate ? (
+                                                <div
+                                                    onClick={() =>
+                                                        onViewAnimal &&
+                                                        onViewAnimal(mate)
+                                                    }
+                                                    className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition shadow-sm"
+                                                >
+                                                    <div className="w-10 h-10 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
+                                                        {mate.imageUrl ||
+                                                        mate.photoUrl ? (
+                                                            <img
+                                                                src={
+                                                                    mate.imageUrl ||
+                                                                    mate.photoUrl
+                                                                }
+                                                                alt={mate.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                                <Cat size={18} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                            Mate
+                                                        </div>
+                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">
+                                                            {formatAnimalDisplayName(
+                                                                mate
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                                            {mate.species}
+                                                        </p>
+                                                        <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">
+                                                            {mate.id_public}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div />
+                                            )}
+                                        </div>
+
+                                        {/* Breeding & Birth */}
+                                        {(litter.matingDate ||
+                                            litter.pairingDate ||
+                                            litter.breedingMethod ||
+                                            litter.breedingConditionAtTime ||
+                                            litter.outcome ||
+                                            litter.birthDate ||
+                                            litter.birthMethod ||
+                                            litter.expectedDueDate ||
+                                            litter.weaningDate) && (
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
+                                                <h4 className="text-[10px] font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-2">
+                                                    Breeding &amp; Birth
+                                                </h4>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                                                    {(litter.matingDate ||
+                                                        litter.pairingDate) && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Mating Date
+                                                            </div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                {formatDate(
+                                                                    litter.matingDate ||
+                                                                    litter.pairingDate
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {litter.expectedDueDate && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Expected Due Date
+                                                            </div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                {formatDate(
+                                                                    litter.expectedDueDate
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {litter.breedingMethod && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Breeding Method
+                                                            </div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                {litter.breedingMethod}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {litter.breedingConditionAtTime && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Breeding Condition
+                                                            </div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                {litter.breedingConditionAtTime}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {litter.outcome &&
+                                                        !(
+                                                            litter.isPlanned &&
+                                                            litter.outcome ===
+                                                                'Unknown'
+                                                        ) && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                    Outcome
+                                                                </div>
+                                                                <div
+                                                                    className={`font-semibold ${
+                                                                        litter.outcome ===
+                                                                        'Successful'
+                                                                            ? 'text-green-600 dark:text-green-400'
+                                                                            : litter.outcome ===
+                                                                              'Unsuccessful'
+                                                                            ? 'text-red-500'
+                                                                            : 'text-gray-800 dark:text-dark-text'
+                                                                    }`}
+                                                                >
+                                                                    {litter.outcome}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                    {!litter.isPlanned &&
+                                                        litter.birthMethod && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                    Birth Method
+                                                                </div>
+                                                                <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                    {litter.birthMethod}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                    {!litter.isPlanned &&
+                                                        litter.birthDate && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                    Birth Date
+                                                                </div>
+                                                                <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                    {formatDate(
+                                                                        litter.birthDate
+                                                                    )}
+                                                                    {litterAge(
+                                                                        litter.birthDate
+                                                                    ) && (
+                                                                        <span className="ml-2 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                                                            {litterAge(
+                                                                                litter.birthDate
+                                                                            )}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                    {!litter.isPlanned &&
+                                                        litter.weaningDate && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                    Weaning Date
+                                                                </div>
+                                                                <div className="font-semibold text-gray-800 dark:text-dark-text">
+                                                                    {formatDate(
+                                                                        litter.weaningDate
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Stats bar */}
+                                        {!litter.isPlanned && (
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
+                                                <div className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-dark-border">
+                                                    <div className="grid grid-cols-3 pr-3">
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Born
+                                                            </div>
+                                                            <div className="text-lg font-bold text-gray-800 dark:text-dark-text">
+                                                                {litter.litterSizeBorn ??
+                                                                    litter.numberBorn ??
+                                                                    0}
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Stillborn
+                                                            </div>
+                                                            <div className="text-lg font-bold text-gray-400 dark:text-dark-text-muted">
+                                                                {litter.stillbornCount ??
+                                                                    litter.stillborn ??
+                                                                    0}
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Weaned
+                                                            </div>
+                                                            <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                                                {litter.litterSizeWeaned ??
+                                                                    litter.numberWeaned ??
+                                                                    0}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-3 pl-3">
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Males
+                                                            </div>
+                                                            <div className="text-lg font-bold text-blue-500">
+                                                                {litter.maleCount ??
+                                                                    0}
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Females
+                                                            </div>
+                                                            <div className="text-lg font-bold text-pink-500">
+                                                                {litter.femaleCount ??
+                                                                    0}
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                                Unknown
+                                                            </div>
+                                                            <div className="text-lg font-bold text-purple-500">
+                                                                {litter.unknownCount ??
+                                                                    0}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Notes */}
+                                        {litter.notes && (
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
+                                                <h4 className="text-[10px] font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-1">
+                                                    Notes
+                                                </h4>
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary italic leading-relaxed">
+                                                    {litter.notes}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Photos */}
+                                        {!litter.isPlanned &&
+                                            litter.images &&
+                                            litter.images.length > 0 && (
+                                                <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
+                                                    <h4 className="text-[10px] font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-2">
+                                                        Photos
+                                                    </h4>
+
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {litter.images.map(
+                                                            (img, idx) => (
+                                                                <div
+                                                                    key={
+                                                                        img.r2Key ||
+                                                                        idx
+                                                                    }
+                                                                    className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-border"
+                                                                >
+                                                                    <img
+                                                                        src={
+                                                                            img.url
+                                                                        }
+                                                                        alt={
+                                                                            'Gallery ' +
+                                                                            (idx +
+                                                                                1)
+                                                                        }
+                                                                        className="w-full h-full object-cover cursor-pointer"
+                                                                        onClick={() =>
+                                                                            openExternalLink(
+                                                                                img.url
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                        {/* Linked Offspring loading */}
+                                        {lid &&
+                                            breedingRecordOffspring[lid] ===
+                                                undefined && (
+                                                <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-purple-100 dark:border-purple-700/60">
+                                                    <div className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
+                                                        Offspring
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                        {[...Array(3)].map(
+                                                            (_, i) => (
+                                                                <div
+                                                                    key={i}
+                                                                    className="rounded-lg border-2 border-gray-200 dark:border-dark-border h-52 animate-pulse bg-gray-50 dark:bg-dark-surface flex flex-col items-center pt-2"
+                                                                >
+                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                        <div className="w-20 h-20 bg-gray-200 dark:bg-dark-surface rounded-md" />
+                                                                    </div>
+
+                                                                    <div className="w-full px-2 pb-2">
+                                                                        <div className="h-3 bg-gray-200 dark:bg-dark-surface rounded w-3/4 mx-auto mb-1" />
+                                                                        <div className="h-2 bg-gray-200 dark:bg-dark-surface rounded w-1/2 mx-auto" />
+                                                                    </div>
+
+                                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 border-t border-gray-200 dark:border-dark-border mt-auto" />
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                        {/* Linked Offspring loaded */}
+                                        {lid &&
+                                            breedingRecordOffspring[lid] &&
+                                            breedingRecordOffspring[lid].length >
+                                                0 && (
+                                                <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-purple-100 dark:border-purple-700/60">
+                                                    <div className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
+                                                        Offspring (
+                                                        {
+                                                            breedingRecordOffspring[
+                                                                lid
+                                                            ].length
+                                                        }
+                                                        )
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                        {breedingRecordOffspring[
+                                                            lid
+                                                        ].map(offspring =>
+                                                            offspring.isPrivate ? (
+                                                                <div
+                                                                    key={
+                                                                        offspring.id_public
+                                                                    }
+                                                                    className="relative bg-gray-50 dark:bg-dark-surface rounded-lg border-2 border-gray-200 dark:border-dark-border h-52 flex flex-col items-center overflow-hidden pt-2"
+                                                                >
+                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                        <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-2xl">
+                                                                            •
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-full text-center px-2 pb-1">
+                                                                        <div className="text-sm font-semibold text-gray-500 dark:text-dark-text-muted truncate">
+                                                                            Private Animal
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-full px-2 pb-2 flex justify-end">
+                                                                        <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">
+                                                                            {
+                                                                                offspring.id_public
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                                        <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted">
+                                                                            {offspring.gender ||
+                                                                                '•'}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div
+                                                                    key={
+                                                                        offspring.id_public
+                                                                    }
+                                                                    onClick={() =>
+                                                                        onViewAnimal &&
+                                                                        onViewAnimal(
+                                                                            offspring
+                                                                        )
+                                                                    }
+                                                                    className="relative bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 dark:border-dark-border pt-2"
+                                                                >
+                                                                    {offspring.gender && (
+                                                                        <div className="absolute top-1.5 right-1.5">
+                                                                            {offspring.gender ===
+                                                                            'Male' ? (
+                                                                                <Mars
+                                                                                    size={
+                                                                                        14
+                                                                                    }
+                                                                                    strokeWidth={
+                                                                                        2.5
+                                                                                    }
+                                                                                    className="text-primary"
+                                                                                />
+                                                                            ) : (
+                                                                                <Venus
+                                                                                    size={
+                                                                                        14
+                                                                                    }
+                                                                                    strokeWidth={
+                                                                                        2.5
+                                                                                    }
+                                                                                    className="text-accent"
+                                                                                />
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                        {offspring.imageUrl ||
+                                                                        offspring.photoUrl ? (
+                                                                            <img
+                                                                                src={
+                                                                                    offspring.imageUrl ||
+                                                                                    offspring.photoUrl
+                                                                                }
+                                                                                alt={
+                                                                                    offspring.name
+                                                                                }
+                                                                                className="w-20 h-20 object-cover rounded-md"
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                                                <Cat
+                                                                                    size={
+                                                                                        32
+                                                                                    }
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <div className="w-full text-center px-2 pb-1">
+                                                                        <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
+                                                                            {formatAnimalDisplayName(
+                                                                                offspring
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-full px-2 pb-2 flex justify-end">
+                                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                                                            {
+                                                                                offspring.id_public
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                                        <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">
+                                                                            {offspring.status ||
+                                                                                offspring.gender ||
+                                                                                'Unknown'}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    } else {
+                        /*
+                         * PEDIGREE-ONLY RECORD
+                         *
+                         * At this point every offspring in this record is
+                         * genuinely not represented by a managed litter.
+                         */
+                        const recKey = `${litter.birthDate || 'unknown'}_${litter.otherParent?.id_public || 'none'}`;
+                        const mate = litter.otherParent;
+                        const isExpanded = expandedPedigreeRecords[recKey];
+                        const offspringList = litter.offspring || [];
+
+                        const maleCount = offspringList.filter(
+                            o => o.gender === 'Male'
+                        ).length;
+
+                        const femaleCount = offspringList.filter(
+                            o => o.gender === 'Female'
+                        ).length;
+
+                        const unknownCount = offspringList.filter(
+                            o =>
+                                o.gender !== 'Male' &&
+                                o.gender !== 'Female'
+                        ).length;
+
+                        const coi =
+                            offspringList.find(
+                                o => o.inbreedingCoefficient != null
+                            )?.inbreedingCoefficient ?? null;
+
+                        return (
+                            <div
+                                key={recKey}
+                                className={`bg-white dark:bg-dark-card-bg rounded border transition-all ${
+                                    isExpanded
+                                        ? 'border-purple-300 shadow-md'
+                                        : 'border-purple-100 dark:border-purple-700/60'
+                                }`}
+                            >
+                                <div
+                                    onClick={() =>
+                                        setExpandedPedigreeRecords({
+                                            ...expandedPedigreeRecords,
+                                            [recKey]: !isExpanded
+                                        })
+                                    }
+                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition rounded"
+                                >
+                                    {/* Mobile: stacked */}
+                                    <div className="flex-1 sm:hidden">
+                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary flex gap-2 flex-wrap items-center">
+                                            {litter.birthDate && (
+                                                <span>
+                                                    {formatDate(
+                                                        litter.birthDate
+                                                    )}
+                                                </span>
+                                            )}
+
+                                            {mate?.name && (
+                                                <span className="truncate max-w-[120px]">
+                                                    {formatAnimalDisplayName(
+                                                        mate
+                                                    )}
+                                                </span>
+                                            )}
+
+                                            <span>
+                                                {offspringList.length} born
+                                            </span>
+
+                                            {coi != null && (
+                                                <span className="text-gray-500 dark:text-dark-text-muted">
+                                                    COI {coi.toFixed(2)}%
+                                                </span>
+                                            )}
+
+                                            {offspringList.length > 0 && (
+                                                <span className="inline-flex gap-0.5 font-semibold">
+                                                    <span className="text-blue-500">
+                                                        {maleCount}M
+                                                    </span>
+                                                    <span className="text-gray-400 dark:text-dark-text-muted">
+                                                        /
+                                                    </span>
+                                                    <span className="text-pink-500">
+                                                        {femaleCount}F
+                                                    </span>
+                                                    <span className="text-gray-400 dark:text-dark-text-muted">
+                                                        /
+                                                    </span>
+                                                    <span className="text-purple-500">
+                                                        {unknownCount}U
+                                                    </span>
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop: 4-column grid */}
+                                    <div className="hidden sm:grid flex-1 grid-cols-4 gap-3 items-center min-w-0">
+                                        <div>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                Birth
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
+                                                {formatDate(
+                                                    litter.birthDate
+                                                ) || '•'}
+                                            </span>
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                Mate
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">
+                                                {mate
+                                                    ? formatAnimalDisplayName(
+                                                          mate
+                                                      )
+                                                    : '•'}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                COI
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
+                                                {coi != null
+                                                    ? `${coi.toFixed(2)}%`
+                                                    : '•'}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">
+                                                Born
+                                            </span>
+
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-sm font-bold text-gray-800 dark:text-dark-text">
+                                                    {offspringList.length}
+                                                </span>
+
+                                                {offspringList.length > 0 && (
+                                                    <span className="text-xs ml-1">
+                                                        <span className="text-blue-500 font-semibold">
+                                                            {maleCount}M
+                                                        </span>
+                                                        <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">
+                                                            /
+                                                        </span>
+                                                        <span className="text-pink-500 font-semibold">
+                                                            {femaleCount}F
+                                                        </span>
+                                                        <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">
+                                                            /
+                                                        </span>
+                                                        <span className="text-purple-500 font-semibold">
+                                                            {unknownCount}U
+                                                        </span>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <ChevronDown
+                                        size={18}
+                                        className={`text-gray-400 dark:text-dark-text-muted transition-transform flex-shrink-0 ml-2 ${
+                                            isExpanded ? 'rotate-180' : ''
+                                        }`}
+                                    />
+                                </div>
+
+                                {isExpanded && (
+                                    <div className="border-t border-purple-100 dark:border-purple-700/60 p-3 bg-purple-50 dark:bg-purple-900/20 space-y-3">
+
+                                        {/* Birthdate | COI | Mate */}
+                                        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm h-full">
+                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">
+                                                    Birth Date
+                                                </div>
+
+                                                {litter.birthDate ? (
+                                                    <div className="text-sm font-bold text-gray-800 dark:text-dark-text">
+                                                        {formatDate(
+                                                            litter.birthDate
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">
+                                                        •
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-col items-center px-2">
+                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">
+                                                    COI
+                                                </div>
+
+                                                {coi != null ? (
+                                                    <div className="text-base font-medium text-gray-800 dark:text-dark-text">
+                                                        {coi.toFixed(2)}%
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-base font-medium text-gray-300 dark:text-dark-border">
+                                                        •
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {mate ? (
+                                                <div
+                                                    onClick={() =>
+                                                        onViewAnimal &&
+                                                        onViewAnimal(mate)
+                                                    }
+                                                    className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition shadow-sm"
+                                                >
+                                                    <div className="w-10 h-10 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
+                                                        {mate.imageUrl ||
+                                                        mate.photoUrl ? (
+                                                            <img
+                                                                src={
+                                                                    mate.imageUrl ||
+                                                                    mate.photoUrl
+                                                                }
+                                                                alt={mate.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                                <Cat size={18} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                            Mate
+                                                        </div>
+
+                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">
+                                                            {formatAnimalDisplayName(
+                                                                mate
+                                                            )}
+                                                        </p>
+
+                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                                            {mate.species}
+                                                        </p>
+
+                                                        <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">
+                                                            {mate.id_public}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-base font-medium text-gray-300 dark:text-dark-border">
+                                                    •
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
+                                            <div className="grid grid-cols-4 gap-3">
+                                                <div>
+                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                        Born
+                                                    </div>
+                                                    <div className="text-lg font-bold text-gray-800 dark:text-dark-text">
+                                                        {offspringList.length}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                        Males
+                                                    </div>
+                                                    <div className="text-lg font-bold text-blue-500">
+                                                        {maleCount}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                        Females
+                                                    </div>
+                                                    <div className="text-lg font-bold text-pink-500">
+                                                        {femaleCount}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">
+                                                        Unknown
+                                                    </div>
+                                                    <div className="text-lg font-bold text-purple-500">
+                                                        {unknownCount}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Offspring cards */}
+                                        {offspringList.length > 0 && (
+                                            <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-purple-100 dark:border-purple-700/60">
+                                                <div className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
+                                                    Offspring (
+                                                    {offspringList.length})
+                                                </div>
+
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                    {offspringList.map(
+                                                        offspring => (
+                                                            <div
+                                                                key={
+                                                                    offspring.id_public ||
+                                                                    offspring._id
+                                                                }
+                                                                onClick={() =>
+                                                                    onViewAnimal &&
+                                                                    onViewAnimal(
+                                                                        offspring
+                                                                    )
+                                                                }
+                                                                className="relative bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 dark:border-dark-border pt-2"
+                                                            >
+                                                                {offspring.gender && (
+                                                                    <div className="absolute top-1.5 right-1.5">
+                                                                        {offspring.gender ===
+                                                                        'Male' ? (
+                                                                            <Mars
+                                                                                size={
+                                                                                    14
+                                                                                }
+                                                                                strokeWidth={
+                                                                                    2.5
+                                                                                }
+                                                                                className="text-primary"
+                                                                            />
+                                                                        ) : (
+                                                                            <Venus
+                                                                                size={
+                                                                                    14
+                                                                                }
+                                                                                strokeWidth={
+                                                                                    2.5
+                                                                                }
+                                                                                className="text-accent"
+                                                                            />
+                                                                        )}
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                    {offspring.imageUrl ||
+                                                                    offspring.photoUrl ? (
+                                                                        <img
+                                                                            src={
+                                                                                offspring.imageUrl ||
+                                                                                offspring.photoUrl
+                                                                            }
+                                                                            alt={
+                                                                                offspring.name
+                                                                            }
+                                                                            className="w-20 h-20 object-cover rounded-md"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                                            <Cat
+                                                                                size={
+                                                                                    32
+                                                                                }
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="w-full text-center px-2 pb-1">
+                                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
+                                                                        {formatAnimalDisplayName(
+                                                                            offspring
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="w-full px-2 pb-2 flex justify-end">
+                                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                                                        {
+                                                                            offspring.id_public
+                                                                        }
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                                    <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">
+                                                                        {offspring.status ||
+                                                                            offspring.gender ||
+                                                                            'Unknown'}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+                })}
+            </div>
+        );
+    })()}
+</InfoCard><div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/60">
                                 <button
                                     type="button"
                                     onClick={() => setRelInsightsOpen(o => !o)}
@@ -800,7 +2403,14 @@ const LiteAnimalModal = ({
                                                                                 </div>
                                                                             )}
                                                                             <div className="min-w-0">
-                                                                                <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
+                                                                                <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate min-w-0">
+                                                                                    <AnimalNameWithFlag
+                                                                                        animal={rel}
+                                                                                        wrapperClassName="inline-flex max-w-full items-start gap-1 text-left"
+                                                                                        textClassName="truncate leading-tight text-left"
+                                                                                        flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                                                                                    />
+                                                                                </div>
                                                                                 <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
@@ -824,476 +2434,7 @@ const LiteAnimalModal = ({
                                     </div>
                                 )}
                             </div>
-                            <InfoCard title="Offspring & Litters" icon={<Users size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
-                                {(animalLitters === null || pedigreeOffspring === null) ? (
-                                    <div className="text-sm text-gray-500 dark:text-dark-text-muted animate-pulse">
-                                        Loading offspring & litters...
-                                    </div>
-                                ) : (() => {
-                                    const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
-                                    const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
-                                    const _offspringToday = new Date();
-                                    const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
-                                        // isPlanned only clears via the explicit "Mated Today" action, so a past
-                                        // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
-                                        const aIsMated = !a.isPlanned && !!a.matingDate && !a.pregnancyDate && !a.birthDate;
-                                        const bIsMated = !b.isPlanned && !!b.matingDate && !b.pregnancyDate && !b.birthDate;
-                                        const aRank = aIsMated ? 0 : a.isPlanned ? 1 : 2;
-                                        const bRank = bIsMated ? 0 : b.isPlanned ? 1 : 2;
-                                        if (aRank !== bRank) return aRank - bRank;
-                                        const aDate = a.birthDate || a.matingDate;
-                                        const bDate = b.birthDate || b.matingDate;
-                                        if (!aDate) return 1;
-                                        if (!bDate) return -1;
-                                        return new Date(bDate) - new Date(aDate);
-                                    });
-                                    if (allRecords.length === 0) {
-                                        return (
-                                            <p className="text-center text-sm text-gray-400 dark:text-dark-text-muted">
-                                                No known offspring/litters recorded.
-                                            </p>
-                                        );
-                                    }
-                                    return (
-                                            <div className="space-y-2">
-                                                {allRecords.map((litter) => {
-                                                    if (litter._recordType === 'litter') {
-                                                        const lid = litter.litter_id_public;
-                                                        const isSire = litter.sireId_public === animal.id_public;
-                                                        const mate = isSire ? litter.dam : litter.sire;
-                                                        const isExpanded = expandedBreedingRecords[lid];
-                                                        const displayName = litter.breedingPairCodeName;
-                                                        // isPlanned only clears via the explicit "Mated Today" action, so a past
-                                                        // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
-                                                        const lIsMated = !litter.isPlanned && !!litter.matingDate && !litter.pregnancyDate && !litter.birthDate;
-                                                        const lIsPlannedOnly = !!litter.isPlanned && !litter.pregnancyDate && !litter.birthDate;
-                                                        const lIsPregnant = !!litter.pregnancyDate && !litter.birthDate;
-                                                        return (
-                                                            <div key={lid} className={`bg-white dark:bg-dark-card-bg rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100 dark:border-purple-700/60'}`}>
-                                                                <div
-                                                                    onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [lid]: !isExpanded})}
-                                                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition rounded"
-                                                                >
-                                                                    {/* Mobile: stacked */}
-                                                                    <div className="flex-1 sm:hidden">
-                                                                        <div className="flex justify-between items-start mb-1">
-                                                                            <p className="font-bold text-gray-800 dark:text-dark-text text-sm">{displayName || <span className="text-gray-400 dark:text-dark-text-muted font-normal">Unnamed Litter</span>}</p>
-                                                                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                                                                                {lid && <span className="text-xs font-mono bg-purple-100 dark:bg-purple-900/30 px-1.5 py-0.5 rounded text-purple-700 dark:text-purple-300">{lid}</span>}
-                                                                                {lIsPlannedOnly && <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/60 rounded px-1.5 py-0.5"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
-                                                                                {lIsMated && <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700/60 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
-                                                                                {lIsPregnant && <span className="text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700/60 rounded px-1.5 py-0.5"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Pregnant</span>}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary flex gap-2 flex-wrap items-center">
-                                                                            {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}</span>}
-                                                                            {lIsMated && <span className="text-sky-600 dark:text-sky-400">{formatDate(litter.matingDate)}</span>}
-                                                                            {lIsPregnant && <span className="text-pink-600 dark:text-pink-400">{formatDate(litter.pregnancyDate)}</span>}
-                                                                            {lIsPlannedOnly && litter.matingDate && <span className="text-indigo-600 dark:text-indigo-400">{formatDate(litter.matingDate)}</span>}
-                                                                            {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
-                                                                            {litter.inbreedingCoefficient != null && <span className="text-gray-500 dark:text-dark-text-muted">{litter.inbreedingCoefficient.toFixed(2)}%</span>}
-                                                                            {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                                <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                                                                                    {litter.litterSizeBorn != null && <span className="font-bold text-gray-900 dark:text-dark-text">{litter.litterSizeBorn}</span>}
-                                                                                    {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400 dark:text-dark-text-muted">•</span>}
-                                                                                    {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                                        <span className="inline-flex gap-0.5 font-semibold">
-                                                                                            <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
-                                                                                            <span className="text-gray-400 dark:text-dark-text-muted">/</span>
-                                                                                            <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
-                                                                                            <span className="text-gray-400 dark:text-dark-text-muted">/</span>
-                                                                                            <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
-                                                                                        </span>
-                                                                                    )}
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                    {/* Desktop: 6-column grid */}
-                                                                    <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
-                                                                        <div className="min-w-0">
-                                                                            <p className="font-bold text-gray-800 dark:text-dark-text text-sm truncate">{displayName || <span className="text-gray-400 dark:text-dark-text-muted font-normal text-xs">Unnamed</span>}</p>
-                                                                            {lIsPlannedOnly && <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/60 rounded px-1.5 py-0.5 inline-block mt-0.5"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
-                                                                            {lIsMated && <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700/60 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
-                                                                            {lIsPregnant && <span className="text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700/60 rounded px-1.5 py-0.5 inline-block mt-0.5"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Pregnant</span>}
-                                                                        </div>
-                                                                        <div className="min-w-0">
-                                                                            {lid ? <span className="text-xs font-mono bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded text-purple-700 dark:text-purple-300 block w-fit">{lid}</span> : <span className="text-xs text-gray-400 dark:text-dark-text-muted">•</span>}
-                                                                        </div>
-                                                                        <div>
-                                                                            {lIsPlannedOnly ? (<>
-                                                                                <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Planned</span>
-                                                                                <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{formatDate(litter.matingDate) || '?'}</span>
-                                                                            </>) : lIsMated ? (<>
-                                                                                <span className="text-sky-400 text-[10px] uppercase tracking-wide font-semibold block">Mated</span>
-                                                                                <span className="text-sm font-semibold text-sky-700 dark:text-sky-300">{formatDate(litter.matingDate) || '?'}</span>
-                                                                            </>) : lIsPregnant ? (<>
-                                                                                <span className="text-pink-400 text-[10px] uppercase tracking-wide font-semibold block">Pregnant</span>
-                                                                                <span className="text-sm font-semibold text-pink-700 dark:text-pink-300">{formatDate(litter.pregnancyDate) || '?'}</span>
-                                                                            </>) : (<>
-                                                                                <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
-                                                                                <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 text-xs font-semibold text-blue-600 dark:text-blue-400">• {litterAge(litter.birthDate)}</span>}</span>
-                                                                            </>)}
-                                                                        </div>
-                                                                        <div className="min-w-0">
-                                                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '•'}</span>
-                                                                        </div>
-                                                                        <div>
-                                                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">COI</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '•'}</span>
-                                                                        </div>
-                                                                        <div>
-                                                                            {lIsPlannedOnly ? (<>
-                                                                                <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Due</span>
-                                                                                <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{formatDate(litter.expectedDueDate) || '•'}</span>
-                                                                            </>) : lIsMated ? (<>
-                                                                                <span className="text-sky-400 text-[10px] uppercase tracking-wide font-semibold block">Status</span>
-                                                                                <span className="text-xs font-semibold text-sky-500">Awaiting pregnancy</span>
-                                                                            </>) : lIsPregnant ? (<>
-                                                                                <span className="text-pink-400 text-[10px] uppercase tracking-wide font-semibold block">Status</span>
-                                                                                <span className="text-xs font-semibold text-pink-500"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
-                                                                            </>) : (<>
-                                                                                <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Born</span>
-                                                                                <div className="flex items-center gap-1.5">
-                                                                                    <span className="text-sm font-bold text-gray-800 dark:text-dark-text">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
-                                                                                    {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                                        <span className="text-xs ml-1">
-                                                                                            <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
-                                                                                            <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">/</span>
-                                                                                            <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
-                                                                                            <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">/</span>
-                                                                                            <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
-                                                                                        </span>
-                                                                                    )}
-                                                                                </div>
-                                                                            </>)}
-                                                                        </div>
-                                                                    </div>
-                                                                    <ChevronDown size={18} className={`text-gray-400 dark:text-dark-text-muted transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <div className="border-t border-purple-100 dark:border-purple-700/60 p-3 bg-purple-50 dark:bg-purple-900/20 space-y-3">
-                                                                        {/* Name + CTL | COI | Mate */}
-                                                                        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
-                                                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 dark:divide-dark-border gap-3">
-                                                                                <div>
-                                                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">Litter Name</div>
-                                                                                    {displayName
-                                                                                        ? <div className="text-sm font-bold text-gray-800 dark:text-dark-text">{displayName}</div>
-                                                                                        : <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">?</div>}
-                                                                                </div>
-                                                                                <div className="pl-3">
-                                                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">CTL ID</div>
-                                                                                    {lid
-                                                                                        ? <div className="font-mono text-sm font-bold text-purple-700 dark:text-purple-300">{lid}</div>
-                                                                                        : <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">?</div>}
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex flex-col items-center px-2">
-                                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">COI</div>
-                                                                                {litter.inbreedingCoefficient != null
-                                                                                    ? <div className="text-base font-medium text-gray-800 dark:text-dark-text">{litter.inbreedingCoefficient.toFixed(2)}%</div>
-                                                                                    : <div className="text-base font-medium text-gray-300 dark:text-dark-border">•</div>}
-                                                                            </div>
-                                                                            {mate ? (
-                                                                                <div onClick={() => onViewAnimal && onViewAnimal(mate)} className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition shadow-sm">
-                                                                                    <div className="w-10 h-10 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
-                                                                                        {mate.imageUrl || mate.photoUrl
-                                                                                            ? <img src={mate.imageUrl || mate.photoUrl} alt={mate.name} className="w-full h-full object-cover" />
-                                                                                            : <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted"><Cat size={18} /></div>}
-                                                                                    </div>
-                                                                                    <div className="flex-1 min-w-0">
-                                                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Mate</div>
-                                                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</p>
-                                                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{mate.species}</p>
-                                                                                        <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">{mate.id_public}</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : <div />}
-                                                                        </div>
-                                                                        {/* Breeding & Birth */}
-                                                                        {(litter.matingDate || litter.pairingDate || litter.breedingMethod || litter.breedingConditionAtTime || litter.outcome || litter.birthDate || litter.birthMethod || litter.expectedDueDate || litter.weaningDate) && (
-                                                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
-                                                                                <h4 className="text-[10px] font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-2">Breeding &amp; Birth</h4>
-                                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">
-                                                                                    {(litter.matingDate || litter.pairingDate) && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Mating Date</div><div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.matingDate || litter.pairingDate)}</div></div>}
-                                                                                    {litter.expectedDueDate && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Expected Due Date</div><div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.expectedDueDate)}</div></div>}
-                                                                                    {litter.breedingMethod && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Breeding Method</div><div className="font-semibold text-gray-800 dark:text-dark-text">{litter.breedingMethod}</div></div>}
-                                                                                    {litter.breedingConditionAtTime && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800 dark:text-dark-text">{litter.breedingConditionAtTime}</div></div>}
-                                                                                    {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600 dark:text-green-400' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800 dark:text-dark-text'}`}>{litter.outcome}</div></div>}
-                                                                                    {!litter.isPlanned && litter.birthMethod && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800 dark:text-dark-text">{litter.birthMethod}</div></div>}
-                                                                                    {!litter.isPlanned && litter.birthDate && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-blue-600 dark:text-blue-400">{litterAge(litter.birthDate)}</span>}</div></div>}
-                                                                                    {!litter.isPlanned && litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.weaningDate)}</div></div>}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {/* Stats bar */}
-                                                                        {!litter.isPlanned && <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
-                                                                            <div className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-dark-border">
-                                                                                <div className="grid grid-cols-3 pr-3">
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800 dark:text-dark-text">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400 dark:text-dark-text-muted">{litter.stillbornCount ?? litter.stillborn ?? 0}</div></div>
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-blue-600 dark:text-blue-400">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
-                                                                                </div>
-                                                                                <div className="grid grid-cols-3 pl-3">
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? 0}</div></div>
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{litter.femaleCount ?? 0}</div></div>
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? 0}</div></div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>}
-                                                                        {/* Notes */}
-                                                                        {litter.notes && <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 dark:text-dark-text-secondary italic leading-relaxed">{litter.notes}</p></div>}
-                                                                        {/* Photos */}
-                                                                        {!litter.isPlanned && litter.images && litter.images.length > 0 && (
-                                                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
-                                                                                <h4 className="text-[10px] font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-2">Photos</h4>
-                                                                                <div className="flex flex-wrap gap-2">
-                                                                                    {litter.images.map((img, idx) => (
-                                                                                        <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-border">
-                                                                                            <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => openExternalLink(img.url)} />
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {/* Linked Offspring loading */}
-                                                                        {lid && breedingRecordOffspring[lid] === undefined && (
-                                                                            <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-purple-100 dark:border-purple-700/60">
-                                                                                <div className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">Offspring</div>
-                                                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                                                                    {[...Array(3)].map((_, i) => (
-                                                                                        <div key={i} className="rounded-lg border-2 border-gray-200 dark:border-dark-border h-52 animate-pulse bg-gray-50 dark:bg-dark-surface flex flex-col items-center pt-2">
-                                                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                                                                <div className="w-20 h-20 bg-gray-200 dark:bg-dark-surface rounded-md" />
-                                                                                            </div>
-                                                                                            <div className="w-full px-2 pb-2">
-                                                                                                <div className="h-3 bg-gray-200 dark:bg-dark-surface rounded w-3/4 mx-auto mb-1" />
-                                                                                                <div className="h-2 bg-gray-200 dark:bg-dark-surface rounded w-1/2 mx-auto" />
-                                                                                            </div>
-                                                                                            <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 border-t border-gray-200 dark:border-dark-border mt-auto" />
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {/* Linked Offspring loaded */}
-                                                                        {lid && breedingRecordOffspring[lid] && breedingRecordOffspring[lid].length > 0 && (
-                                                                            <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-purple-100 dark:border-purple-700/60">
-                                                                                <div className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">Offspring ({breedingRecordOffspring[lid].length})</div>
-                                                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                                                                    {breedingRecordOffspring[lid].map(offspring => (
-                                                                                        offspring.isPrivate ? (
-                                                                                            <div key={offspring.id_public} className="relative bg-gray-50 dark:bg-dark-surface rounded-lg border-2 border-gray-200 dark:border-dark-border h-52 flex flex-col items-center overflow-hidden pt-2">
-                                                                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                                                                    <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-2xl">•</div>
-                                                                                                </div>
-                                                                                                <div className="w-full text-center px-2 pb-1">
-                                                                                                    <div className="text-sm font-semibold text-gray-500 dark:text-dark-text-muted truncate">Private Animal</div>
-                                                                                                </div>
-                                                                                    <div className="w-full px-2 pb-2 flex justify-end"> {/* Changed from creatorId_public to creatorId_public */}
-                                                                                                    <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{offspring.id_public}</div>
-                                                                                                </div>
-                                                                                                <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
-                                                                                                    <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted">{offspring.gender || '•'}</div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 dark:border-dark-border pt-2">
-                                                                                                {offspring.gender && (
-                                                                                                    <div className="absolute top-1.5 right-1.5">
-                                                                                                        {offspring.gender === 'Male'
-                                                                                                            ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
-                                                                                                            : <Venus size={14} strokeWidth={2.5} className="text-accent" />
-                                                                                                        }
-                                                                                                    </div>
-                                                                                                )}
-                                                                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                                                                    {offspring.imageUrl || offspring.photoUrl ? (
-                                                                                                        <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" />
-                                                                                                    ) : (
-                                                                                                        <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                                                                                            <Cat size={32} />
-                                                                                                        </div>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                                <div className="w-full text-center px-2 pb-1">
-                                                                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                                                                        {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div className="w-full px-2 pb-2 flex justify-end">
-                                                                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted">{offspring.id_public}</div>
-                                                                                                </div>
-                                                                                                <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
-                                                                                                    <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{offspring.status || offspring.gender || 'Unknown'}</div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        )
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    } else {
-                                                        // Pedigree-only record
-                                                        const recKey = `${litter.birthDate || 'unknown'}_${litter.otherParent?.id_public || 'none'}`;
-                                                        const mate = litter.otherParent;
-                                                        const isExpanded = expandedPedigreeRecords[recKey];
-                                                        const offspringList = litter.offspring || [];
-                                                        const maleCount = offspringList.filter(o => o.gender === 'Male').length;
-                                                        const femaleCount = offspringList.filter(o => o.gender === 'Female').length;
-                                                        const unknownCount = offspringList.filter(o => o.gender !== 'Male' && o.gender !== 'Female').length;
-                                                        const coi = offspringList.find(o => o.inbreedingCoefficient != null)?.inbreedingCoefficient ?? null;
-                                                        return (
-                                                            <div key={recKey} className={`bg-white dark:bg-dark-card-bg rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100 dark:border-purple-700/60'}`}>
-                                                                <div
-                                                                    onClick={() => setExpandedPedigreeRecords({...expandedPedigreeRecords, [recKey]: !isExpanded})}
-                                                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition rounded"
-                                                                >
-                                                                    {/* Mobile: stacked */}
-                                                                    <div className="flex-1 sm:hidden">
-                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary flex gap-2 flex-wrap items-center">
-                                                                            {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
-                                                                            {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
-                                                                            <span>{offspringList.length} born</span>
-                                                                            {coi != null && <span className="text-gray-500 dark:text-dark-text-muted">COI {coi.toFixed(2)}%</span>}
-                                                                            {offspringList.length > 0 && (
-                                                                                <span className="inline-flex gap-0.5 font-semibold">
-                                                                                    <span className="text-blue-500">{maleCount}M</span>
-                                                                                    <span className="text-gray-400 dark:text-dark-text-muted">/</span>
-                                                                                    <span className="text-pink-500">{femaleCount}F</span>
-                                                                                    <span className="text-gray-400 dark:text-dark-text-muted">/</span>
-                                                                                    <span className="text-purple-500">{unknownCount}U</span>
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                    {/* Desktop: 4-column grid */}
-                                                                    <div className="hidden sm:grid flex-1 grid-cols-4 gap-3 items-center min-w-0">
-                                                                        <div>
-                                                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.birthDate) || '•'}</span>
-                                                                        </div>
-                                                                        <div className="min-w-0">
-                                                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '•'}</span>
-                                                                        </div>
-                                                                        <div>
-                                                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">COI</span>
-                                                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">{coi != null ? `${coi.toFixed(2)}%` : '•'}</span>
-                                                                        </div>
-                                                                        <div>
-                                                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Born</span>
-                                                                            <div className="flex items-center gap-1.5">
-                                                                                <span className="text-sm font-bold text-gray-800 dark:text-dark-text">{offspringList.length}</span>
-                                                                                {offspringList.length > 0 && (
-                                                                                    <span className="text-xs ml-1">
-                                                                                        <span className="text-blue-500 font-semibold">{maleCount}M</span>
-                                                                                        <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">/</span>
-                                                                                        <span className="text-pink-500 font-semibold">{femaleCount}F</span>
-                                                                                        <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">/</span>
-                                                                                        <span className="text-purple-500 font-semibold">{unknownCount}U</span>
-                                                                                    </span>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <ChevronDown size={18} className={`text-gray-400 dark:text-dark-text-muted transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <div className="border-t border-purple-100 dark:border-purple-700/60 p-3 bg-purple-50 dark:bg-purple-900/20 space-y-3">
-                                                                        {/* Birthdate | COI | Mate */}
-                                                                        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
-                                                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm h-full">
-                                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">Birth Date</div>
-                                                                                {litter.birthDate
-                                                                                    ? <div className="text-sm font-bold text-gray-800 dark:text-dark-text">{formatDate(litter.birthDate)}</div>
-                                                                                    : <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">•</div>}
-                                                                            </div>
-                                                                            <div className="flex flex-col items-center px-2">
-                                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">COI</div>
-                                                                                {coi != null ? <div className="text-base font-medium text-gray-800 dark:text-dark-text">{coi.toFixed(2)}%</div> : <div className="text-base font-medium text-gray-300 dark:text-dark-border">•</div>}
-                                                                            </div>
-                                                                            {mate ? (
-                                                                                <div onClick={() => onViewAnimal && onViewAnimal(mate)} className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition shadow-sm">
-                                                                                    <div className="w-10 h-10 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
-                                                                                        {mate.imageUrl || mate.photoUrl
-                                                                                            ? <img src={mate.imageUrl || mate.photoUrl} alt={mate.name} className="w-full h-full object-cover" />
-                                                                                            : <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted"><Cat size={18} /></div>}
-                                                                                    </div>
-                                                                                    <div className="flex-1 min-w-0">
-                                                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Mate</div>
-                                                                                        <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</p>
-                                                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{mate.species}</p>
-                                                                                        <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">{mate.id_public}</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : <div className="text-base font-medium text-gray-300 dark:text-dark-border">•</div>}
-                                                                        </div>
-                                                                        {/* Stats */}
-                                                                        <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-3 shadow-sm">
-                                                                            <div className="grid grid-cols-4 gap-3">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800 dark:text-dark-text">{offspringList.length}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{maleCount}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{femaleCount}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{unknownCount}</div></div>
-                                                                            </div>
-                                                                        </div>
-                                                                        {/* Offspring cards */}
-                                                                        {offspringList.length > 0 && (
-                                                                            <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-purple-100 dark:border-purple-700/60">
-                                                                                <div className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">Offspring ({offspringList.length})</div>
-                                                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                                                                    {offspringList.map(offspring => (
-                                                                                        <div key={offspring.id_public || offspring._id} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 dark:border-dark-border pt-2">
-                                                                                            {offspring.gender && (
-                                                                                                <div className="absolute top-1.5 right-1.5">
-                                                                                                    {offspring.gender === 'Male'
-                                                                                                        ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
-                                                                                                        : <Venus size={14} strokeWidth={2.5} className="text-accent" />
-                                                                                                    }
-                                                                                                </div>
-                                                                                            )}
-                                                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                                                                {offspring.imageUrl || offspring.photoUrl ? (
-                                                                                                    <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" />
-                                                                                                ) : (
-                                                                                                    <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                                                                                        <Cat size={32} />
-                                                                                                    </div>
-                                                                                                )}
-                                                                                            </div>
-                                                                                            <div className="w-full text-center px-2 pb-1">
-                                                                                                <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                                                                    {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div className="w-full px-2 pb-2 flex justify-end">
-                                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{offspring.id_public}</div>
-                                                                                            </div>
-                                                                                            <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
-                                                                                                <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{offspring.status || offspring.gender || 'Unknown'}</div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    }
-                                                })}
-                                            </div>
-                                    );
-                                })()}
-                                </InfoCard>
+                            
                         </div>
                     )}
                     {activeTab === 'records' && (

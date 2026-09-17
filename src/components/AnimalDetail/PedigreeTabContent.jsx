@@ -3,6 +3,7 @@ import apiClient from '../../utils/apiClient';
 import { Loader2, ScrollText, Mars, Venus } from 'lucide-react';
 import { PedigreeChart } from '../AnimalForm';
 import { formatDate } from '../../utils/dateFormatter';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal }) => {
     const [generations, setGenerations] = useState(4); // Default to 4 generations for inline view
@@ -114,7 +115,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     const renderSlot = (slotKey, label) => {
         const d = getSlot(slotKey);
         const hasData = d && (d.ctcId || Object.entries(d).some(([fk, v]) => fk !== 'mode' && v && String(v).trim()));
-        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+        const fullName = formatAnimalDisplayName(d);
         const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
         const isSire = slotGender === 'Male';
         const GIcon = isSire ? Mars : Venus;
@@ -135,7 +136,17 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
                     <div className="flex gap-2.5">
                         {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-dark-border self-start" />}
                         <div className="flex-1 min-w-0 space-y-0.5 pb-4">
-                            {fullName && <p className="text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-dark-text leading-tight">{fullName}</p>}
+                            {fullName && (
+                                <div className="w-full text-left text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-dark-text leading-tight">
+                                    <AnimalNameWithFlag
+                                        animal={d}
+                                        wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left"
+                                        wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.25rem', textAlign: 'left' }}
+                                        textClassName="leading-tight"
+                                        flagClassName="inline-block h-3.5 w-5 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]"
+                                    />
+                                </div>
+                            )}
                             {d.variety && <p className="text-[9px] sm:text-[11px] text-gray-500 dark:text-dark-text-muted">{d.variety}</p>}
                             {d.genCode && <p className="text-[9px] sm:text-[11px] font-mono text-indigo-600 dark:text-indigo-400">{d.genCode}</p>}
                             {d.birthDate && <p className="text-[9px] sm:text-[11px] text-gray-400 dark:text-dark-text-muted">{formatDate(d.birthDate)}</p>}

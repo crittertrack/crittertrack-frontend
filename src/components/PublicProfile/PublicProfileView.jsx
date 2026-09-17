@@ -11,6 +11,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
 
@@ -601,7 +602,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         if (statusFilter && animal.status !== statusFilter) return false;
         if (animalSearch) {
             const q = animalSearch.toLowerCase();
-            const name = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ').toLowerCase();
+            const name = formatAnimalDisplayName(animal).toLowerCase();
             if (!name.includes(q) && !(animal.id_public || '').toLowerCase().includes(q)) return false;
         }
         return true;
@@ -1032,7 +1033,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-6 h-28">
+                                                <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28">
                                                     <div className="relative w-32 h-28 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
@@ -1055,9 +1056,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 </div>
                                                 
                                                 {/* Prefix / Name under image */}
-                                                <div className="w-full text-center px-2 pb-1">
-                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
-                                                </div>
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+        <AnimalNameWithFlag
+            animal={animal}
+            wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
+            textClassName="break-words leading-tight text-center"
+            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+        />
+    </div>
+</div>
 
                                                 {/* ID bottom-right */}
                                                 <div className="w-full px-2 pb-2 flex justify-end">
@@ -1120,7 +1128,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 )}
                             </div>
                             <div className="p-3 flex flex-col gap-1.5 flex-1">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-1">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text text-center">
+                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-center gap-1 text-center" textClassName="break-words leading-snug text-center" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />
+                                </p>
                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species}{ageStr ? ` · ${ageStr}` : ''}</p>
                                 {isSale && priceLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/60 rounded-full px-2 py-0.5 w-fit">
@@ -1253,7 +1263,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const ParentMiniCard = ({ role, animal }) => {
                     if (!animal) return null;
                     const imgUrl = animal.imageUrl || animal.photoUrl || null;
-                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                    const fullName = formatAnimalDisplayName(animal);
                     const isSire = role === 'Sire';
                     return (
                         <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-dark-surface rounded-lg p-2 border border-gray-100 dark:border-dark-border min-w-0">

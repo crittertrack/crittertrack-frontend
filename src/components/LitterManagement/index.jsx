@@ -17,6 +17,7 @@ import { PedigreeChart } from '../AnimalForm';
 import InfoButton from '../shared/InfoButton';
 import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 import { downloadBlob } from '../../utils/nativeDownload';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -4202,7 +4203,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                             {/* Name */}
                                                             <div className="w-full text-center px-2 pb-1">
                                                                 <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                                    {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                                    {formatAnimalDisplayName(animal)}
                                                                 </div>
                                                             </div>
 

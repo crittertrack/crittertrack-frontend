@@ -4,6 +4,7 @@ import { X, Search, Loader2, User, Cat } from 'lucide-react';
 import AnimalImage from '../shared/AnimalImage';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getDonationBadge, DonationBadge } from '../../utils/donationUtils';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 // ==================== PARENT SEARCH MODAL ====================
 const ParentSearchModal = ({ 
@@ -47,7 +48,7 @@ const ParentSearchModal = ({
                 {/* Info */}
                 <div className="flex-grow">
                     <p className="font-semibold text-gray-800">
-                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                        {formatAnimalDisplayName(animal)}
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">

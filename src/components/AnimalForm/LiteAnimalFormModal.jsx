@@ -20,6 +20,7 @@ import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { buildChangedSaveFields } from '../../utils/saveDiff';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
@@ -384,7 +385,7 @@ const ParentSearchModal = ({
                 </div>
                 <div className="flex-grow">
                     <p className="font-semibold text-gray-800 dark:text-dark-text">
-                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                        {formatAnimalDisplayName(animal)}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
@@ -6332,7 +6333,7 @@ const LiteAnimalFormModal = ({
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Mate</label>
                                             {mateInfo ? (
                                                 <div className="flex items-center gap-2 mt-1 p-2 border rounded-md bg-white dark:bg-dark-card-bg">
-                                                    <span className="flex-1">{[mateInfo.prefix, mateInfo.name, mateInfo.suffix].filter(Boolean).join(' ')} ({mateInfo.id_public})</span>
+                                                    <span className="flex-1">{formatAnimalDisplayName(mateInfo)} ({mateInfo.id_public})</span>
                                                     <button type="button" onClick={clearMateSelection} className="text-red-500"><X size={16} /></button>
                                                 </div>
                                             ) : (
@@ -6418,7 +6419,7 @@ const LiteAnimalFormModal = ({
                                                             : <div className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full bg-gray-100 dark:bg-dark-surface flex items-center justify-center flex-shrink-0`}><Cat size={isParent ? 22 : 16} className="text-gray-300 dark:text-dark-border" /></div>
                                                         }
                                                         <div className="flex-1 min-w-0">
-                                                            <p className={`${isParent ? 'text-sm' : 'text-xs'} font-semibold text-gray-800 dark:text-dark-text truncate`}>{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
+                                                            <p className={`${isParent ? 'text-sm' : 'text-xs'} font-semibold text-gray-800 dark:text-dark-text truncate`} title={formatAnimalDisplayName(d)}>{formatAnimalDisplayName(d)}</p>
                                                             {d.variety && <p className={`${isParent ? 'text-xs' : 'text-[11px]'} text-gray-500 dark:text-dark-text-muted truncate`}>{d.variety}</p>}
                                                             <p className="text-[10px] font-mono text-gray-500 dark:text-dark-text-muted">{d.ctcId}</p>
                                                         </div>

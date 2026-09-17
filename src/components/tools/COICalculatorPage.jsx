@@ -5,6 +5,7 @@ import InfoButton from '../shared/InfoButton';
 import { compareBreedingLines } from '../../utils/breedingLineColor';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { PedigreeChart } from '../AnimalForm';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 // Placeholder id for the hypothetical (not-yet-bred) offspring node used to anchor the
 // direct-lines family tree view around a sire/dam pairing that has no real litter yet.
@@ -13,7 +14,7 @@ const PAIRING_PREVIEW_ID = '__coi_pairing_preview__';
 // A simplified animal selector for the calculator
 const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const getFullName = (animal) => [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+  const getFullName = (animal) => formatAnimalDisplayName(animal);
   const filteredAnimals = animals.filter(a => 
     getFullName(a).toLowerCase().includes(searchTerm.toLowerCase()) || 
     a.id_public.toLowerCase().includes(searchTerm.toLowerCase())

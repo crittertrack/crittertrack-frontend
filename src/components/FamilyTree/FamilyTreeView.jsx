@@ -4,6 +4,7 @@ import { Loader2, ZoomIn, ZoomOut, Home, Cat } from 'lucide-react';
 import dagre from 'dagre';
 import { formatDate } from '../../utils/dateFormatter';
 import themeColors from '../../utils/themeColors';
+import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 const NODE_W = 96;
 const NODE_H = 92;
@@ -24,8 +25,8 @@ const compareSiblingOrder = (a, b) => {
     const ctcB = parseCtcNumeric(b?.id_public);
     if (ctcA !== ctcB) return ctcA - ctcB;
 
-    const nameA = [a?.prefix, a?.name, a?.suffix].filter(Boolean).join(' ').toLowerCase();
-    const nameB = [b?.prefix, b?.name, b?.suffix].filter(Boolean).join(' ').toLowerCase();
+    const nameA = formatAnimalDisplayName(a).toLowerCase();
+    const nameB = formatAnimalDisplayName(b).toLowerCase();
     return nameA.localeCompare(nameB);
 };
 
@@ -1028,7 +1029,7 @@ const FamilyTreeView = ({
                             const isFemale = animal.gender === 'Female';
                             const borderColor = isMale ? themeColors['info-blue'] : isFemale ? '#ec4899' : '#9ca3af';
                             const bgColor = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#eef2f7';
-                            const displayName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed';
+                            const displayName = formatAnimalDisplayName(animal) || 'Unnamed';
                             const imageSrc = animal.imageUrl || animal.photoUrl || null;
 
                             return (

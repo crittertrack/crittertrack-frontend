@@ -35,6 +35,7 @@ import { ALERT_CATEGORIES } from '../../utils/alertCategories';
 import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
@@ -2886,9 +2887,16 @@ useEffect(() => {
                     </div>
                     
                     {/* Prefix / Name under image */}
-                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow">
-                        <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2 leading-tight">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
-                    </div>
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+        <AnimalNameWithFlag
+            animal={animal}
+            wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
+            textClassName="break-words leading-tight text-center"
+            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+        />
+    </div>
+</div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
@@ -3234,7 +3242,7 @@ useEffect(() => {
                                                             <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
+                                                            <p className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate">{formatAnimalDisplayName(animal)}</p>
                                                             <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species} • {animal.gender || 'Unknown'}</p>
                                                             {animal.breederAssignedId && <p className="text-xs text-gray-400 dark:text-dark-text-muted">ID: {animal.breederAssignedId}</p>}
                                                         </div>
@@ -3304,7 +3312,12 @@ useEffect(() => {
                 )}
                 <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">
-                        {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
+                        <AnimalNameWithFlag
+                            animal={animal}
+                            wrapperClassName="inline-flex max-w-full items-center gap-1.5"
+                            textClassName="truncate"
+                            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                        />
                     </div>
                     <div className="text-xs text-gray-500 dark:text-dark-text-secondary truncate">
                         {getSpeciesDisplayName(animal.species)}{animal.gender ? ` · ${animal.gender}` : ''}
@@ -3564,7 +3577,7 @@ useEffect(() => {
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
+                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
@@ -3658,7 +3671,7 @@ useEffect(() => {
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
+                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
@@ -5356,7 +5369,7 @@ useEffect(() => {
                 <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate flex items-center gap-1">
                         {animal.gender === 'Male' ? <Mars size={13} className="text-primary dark:text-dark-primary shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} className="text-accent shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} className="text-purple-500 shrink-0" /> : null}
-                        <span className="truncate">{[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}</span>
+                        <span className="truncate">{formatAnimalDisplayName({ ...animal, name: animal.name || 'Unnamed' })}</span>
                     </p>
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{variety}</p>
                     {ageStr && <p className="text-xs text-gray-400 dark:text-dark-text-muted">{animal.birthDate ? `${formatDateShort(animal.birthDate)} - ` : ''}{ageStr}</p>}
@@ -5697,7 +5710,7 @@ useEffect(() => {
                 <div className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onSelect(animal)}>
                     <div className="w-16 h-16 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"><AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} /></div>
                     <div className="flex-grow">
-                        <p className="font-semibold text-gray-800 dark:text-dark-text">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
+                        <p className="font-semibold text-gray-800 dark:text-dark-text">{formatAnimalDisplayName(animal)}</p>
                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}</p>
                         {getSpeciesLatinName(animal.species) && ( <p className="text-xs italic text-gray-500 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</p> )}
