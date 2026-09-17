@@ -605,39 +605,145 @@ useEffect(() => {
                                         <div className="w-full">
                                             <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
                                                 <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
-                                                    <div className="text-center leading-none">
-                                                        <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
-                                                        <div className="mt-1 text-sm font-bold text-gray-900 dark:text-dark-text">
-                                                            {(() => {
-                                                                const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
-                                                                if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
-                                                                if (animalLitters === null || pedigreeOffspring === null) {
-                                                                    return Number.isFinite(explicitTotal) ? explicitTotal : 0;
-                                                                }
-                                                                const seenIds = new Set();
-                                                                let computedTotal = 0;
-                                                                const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
-                                                                for (const item of sourceItems) {
-                                                                    const groupedOffspring = Array.isArray(item?.offspring) ? item.offspring : [];
-                                                                    if (groupedOffspring.length > 0) {
-                                                                        for (const child of groupedOffspring) {
-                                                                            if (child?.id_public && !seenIds.has(child.id_public)) {
-                                                                                seenIds.add(child.id_public);
-                                                                                computedTotal += 1;
-                                                                            }
-                                                                        }
-                                                                        continue;
-                                                                    }
-                                                                    const directTotal = Number(item?.litterSizeBorn ?? item?.numberBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
-                                                                    const genderTotal = Number(item?.maleCount ?? 0) + Number(item?.femaleCount ?? 0) + Number(item?.unknownCount ?? 0);
-                                                                    const fromLitter = Number.isFinite(directTotal) && directTotal > 0 ? directTotal : genderTotal;
-                                                                    if (Number.isFinite(fromLitter) && fromLitter > 0) computedTotal += fromLitter;
-                                                                }
-                                                                return computedTotal || 0;
-                                                            })()}
-                                                        </div>
-                                                    </div>
-                                                </div>
+    <div className="text-center leading-none">
+        <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">
+            Total offspring
+        </div>
+
+        <div className="mt-1 text-sm font-bold text-gray-900 dark:text-dark-text">
+            {(() => {
+                const explicitTotal = Number(
+                    animal.totalOffspringProduced ??
+                    animal.offspringCount ??
+                    animal.litterCount ??
+                    animal.viableOffspringCount ??
+                    0
+                );
+
+                if (Number.isFinite(explicitTotal) && explicitTotal > 0) {
+                    return explicitTotal;
+                }
+
+                if (animalLitters === null || pedigreeOffspring === null) {
+                    return 0;
+                }
+
+                /*
+                 * Litter Management is authoritative.
+                 * Count its actual linked offspring first.
+                 */
+                const managedOffspringIds = new Set();
+
+                for (const litter of animalLitters || []) {
+                    for (const id of litter?.offspringIds_public || []) {
+                        if (id) {
+                            managedOffspringIds.add(id);
+                        }
+                    }
+
+                    const lid = litter?.litter_id_public;
+
+                    if (lid && breedingRecordOffspring?.[lid]) {
+                        for (const child of breedingRecordOffspring[lid]) {
+                            if (child?.id_public) {
+                                managedOffspringIds.add(child.id_public);
+                            }
+                        }
+                    }
+                }
+
+                const seenIds = new Set(managedOffspringIds);
+                let computedTotal = managedOffspringIds.size;
+
+                /*
+                 * Add only pedigree offspring that are NOT already
+                 * represented by a Litter Management litter.
+                 */
+                for (const group of pedigreeOffspring || []) {
+                    const offspring = Array.isArray(group?.offspring)
+                        ? group.offspring
+                        : [];
+
+                    for (const child of offspring) {
+                        if (!child) continue;
+
+                        // Exact offspring ID already belongs to a managed litter.
+                        if (
+                            child.id_public &&
+                            managedOffspringIds.has(child.id_public)
+                        ) {
+                            continue;
+                        }
+
+                        // Already counted elsewhere.
+                        if (
+                            child.id_public &&
+                            seenIds.has(child.id_public)
+                        ) {
+                            continue;
+                        }
+
+                        const childBirthDate = child.birthDate
+                            ? new Date(child.birthDate)
+                                .toISOString()
+                                .slice(0, 10)
+                            : null;
+
+                        const childOtherParentId =
+                            child.sireId_public === animal.id_public
+                                ? child.damId_public
+                                : child.sireId_public;
+
+                        /*
+                         * Same matching rule as the Offspring & Litters
+                         * display: birth date + other parent.
+                         */
+                        const matchesManagedLitter = (animalLitters || []).some(
+                            litter => {
+                                const litterBirthDate = litter?.birthDate
+                                    ? new Date(litter.birthDate)
+                                        .toISOString()
+                                        .slice(0, 10)
+                                    : null;
+
+                                if (
+                                    !childBirthDate ||
+                                    !litterBirthDate ||
+                                    childBirthDate !== litterBirthDate
+                                ) {
+                                    return false;
+                                }
+
+                                const litterOtherParentId =
+                                    litter.sireId_public === animal.id_public
+                                        ? litter.damId_public
+                                        : litter.sireId_public;
+
+                                return (
+                                    litterOtherParentId &&
+                                    childOtherParentId &&
+                                    litterOtherParentId === childOtherParentId
+                                );
+                            }
+                        );
+
+                        if (matchesManagedLitter) {
+                            continue;
+                        }
+
+                        if (child.id_public) {
+                            seenIds.add(child.id_public);
+                        }
+
+                        computedTotal += 1;
+                    }
+                }
+
+                return computedTotal;
+            })()}
+        </div>
+    </div>
+</div>
                                                 <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-2">
                                                     <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap">
                                                         {(() => {
