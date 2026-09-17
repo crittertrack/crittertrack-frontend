@@ -94,15 +94,16 @@ export const AnimalNameWithFlag = ({
         'Unnamed';
 
     const defaultStyle = {
-        direction: 'ltr',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        gap: '0.25rem',
-        width: '100%',
-        minWidth: 0,
-        textAlign: 'center',
-    };
+    direction: 'ltr',
+    display: 'inline-flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: '0.25rem',
+    maxWidth: '100%',
+    minWidth: 0,
+    verticalAlign: 'baseline',
+    textAlign: 'center',
+};
 
     return (
         <span

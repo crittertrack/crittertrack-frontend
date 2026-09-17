@@ -1056,16 +1056,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 </div>
                                                 
                                                 {/* Prefix / Name under image */}
-                                                <div className="w-full px-2 pb-1">
-                                                    <div className="text-sm font-semibold text-gray-800 dark:text-dark-text leading-snug text-center">
-                                                        <AnimalNameWithFlag
-    animal={animal}
-    wrapperClassName="flex w-full items-start justify-center gap-1 text-center"
-    textClassName="break-words leading-tight text-center"
-    flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
-/>
-                                                    </div>
-                                                </div>
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+        <AnimalNameWithFlag
+            animal={animal}
+            wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
+            textClassName="break-words leading-tight text-center"
+            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+        />
+    </div>
+</div>
 
                                                 {/* ID bottom-right */}
                                                 <div className="w-full px-2 pb-2 flex justify-end">
