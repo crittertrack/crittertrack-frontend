@@ -611,7 +611,6 @@ useEffect(() => {
         </div>
 
         <div className="mt-1 text-sm font-bold text-gray-900 dark:text-dark-text">
-            ```jsx id="f5f1xq"
 {(() => {
     const seenIds = new Set();
     let computedTotal = 0;

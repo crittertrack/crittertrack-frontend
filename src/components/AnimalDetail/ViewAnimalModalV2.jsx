@@ -575,7 +575,6 @@ useEffect(() => {
                                                     <div className="text-center leading-none">
                                                         <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
                                                         <div className="mt-0.5 text-sm font-bold text-gray-900 dark:text-dark-text">
-                                                            ```jsx id="f5f1xq"
 {(() => {
     const seenIds = new Set();
     let computedTotal = 0;
