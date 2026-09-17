@@ -408,9 +408,19 @@ const AnimalModalV2 = ({
                         <div className="bg-white/70 dark:bg-dark-card-bg/70 backdrop-blur-sm rounded-lg border border-gray-300 dark:border-dark-border shadow-sm p-3 md:p-4 h-full flex flex-col">
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div className="min-w-0">
-                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text flex items-center gap-2 flex-wrap break-words">
-                                        <AnimalNameWithFlag animal={animal} /> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
-                                    </h2>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text flex items-start justify-start gap-2 flex-wrap break-words text-left">
+    <AnimalNameWithFlag
+        animal={animal}
+        wrapperClassName="inline-flex max-w-full items-start justify-start gap-1"
+        textClassName="break-words leading-tight text-left"
+    />
+    {animal.gender === 'Male' && (
+        <Mars className="text-blue-500 shrink-0" size={24} />
+    )}
+    {animal.gender === 'Female' && (
+        <Venus className="text-pink-500 shrink-0" size={24} />
+    )}
+</h2>
                                     {!isHeaderCollapsed && (
                                         <>
                                             <p className="text-xs text-gray-700 dark:text-dark-text-secondary">
