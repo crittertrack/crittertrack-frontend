@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import apiClient from '../../utils/apiClient';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
-import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
+import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import themeColors from '../../utils/themeColors';
 import AnimalImage from '../shared/AnimalImage';
 import {
@@ -1027,19 +1027,26 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         {genIndex === 3 ? (
                             stacked ? (
                                 <>
-                                    <div style={{ fontSize: '0.54rem', fontWeight: 700, color: certFontColor, lineHeight: 1.05, overflowWrap: 'anywhere', padding: '0 18px 0 4px' }}>{fullName}</div>
+                                    <div style={{ fontSize: '0.54rem', fontWeight: 700, color: certFontColor, lineHeight: 1.05, overflowWrap: 'anywhere', padding: '0 18px 0 4px' }}>
+                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.25rem', textAlign: 'left', maxWidth: '100%' }} textClassName="leading-[1.05]" flagClassName="inline-block h-3 w-4 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]" />
+                                    </div>
                                     {variety && <div style={{ fontSize: '0.47rem', color: certFontColor, lineHeight: 1.05, overflowWrap: 'anywhere', padding: '0 18px 0 4px' }}>{variety}</div>}
                                     {animal.birthDate && <div style={{ fontSize: '0.47rem', color: certFontColor, lineHeight: 1.05, padding: '0 18px 0 4px' }}>{formatDate(animal.birthDate)}</div>}
                                 </>
                             ) : (
                                 <>
-                                    <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
+                                    <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>
+                                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.25rem', textAlign: 'left', maxWidth: '100%' }} textClassName="leading-[1.4]" flagClassName="inline-block h-4 w-5 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]" />
+                                        {variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}
+                                    </div>
                                     <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
                                 </>
                             )
                         ) : (
                             <>
-                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{fullName}</div>
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere' }}>
+                                    <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.25rem', textAlign: 'left', maxWidth: '100%' }} textClassName="leading-[1.2]" flagClassName="inline-block h-4 w-5 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]" />
+                                </div>
                                 {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{variety}</div>}
                                 {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}
                                 {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
@@ -1314,7 +1321,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 {/* Details */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ marginBottom: 4 }}>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: certFontColor }}>{fullName}</span>
+                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.25rem', textAlign: 'left', maxWidth: '100%' }} textClassName="text-[0.9rem] font-bold leading-[1.2]" flagClassName="inline-block h-4 w-5 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]" />
                     </div>
                     <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
                         <tbody>
@@ -1373,7 +1380,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         )}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827', lineHeight: 1.15, overflowWrap: 'anywhere', paddingRight: 20 }}>{fullName || 'Unknown'}</div>
+                        <AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-start justify-start gap-1 text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.25rem', textAlign: 'left', maxWidth: '100%' }} textClassName="text-[0.95rem] font-bold leading-[1.15]" flagClassName="inline-block h-4 w-5 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]" />
                         {variety && <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: 2, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{variety}</div>}
                         {animal.birthDate && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 3 }}>{formatDate(animal.birthDate)}</div>}
                         {animal.id_public && <div style={{ fontSize: '0.7rem', color: '#374151', fontFamily: 'monospace', marginTop: 4 }}>{animal.id_public}</div>}
@@ -1523,7 +1530,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                     )}
                                 </div>
                                 <div style={{ width: '100%', background: 'rgba(255,255,255,0.95)', borderTop: '1px solid #d1d5db', fontSize: '0.60rem', color: '#111827', fontWeight: 700, textAlign: 'center', padding: '2px 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {fullName}
+                                    <AnimalNameWithFlag animal={a} wrapperClassName="inline-flex max-w-full items-center justify-center gap-1 text-center" wrapperStyle={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', textAlign: 'center', maxWidth: '100%' }} textClassName="truncate" flagClassName="inline-block h-3 w-4 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[1px]" />
                                 </div>
                             </div>
                         </div>

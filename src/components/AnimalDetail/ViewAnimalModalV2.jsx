@@ -549,10 +549,10 @@ const ViewAnimalModalV2 = ({
 
                                         <div className="w-full">
                                             <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
-                                                <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5">
+                                                <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-2 py-1.5">
                                                     <div className="text-center leading-none">
                                                         <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">Total offspring</div>
-                                                        <div className="mt-1 text-base font-bold text-gray-900 dark:text-dark-text">
+                                                        <div className="mt-0.5 text-base font-bold text-gray-900 dark:text-dark-text">
                                                             {(() => {
                                                                 const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
                                                                 if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
@@ -566,8 +566,8 @@ const ViewAnimalModalV2 = ({
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-2">
-                                                    <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap">
+                                                <div className="w-full md:w-3/4 min-w-0 rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 px-3 py-1.5">
+                                                    <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2 flex-wrap leading-none">
                                                         {(() => {
                                                             const lines = sortLinesGradientFirst(hideRedundantLegacyLines((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false)));
                                                             const idParts = [

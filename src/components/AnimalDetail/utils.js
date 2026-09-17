@@ -302,7 +302,7 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                     </div>
                 )}
                 <div className="flex-grow min-w-0">
-                    <AnimalNameWithFlag animal={parent} className="w-full justify-start" wrapperClassName="inline-flex items-start justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="text-xs font-semibold text-gray-800 dark:text-dark-text text-left leading-[1.1]" flagClassName="inline-block h-3.5 w-5 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[2px] self-start shrink-0" />
+                    <AnimalNameWithFlag animal={parent} className="w-full justify-start" wrapperClassName="inline-flex items-start justify-start gap-0.125rem text-left" wrapperStyle={{ display: 'inline-flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '0.125rem', textAlign: 'left' }} textClassName="text-xs font-semibold text-gray-800 dark:text-dark-text text-left leading-[1.1]" textStyle={{ textAlign: 'left' }} flagClassName="inline-block h-3.5 w-5 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-[2px] self-start shrink-0" />
                     <p className="text-xs text-gray-600 dark:text-dark-text-secondary font-mono">
                         {parent.id_public}
                     </p>
