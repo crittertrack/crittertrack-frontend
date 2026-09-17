@@ -263,11 +263,11 @@ const LiteViewAnimalModal = ({
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
         let cancelled = false;
-        apiClient.get(`/animals/${animal.id_public}/offspring`)
+        apiClient.get(`/animals/${animal.id_public}/offspring?includeManaged=true`)
             .then(res => {
                 if (cancelled) return;
-                const unmanaged = (res.data || []).filter(l => !l.litter_id_public);
-                setPedigreeOffspring(unmanaged);
+                const managedAndPedigree = Array.isArray(res.data) ? res.data : [];
+                setPedigreeOffspring(managedAndPedigree);
             })
             .catch(() => { if (!cancelled) setPedigreeOffspring([]); });
         return () => { cancelled = true; };
@@ -546,13 +546,28 @@ const LiteViewAnimalModal = ({
                                                             {(() => {
                                                                 const explicitTotal = Number(animal.totalOffspringProduced ?? animal.offspringCount ?? animal.litterCount ?? animal.viableOffspringCount ?? 0);
                                                                 if (Number.isFinite(explicitTotal) && explicitTotal > 0) return explicitTotal;
+                                                                if (animalLitters === null || pedigreeOffspring === null) {
+                                                                    return Number.isFinite(explicitTotal) ? explicitTotal : 0;
+                                                                }
+                                                                const seenIds = new Set();
+                                                                let computedTotal = 0;
                                                                 const sourceItems = [...(animalLitters || []), ...(pedigreeOffspring || [])];
-                                                                const computedTotal = sourceItems.reduce((sum, item) => {
+                                                                for (const item of sourceItems) {
+                                                                    const groupedOffspring = Array.isArray(item?.offspring) ? item.offspring : [];
+                                                                    if (groupedOffspring.length > 0) {
+                                                                        for (const child of groupedOffspring) {
+                                                                            if (child?.id_public && !seenIds.has(child.id_public)) {
+                                                                                seenIds.add(child.id_public);
+                                                                                computedTotal += 1;
+                                                                            }
+                                                                        }
+                                                                        continue;
+                                                                    }
                                                                     const directTotal = Number(item?.litterSizeBorn ?? item?.numberBorn ?? item?.litterSize ?? item?.offspringCount ?? 0);
                                                                     const genderTotal = Number(item?.maleCount ?? 0) + Number(item?.femaleCount ?? 0) + Number(item?.unknownCount ?? 0);
                                                                     const fromLitter = Number.isFinite(directTotal) && directTotal > 0 ? directTotal : genderTotal;
-                                                                    return sum + (Number.isFinite(fromLitter) ? fromLitter : 0);
-                                                                }, 0);
+                                                                    if (Number.isFinite(fromLitter) && fromLitter > 0) computedTotal += fromLitter;
+                                                                }
                                                                 return computedTotal || 0;
                                                             })()}
                                                         </div>
