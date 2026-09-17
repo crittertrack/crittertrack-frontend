@@ -14,6 +14,7 @@ import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import apiClient from '../../utils/apiClient';
+import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
 import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { CareTabContent } from './CareTabContent';
 import { PedigreeTabContent } from './PedigreeTabContent';
@@ -413,8 +414,11 @@ useEffect(() => {
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text flex items-center gap-2 flex-wrap break-words">
-                                        <AnimalNameWithFlag animal={animal} /> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
-                                    </h2>
+<AnimalNameWithFlag
+    animal={animal}
+    className="justify-start"
+    wrapperClassName="inline-flex items-center justify-start gap-0.5 text-left"
+/> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}                                    </h2>
                                     {!isHeaderCollapsed && (
                                         <>
                                             <p className="text-xs text-gray-700 dark:text-dark-text-secondary">

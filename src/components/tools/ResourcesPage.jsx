@@ -82,9 +82,7 @@ const ResourcesPage = ({ API_BASE_URL, authToken }) => {
         if (!suggestText.trim()) return;
         setSuggestStatus('sending');
         try {
-            await axios.post(`${API_BASE_URL}/resource-suggestions`, { text: suggestText.trim() }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/resource-suggestions`, { text: suggestText.trim() });
             setSuggestText('');
             setSuggestStatus('sent');
         } catch (err) {

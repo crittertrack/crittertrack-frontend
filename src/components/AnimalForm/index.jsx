@@ -1,11 +1,20 @@
 ﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import ReactDOM from 'react-dom';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import apiClient from '../../utils/apiClient';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import themeColors from '../../utils/themeColors';
 import AnimalImage from '../shared/AnimalImage';
+import { downloadBlob } from '../../utils/nativeDownload';
+import { formatDate, formatDateShort } from '../../utils/dateFormatter';
+import DatePicker from '../DatePicker';
+import AnimalImageUpload from '../AnimalImageUpload';
+import GeneticCodeBuilder from '../GeneticCodeBuilder';
+import LoadingSpinner from '../shared/LoadingSpinner';
+import AnimalFormModalV2 from './AnimalFormModalV2';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock,
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
@@ -40,16 +49,6 @@ const MAX_PEDIGREE_FETCH_NODES = 100;
 const MAX_PEDIGREE_FETCH_DEPTH = 5;
 const PEDIGREE_CACHE_TTL_MS = 2 * 60 * 1000; // treat cached trees older than this as stale (e.g. after editing breeder/owner)
 const isPedigreeCacheFresh = (cached) => !!cached && Date.now() - (cached.timestamp || 0) < PEDIGREE_CACHE_TTL_MS;
-
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { downloadBlob } from '../../utils/nativeDownload';
-import { formatDate, formatDateShort } from '../../utils/dateFormatter';
-import DatePicker from '../DatePicker';
-import AnimalImageUpload from '../AnimalImageUpload';
-import GeneticCodeBuilder from '../GeneticCodeBuilder';
-import LoadingSpinner from '../shared/LoadingSpinner';
-import AnimalFormModalV2 from './AnimalFormModalV2';
 
 const getPedigreeCacheKey = (rootId, authToken) => {
     if (!rootId) return null;

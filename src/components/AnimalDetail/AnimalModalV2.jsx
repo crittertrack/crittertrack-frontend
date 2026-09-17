@@ -96,11 +96,9 @@ const AnimalModalV2 = ({
     setShowImageModal,
     setEnlargedImageUrl
 }) => {
-    if (!animal) return null;
-
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-    const [mainImage, setMainImage] = useState(animal.imageUrl || animal.photoUrl);
+    const [mainImage, setMainImage] = useState(animal?.imageUrl || animal?.photoUrl);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [avgKinship, setAvgKinship] = useState(null);
@@ -125,8 +123,9 @@ const AnimalModalV2 = ({
     const animalTimelineEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
 
     useEffect(() => {
+        if (!animal) return;
         setMainImage(animal.imageUrl || animal.photoUrl);
-    }, [animal.imageUrl, animal.photoUrl]);
+    }, [animal?.imageUrl, animal?.photoUrl]);
 
     useEffect(() => {
         const fetchBreeder = async () => {
@@ -314,7 +313,9 @@ useEffect(() => {
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
     }, [animal]);
 
-    const allImages = useMemo(() => [animal.imageUrl || animal.photoUrl, ...(animal.extraImages || [])].filter(Boolean), [animal]);
+    const allImages = useMemo(() => [animal?.imageUrl || animal?.photoUrl, ...(animal?.extraImages || [])].filter(Boolean), [animal]);
+
+    if (!animal) return null;
 
     const TABS = [
         { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },

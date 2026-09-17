@@ -122,7 +122,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
         const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
         const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await apiClient.get(`/animals/any/${encodeURIComponent(d.ctcId)}`);
                 if (res.data) onViewAnimal(res.data);
             } catch { /* not accessible */ }
         } : undefined;

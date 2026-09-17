@@ -51,18 +51,6 @@ import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
 
-// Lazy-loaded — these are only reachable from rarely-hit branches (logged-out
-// marketing views, non-owner edit fallback), so keep them out of the main bundle.
-const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
-const DonationView = lazy(() => import('./components/Donation/DonationView'));
-const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
-const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
-const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
-const AnimalForm = lazy(() => import('./components/AnimalForm'));
-// Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
-// must never be part of the main bundle every visitor downloads.
-const AdminPanel = lazy(() => import('./components/EnhancedAdminPanel'));
-
 // Phase 7: Modals & Messages
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
 import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './components/Modals/SearchModals';
@@ -93,6 +81,18 @@ import {
 } from './utils/iosFundraiser';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
+
+// Lazy-loaded — these are only reachable from rarely-hit branches (logged-out
+// marketing views, non-owner edit fallback), so keep them out of the main bundle.
+const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
+const DonationView = lazy(() => import('./components/Donation/DonationView'));
+const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
+const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
+const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
+const AnimalForm = lazy(() => import('./components/AnimalForm'));
+// Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
+// must never be part of the main bundle every visitor downloads.
+const AdminPanel = lazy(() => import('./components/EnhancedAdminPanel'));
 
 // App version for cache invalidation - increment to force cache clear
 const APP_VERSION = '7.0.6';

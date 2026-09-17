@@ -95,11 +95,9 @@ const LiteAnimalModal = ({
     setShowImageModal,
     setEnlargedImageUrl
 }) => {
-    if (!animal) return null;
-
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-    const [mainImage, setMainImage] = useState(animal.imageUrl || animal.photoUrl);
+    const [mainImage, setMainImage] = useState(animal?.imageUrl || animal?.photoUrl);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [avgKinship, setAvgKinship] = useState(null);
@@ -124,8 +122,9 @@ const LiteAnimalModal = ({
     const animalTimelineEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
 
     useEffect(() => {
+        if (!animal) return;
         setMainImage(animal.imageUrl || animal.photoUrl);
-    }, [animal.imageUrl, animal.photoUrl]);
+    }, [animal?.imageUrl, animal?.photoUrl]);
 
     useEffect(() => {
         const fetchBreeder = async () => {
@@ -304,13 +303,16 @@ useEffect(() => {
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
     }, [animal]);
 
-    const allImages = useMemo(() => [animal.imageUrl || animal.photoUrl, ...(animal.extraImages || [])].filter(Boolean), [animal]);
+    const allImages = useMemo(() => [animal?.imageUrl || animal?.photoUrl, ...(animal?.extraImages || [])].filter(Boolean), [animal]);
 
     // Lite mode's animal detail only exposes 4 top-level tabs (matches crittertrack-lite's own
     // AnimalDetail.jsx: Summary/Records/Photos/Pedigree) — Identification/Appearance/Health/Care/
     // Behavior/Breeding/legacy-Records all collapse into sections under this one Records tab, and
     // Timeline is dropped entirely since native Lite has no equivalent.
     const [openRecordSections, setOpenRecordSections] = useState({ identification: true, appearance: false, health: false, care: false, behavior: false, breeding: false, legalOther: false });
+
+    if (!animal) return null;
+
     const toggleRecordSection = (key) => setOpenRecordSections((s) => ({ ...s, [key]: !s[key] }));
 
     const TABS = [
@@ -412,8 +414,11 @@ useEffect(() => {
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text flex items-center gap-2 flex-wrap break-words">
-                                        <AnimalNameWithFlag animal={animal} /> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
-                                    </h2>
+<AnimalNameWithFlag
+    animal={animal}
+    className="justify-start"
+    wrapperClassName="inline-flex items-center justify-start gap-0.5 text-left"
+/> {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}                                    </h2>
                                     {!isHeaderCollapsed && (
                                         <>
                                             <p className="text-xs text-gray-700 dark:text-dark-text-secondary">

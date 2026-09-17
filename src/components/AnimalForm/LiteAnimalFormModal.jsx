@@ -247,8 +247,6 @@ const ContactDisplayField = ({ label, value, onEdit }) => (
 );
 
 const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, authToken }) => {
-    if (!isOpen) return null;
-
     const [mode, setMode] = useState('user'); // 'user', 'contact', 'manual'
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -286,6 +284,8 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
         if (!showRetiredBreeders && contact.isBreeder && (contact.breederStatus || 'active') === 'retired') return false;
         return true;
     });
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[90] flex items-center justify-center p-4" onClick={onClose}>
@@ -1048,8 +1048,6 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 };
 
 const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [], onManageLocations }) => {
-    if (!isOpen) return null;
-
     const getEnclosureLocationName = useCallback((enclosure) => {
         // Resolve enclosure location display name from buildingId/roomId references
         if (!locations || locations.length === 0) {
@@ -1146,6 +1144,8 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
         e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.location?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[95] flex items-center justify-center p-4" onClick={onClose}>
