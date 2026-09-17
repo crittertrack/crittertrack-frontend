@@ -76,19 +76,20 @@ export const formatAnimalDisplayName = (animal = {}) => {
     return displayText || 'Unnamed';
 };
 
-export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'flex w-full items-start justify-center gap-1.5 text-center', wrapperStyle = {}, textStyle = {} }) => {
+export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'inline-flex items-start justify-center gap-1.5 text-center', wrapperStyle = {}, textStyle = {} }) => {
     const { flagCode, displayText } = getAnimalDisplayParts(animal);
     const text = displayText || [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ') || 'Unnamed';
 
     const defaultStyle = {
         direction: 'ltr',
-        display: 'flex',
+        display: 'inline-flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
         gap: '0.25rem',
-        Width: '100%',
+        maxWidth: '100%',
         minWidth: 0,
         verticalAlign: 'baseline',
+        flexShrink: 0,
         textAlign: 'center',
     };
 
@@ -113,7 +114,7 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
                     wordBreak: 'break-word',
                     whiteSpace: 'normal',
                     display: 'block',
-                    textAlign: 'left',
+                    textAlign: 'center',
                     ...textStyle,
                 }}
             >
