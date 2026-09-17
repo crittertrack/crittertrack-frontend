@@ -102,7 +102,7 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
                 <span
                     className={`fi fi-${flagCode} ${flagClassName}`.trim()}
                     aria-label={`${flagCode.toUpperCase()} flag`}
-                    style={{ display: 'inline-block', flex: '0 0 auto', marginTop: '0.1rem' }}
+                    style={{ display: 'inline-block', flex: '0 0 auto', alignSelf: 'flex-start', marginTop: '0.05rem', lineHeight: 1 }}
                 />
             )}
             <span
@@ -114,7 +114,7 @@ export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '',
                     wordBreak: 'break-word',
                     whiteSpace: 'normal',
                     display: 'block',
-                    textAlign: 'center',
+                    textAlign: 'left',
                     ...textStyle,
                 }}
             >
