@@ -76,20 +76,19 @@ export const formatAnimalDisplayName = (animal = {}) => {
     return displayText || 'Unnamed';
 };
 
-export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'inline-flex items-start justify-center gap-1.5 text-center', wrapperStyle = {}, textStyle = {} }) => {
+export const AnimalNameWithFlag = ({ animal, className = '', textClassName = '', flagClassName = 'inline-block h-4 w-6 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden', wrapperClassName = 'flex w-full items-start justify-center gap-1.5 text-center', wrapperStyle = {}, textStyle = {} }) => {
     const { flagCode, displayText } = getAnimalDisplayParts(animal);
     const text = displayText || [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ') || 'Unnamed';
 
     const defaultStyle = {
         direction: 'ltr',
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
         gap: '0.25rem',
-        maxWidth: '100%',
+        Width: '100%',
         minWidth: 0,
         verticalAlign: 'baseline',
-        flexShrink: 0,
         textAlign: 'center',
     };
 
