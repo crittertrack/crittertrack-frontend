@@ -30,7 +30,7 @@ import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
-import LiteModeToggle from './components/LiteModeToggle';
+// import LiteModeToggle from './components/LiteModeToggle';
 import LiteBottomNav from './components/LiteBottomNav';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
@@ -320,7 +320,7 @@ const App = () => {
     // its own separate crittertrack-lite app already). See docs/lite-web-toggle-brainstorm.md.
     // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
     // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
-    const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
+    const isLiteModeActive = false; // Lite mode toggle disabled per user request
     
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
@@ -1932,7 +1932,7 @@ const App = () => {
 
                         <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
-                        <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
+                        {/* <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} /> */}
 
                         <button
                             onClick={() => {
@@ -2037,7 +2037,7 @@ const App = () => {
 
                             <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
-                            <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
+                            {/* <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} /> */}
 
                             <button
                                 onClick={() => {
