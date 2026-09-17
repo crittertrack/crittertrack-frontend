@@ -728,89 +728,6 @@ const ViewAnimalModalV2 = ({
                                 </InfoCard>
                             </div>
                             </div>
-                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/60">
-                                <button
-                                    type="button"
-                                    onClick={() => setRelInsightsOpen(o => !o)}
-                                    className="w-full flex items-center justify-between p-4 text-left"
-                                >
-                                    <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center">
-                                        <Network size={20} className="text-blue-600 dark:text-blue-400 mr-2" />
-                                        Relationship Insights
-                                        {ownedAnimalsLoaded && allRelGroups.length > 0 && (
-                                            <span className="ml-2 text-xs font-normal text-gray-500 dark:text-dark-text-muted bg-white dark:bg-dark-card-bg border border-blue-200 dark:border-blue-700/60 rounded-full px-2 py-0.5">
-                                                {allRelGroups.reduce((s, g) => s + g.items.length, 0)} relatives
-                                            </span>
-                                        )}
-                                        {globalRelsLoading && (
-                                            <Loader2 size={13} className="animate-spin text-blue-400 ml-2" />
-                                        )}
-                                    </h3>
-                                    {relInsightsOpen
-                                        ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
-                                        : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
-                                </button>
-                                {relInsightsOpen && (
-                                    <div className="px-4 pb-4 space-y-3">
-                                        {!ownedAnimalsLoaded ? (
-                                            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-dark-text-muted py-2">
-                                                <Loader2 size={13} className="animate-spin" />
-                                                Loading relationships...
-                                            </div>
-                                            ) : allRelGroups.length === 0 && !globalRelsLoading ? (
-                                                <div className="text-xs text-gray-400 dark:text-dark-text-muted py-1">No known relatives found</div>
-                                            ) : (
-                                                <>
-                                                    {allRelGroups.map(({ label: groupLabel, items }) => (
-                                                        <div key={groupLabel}>
-                                                            <h4 className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-2">{groupLabel}</h4>
-                                                            <div className="space-y-2">
-                                                                {items.map(({ rel, relLabel }) => (
-                                                                    <div
-                                                                        key={rel.id_public}
-                                                                        className="flex items-center justify-between p-2.5 bg-white dark:bg-dark-card-bg rounded-lg border border-blue-100 dark:border-blue-700/60 hover:border-blue-300 transition-colors cursor-pointer"
-                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                                    >
-                                                                        <div className="flex items-center gap-2 min-w-0">
-                                                                            {(rel.imageUrl || rel.photoUrl) ? (
-                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-dark-border" />
-                                                                            ) : (
-                                                                                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 dark:text-blue-400 font-semibold">
-                                                                                    {rel.species?.charAt(0).toUpperCase()}
-                                                                                </div>
-                                                                            )}
-                                                                            <div className="min-w-0">
-                                                                                <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate min-w-0">
-                                                                                    <AnimalNameWithFlag
-                                                                                        animal={rel}
-                                                                                        wrapperClassName="inline-flex max-w-full items-start gap-1 text-left"
-                                                                                        textClassName="truncate leading-tight text-left"
-                                                                                        flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
-                                                                                    />
-                                                                                </div>
-                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                            <span className="text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
-                                                                            <ChevronRight size={14} className="text-gray-400 dark:text-dark-text-muted" />
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {globalRelsLoading && (
-                                                        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-dark-text-muted py-1">
-                                                            <Loader2 size={13} className="animate-spin" />
-                                                            Loading more...
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
-                                    </div>
-                                )}
-                            </div>
                             <InfoCard title="Offspring & Litters" icon={<Users size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                                 {(animalLitters === null || pedigreeOffspring === null) ? (
                                     <div className="text-sm text-gray-500 dark:text-dark-text-muted animate-pulse">
@@ -1281,6 +1198,90 @@ const ViewAnimalModalV2 = ({
                                     );
                                 })()}
                                 </InfoCard>
+<div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/60">
+                                <button
+                                    type="button"
+                                    onClick={() => setRelInsightsOpen(o => !o)}
+                                    className="w-full flex items-center justify-between p-4 text-left"
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center">
+                                        <Network size={20} className="text-blue-600 dark:text-blue-400 mr-2" />
+                                        Relationship Insights
+                                        {ownedAnimalsLoaded && allRelGroups.length > 0 && (
+                                            <span className="ml-2 text-xs font-normal text-gray-500 dark:text-dark-text-muted bg-white dark:bg-dark-card-bg border border-blue-200 dark:border-blue-700/60 rounded-full px-2 py-0.5">
+                                                {allRelGroups.reduce((s, g) => s + g.items.length, 0)} relatives
+                                            </span>
+                                        )}
+                                        {globalRelsLoading && (
+                                            <Loader2 size={13} className="animate-spin text-blue-400 ml-2" />
+                                        )}
+                                    </h3>
+                                    {relInsightsOpen
+                                        ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                        : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                </button>
+                                {relInsightsOpen && (
+                                    <div className="px-4 pb-4 space-y-3">
+                                        {!ownedAnimalsLoaded ? (
+                                            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-dark-text-muted py-2">
+                                                <Loader2 size={13} className="animate-spin" />
+                                                Loading relationships...
+                                            </div>
+                                            ) : allRelGroups.length === 0 && !globalRelsLoading ? (
+                                                <div className="text-xs text-gray-400 dark:text-dark-text-muted py-1">No known relatives found</div>
+                                            ) : (
+                                                <>
+                                                    {allRelGroups.map(({ label: groupLabel, items }) => (
+                                                        <div key={groupLabel}>
+                                                            <h4 className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                            <div className="space-y-2">
+                                                                {items.map(({ rel, relLabel }) => (
+                                                                    <div
+                                                                        key={rel.id_public}
+                                                                        className="flex items-center justify-between p-2.5 bg-white dark:bg-dark-card-bg rounded-lg border border-blue-100 dark:border-blue-700/60 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                    >
+                                                                        <div className="flex items-center gap-2 min-w-0">
+                                                                            {(rel.imageUrl || rel.photoUrl) ? (
+                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-dark-border" />
+                                                                            ) : (
+                                                                                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                                                                                    {rel.species?.charAt(0).toUpperCase()}
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="min-w-0">
+                                                                                <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate min-w-0">
+                                                                                    <AnimalNameWithFlag
+                                                                                        animal={rel}
+                                                                                        wrapperClassName="inline-flex max-w-full items-start gap-1 text-left"
+                                                                                        textClassName="truncate leading-tight text-left"
+                                                                                        flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                            <span className="text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                            <ChevronRight size={14} className="text-gray-400 dark:text-dark-text-muted" />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {globalRelsLoading && (
+                                                        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-dark-text-muted py-1">
+                                                            <Loader2 size={13} className="animate-spin" />
+                                                            Loading more...
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                    </div>
+                                )}
+                            </div>
+                            
                         </div>
                     )}
                     {activeTab === 'identification' && (
