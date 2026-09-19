@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2, Search, X } from 'lucide-react';
+import { ChevronLeft, RefreshCw, Archive, ArchiveRestore, ArrowLeftRight, Loader2, Search, X } from 'lucide-react';
 import apiClient from '../utils/apiClient';
 import InfoButton from './shared/InfoButton';
 import { STATUS_OPTIONS } from '../utils/constants';
@@ -26,6 +26,7 @@ const ArchiveScreen = ({
     const [archiveLoading, setArchiveLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [unarchivingAll, setUnarchivingAll] = useState(false);
 
     const fetchArchiveData = useCallback(async () => {
         if (!authToken) return;
@@ -88,6 +89,47 @@ const ArchiveScreen = ({
             fetchAnimals();
         } catch (err) {
             showModalMessage('Error', err.response?.data?.message || 'Failed to unarchive');
+        }
+    };
+
+    // Unarchives every animal currently in the "Archived" bucket (excludes Sold/Transferred,
+    // which is intentionally not offered a bulk-restore since those animals aren't owned anymore).
+    // Respects the current search/status filters so a user narrowing the list can restore just
+    // the filtered subset rather than being forced to always act on everything.
+    const handleUnarchiveAll = async () => {
+        const targets = filteredArchivedAnimals;
+        if (targets.length === 0) return;
+
+        const confirmed = window.confirm(
+            `Unarchive all ${targets.length} animal${targets.length !== 1 ? 's' : ''} shown in the Archived list? This does not affect Sold/Transferred animals.`
+        );
+        if (!confirmed) return;
+
+        setUnarchivingAll(true);
+        let successCount = 0;
+        let failCount = 0;
+        try {
+            for (const animal of targets) {
+                try {
+                    const res = await apiClient.put(`/animals/${animal.id_public}`, { archived: false });
+                    const updatedAnimal = { ...animal, ...(res.data?.animal || res.data), id_public: animal.id_public, archived: false };
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
+                    successCount += 1;
+                } catch (err) {
+                    console.error(`Failed to unarchive ${animal.id_public}:`, err);
+                    failCount += 1;
+                }
+            }
+            window.dispatchEvent(new Event('animals-changed'));
+            if (failCount === 0) {
+                showModalMessage('Success', `Unarchived ${successCount} animal${successCount !== 1 ? 's' : ''}.`);
+            } else {
+                showModalMessage('Partial Success', `Unarchived ${successCount} animal${successCount !== 1 ? 's' : ''}, but ${failCount} failed. Please try again.`);
+            }
+            fetchArchiveData();
+            fetchAnimals();
+        } finally {
+            setUnarchivingAll(false);
         }
     };
 
@@ -246,6 +288,19 @@ const ArchiveScreen = ({
                         />
                         {!collapsedMgmtSections['archived'] && (
                             <div className="p-3 space-y-1.5">
+                                {filteredArchivedAnimals.length > 0 && (
+                                    <div className="flex justify-end pb-1">
+                                        <button
+                                            onClick={handleUnarchiveAll}
+                                            disabled={unarchivingAll}
+                                            className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg border bg-blue-500 dark:bg-dark-info-blue text-white hover:bg-blue-600 dark:hover:bg-dark-info-blue-hover border-blue-500 dark:border-dark-info-blue disabled:opacity-50 whitespace-nowrap"
+                                            title="Unarchive every animal currently listed here (excludes Sold/Transferred)"
+                                        >
+                                            {unarchivingAll ? <Loader2 size={12} className="animate-spin" /> : <ArchiveRestore size={12} />}
+                                            Unarchive All ({filteredArchivedAnimals.length})
+                                        </button>
+                                    </div>
+                                )}
                                 {filteredArchivedAnimals.length === 0
                                     ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">{searchQuery ? 'No matching archived animals.' : 'No archived animals.'}</div>
                                     : filteredArchivedAnimals.map(a => (
