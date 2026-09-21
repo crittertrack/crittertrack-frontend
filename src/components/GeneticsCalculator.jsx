@@ -110,7 +110,7 @@ const GENE_LOCI = {
     ]
   },
   Rn: {
-    name: 'Roan',
+    name: 'Roan/Merle',
     description: 'Recessive. Intermingled white hairs. e.g. Roan (rn/rn - evenly intermingled white hairs), Merle (rn/rn - intermingled white hairs + solid patches of original color)',
     combinations: [
       'rn/rn',
@@ -202,7 +202,7 @@ const MOUSE_POSSIBLE_HET_LOCI = [
   { locus: 'Sa', name: 'Satin' },
   { locus: 'Rst', name: 'Rosette' },
   { locus: 'Fz', name: 'Fuzz' },
-  { locus: 'Rn', name: 'Roan' },
+  { locus: 'Rn', name: 'Merle' },
   { locus: 'Si', name: 'Silvered' },
 ];
 
@@ -613,8 +613,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // P-locus carriers (Pink-eye)
   if (genotype.P === 'P/p' || genotype.P === 'p/P') carriers.push('Pink-eye');
   
-  // Rn-locus carriers (Roan)
-  if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') carriers.push('Roan');
+  // Rn-locus carriers (Merle)
+  if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') carriers.push('Merle');
   
   // Si-locus carriers (Silvered)
   if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') carriers.push('Silvered');
@@ -1352,7 +1352,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Roan (Rn) - recessive trait
   if (genotype.Rn === 'rn/rn') {
-    markings.push('Roan');
+    markings.push('Merle');
   }
 
   // Silvered (Si) - recessive trait
@@ -1659,7 +1659,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
             possibleCarriers.add('Pied');
           }
           if (locus === 'Rn' && (alleles === 'Rn/rn' || alleles === 'rn/Rn')) {
-            possibleCarriers.add('Roan');
+            possibleCarriers.add('Merle');
           }
           if (locus === 'go' && (alleles === 'Go/go' || alleles === 'go/Go')) {
             possibleCarriers.add('Longhair');
@@ -1886,7 +1886,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       S: 'S/S',      // Non-pied (wild type)
       W: 'w/w',      // No white spotting
       Spl: 'spl/spl', // No splashed
-      Rn: 'Rn/Rn',   // No roan
+      Rn: 'Rn/Rn',   // No merle
       Si: 'Si/Si',   // No silver
       Mobr: 'mobr/mobr', // No xbrindle
       U: 'u/u',      // No umbrous
@@ -2322,7 +2322,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Variegated': ['W'],
     'Rumpwhite': ['W'],
     'xbrindle': ['Mobr'],
-    'Roan': ['Rn'],
+    'Merle': ['Rn'],
     'Pearl/Silvered': ['Si'],
     'Shorthair': ['Go'],
     'Longhair': ['Go'],
@@ -2464,7 +2464,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         { name: 'Variegated', image: '/images/phenotypes/variegated.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
         { name: 'Rumpwhite', image: '/images/phenotypes/rumpwhite.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
         { name: 'xbrindle', image: '/images/phenotypes/xbrindle.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
-        { name: 'Roan', image: '/images/phenotypes/roan.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'rn/rn' } },
+        { name: 'Merle', image: '/images/phenotypes/roan.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'rn/rn' } },
         { name: 'Pearl/Silvered', image: '/images/phenotypes/pearl.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'si/si' } },
       ]
     },
