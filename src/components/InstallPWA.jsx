@@ -5,8 +5,29 @@ import { Capacitor } from '@capacitor/core';
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-const InstallPWA = () => {
-  const [installPrompt, setInstallPrompt] = useState(null);
+// The browser only ever fires 'beforeinstallprompt' ONCE per page load (Windows/Android
+// Chrome/Edge — iOS Safari never fires it at all, see isIOSSafari below). Whichever listener
+// happens to be attached at that moment gets it. InstallPWA is mounted in multiple places
+// (the login screen's AuthView, and AndroidBetaBanner once logged in) at different times, so
+// capturing the event into per-component React state meant only whichever instance existed
+// at that single moment could ever use it — e.g. the login screen captured it, then unmounted
+// on login, and the banner's later instance had nothing to trigger, so its button/link just
+// silently did nothing on Windows/desktop Chrome. Capturing it into this module-level store
+// instead (registered once, immediately on import) means every InstallPWA instance — no
+// matter when it mounts — can read the same captured event.
+let capturedInstallPrompt = null;
+const promptListeners = new Set();
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  capturedInstallPrompt = e;
+  promptListeners.forEach((listener) => listener(e));
+});
+
+// compact=true renders just a small text link (e.g. for use inline in banners like
+// AndroidBetaBanner) instead of the full button+info-toggle UI shown on the login screen —
+// both share the exact same install/guide logic below, just different trigger markup.
+const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web)', compactClassName = '' }) => {
+  const [installPrompt, setInstallPrompt] = useState(capturedInstallPrompt);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -16,13 +37,11 @@ const InstallPWA = () => {
       setIsInstalled(true);
     }
 
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    // Covers the case where the event already fired (and was captured above) before this
+    // particular instance mounted — plus stays subscribed in case it fires later instead.
+    if (capturedInstallPrompt) setInstallPrompt(capturedInstallPrompt);
+    promptListeners.add(setInstallPrompt);
+    return () => promptListeners.delete(setInstallPrompt);
   }, []);
 
   // Already running as the installed native app — no "Install App" prompt to show.
@@ -37,12 +56,59 @@ const InstallPWA = () => {
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === 'accepted') setIsInstalled(true);
-    setInstallPrompt(null);
+    // The prompt is single-use — clear the shared store too so every other mounted
+    // instance (e.g. both the login screen's button and the banner's link, if somehow
+    // both were on screen) also reflects that it's been consumed.
+    capturedInstallPrompt = null;
+    promptListeners.forEach((listener) => listener(null));
   };
 
   if (isInstalled) return null;
 
   const isIOSSafari = isIOS() || (isSafari() && !installPrompt);
+
+  const iosGuideModal = showIOSGuide && (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4" onClick={() => setShowIOSGuide(false)}>
+      <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-sm mb-4" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-gray-800">Add to Home Screen</h3>
+          <button onClick={() => setShowIOSGuide(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+        </div>
+        <ol className="space-y-3 text-sm text-gray-700">
+          <li className="flex items-start gap-2">
+            <span className="bg-purple-100 text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+            <span>Tap the <Share size={14} className="inline-block align-middle mx-0.5 text-blue-500" /> <strong>Share</strong> button at the bottom of your browser</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="bg-purple-100 text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+            <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="bg-purple-100 text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+            <span>Tap <strong>"Add"</strong> in the top right corner</span>
+          </li>
+        </ol>
+        <p className="text-xs text-gray-400 mt-3">CritterTrack will appear on your home screen and open fullscreen like a native app.</p>
+      </div>
+    </div>
+  );
+
+  if (compact) {
+    // No disabled/greyed-out state here (unlike the full button below) — on unsupported
+    // browsers this just silently no-ops on click, which is fine for a low-emphasis link.
+    return (
+      <>
+        <button
+          type="button"
+          onClick={handleInstallClick}
+          className={compactClassName || 'text-xs font-medium text-white/90 hover:text-white underline underline-offset-2 transition'}
+        >
+          {compactLabel}
+        </button>
+        {iosGuideModal}
+      </>
+    );
+  }
 
   return (
     <>
@@ -74,31 +140,7 @@ const InstallPWA = () => {
         </p>
       )}
 
-      {showIOSGuide && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4" onClick={() => setShowIOSGuide(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-sm mb-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-800">Add to Home Screen</h3>
-              <button onClick={() => setShowIOSGuide(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
-            </div>
-            <ol className="space-y-3 text-sm text-gray-700">
-              <li className="flex items-start gap-2">
-                <span className="bg-purple-100 text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
-                <span>Tap the <Share size={14} className="inline-block align-middle mx-0.5 text-blue-500" /> <strong>Share</strong> button at the bottom of your browser</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="bg-purple-100 text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
-                <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="bg-purple-100 text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
-                <span>Tap <strong>"Add"</strong> in the top right corner</span>
-              </li>
-            </ol>
-            <p className="text-xs text-gray-400 mt-3">CritterTrack will appear on your home screen and open fullscreen like a native app.</p>
-          </div>
-        </div>
-      )}
+      {iosGuideModal}
     </>
   );
 };

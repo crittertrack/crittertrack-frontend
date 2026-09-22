@@ -23,7 +23,7 @@ import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import AuthView from './components/Auth/AuthView';
 import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationBar from './components/Notifications/NotificationBar';
-import SupportTierBanner from './components/SupportTierBanner';
+import AndroidBetaBanner from './components/AndroidBetaBanner';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -75,10 +75,6 @@ import FinanceDropdown from './components/FinanceDropdown';
 import { API_BASE_URL } from './utils/apiConfig';
 import { downloadBlob } from './utils/nativeDownload';
 import { openExternalLink } from './utils/externalLink';
-import {
-    MINI_SUPPORTER_URL, GENTLE_SUPPORTER_URL, DEDICATED_SUPPORTER_URL, MAJOR_SUPPORTER_URL,
-    useIosFundraiserTotal, getIosFundraiserPercentage, getFundraiserStatusText,
-} from './utils/iosFundraiser';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 
@@ -88,7 +84,6 @@ const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'))
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
-const IosFundraiserPage = lazy(() => import('./components/Donation/IosFundraiserPage'));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 // Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
 // must never be part of the main bundle every visitor downloads.
@@ -237,9 +232,6 @@ const App = () => {
     const [authTokenTemp, setAuthTokenTemp] = useState(null);
     const [userProfileTemp, setUserProfileTemp] = useState(null);
 
-    // Live iOS fundraiser total, shown in the Support CritterTrack panel (both logged-in and out)
-    const iosFundraiserTotal = useIosFundraiserTotal();
-    
     // Phase 10c: Animal Navigation
     const publicAnimalNav = usePublicAnimalNavigation();
     const privateAnimalNav = usePrivateAnimalNavigation(authTokenTemp, API_BASE_URL);
@@ -1078,7 +1070,7 @@ const App = () => {
             localStorage.removeItem('authToken');
             setUserProfile(null);
             // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
-            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources', 'supporters', 'ios-fundraiser'];
+            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources', 'supporters'];
             const currentPath = location.pathname.split('/')[1] || '';
             if (!publicRoutes.includes(currentPath)) {
                 navigate('/');
@@ -1546,28 +1538,6 @@ const App = () => {
             );
         }
 
-        // Full iOS fundraiser story for non-logged-in users
-        if (currentView === 'ios-fundraiser') {
-            return (
-                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
-                    {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-
-                    <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
-                        <CustomAppLogo size="w-10 h-10" />
-                        <button
-                            onClick={() => navigate('/')}
-                            className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
-                        >
-                            <LogIn size={18} className="mr-1" /> Login
-                        </button>
-                    </header>
-
-                    <Suspense fallback={<LoadingSpinner />}>
-                        <IosFundraiserPage />
-                    </Suspense>
-                </div>
-            );
-        }
         
         // Default auth view with search button
         return (
@@ -1652,25 +1622,6 @@ const App = () => {
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-6">
                                     Your support helps cover server costs and enables continuous improvements. Every contribution, 
                                     no matter the size, makes a difference!
-                                </p>
-                                
-                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-2">
-                                    Separately, we're raising support to bring a dedicated <strong>iOS version</strong> of CritterTrack to life.{' '}
-                                    <button type="button" onClick={() => navigate('/ios-fundraiser')} className="underline font-medium hover:text-gray-800 dark:hover:text-dark-text">Read more</button>
-                                </p>
-                                <div className="bg-gray-100 dark:bg-dark-surface rounded-full h-1.5 mb-2">
-                                    <div className="bg-gradient-to-r from-pink-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${getIosFundraiserPercentage(iosFundraiserTotal)}%` }} />
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
-                                    {getFundraiserStatusText(iosFundraiserTotal)}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-6">
-                                    Pick a tier{' '}
-                                    <button type="button" onClick={() => openExternalLink(MINI_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Mini</button>,{' '}
-                                    <button type="button" onClick={() => openExternalLink(GENTLE_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Gentle</button>,{' '}
-                                    <button type="button" onClick={() => openExternalLink(DEDICATED_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Dedicated</button>, or{' '}
-                                    <button type="button" onClick={() => openExternalLink(MAJOR_SUPPORTER_URL)} className="underline font-medium hover:text-gray-700 dark:hover:text-dark-text">Major</button>{' '}
-                                    to support.
                                 </p>
                             </>
                         )}
@@ -2177,7 +2128,7 @@ const App = () => {
                 </div>
             </header>
 
-            <SupportTierBanner />
+            <AndroidBetaBanner userProfile={userProfile} setUserProfile={setUserProfile} />
 
             {/* Unified alerts/notifications banner — unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}
