@@ -3,7 +3,7 @@ import { X, Smartphone, Mail, Loader2, Download, CheckCircle } from 'lucide-reac
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../utils/apiClient';
 import { openExternalLink } from '../utils/externalLink';
-import { AddToHomeScreenGuideModal } from './InstallPWA';
+import InstallPWA from './InstallPWA';
 
 const DISMISS_KEY = 'ct_dismissed_android_beta_banner_v1';
 export const ANDROID_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.crittertrack.app';
@@ -95,7 +95,6 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
         try { return localStorage.getItem(DISMISS_KEY) === 'true'; } catch { return false; }
     });
     const [showModal, setShowModal] = useState(false);
-    const [showIOSGuide, setShowIOSGuide] = useState(false);
 
     // Never shown inside the native Android app itself — that's the app being promoted.
     if (Capacitor.isNativePlatform()) return null;
@@ -125,13 +124,11 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                             >
                                 Join the Android Beta
                             </button>
-                            <button
-                                type="button"
-                                onClick={() => setShowIOSGuide(true)}
-                                className="text-xs font-medium text-white/90 hover:text-white underline underline-offset-2 transition"
-                            >
-                                Not on Android but still want an app? Add CritterTrack to your home screen
-                            </button>
+                            <InstallPWA
+                                compact
+                                compactLabel="Not on Android but still want an app? Add CritterTrack to your home screen"
+                                compactClassName="text-xs font-medium text-white/90 hover:text-white underline underline-offset-2 transition"
+                            />
                         </div>
                     </>
                 ) : (
@@ -178,8 +175,6 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                     }}
                 />
             )}
-
-            {showIOSGuide && <AddToHomeScreenGuideModal onClose={() => setShowIOSGuide(false)} />}
         </div>
     );
 };
