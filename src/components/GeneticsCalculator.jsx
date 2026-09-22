@@ -190,14 +190,38 @@ const GENE_LOCI = {
 // Simple single-mutant recessive loci eligible for "possible het" (unconfirmed/probability-based
 // carrier) notes — the same concept as the '/-' wildcard combos above (a wildtype-phenotype animal
 // whose second allele is unconfirmed), just expressed as a breeding-record percentage instead of a
-// dropdown option. Excludes multi-allelic loci (A, C, S, W) and dominant-trait loci (Re, Spl, Nu,
-// U) whose '/-' ambiguity is about dosage of a *visible* trait, not a hidden carrier.
+// dropdown option. Excludes multi-allelic loci (A, W) and dominant-trait loci (Re, Nu, U) whose
+// '/-' ambiguity is about dosage of a *visible* trait with no way to be masked, not a hidden carrier.
+//
+// C-locus is multi-allelic (C > cch > ch > ce > c), so instead of one generic entry it gets 4
+// distinct "locus:allele" pseudo-entries below — one per recessive mutant a C/- animal could be
+// hiding a single copy of: C/c = possible Albino carrier, C/ch = possible Siamese carrier,
+// C/ce = possible Beige carrier, C/cch = possible Chinchilla carrier. getPossibleHetRealLocus()
+// resolves these back to the real 'C' genotype key wherever the generic single-mutant logic
+// assumed a 1:1 locus:allele mapping.
+//
+// S (Pied) is included as a plain recessive entry — S/s carries one copy of s without expressing
+// Pied, same as any other simple recessive.
+//
+// Spl (Splashed) is unusual: it's Dominant (a single Spl/spl copy normally shows visually), BUT its
+// visibility is gated on C-locus dilution (see `hasVisibleCLocus`/`shouldUseSplashed` above) — an
+// animal that is C/C or C/c (full-color/Albino-carrier) will NOT show Splashed even if it carries
+// Spl/spl, so it's a genuinely hidden trait in that case and worth tracking here too. MOUSE_
+// POSSIBLE_HET_OVERRIDES below supplies its wildtype/het combos explicitly since Spl's wildtype
+// allele is lowercase ('spl/spl'), the opposite of the uppercase-wildtype convention the generic
+// by-case detection below assumes for every other locus.
 const MOUSE_POSSIBLE_HET_LOCI = [
   { locus: 'B', name: 'Chocolate' },
+  { locus: 'C:c', name: 'Albino' },
+  { locus: 'C:ch', name: 'Siamese' },
+  { locus: 'C:ce', name: 'Beige' },
+  { locus: 'C:cch', name: 'Chinchilla' },
   { locus: 'D', name: 'Blue' },
   { locus: 'E', name: 'Recessive Red' },
   { locus: 'Ln', name: 'Leaden' },
   { locus: 'P', name: 'Pink-eye' },
+  { locus: 'S', name: 'Pied' },
+  { locus: 'Spl', name: 'Splashed' },
   { locus: 'Go', name: 'Longhair' },
   { locus: 'Sa', name: 'Satin' },
   { locus: 'Rst', name: 'Rosette' },
@@ -205,6 +229,24 @@ const MOUSE_POSSIBLE_HET_LOCI = [
   { locus: 'Rn', name: 'Merle' },
   { locus: 'Si', name: 'Silvered' },
 ];
+
+// Maps a "locus:allele" pseudo-entry (see MOUSE_POSSIBLE_HET_LOCI comment above) back to its real
+// genotype locus key. Plain locus keys (no ':') pass through unchanged.
+const getPossibleHetRealLocus = (locusKey) => (locusKey && locusKey.includes(':') ? locusKey.split(':')[0] : locusKey);
+
+// Explicit wildtype/het combo overrides for "possible het" entries the generic by-case detection
+// (below, in the cross-calculation branch loop) can't handle correctly on its own:
+//  - The 4 C-locus "locus:allele" pseudo-entries, since there are 4 distinct recessive alleles and
+//    no single "the" het combo to find by case alone.
+//  - Spl (Splashed), whose wildtype allele is lowercase ('spl/spl') — the generic detection assumes
+//    the uppercase allele is always the wildtype, which is backwards for this dominant-trait locus.
+const MOUSE_POSSIBLE_HET_OVERRIDES = {
+  'C:c': { wildtype: 'C/C', het: 'C/c' },
+  'C:ch': { wildtype: 'C/C', het: 'C/ch' },
+  'C:ce': { wildtype: 'C/C', het: 'C/ce' },
+  'C:cch': { wildtype: 'C/C', het: 'C/cch' },
+  'Spl': { wildtype: 'spl/spl', het: 'Spl/spl' },
+};
 
 // Which species currently support the "possible het" probability system, and the recessive loci
 // eligible for it in each. Empty/absent species fall back to the old fixed-genotype behavior.
@@ -1979,10 +2021,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     const activeHetEntries = possibleHetLoci.length
       ? [
           ...(parent1PossibleHets || [])
-            .filter(h => h && h.locus && !parent1[h.locus] && h.percent > 0 && h.percent <= 100)
+            .filter(h => h && h.locus && !parent1[getPossibleHetRealLocus(h.locus)] && h.percent > 0 && h.percent <= 100)
             .map(h => ({ ...h, parentKey: 'p1' })),
           ...(parent2PossibleHets || [])
-            .filter(h => h && h.locus && !parent2[h.locus] && h.percent > 0 && h.percent <= 100)
+            .filter(h => h && h.locus && !parent2[getPossibleHetRealLocus(h.locus)] && h.percent > 0 && h.percent <= 100)
             .map(h => ({ ...h, parentKey: 'p2' })),
         ]
       : [];
@@ -1990,7 +2032,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     // Only calculate for loci where at least one parent has a selection (or a possible het targets it)
     const selectedLoci = Object.keys(geneLoci).filter(locus => 
       (parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '') ||
-      activeHetEntries.some(h => h.locus === locus)
+      activeHetEntries.some(h => getPossibleHetRealLocus(h.locus) === locus)
     );
     
     // If no loci selected, don't calculate
@@ -2033,15 +2075,22 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         let branchProbability = 1;
 
         activeHetEntries.forEach((entry, i) => {
-          const combos = geneLoci[entry.locus]?.combinations || [];
-          // Find wildtype (homozygous dominant) and het combos by allele case rather than array
-          // position — different species order their combinations arrays differently (e.g. Ball
-          // Python lists wildtype first, Fancy Mouse lists the recessive mutant first).
-          const wildtype = combos.find(c => {
+          const realLocus = getPossibleHetRealLocus(entry.locus);
+          const combos = geneLoci[realLocus]?.combinations || [];
+          const override = MOUSE_POSSIBLE_HET_OVERRIDES[entry.locus];
+          // Find wildtype (homozygous dominant) combo by allele case — different species order
+          // their combinations arrays differently (e.g. Ball Python lists wildtype first, Fancy
+          // Mouse lists the recessive mutant first). Explicit overrides (C-locus pseudo-entries,
+          // Spl) skip this since their wildtype can't be reliably found by case alone.
+          const wildtype = override?.wildtype || combos.find(c => {
             const [a, b] = c.split('/');
             return a === b && a[0] === a[0].toUpperCase();
           });
-          const het = combos.find(c => {
+          // Het combo: for entries with an explicit override (C-locus pseudo-entries, which have 4
+          // distinct recessive alleles with no single "the" het combo to find by case alone; Spl,
+          // whose wildtype is lowercase, backwards from every other locus) the exact combo is used
+          // directly; simple biallelic loci fall back to finding the one het combo by allele case.
+          const het = override?.het || combos.find(c => {
             const [a, b] = c.split('/');
             if (a === b) return false;
             return (a[0] === a[0].toUpperCase()) !== (b[0] === b[0].toUpperCase());
@@ -2051,11 +2100,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           branchProbability *= isCarrierBranch ? p : (1 - p);
 
           const target = entry.parentKey === 'p1' ? p1b : p2b;
-          target[entry.locus] = isCarrierBranch ? het : wildtype;
+          target[realLocus] = isCarrierBranch ? het : wildtype;
 
           // Assume the other parent is non-carrier at this locus unless it has a real selection.
           const other = entry.parentKey === 'p1' ? p2b : p1b;
-          if (!other[entry.locus]) other[entry.locus] = wildtype;
+          if (!other[realLocus]) other[realLocus] = wildtype;
         });
 
         if (branchProbability <= 0) continue;
@@ -2725,7 +2774,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                       )}
                       <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
                       <button type="button" onClick={() => removePossibleHet(setParent1PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
-                      {parent1[entry.locus] && (
+                      {parent1[getPossibleHetRealLocus(entry.locus)] && (
                         <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored — confirmed above)</span>
                       )}
                     </div>
@@ -2851,7 +2900,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                       )}
                       <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
                       <button type="button" onClick={() => removePossibleHet(setParent2PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
-                      {parent2[entry.locus] && (
+                      {parent2[getPossibleHetRealLocus(entry.locus)] && (
                         <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored — confirmed above)</span>
                       )}
                     </div>
