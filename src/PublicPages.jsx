@@ -214,9 +214,23 @@ const PublicAnimalPage = () => {
 const PublicProfilePage = ({ onOpenMessages }) => {
     const { userId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+
+    // Public profiles are routinely landed on directly (shared links, QR codes, deep links)
+    // with no prior in-app history entry, so a plain navigate(-1) either no-ops or exits to
+    // whatever page/tab was open before this one instead of going anywhere useful. react-router
+    // marks that very first entry's location.key as 'default', so use that to detect "nothing to
+    // go back to" and fall back to the home screen instead.
+    const handleBack = () => {
+        if (location.key !== 'default') {
+            navigate(-1);
+        } else {
+            navigate('/');
+        }
+    };
 
     // Check if user is logged in and in moderator mode
     const authToken = localStorage.getItem('authToken');
@@ -271,7 +285,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
                         This profile either doesn't exist or is not publicly visible.
                     </p>
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={handleBack}
                         className="w-full px-4 py-2 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                     >
                         {authToken ? 'Go to Dashboard' : 'Login / Register'}
@@ -286,7 +300,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
             <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={handleBack}
                     className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                 >
                     {authToken ? 'Dashboard' : 'Home'}
@@ -294,7 +308,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
             </header>
             <PublicProfileView
                 profile={profile}
-                onBack={() => navigate(-1)}
+                onBack={handleBack}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`, { state: { from: `/user/${userId}` } })}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
