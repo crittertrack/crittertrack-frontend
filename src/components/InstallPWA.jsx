@@ -5,11 +5,29 @@ import { Capacitor } from '@capacitor/core';
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
+// The browser only ever fires 'beforeinstallprompt' ONCE per page load (Windows/Android
+// Chrome/Edge — iOS Safari never fires it at all, see isIOSSafari below). Whichever listener
+// happens to be attached at that moment gets it. InstallPWA is mounted in multiple places
+// (the login screen's AuthView, and AndroidBetaBanner once logged in) at different times, so
+// capturing the event into per-component React state meant only whichever instance existed
+// at that single moment could ever use it — e.g. the login screen captured it, then unmounted
+// on login, and the banner's later instance had nothing to trigger, so its button/link just
+// silently did nothing on Windows/desktop Chrome. Capturing it into this module-level store
+// instead (registered once, immediately on import) means every InstallPWA instance — no
+// matter when it mounts — can read the same captured event.
+let capturedInstallPrompt = null;
+const promptListeners = new Set();
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  capturedInstallPrompt = e;
+  promptListeners.forEach((listener) => listener(e));
+});
+
 // compact=true renders just a small text link (e.g. for use inline in banners like
 // AndroidBetaBanner) instead of the full button+info-toggle UI shown on the login screen —
 // both share the exact same install/guide logic below, just different trigger markup.
 const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web)', compactClassName = '' }) => {
-  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installPrompt, setInstallPrompt] = useState(capturedInstallPrompt);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -19,13 +37,11 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
       setIsInstalled(true);
     }
 
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    // Covers the case where the event already fired (and was captured above) before this
+    // particular instance mounted — plus stays subscribed in case it fires later instead.
+    if (capturedInstallPrompt) setInstallPrompt(capturedInstallPrompt);
+    promptListeners.add(setInstallPrompt);
+    return () => promptListeners.delete(setInstallPrompt);
   }, []);
 
   // Already running as the installed native app — no "Install App" prompt to show.
@@ -40,7 +56,11 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === 'accepted') setIsInstalled(true);
-    setInstallPrompt(null);
+    // The prompt is single-use — clear the shared store too so every other mounted
+    // instance (e.g. both the login screen's button and the banner's link, if somehow
+    // both were on screen) also reflects that it's been consumed.
+    capturedInstallPrompt = null;
+    promptListeners.forEach((listener) => listener(null));
   };
 
   if (isInstalled) return null;
