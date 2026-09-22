@@ -108,15 +108,15 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
     const optedIn = !!userProfile?.androidBetaOptIn?.googleEmail;
 
     return (
-        <div className="max-w-7xl mx-auto mb-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm rounded-lg shadow-md px-4 py-3 flex items-center justify-between gap-3">
-            <div className="flex-1">
+        <div className="max-w-7xl mx-auto mb-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-xs sm:text-sm rounded-lg shadow-md px-3 py-2.5 sm:px-4 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+            <div className="flex-1 min-w-0">
                 {!optedIn ? (
                     <>
-                        <span>
+                        <span className="block leading-snug">
                             🤖 CritterTrack is now in <strong>closed beta testing</strong> on the Google Play Store!
                             Want in? Submit your Google account email below.
                         </span>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                        <div className="mt-2 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-x-3 gap-y-1.5">
                             <button
                                 type="button"
                                 onClick={() => setShowModal(true)}
@@ -133,12 +133,14 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                     </>
                 ) : (
                     <>
-                        <span className="flex items-center gap-1.5">
-                            <CheckCircle size={15} className="flex-shrink-0" />
-                            You're opted in with <strong>{userProfile.androidBetaOptIn.googleEmail}</strong>. It can
-                            take up to <strong>24 hours</strong> for access to be granted.
+                        <span className="flex items-start sm:items-center gap-1.5 leading-snug">
+                            <CheckCircle size={15} className="flex-shrink-0 mt-0.5 sm:mt-0" />
+                            <span>
+                                You're opted in with <strong>{userProfile.androidBetaOptIn.googleEmail}</strong>. It
+                                can take up to <strong>24 hours</strong> for access to be granted.
+                            </span>
                         </span>
-                        <p className="mt-1.5 text-xs text-white/90">
+                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
                             Once you're in, please stay signed into the app for at least <strong>14 days</strong>,
                             and send any feedback through the Google Play Store's beta feedback option rather than
                             CritterTrack support.
@@ -150,7 +152,7 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                                 className="bg-white/20 hover:bg-white/30 font-semibold px-3 py-1.5 rounded-lg transition text-xs inline-flex items-center gap-1.5"
                             >
                                 <Download size={14} />
-                                Download on Google Play
+                                Open on Google Play
                             </button>
                         </div>
                     </>
@@ -158,7 +160,7 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
             </div>
             <button
                 onClick={dismiss}
-                className="flex-shrink-0 p-1 rounded hover:bg-white/20 transition"
+                className="flex-shrink-0 self-start sm:self-auto p-1 rounded hover:bg-white/20 transition"
                 title="Dismiss"
             >
                 <X size={16} />
