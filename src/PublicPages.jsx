@@ -54,6 +54,15 @@ const PublicAnimalPage = () => {
         }
     };
 
+    // "Home" button always hard-navigates to the My Animals screen, ignoring any
+    // referrer/back-history state. Chained animal-to-animal navigation (sire/dam/
+    // offspring links) can build up a deep or looping history stack, which made the
+    // history-based handleGoBack() re-open the same animal instead of leaving. Using
+    // replace:true here also clears that stale history entry instead of adding to it.
+    const handleGoHome = () => {
+        navigate('/', { replace: true });
+    };
+
     const handleImageDownload = async (imageUrl) => {
         try {
             const response = await fetch(imageUrl);
@@ -116,7 +125,7 @@ const PublicAnimalPage = () => {
                 <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button
-                        onClick={handleGoBack}
+                        onClick={handleGoHome}
                         className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                     >
                         Home
@@ -152,7 +161,7 @@ const PublicAnimalPage = () => {
             <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
-                    onClick={handleGoBack}
+                    onClick={handleGoHome}
                     className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                 >
                     Home
@@ -232,6 +241,12 @@ const PublicProfilePage = ({ onOpenMessages }) => {
         }
     };
 
+    // "Home" button always hard-navigates to the My Animals screen, ignoring any
+    // back-history state. See matching comment in PublicAnimalPage's handleGoHome.
+    const handleGoHome = () => {
+        navigate('/', { replace: true });
+    };
+
     // Check if user is logged in and in moderator mode
     const authToken = localStorage.getItem('authToken');
     const [userProfile, setUserProfile] = useState(null);
@@ -285,10 +300,10 @@ const PublicProfilePage = ({ onOpenMessages }) => {
                         This profile either doesn't exist or is not publicly visible.
                     </p>
                     <button
-                        onClick={handleBack}
+                        onClick={authToken ? handleGoHome : handleBack}
                         className="w-full px-4 py-2 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                     >
-                        {authToken ? 'Go to Dashboard' : 'Login / Register'}
+                        {authToken ? 'Go Home' : 'Login / Register'}
                     </button>
                 </div>
             </div>
@@ -300,10 +315,10 @@ const PublicProfilePage = ({ onOpenMessages }) => {
             <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
-                    onClick={handleBack}
+                    onClick={handleGoHome}
                     className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                 >
-                    {authToken ? 'Dashboard' : 'Home'}
+                    Home
                 </button>
             </header>
             <PublicProfileView
