@@ -141,6 +141,11 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                             </span>
                         </span>
                         <p className="mt-1.5 text-xs text-white/90 leading-snug">
+                            Click <strong>Open on Google Play</strong> below to check your access — there's no other
+                            confirmation besides the message the Play Store shows you there once you've been added
+                            as a tester.
+                        </p>
+                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
                             Once you're in, please stay signed into the app for at least <strong>14 days</strong>,
                             and send any feedback through the Google Play Store's beta feedback option rather than
                             CritterTrack support.
