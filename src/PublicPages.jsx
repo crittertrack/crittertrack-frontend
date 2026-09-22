@@ -323,7 +323,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
             </header>
             <PublicProfileView
                 profile={profile}
-                onBack={handleBack}
+                onBack={handleGoHome}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`, { state: { from: `/user/${userId}` } })}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
