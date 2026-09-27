@@ -6254,6 +6254,25 @@ useEffect(() => {
 
     const liteViewTitle = animalView === 'list' ? 'My Animals' : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals';
 
+    // The one and only definition of the animal-view tab bar. Both the mobile (sm:hidden) and
+    // desktop (hidden sm:flex) bars below map over this — they previously had their own hardcoded
+    // copies of the list, which is how the Lite filter ended up applied to one but not the other.
+    // LITE_HIDDEN_TABS is applied here, once, so both bars and both modes stay in sync.
+    const viewTabs = useMemo(() => ([
+        { key: 'list', icon: <ClipboardList size={14} className="shrink-0" />, label: 'My Animals' },
+        { key: 'collections', icon: <FolderOpen size={14} className="shrink-0" />, label: 'Collections' },
+        { key: 'enclosures', icon: <Home size={14} className="shrink-0" />, label: 'Enclosures' },
+        { key: 'reproduction', icon: <Heart size={14} className="shrink-0" />, label: 'Reproduction' },
+        { key: 'health', icon: <Activity size={14} className="shrink-0" />, label: 'Health' },
+        { key: 'feeding', icon: <Utensils size={14} className="shrink-0" />, label: 'Feeding & Care' },
+    ].filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key))), [isLite]);
+
+    const pinDefaultView = (e, viewKey) => {
+        e.stopPropagation();
+        setDefaultAnimalView(viewKey);
+        try { localStorage.setItem('ct_default_animal_view', viewKey); } catch { /* ignore */ }
+    };
+
     return (
         <>
             {/* Animal List section — Lite mode drops the white card shell entirely so content
@@ -6430,15 +6449,7 @@ useEffect(() => {
                 {/* 3 tabs in Lite (My Animals / Collections / Enclosures), 6 in Full — both fit
                     3 columns cleanly, so the grid stays grid-cols-3 either way. */}
                 <div className="grid grid-cols-3 sm:hidden">
-                                {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
-                                    {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
-                                    {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
-                                    {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'},
-                                    {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
-                // Same Lite filter the desktop tab bar uses (line ~6461). Without it these three
-                // tabs stayed visible on phones in Lite mode while desktop correctly hid them.
-                ].filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key)).map(tab => (
+                                {viewTabs.map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                                                 className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
@@ -6460,10 +6471,7 @@ useEffect(() => {
                 ))}
                 </div>
                 <div className="hidden sm:flex">
-                {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
-                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'}, {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'}, {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'}, {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}, {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}]
-                  .filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key))
-                  .map(tab => (
+                {viewTabs.map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
