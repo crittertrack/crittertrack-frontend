@@ -2,7 +2,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
-import { getCachedUiMode } from '../../utils/uiModeCache';
+import { resolveLiteMode } from '../../utils/liteMode';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
@@ -22,6 +22,7 @@ import {
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
+import { isHealthEnclosurePurpose } from '../../utils/enclosurePurpose';
 import { computeIsInTreatment, HEALTH_STATUS_TEXT_COLORS, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
@@ -801,11 +802,12 @@ const AnimalList = ({
     const isCollectionsView = animalView === 'collections';
     const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
     const isListLikeView = animalView === 'list' || isCollectionsView;
-    // Lite mode (web-only, see docs/lite-web-toggle-brainstorm.md): Reproduction/Health/Feeding &
-    // Care/Supplies are dropped entirely, navigated instead via LiteBottomNav's fixed routes.
-    // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
-    // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
-    const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
+
+    // Lite (web-only, see docs/lite-web-toggle-brainstorm.md) drops the Reproduction, Health
+    // and Feeding & Care tabs from the management bar. Everything else on this page is the
+    // Full frontend — see app.jsx for the matching main-nav trimming.
+    const isLite = resolveLiteMode(userProfile);
+    const LITE_HIDDEN_TABS = ['reproduction', 'health', 'feeding'];
 
     // Lite mode's bottom nav routes (/, /collections, /enclosures) all render this same
     // AnimalList instance without remounting it, so a route change only shows up here as
@@ -829,10 +831,10 @@ const AnimalList = ({
     // Defensive: these tabs no longer have a way to be reached in Lite mode, but if anything
     // (e.g. a stale deep-link) sets animalView to one anyway, fall back to the main list.
     useEffect(() => {
-        if (isLiteModeActive && ['reproduction', 'health', 'feeding', 'supplies'].includes(animalView)) {
+        if (['reproduction', 'health', 'feeding', 'supplies'].includes(animalView)) {
             setAnimalView('list');
         }
-    }, [isLiteModeActive, animalView]);
+    }, [animalView]);
 
     // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })). The browser
     // keeps history.state for an entry across reloads/remounts, so the state must be explicitly cleared
@@ -2076,7 +2078,9 @@ useEffect(() => {
     const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
     const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
 
-    const healthEnclosures = enclosures.filter(e => e.purpose === 'medical' || e.purpose === 'quarantine');
+    // isHealthEnclosurePurpose also matches the legacy combined 'health' purpose, so
+    // enclosures saved before Medical/Quarantine were split still group into this panel.
+    const healthEnclosures = enclosures.filter(e => isHealthEnclosurePurpose(e.purpose));
     const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
     const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
 
@@ -5946,7 +5950,7 @@ useEffect(() => {
                     </div>
 
                     {/* Column 2: Owned — bulk owned/unowned setter, not shown in Lite mode */}
-                    {!isLiteModeActive && (
+                    {true && (
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Heart size={32} className="text-red-800 dark:text-red-200" />}
@@ -5972,7 +5976,7 @@ useEffect(() => {
                     )}
 
                     {/* Column 3: Public — bulk public/private setter, not shown in Lite mode */}
-                    {!isLiteModeActive && (
+                    {true && (
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Eye size={32} className="text-green-800 dark:text-green-200" />}
@@ -6018,7 +6022,7 @@ useEffect(() => {
                     </div>
 
                     {/* Column 5: Needs Attention — mostly Feeding/Health/Reproduction alerts, dropped tabs in Lite mode */}
-                    {!isLiteModeActive && (
+                    {true && (
                     <div className="flex flex-col gap-2">
                         {(() => {
                             const totalAttention = feedingCareDueDashboard.length + generalTaskDue.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
@@ -6216,14 +6220,12 @@ useEffect(() => {
         <>
             {/* Animal List section — Lite mode drops the white card shell entirely so content
                 sits directly on the pink page background, matching crittertrack-lite's pages. */}
-            <div className={isLiteModeActive ? 'w-full max-w-7xl px-4 pt-4' : 'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
+            <div className={'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
                 {/* Lite mode: header row itself becomes the gradient bar mirroring crittertrack-lite's
                     TopBar (from-accent to-primary), with title/info/refresh/action buttons all in one row. */}
-                <div className={isLiteModeActive
-                    ? 'w-full bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white rounded-xl px-4 py-3 mb-4 shadow-sm flex items-center gap-2'
-                    : 'flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4'}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4">
                     <div className="flex items-center gap-2 min-w-0 flex-wrap w-full sm:w-auto sm:flex-1">
-                        {!isLiteModeActive && (
+                        {true && (
                             <>
                                 <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
                                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate min-w-0" data-tutorial-target="my-animals-title">
@@ -6231,14 +6233,14 @@ useEffect(() => {
                                 </h2>
                             </>
                         )}
-                        {isLiteModeActive && (
+                        {false && (
                             <>
                                 <ClipboardList size={20} className="shrink-0" />
                                 <h2 className="text-lg font-bold truncate shrink-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
                             </>
                         )}
                         {ANIMAL_VIEW_INFO[animalView] && (
-                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} variant={isLiteModeActive ? 'light' : 'default'} className="shrink-0">
+                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} variant="default" className="shrink-0">
                                 {ANIMAL_VIEW_INFO[animalView].body}
                             </InfoButton>
                         )}
@@ -6246,9 +6248,7 @@ useEffect(() => {
                         <button
                             onClick={handleRefresh}
                             disabled={loading}
-                            className={isLiteModeActive
-                                ? 'text-white/85 hover:text-white transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-white/10 text-xs font-medium'
-                                : 'text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium'}
+                            className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium"
                             title="Refresh"
                         >
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -6262,9 +6262,7 @@ useEffect(() => {
                                 </span>
                                 <button
                                     onClick={handleClearFilters}
-                                    className={isLiteModeActive
-                                        ? 'hidden sm:flex items-center gap-1 text-white/90 hover:text-white hover:bg-white/10 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0'
-                                        : 'hidden sm:flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0'}
+                                    className="hidden sm:flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0"
                                     title="Clear all filters"
                                 >
                                     <X size={14} />
@@ -6287,7 +6285,7 @@ useEffect(() => {
                             </button>
                         )}
                         {/* Find Duplicates — administrative tool, hidden in Lite mode */}
-                        {!showArchiveScreen && !isLiteModeActive && (
+                        {!showArchiveScreen && (
                             <button
                                 onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
                                 className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 dark:bg-amber-700 text-white border-amber-500 dark:border-amber-700' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
@@ -6298,7 +6296,7 @@ useEffect(() => {
                             </button>
                         )}
                         {/* Lite mode: just the Owned/All toggle + Archive button, no counters, standing in for the full dashboard grid */}
-                        {isLiteModeActive && isListLikeView && (
+                        {false && isListLikeView && (
                             <>
                                 <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
                                     <button
@@ -6341,7 +6339,7 @@ useEffect(() => {
                             <button onClick={() => { setEditingGeneralTask(null); setShowGeneralTaskModal(true); }} className="flex bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Custom Task">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Custom Task</span>
                             </button>
-                        ) : (!isLiteModeActive || animalView === 'enclosures') ? (
+                        ) : animalView === 'enclosures' ? (
                             <button
                                 onClick={() => openEnclosureModal()}
                                 className="flex bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -6351,9 +6349,9 @@ useEffect(() => {
                             </button>
                         ) : null}
                         {/* Add Animal (only on list/collections views, or just list in Lite mode) — desktop only, mobile is in title row */}
-                        {(isLiteModeActive ? animalView === 'list' : isListLikeView) && !showArchiveScreen && (
+                        {isListLikeView && !showArchiveScreen && (
                             <button
-                                onClick={() => (isLiteModeActive ? setShowQuickAdd(true) : navigate('/select-species'))}
+                                onClick={() => navigate('/select-species')}
                                 className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                                 data-tutorial-target="add-animal-btn"
                             >
@@ -6361,9 +6359,9 @@ useEffect(() => {
                             </button>
                         )}
                         {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
-                        {(isLiteModeActive ? animalView === 'list' : isListLikeView) && !showArchiveScreen && (
+                        {isListLikeView && !showArchiveScreen && (
                         <button
-                            onClick={() => (isLiteModeActive ? setShowQuickAdd(true) : navigate('/select-species'))}
+                            onClick={() => navigate('/select-species')}
                             className="sm:hidden bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
@@ -6375,9 +6373,7 @@ useEffect(() => {
                 </div>
 
                 {/* Conditional Dashboards */}
-                {isLiteModeActive ? (
-                    null
-                ) : animalView === 'enclosures' ? (
+                {animalView === 'enclosures' ? (
                     renderEnclosureDashboard()
                 ) : animalView === 'reproduction' ? (
                     renderReproductionDashboard()
@@ -6391,7 +6387,7 @@ useEffect(() => {
 
                 {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies
                     — hidden in Lite mode, where LiteBottomNav switches between these views instead. */}
-            {!showArchiveScreen && !isLiteModeActive && (
+            {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 dark:border-dark-text-muted rounded-xl overflow-hidden shadow-sm">
                 <div className="grid grid-cols-3 sm:hidden">
                                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
@@ -6423,7 +6419,9 @@ useEffect(() => {
                 </div>
                 <div className="hidden sm:flex">
                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
-                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'}, {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'}, {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'}, {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}, {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}].map(tab => (
+                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'}, {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'}, {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'}, {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}, {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}]
+                  .filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key))
+                  .map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
@@ -6453,7 +6451,7 @@ useEffect(() => {
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Cards/List toggle has no effect in Lite mode (it always renders its own fixed
                             row layout), so showing it there would just be a dead control. */}
-                        {!isLiteModeActive && (
+                        {true && (
                         <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
                             <button onClick={() => {
                                 if (isCollectionsView) { setCollectionsViewMode('cards'); } else {
@@ -6599,9 +6597,9 @@ useEffect(() => {
                     </div>
             </div>
             )}
-             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : (isLiteModeActive && animalView === 'enclosures') ? renderLiteEnclosuresList() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : (isLiteModeActive && animalView === 'collections') ? renderLiteCollectionsList() : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
+             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
-            ) : displayedAnimalCount === 0 ? ( <div /> ) : isLiteModeActive ? renderLiteAnimalsList() : myAnimalsViewMode === 'list' ? (
+            ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="relative">
                     {showColumnsDropdown && (
                         <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white dark:bg-dark-card-bg border rounded-lg shadow-lg p-3 z-20 w-48">

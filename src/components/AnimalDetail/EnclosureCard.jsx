@@ -1,6 +1,7 @@
 import React from 'react';
 import { Home, Thermometer, Droplets, Sun, Sparkles, Package } from 'lucide-react';
 import { InfoItem } from './DashboardComponents';
+import { getEnclosurePurposeLabel } from '../../utils/enclosurePurpose';
 
 const formatDimensions = (dims) => {
     if (dims && (dims.length || dims.width || dims.height)) {
@@ -35,7 +36,7 @@ export const EnclosureCard = ({ enclosureInfo }) => {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                         <InfoItem label="Purpose">
-                            <p className="text-xs font-medium text-gray-900 dark:text-dark-text capitalize">{enclosureInfo.purpose || 'General'}</p>
+                            <p className="text-xs font-medium text-gray-900 dark:text-dark-text">{getEnclosurePurposeLabel(enclosureInfo.purpose)}</p>
                             {enclosureInfo.purposeDescription && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{enclosureInfo.purposeDescription}</p>}
                         </InfoItem>
                         
