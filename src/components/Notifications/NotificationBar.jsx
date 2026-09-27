@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,6 @@ import { ALERT_CATEGORIES } from '../../utils/alertCategories';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { parseLocalDate } from '../../utils/dateFormatter';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
-import { getCachedUiMode } from '../../utils/uiModeCache';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import '../NewsTickerBanner.css';
 
@@ -36,7 +35,7 @@ const isFeedingDue = (lastDate, intervalHours) => {
   return (Date.now() - d.getTime()) / 3600000 >= Number(intervalHours);
 };
 
-// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
+// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays â€” convert so isTaskDue works.
 const cleaningTaskFreqDays = (t) => {
   if (t.frequencyDays) return t.frequencyDays;
   if (!t.frequency) return null;
@@ -72,7 +71,7 @@ const describeNotification = (n) => {
 // Matches AnimalList's own [prefix, name, suffix] display convention.
 const animalDisplayName = (a) => formatAnimalDisplayName({ ...a, name: a?.name || 'Unnamed' });
 
-// "(Name1, Name2 +N more)" — keeps the ticker text from growing unbounded.
+// "(Name1, Name2 +N more)" â€” keeps the ticker text from growing unbounded.
 const formatNameList = (names, max = 2) => {
   if (!names.length) return '';
   if (names.length <= max) return `(${names.join(', ')})`;
@@ -85,15 +84,12 @@ const defaultAlertSettings = () =>
 // Single global banner shown on every page: unread messages/notifications, moderator
 // warnings/notices, and the user's optional care/breeding alert categories. Auto-scrolls
 // (ticker-style, matching NewsTickerBanner's motion) when there's more than one item.
-// Ids of ticker items covered by the Lite web Notifications quick-actions page — in Lite mode
+// Ids of ticker items covered by the Lite web Notifications quick-actions page â€” in Lite mode
 // these route there instead of their normal onClick (mostly navigate('/', {state:{animalView}})
 // calls that Lite's defensive animalView guard just bounces back to 'list', making them no-ops).
-const NOTIFICATIONS_PAGE_ITEM_IDS = new Set(['feeding', 'grooming', 'training', 'careTasks', 'reproduction', 'health', 'maintenance', 'supplies', 'birthdays', 'notifications']);
 
 const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifications, setShowMessages }) => {
-  // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
-  // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
-  const isLiteModeActive = (userProfile ? userProfile.uiMode === 'lite' : getCachedUiMode() === 'lite') && !Capacitor.isNativePlatform();
+  // Lite renders identically to Full â€” see utils/liteMode.js.
   const navigate = useNavigate();
   const userKey = useMemo(() => getUserKey(authToken), [authToken]);
 
@@ -133,7 +129,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       const response = await apiClient.get(`/notifications`);
       const all = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
       setModMessages(all.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
-      // Backend already sorts newest-first — grab the most recent unread, non-admin notification
+      // Backend already sorts newest-first â€” grab the most recent unread, non-admin notification
       // so the ticker can say what it's actually about (e.g. "regarding <animal name>").
       const unread = all.filter(n => !n.read && n.status === 'pending' && !['broadcast', 'announcement', 'moderator_message'].includes(n.type));
       setLatestNotification(unread[0] || null);
@@ -158,7 +154,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         .filter(c => c.unreadCount > 0)
         .sort((a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate));
       // Prefer a non-staff sender, but a conversation that once had a mod message (flagged
-      // "isStaff") can still carry an unread regular reply counted in regularMessageCount —
+      // "isStaff") can still carry an unread regular reply counted in regularMessageCount â€”
       // fall back to it rather than leaving the preview blank.
       const preview = unreadConvos.find(c => !c.otherUser?.isStaff) || unreadConvos[0] || null;
       setLatestMessageSender(preview?.otherUser || null);
@@ -194,7 +190,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const fetchCareData = useCallback(async () => {
     if (!authToken) return;
     try {
-      // Deliberately NOT passing isOwned=true — the Dashboard's own "Needs Attention" widgets
+      // Deliberately NOT passing isOwned=true â€” the Dashboard's own "Needs Attention" widgets
       // (AnimalList's activeAnimalsForDashboard) include every non-archived, non-view-only animal
       // regardless of ownership, so restricting to owned-only here silently hid alerts for
       // animals not marked "owned" and made the ticker disagree with the Dashboard.
@@ -365,7 +361,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
 
   const renderItem = (item) => (
     <button
-      onClick={(isLiteModeActive && NOTIFICATIONS_PAGE_ITEM_IDS.has(item.id)) ? () => navigate('/notifications') : item.onClick}
+      onClick={item.onClick}
       className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center font-semibold"
     >
       <item.icon size={14} className={`inline-block mr-1.5 flex-shrink-0 ${item.iconColor}`} />
@@ -417,7 +413,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
               </div>
               {expandedWarnings.length >= 3 && (
                 <p className="text-xs mt-2 text-red-600 font-semibold">
-                  You have reached 3 warnings — your account is suspended. Contact moderators for appeal.
+                  You have reached 3 warnings â€” your account is suspended. Contact moderators for appeal.
                 </p>
               )}
             </div>

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { X, Home, Trash2, Save, Loader2, Search, Package, RefreshCw, Wrench, Settings, Utensils, Info } from 'lucide-react';
 import { SpeciesPickerModal } from './Modals/SpeciesModals';
+import { ENCLOSURE_PURPOSE_OPTIONS } from '../utils/enclosurePurpose';
 
 const EnclosureModal = ({
     isOpen,
@@ -125,12 +126,9 @@ const EnclosureModal = ({
                                     value={enclosureFormData.purpose || 'general'}
                                     onChange={e => setNewEnclosureForm(p => ({ ...p, purpose: e.target.value }))}
                                     className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text">
-                                    <option value="general">General</option>
-                                    <option value="reproduction">Nursery / Breeding</option>
-                                    <option value="medical">Medical</option>
-                                    <option value="quarantine">Quarantine</option>
-                                    <option value="sale">For Sale</option>
-                                    <option value="other">Other</option>
+                                    {ENCLOSURE_PURPOSE_OPTIONS.map(o => (
+                                        <option key={o.value} value={o.value}>{o.label}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>

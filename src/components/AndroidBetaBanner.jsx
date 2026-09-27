@@ -6,7 +6,13 @@ import { openExternalLink } from '../utils/externalLink';
 import InstallPWA from './InstallPWA';
 
 const DISMISS_KEY = 'ct_dismissed_android_beta_banner_v1';
-export const ANDROID_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.crittertrack.app';
+// The /apps/testing/ opt-in link, NOT the public /store/apps/details URL.
+// CritterTrack is in closed beta, so it has no public Play listing — the store URL 404s with
+// "the requested URL was not found". Only testers who joined the track can install, and this
+// is the link Google generates for that. Swap back to
+// 'https://play.google.com/store/apps/details?id=com.crittertrack.app' once the app reaches
+// Production and has a public page.
+export const ANDROID_PLAY_STORE_URL = 'https://play.google.com/apps/testing/com.crittertrack.app';
 
 // Opt-in modal — collects the Google account email (NOT the CritterTrack account email) that
 // the developer manually adds to the Play Console's closed testing tester list. See
@@ -95,6 +101,10 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
         try { return localStorage.getItem(DISMISS_KEY) === 'true'; } catch { return false; }
     });
     const [showModal, setShowModal] = useState(false);
+    // Collapsed by default so the banner stays short on phones: the opt-in status and the
+    // 24-hour/"App not available" guidance are what people actually need at a glance, while
+    // the longer "what you'll see on the Play page" walkthrough is opt-in.
+    const [showHelp, setShowHelp] = useState(false);
 
     // Never shown inside the native Android app itself — that's the app being promoted.
     if (Capacitor.isNativePlatform()) return null;
@@ -136,30 +146,56 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                         <span className="flex items-start sm:items-center gap-1.5 leading-snug">
                             <CheckCircle size={15} className="flex-shrink-0 mt-0.5 sm:mt-0" />
                             <span>
-                                You're opted in with <strong>{userProfile.androidBetaOptIn.googleEmail}</strong>. It
-                                can take up to <strong>24 hours</strong> for access to be granted.
+                                Opted in as <strong>{userProfile.androidBetaOptIn.googleEmail}</strong> — access can take
+                                up to <strong>24 hours</strong>.
                             </span>
                         </span>
-                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                            Click <strong>Open on Google Play</strong> below to check your access — there's no other
-                            confirmation besides the message the Play Store shows you there once you've been added
-                            as a tester.
-                        </p>
-                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                            Once you're in, please stay signed into the app for at least <strong>14 days</strong>,
-                            and send any feedback through the Google Play Store's beta feedback option rather than
-                            CritterTrack support.
-                        </p>
-                        <div className="mt-2">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                             <button
                                 type="button"
                                 onClick={() => openExternalLink(ANDROID_PLAY_STORE_URL)}
-                                className="bg-white/20 hover:bg-white/30 font-semibold px-3 py-1.5 rounded-lg transition text-xs inline-flex items-center gap-1.5"
+                                className="bg-white/20 hover:bg-white/30 font-semibold px-2.5 py-1 rounded-lg transition text-xs inline-flex items-center gap-1.5"
                             >
                                 <Download size={14} />
                                 Open on Google Play
                             </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowHelp(v => !v)}
+                                aria-expanded={showHelp}
+                                className="text-xs font-semibold text-white/90 hover:text-white underline underline-offset-2 transition whitespace-nowrap"
+                            >
+                                {showHelp ? 'Hide instructions' : 'Instructions'}
+                            </button>
                         </div>
+                        {showHelp && (
+                            <div className="mt-1.5 space-y-1.5">
+                                <p className="text-xs text-white/90 leading-snug">
+                                    Click <strong>Open on Google Play</strong> to check your access — there's no other
+                                    confirmation besides the message the Play Store shows you there once you've been added
+                                    as a tester. On that page, click <strong>"Become a tester"</strong>, then also click{" "}
+                                    <strong>"Download it on Google Play"</strong> to actually install it — both steps are needed.
+                                </p>
+                                <p className="text-xs text-white/90 leading-snug">
+                                    <strong>Still seeing "App not available" after 24 hours?</strong> Make sure the Play Store on
+                                    your device is signed in with the same Google account you entered above — the tester list is
+                                    per-account, so being signed into a different one will show the same message.
+                                </p>
+                                <p className="text-xs text-white/90 leading-snug">
+                                    Once you're in, please stay signed into the app for at least <strong>14 days</strong>,
+                                    and send any feedback through the Google Play Store's beta feedback option rather than
+                                    CritterTrack support.
+                                </p>
+                                <p className="text-xs text-white/90 leading-snug">
+                                    <strong>Already have CritterTrack installed?</strong> Google may say{" "}
+                                    <em>"You'll receive an update to the CritterTrack app if you already have it installed on
+                                    your device."</em> That only refers to the Play Store app — it does <strong>not</strong> apply
+                                    to the separate app you installed from the purple{" "}
+                                    <strong>"Install CritterTrack (Web)"</strong> button on the login screen. If you used that
+                                    button, <strong>uninstall that one and install this one</strong>; they're separate apps.
+                                </p>
+                            </div>
+                        )}
                     </>
                 )}
             </div>

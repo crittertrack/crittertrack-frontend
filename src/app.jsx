@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle, lazy, Suspense } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import apiClient from './utils/apiClient';
-import { getCachedUiMode } from './utils/uiModeCache';
+import { resolveLiteMode } from './utils/liteMode';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Droplet, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import 'flag-icons/css/flag-icons.min.css';
@@ -30,7 +30,7 @@ import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
-// import LiteModeToggle from './components/LiteModeToggle';
+import LiteModeToggle from './components/LiteModeToggle';
 import LiteBottomNav from './components/LiteBottomNav';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
@@ -310,9 +310,14 @@ const App = () => {
 
     // Lite mode is desktop/PWA web only — never on the native Android/iOS full app (that has
     // its own separate crittertrack-lite app already). See docs/lite-web-toggle-brainstorm.md.
-    // Falls back to the cached uiMode while userProfile is still loading (e.g. right after App
-    // remounts from the standalone /user/:userId route) so Lite mode doesn't flash Full first.
-    const isLiteModeActive = false; // Lite mode toggle disabled per user request
+    // Lite mode ──────────────────────────────────────────────────────────────
+    // Lite is reachable via the header toggle (LiteModeToggle), which sets the account's
+    // uiMode. Lite is the Full frontend with a deliberately smaller surface:
+    //   - main nav drops Contacts, Marketplace, Calendar, Community, Tools, Finance
+    //   - management drops the Reproduction, Health and Feeding & Care tabs
+    // Every other surface is the Full frontend — the old per-branch Lite conditionals have
+    // all been removed, and the Lite* components are thin wrappers over the Full ones.
+    const isLite = resolveLiteMode(userProfile);
     
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
@@ -1743,7 +1748,7 @@ const App = () => {
     }
 
      return (
-        <div className={`min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 ${isLiteModeActive ? 'pb-24' : ''}`}>
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
@@ -1827,19 +1832,20 @@ const App = () => {
                 </div>
                 
                 <div className="hidden md:flex justify-between items-center">
-                    <CustomAppLogo size="w-10 h-10" lite={isLiteModeActive} />
+                    <CustomAppLogo size="w-10 h-10" />
                     
-                    <nav className="flex space-x-3">
-                        {!isLiteModeActive && (
+                    <nav className={`flex space-x-3 ${isLite ? 'flex-1' : ''}`}>
+                        {true && (
                         <>
-                        <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                        <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${isLite ? 'flex-1' : ''} ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
-                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${isLite ? 'flex-1' : ''} ${currentView === 'litters' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
+                        {!isLite && (<>
                         <button onClick={() => navigate('/contacts')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-1" />
                             <span>Contacts</span>
@@ -1874,6 +1880,7 @@ const App = () => {
                                 <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
                             )}
                         </div>
+                        </>)}
                         </>
                         )}
                     </nav>
@@ -1883,11 +1890,10 @@ const App = () => {
 
                         <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
-                        {/* <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} /> */}
+                        <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
 
                         <button
                             onClick={() => {
-                                if (isLiteModeActive) { navigate('/notifications'); return; }
                                 setShowNotifications(true);
                                 setNotificationCount(0);
                                 fetchNotificationCount();
@@ -1926,7 +1932,7 @@ const App = () => {
                         {/* Avatar / Profile Dropdown */}
                         <div className="relative" ref={profileMenuDesktopRef}>
                             <button
-                                onClick={() => isLiteModeActive ? navigate('/lite-settings') : setShowProfileMenu(p => !p)}
+                                onClick={() => setShowProfileMenu(p => !p)}
                                 className="w-10 h-10 rounded-full bg-primary dark:bg-dark-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                 title="Account"
                             >
@@ -1937,11 +1943,11 @@ const App = () => {
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
-                                    <button onClick={() => { navigate(isLiteModeActive ? '/lite-settings' : `/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
+                                    <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
                                     </button>
-                                    {!isLiteModeActive && (
+                                    {true && (
                                         <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <MessageSquare size={15} /> Report an Issue
@@ -1953,7 +1959,7 @@ const App = () => {
                                             <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
                                         </button>
                                     )}
-                                    {!isLiteModeActive && (
+                                    {true && (
                                         <>
                                             <hr className="my-1 border-gray-200" />
                                             <button onClick={() => handleLogout(false)}
@@ -1981,7 +1987,7 @@ const App = () => {
                     
                     {/* Second row: Logo and action buttons */}
                     <div className="flex justify-between items-center mb-3 gap-2">
-                        <CustomAppLogo size="w-8 h-8" lite={isLiteModeActive} className="flex-shrink-0" />
+                        <CustomAppLogo size="w-8 h-8" lite={false} className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
                             <ThemeToggle />
@@ -1992,7 +1998,6 @@ const App = () => {
 
                             <button
                                 onClick={() => {
-                                    if (isLiteModeActive) { navigate('/notifications'); return; }
                                     setShowNotifications(true);
                                     setNotificationCount(0);
                                     fetchNotificationCount();
@@ -2031,7 +2036,7 @@ const App = () => {
                             {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
-                                    onClick={() => isLiteModeActive ? navigate('/lite-settings') : setShowProfileMenu(p => !p)}
+                                    onClick={() => setShowProfileMenu(p => !p)}
                                     className="w-9 h-9 rounded-full bg-primary dark:bg-dark-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                     title="Account"
                                 >
@@ -2042,11 +2047,11 @@ const App = () => {
                                 </button>
                                 {showProfileMenu && (
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
-                                        <button onClick={() => { navigate(isLiteModeActive ? '/lite-settings' : `/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
+                                        <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
                                         </button>
-                                        {!isLiteModeActive && (
+                                        {true && (
                                             <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                                 <MessageSquare size={15} /> Report an Issue
@@ -2058,7 +2063,7 @@ const App = () => {
                                                 <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
                                             </button>
                                         )}
-                                        {!isLiteModeActive && (
+                                        {true && (
                                             <>
                                                 <hr className="my-1 border-gray-200" />
                                                 <button onClick={() => handleLogout(false)}
@@ -2074,9 +2079,9 @@ const App = () => {
                     </div>
 
                     {/* Third & Fourth rows: legacy nav — hidden entirely in Lite mode, replaced by LiteBottomNav */}
-                    {!isLiteModeActive && (
+                    {true && (
                     <>
-                    <nav className="grid grid-cols-4 gap-1 mb-1">
+                    <nav className={`grid grid-cols-${isLite ? '2' : '4'} gap-1 mb-1`}>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
@@ -2085,6 +2090,7 @@ const App = () => {
                             <BookOpen size={18} className="mb-0.5" />
                             <span>Litters</span>
                         </button>
+                        {!isLite && (<>
                         <button onClick={() => navigate('/contacts')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-0.5" />
                             <span>Contacts</span>
@@ -2093,9 +2099,10 @@ const App = () => {
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Marketplace</span>
                         </button>
+                        </>)}
                     </nav>
 
-                    <nav className="grid grid-cols-4 gap-1">
+                    {!isLite && (<nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Calendar size={18} className="mb-0.5" />
                             <span>Calendar</span>
@@ -2122,7 +2129,7 @@ const App = () => {
                                 <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
                             )}
                         </div>
-                    </nav>
+                    </nav>)}
                     </>
                     )}
                 </div>
@@ -2295,7 +2302,7 @@ const App = () => {
                 // Only show editable modal if: user created it AND it's not marked as view-only
                 const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && !animalToView.isViewOnly;
                 if (iCurrentlyOwn) {
-                    const AnimalModalComponent = isLiteModeActive ? LiteAnimalModal : AnimalModalV2;
+                    const AnimalModalComponent = isLite ? LiteAnimalModal : AnimalModalV2;
                     return (
                         <AnimalModalComponent
                             animal={animalToView}
@@ -2323,7 +2330,7 @@ const App = () => {
                         />
                     );
                 } else {
-                    const ViewAnimalModalComponent = isLiteModeActive ? LiteViewAnimalModal : ViewAnimalModalV2;
+                    const ViewAnimalModalComponent = ViewAnimalModalV2;
                     return (
                         <ViewAnimalModalComponent
                                 animal={animalToView}
@@ -2346,7 +2353,7 @@ const App = () => {
             {animalToEdit && (
                 (() => {
                     const iCurrentlyOwn = animalToEdit.creatorId_public === userProfile?.id_public;
-                    const AnimalFormComponent = isLiteModeActive ? LiteAnimalFormModal : AnimalFormModalV2;
+                    const AnimalFormComponent = isLite ? LiteAnimalFormModal : AnimalFormModalV2;
                     return (
                         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                             {iCurrentlyOwn ? (
@@ -2514,7 +2521,7 @@ const App = () => {
                 />
             </main>
 
-            {isLiteModeActive && <LiteBottomNav />}
+            {false && <LiteBottomNav />}
 
             {/* Image Enlarge Modal */}
             {showImageModal && enlargedImageUrl && (

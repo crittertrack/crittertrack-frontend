@@ -17,6 +17,31 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
+// Just the "Identification Numbers" card, split out so the Lite Records tab can surface the
+// same identifiers without dragging along Classification/Origin/Tags.
+export const IdentificationNumbersCard = ({ animal }) => {
+    const species = animal.species;
+    const hidden = (field) => isFieldHiddenForSpecies(field, species);
+    const label = (field, def) => getFieldLabel(field, species, def);
+    return (
+        <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+            <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <InfoItem label="CritterTrack ID" value={animal.id_public} />
+                {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
+                {animal.microchipNumber && !hidden('microchipNumber') && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
+                {animal.tattooId && !hidden('tattooId') && <InfoItem label="Tattoo" value={animal.tattooId} />}
+                {animal.ringId && !hidden('ringId') && <InfoItem label="Ring ID" value={animal.ringId} />}
+                {animal.eartagNumber && !hidden('eartagNumber') && <InfoItem label="Ear Tag" value={animal.eartagNumber} />}
+                {animal.pedigreeRegistrationId && !hidden('pedigreeRegistrationId') && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
+                {animal.colonyId && <InfoItem label={label('colonyId', 'Colony ID')} value={animal.colonyId} />}
+                {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
+                    <InfoItem key={index} label={identifier.title} value={identifier.value} />
+                ))}
+            </dl>
+        </InfoCard>
+    );
+};
+
 export const IdentificationTabContent = ({ 
     animal, 
     breedingLineDefs = [], 
@@ -30,21 +55,7 @@ export const IdentificationTabContent = ({
     const label = (field, def) => getFieldLabel(field, species, def);
     return (
         <div className="space-y-6">
-            <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
-                    <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <InfoItem label="CritterTrack ID" value={animal.id_public} />
-                        {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
-                        {animal.microchipNumber && !hidden('microchipNumber') && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
-                        {animal.tattooId && !hidden('tattooId') && <InfoItem label="Tattoo" value={animal.tattooId} />}
-                        {animal.ringId && !hidden('ringId') && <InfoItem label="Ring ID" value={animal.ringId} />}
-                        {animal.eartagNumber && !hidden('eartagNumber') && <InfoItem label="Ear Tag" value={animal.eartagNumber} />}
-                        {animal.pedigreeRegistrationId && !hidden('pedigreeRegistrationId') && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
-                        {animal.colonyId && <InfoItem label={label('colonyId', 'Colony ID')} value={animal.colonyId} />}
-                        {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
-                            <InfoItem key={index} label={identifier.title} value={identifier.value} />
-                        ))}
-                    </dl>
-            </InfoCard>
+            <IdentificationNumbersCard animal={animal} />
             <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Species" value={animal.species} />

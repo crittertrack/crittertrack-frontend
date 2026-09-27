@@ -9,6 +9,7 @@ import {
 import AnimalImage from './shared/AnimalImage';
 import { formatDate, parseLocalDate } from '../utils/dateFormatter';
 import { formatAnimalDisplayName } from '../utils/animalDisplayName';
+import { getEnclosurePurposeLabel } from '../utils/enclosurePurpose';
 
 const TABS = [
     { id: 'dashboard', label: 'Dashboard', icon: Info },
@@ -551,7 +552,7 @@ const EnclosureDetailModal = ({
                                         </div>
                                          <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Purpose</span>
-                                            <span className="text-gray-800 dark:text-dark-text capitalize">{enclosure.purpose || 'General'}</span>
+                                            <span className="text-gray-800 dark:text-dark-text">{getEnclosurePurposeLabel(enclosure.purpose)}</span>
                                         </div>
                                         {enclosure.purposeDescription && (
                                             <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted">

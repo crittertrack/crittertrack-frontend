@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
@@ -29,6 +29,8 @@ import { EnclosureCard } from './EnclosureCard';
 import { RecordsTabContent } from './RecordsTabContent';
 import InfoButton from '../shared/InfoButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
+import { resolveLiteMode } from '../../utils/liteMode';
+import { LiteRecordsTabContent } from './LiteRecordsTabContent';
 import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
@@ -94,7 +96,10 @@ const AnimalModalV2 = ({
     toggleAnimalBreedingLine,
     setAnimalBreedingLinesDirect,
     setShowImageModal,
-    setEnlargedImageUrl
+    setEnlargedImageUrl,
+    // Optional tab override. Omit it and the modal shows the full tab set; Lite passes a
+    // trimmed list (Dashboard / Gallery / Pedigree / Records) â€” see LiteAnimalModal.jsx.
+    tabs: tabsOverride
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
@@ -119,7 +124,7 @@ const AnimalModalV2 = ({
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
-    // Same aggregated event list as the Timeline tab — Recent Activity is just its top 5.
+    // Same aggregated event list as the Timeline tab â€” Recent Activity is just its top 5.
     const animalTimelineEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
 
     useEffect(() => {
@@ -234,7 +239,7 @@ const AnimalModalV2 = ({
         run();
     }, [authToken, API_BASE_URL, animal?.id_public]);
 
-    // Fetch litters where this animal is sire or dam — includes litters registered by
+    // Fetch litters where this animal is sire or dam â€” includes litters registered by
     // OTHER users using this animal, not just ones this user created themselves.
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
@@ -315,19 +320,40 @@ useEffect(() => {
 
     const allImages = useMemo(() => [animal?.imageUrl || animal?.photoUrl, ...(animal?.extraImages || [])].filter(Boolean), [animal]);
 
-    const TABS = [
+    // Full tab set. The modal filters this by the optional `tabs` prop, so Lite can show a
+    // trimmed list while every tab's content below stays defined exactly once.
+    const ALL_TABS = [
         { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
-        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> }, 
-        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> }, 
-        { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> }, 
-        { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> }, 
+        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> },
+        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
+        { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> },
+        { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> },
         { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
         { id: 'pedigree', label: 'Pedigree', icon: <Dna size={14} /> },
         { id: 'gallery', label: 'Gallery', icon: <ImageIcon size={14} /> },
         { id: 'timeline', label: 'Timeline', icon: <Clock size={14} /> },
         { id: 'records', label: 'Records', icon: <FileText size={14} /> },
     ];
+
+    // Lite trims the tab set (see LiteAnimalModal) and swaps the Records tab content for the
+    // Lite variant; the rest of this modal is identical to the Full frontend.
+    const isLite = resolveLiteMode(userProfile);
+
+    // `tabs` may be ids ('gallery') or objects ({ id, label }). The caller's ORDER wins — mapping
+    // over the override rather than filtering ALL_TABS is what lets Lite put Records before
+    // Gallery. Omit the prop and the full tab set shows in its natural order.
+    const TABS = tabsOverride
+        ? tabsOverride
+            .map((o) => {
+                const id = typeof o === 'string' ? o : o?.id;
+                const found = ALL_TABS.find((t) => t.id === id);
+                if (!found) return null;
+                const label = typeof o === 'string' ? null : o.label;
+                return label ? { ...found, label } : found;
+            })
+            .filter(Boolean)
+        : ALL_TABS;
 
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
 
@@ -468,8 +494,8 @@ useEffect(() => {
                                                     const reproState = getReproductionState(animal);
                                                     return reproState ? <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${reproState.color}`}>{reproState.icon} {reproState.label}</span> : null;
                                                 })()}
-                                                {animal.isForSale && <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}</span>}
-                                                {animal.availableForBreeding && <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}</span>}
+                                                {animal.isForSale && <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` Â· ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}</span>}
+                                                {animal.availableForBreeding && <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` Â· ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}</span>}
                                             </div>
                                         </>
                                     )}
@@ -588,7 +614,7 @@ useEffect(() => {
                                                                         if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
                                                                         if (months < 0) { years--; months += 12; }
                                                                         const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                                                        return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
+                                                                        return `(${animal.deceasedDate ? `Lived ${age} â€  ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
                                                                     })()}
                                                                 </span>
                                                             </>
@@ -710,7 +736,7 @@ useEffect(() => {
                     </div>
                 </div>
 
-                {/* Tabs — sticky so it's still reachable when the header (image/info) is taller than the viewport */}
+                {/* Tabs â€” sticky so it's still reachable when the header (image/info) is taller than the viewport */}
                 <div className="sticky top-0 z-10 bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-border">
                     <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-4 -mb-px px-2 sm:px-4">
                         <button
@@ -733,7 +759,7 @@ useEffect(() => {
                     </nav>
                 </div>
 
-                {/* Content — the modal box itself scrolls now, so this no longer needs its own scroll region */}
+                {/* Content â€” the modal box itself scrolls now, so this no longer needs its own scroll region */}
                 <div className="p-3 sm:p-6 rounded-b-xl flex-1">
                     {activeTab === 'dashboard' && (
                         <div className="space-y-6">
@@ -774,7 +800,7 @@ useEffect(() => {
                                             <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
                                                 <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
                                                 <InfoButton title="Average Kinship (AVK)">
-                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
+                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data â€” calculated purely from recorded pedigree relationships).</p>
                                                     <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
                                                 </InfoButton>
                                             </div>
@@ -2442,7 +2468,7 @@ useEffect(() => {
                                                                                         flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
                                                                                     />
                                                                                 </div>
-                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` Â· ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` Â· ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -2524,7 +2550,15 @@ useEffect(() => {
                     )}
                     {activeTab === 'records' && (
                         <div className="space-y-6">
-                            <RecordsTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
+                            {isLite ? (
+                                <LiteRecordsTabContent
+                                    animal={animal}
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            ) : (
+                                <RecordsTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
+                            )}
                         </div>
                     )}
                     {/* Placeholder for other tabs */}

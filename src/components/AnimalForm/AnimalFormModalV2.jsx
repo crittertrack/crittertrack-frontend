@@ -18,6 +18,8 @@ import { CommunityGeneticsModal } from '../Modals/CommunityGeneticsModal';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { ENCLOSURE_PURPOSE_OPTIONS, getEnclosurePurposeLabel } from '../../utils/enclosurePurpose';
+import { MANUAL_PEDIGREE_ENABLED } from '../../utils/pedigreeFlags';
 import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { buildChangedSaveFields } from '../../utils/saveDiff';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
@@ -1202,9 +1204,9 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                                         </div>
                                                     )}
                                                     {enclosure.purpose && enclosure.purpose !== 'general' && (
-                                                        <div className="flex items-center gap-1" title={`Purpose: ${enclosure.purpose}`}>
+                                                        <div className="flex items-center gap-1" title={`Purpose: ${getEnclosurePurposeLabel(enclosure.purpose)}`}>
                                                             <Target size={12} />
-                                                            <span className="capitalize">{enclosure.purpose}</span>
+                                                            <span>{getEnclosurePurposeLabel(enclosure.purpose)}</span>
                                                         </div>
                                                     )}
                                                     {enclosure.enclosureType && (
@@ -1274,12 +1276,9 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                     value={newEnclosureData.purpose || 'general'}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, purpose: e.target.value }))}
                                     className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg">
-                                    <option value="general">General</option>
-                                    <option value="reproduction">Nursery / Breeding</option>
-                                    <option value="medical">Medical</option>
-                                    <option value="quarantine">Quarantine</option>
-                                    <option value="sale">For Sale</option>
-                                    <option value="other">Other</option>
+                                    {ENCLOSURE_PURPOSE_OPTIONS.map(o => (
+                                        <option key={o.value} value={o.value}>{o.label}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
@@ -1529,7 +1528,10 @@ const AnimalFormModalV2 = ({
     // Optional: called with (species, { tabs, sections }) right after a Customize-tab hidden
     // sections save succeeds, so the parent can update its own userProfile state and avoid a
     // stale Customize tab if this modal (or another instance) is reopened before a full profile refetch.
-    onHiddenSectionsUpdate
+    onHiddenSectionsUpdate,
+    // Optional: trims the tab bar. Lite passes ['dashboard','gallery','pedigree','records'] so
+    // its edit form mirrors its trimmed view modal. Omit it and the full 11-tab form shows.
+    tabs: tabsOverride
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
@@ -3480,6 +3482,27 @@ const AnimalFormModalV2 = ({
         damSire: { father: 'damSireSire', mother: 'damSireDam' },
         damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
     };
+    // All pedigree slot keys the form supports (Gen1 parents through Gen3 great-grandparents).
+    const MP_ALL_SLOTS = ['sire','dam','sireSire','sireDam','damSire','damDam',
+        'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+        'damSireSire','damSireDam','damDamSire','damDamDam'];
+    const mpCapitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const mpHasSlotValue = (entry) => !!entry && (entry.ctcId || Object.entries(entry).some(([k, v]) => k !== 'mode' && v && String(v).trim()));
+    // When the registered-link (CTC) chain runs out at `cur` (occupying `curSlotKey` in the
+    // offspring's tree), fall back to `cur`'s own manually-typed (unregistered) ancestors —
+    // stored in cur.manualPedigree — remapped one generation down onto the offspring's tree.
+    // e.g. cur.manualPedigree.sire (cur's father) -> offspring's `${curSlotKey}Sire` slot.
+    const mpMergeManualDescendants = (cur, curSlotKey, updates) => {
+        const curMP = cur?.manualPedigree;
+        if (!curMP || typeof curMP !== 'object') return;
+        MP_ALL_SLOTS.forEach((relSlot) => {
+            const entry = curMP[relSlot];
+            if (!mpHasSlotValue(entry)) return;
+            const targetSlot = curSlotKey + mpCapitalize(relSlot);
+            if (!MP_ALL_SLOTS.includes(targetSlot) || updates[targetSlot]) return;
+            updates[targetSlot] = { ...entry };
+        });
+    };
     const mpLinkAnimal = async (slotKey, a) => {
         const updates = { [slotKey]: mpToSlot(a) };
         const queue = [{ animal: a, slot: slotKey }];
@@ -3491,6 +3514,9 @@ const AnimalFormModalV2 = ({
             const motherId = cur.damId_public;
             if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
             if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
+            // Registered link missing for one/both sides — inherit any manually-typed ancestors
+            // `cur` already has recorded on its own Pedigree tab, so they aren't lost on offspring.
+            mpMergeManualDescendants(cur, slot, updates);
         }
         setMpEditForm(f => ({ ...f, ...updates }));
         // Gen-1 sire/dam slots are the real parent relationship, not just pedigree-display data —
@@ -3872,10 +3898,22 @@ const AnimalFormModalV2 = ({
     ];
     // Tabs the user chose to hide for this species stay out of the tab bar entirely; Customize is
     // always appended last so there's always a way back in to re-enable them.
+    const isLiteForm = Array.isArray(tabsOverride);
+
+    // `tabs` (optional) trims further and may relabel. Lite passes Dashboard/Gallery/Pedigree
+    // plus the health tab relabelled 'Records' — that's where the vet-visit/medication/
+    // vaccination/deworming/condition/allergy editors already live, so Lite reuses them rather
+    // than duplicating the UI. See LiteAnimalFormModal.jsx.
+    const tabOverrides = (tabsOverride || []).map(t => (typeof t === 'string' ? { id: t } : t));
     const visibleTabs = [
         ...TABS.filter(tab => MANDATORY_TABS.includes(tab.id) || !isTabHidden(tab.id)),
         { id: 'customize', label: 'Customize', icon: Settings },
-    ];
+    ]
+        .filter(t => !tabsOverride || tabOverrides.some(o => o.id === t.id))
+        .map(t => {
+            const o = tabOverrides.find(x => x.id === t.id);
+            return o && o.label ? { ...t, label: o.label } : t;
+        });
 
     // Species template: prefer the real Species collection category (covers custom species too),
     // falling back to the static category map for species not present in speciesOptions yet.
@@ -3938,6 +3976,20 @@ const AnimalFormModalV2 = ({
                     {/* Tab Content */}
                     <div className="p-3 sm:p-6">
                         {activeTab === 'dashboard' && ( // DASHBOARD
+                            <div className="space-y-4">
+                            {/* Lite only: the view modal's header "Notes" card renders animal.remarks,
+                                so surface the same field here as its own always-open block instead of
+                                leaving it buried in the collapsible Identity section (whose collapsed
+                                state persists to localStorage and can hide it indefinitely). The
+                                Identity copy below is suppressed in Lite so there's only one editor. */}
+                            {isLiteForm && (
+                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Notes</label>
+                                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="4"
+                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="General notes, observations, and records..." />
+                                </div>
+                            )}
                             <div className="flex flex-col md:flex-row gap-4">
                                 {/* Left Column: Image Upload */}
                                 <div className="w-full md:w-1/4 flex-shrink-0 flex flex-col gap-2">
@@ -4039,12 +4091,14 @@ const AnimalFormModalV2 = ({
                                                         </div>
                                                     )}
                                                 </div>
+                                                {!isLiteForm && (
                                                 <div className="md:col-span-3">
                                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Remarks</label>
                                                     <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
                                                         className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                         placeholder="General notes, observations, and records..." />
                                                 </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -4146,6 +4200,7 @@ const AnimalFormModalV2 = ({
                                         )}
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         )}
                         {activeTab === 'identification' && (
@@ -6376,7 +6431,11 @@ const AnimalFormModalV2 = ({
                             const renderEditSlot = (slotKey, label, sideColor) => {
                                 const d = getSlot(slotKey);
                                 const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
-                                const isCTC = d.mode === 'ctc';
+                                // Manual entry is retired (see utils/pedigreeFlags). Slots that
+                                // already hold hand-typed data stay readable but frozen; every
+                                // other slot behaves as link-only so users can't create more.
+                                const isLockedManual = !MANUAL_PEDIGREE_ENABLED && d.mode !== 'ctc' && mpHasSlotValue(d);
+                                const isCTC = d.mode === 'ctc' || !isLockedManual;
                                 const isParent = slotKey === 'sire' || slotKey === 'dam';
                                 const bdr = isSire ? 'border-blue-200 dark:border-blue-700/60 bg-blue-50/40' : 'border-pink-200 dark:border-pink-700/60 bg-pink-50/40';
                                 const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
@@ -6385,15 +6444,32 @@ const AnimalFormModalV2 = ({
                                     <div key={slotKey} className={`rounded-lg border ${isParent ? 'p-4' : 'p-3'} space-y-2 text-xs ${bdr}`}>
                                         <div className="flex items-center justify-between">
                                             <p className={`${isParent ? 'text-xs' : 'text-[10px]'} font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
-                                            <div className="flex rounded border border-gray-300 dark:border-dark-border overflow-hidden text-[10px]">
-                                                <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
-                                                    className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 dark:bg-dark-surface font-semibold text-gray-800 dark:text-dark-text' : 'text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}>Manual</button>
-                                                <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
-                                                    className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary dark:bg-dark-primary font-semibold text-black' : 'text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}>Link CTC</button>
-                                            </div>
+                                            {MANUAL_PEDIGREE_ENABLED ? (
+                                                <div className="flex rounded border border-gray-300 dark:border-dark-border overflow-hidden text-[10px]">
+                                                    <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
+                                                        className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 dark:bg-dark-surface font-semibold text-gray-800 dark:text-dark-text' : 'text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}>Manual</button>
+                                                    <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
+                                                        className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary dark:bg-dark-primary font-semibold text-black' : 'text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}>Link CTC</button>
+                                                </div>
+                                            ) : isLockedManual ? (
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-semibold">Retired</span>
+                                            ) : null}
                                         </div>
 
-                                        {isCTC ? (
+                                        {isLockedManual ? (
+                                            <div className="space-y-1">
+                                                <div className={`flex items-center gap-2 ${isParent ? 'p-2' : ''} bg-white dark:bg-dark-card-bg rounded border border-amber-200 dark:border-amber-800/60`}>
+                                                    {d.imageUrl
+                                                        ? <img src={d.imageUrl} className={`${isParent ? 'w-12 h-12' : 'w-8 h-8'} rounded-full object-cover flex-shrink-0`} alt="" />
+                                                        : <div className={`${isParent ? 'w-12 h-12' : 'w-8 h-8'} rounded-full bg-gray-100 dark:bg-dark-surface flex items-center justify-center flex-shrink-0`}><Cat size={isParent ? 18 : 13} className="text-gray-300 dark:text-dark-border" /></div>}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-semibold text-gray-800 dark:text-dark-text truncate">{formatAnimalDisplayName(d)}</p>
+                                                        {d.genCode && <p className="text-[10px] font-mono text-gray-500 dark:text-dark-text-muted truncate">{d.genCode}</p>}
+                                                    </div>
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted">Previously entered by hand. Kept for reference — no longer editable. Create a CritterTrack animal to link a real ancestor.</p>
+                                            </div>
+                                        ) : isCTC ? (
                                             d.ctcId ? (
                                                 <div className="space-y-1.5">
                                                     <div className={`flex items-center gap-3 ${isParent ? 'p-3' : 'p-2'} bg-white dark:bg-dark-card-bg rounded border border-primary/30`}>
@@ -6469,7 +6545,11 @@ const AnimalFormModalV2 = ({
                                         <Dna size={18} className="text-orange-500" />
                                         <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary">Pedigree</h3>
                                     </div>
-                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only — they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
+                                    {MANUAL_PEDIGREE_ENABLED ? (
+                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only — they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
+                                    ) : (
+                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">Every ancestor here is a real CritterTrack animal. That means their names, photos, genetics and parents are shared across your whole herd, and they count toward COI and the pedigree chart. If an ancestor isn't in CritterTrack yet, create them as an animal first, then link them here.</p>
+                                    )}
 
                                     <div>
                                         <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 1 — Parents</p>
