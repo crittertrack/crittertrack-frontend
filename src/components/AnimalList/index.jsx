@@ -6296,10 +6296,15 @@ useEffect(() => {
                                 <h2 className="text-lg font-bold truncate shrink-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
                             </>
                         )}
+                        {/* Hidden on mobile: the info icon is wide enough that, together with the
+                            title and refresh button, it wraps and pushes the Add Animal button
+                            onto its own row. Desktop keeps it. */}
                         {ANIMAL_VIEW_INFO[animalView] && (
-                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} variant="default" className="shrink-0">
-                                {ANIMAL_VIEW_INFO[animalView].body}
-                            </InfoButton>
+                            <div className="hidden sm:block shrink-0">
+                                <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} variant="default">
+                                    {ANIMAL_VIEW_INFO[animalView].body}
+                                </InfoButton>
+                            </div>
                         )}
                         {/* Refresh button */}
                         <button
