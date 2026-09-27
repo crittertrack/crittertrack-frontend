@@ -6,7 +6,13 @@ import { openExternalLink } from '../utils/externalLink';
 import InstallPWA from './InstallPWA';
 
 const DISMISS_KEY = 'ct_dismissed_android_beta_banner_v1';
-export const ANDROID_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.crittertrack.app';
+// The /apps/testing/ opt-in link, NOT the public /store/apps/details URL.
+// CritterTrack is in closed beta, so it has no public Play listing — the store URL 404s with
+// "the requested URL was not found". Only testers who joined the track can install, and this
+// is the link Google generates for that. Swap back to
+// 'https://play.google.com/store/apps/details?id=com.crittertrack.app' once the app reaches
+// Production and has a public page.
+export const ANDROID_PLAY_STORE_URL = 'https://play.google.com/apps/testing/com.crittertrack.app';
 
 // Opt-in modal — collects the Google account email (NOT the CritterTrack account email) that
 // the developer manually adds to the Play Console's closed testing tester list. See
