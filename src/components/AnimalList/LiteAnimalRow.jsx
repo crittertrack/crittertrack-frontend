@@ -104,8 +104,11 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                 </div>
             </div>
 
-            {/* MIDDLE — reproductive status, general status, CTC ID. Fixed-width and rigid on
-                desktop so the block anchors at one x-position regardless of name/variety length. */}
+            {/* MIDDLE — reproductive status, general status, CTC ID. Fixed-width and rigid, with
+                the LEFT and RIGHT columns both set to flex-1 below so they absorb equal slack.
+                That's what actually centres this block: whichever way the name/variety text
+                stretches, it grows both sides by the same amount and the status/ID pills stay
+                at the horizontal midpoint. */}
             <div className="hidden sm:flex flex-col items-start gap-1 w-48 shrink-0 grow-0 basis-48">
                 {reproState && (
                     <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${reproState.color}`}>
@@ -118,10 +121,11 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                 <span className="text-[10px] font-mono text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
             </div>
 
-            {/* RIGHT — owned + public toggles. Fixed width on desktop so the middle column
-                above stays put: "Unowned" is wider than "Owned", which otherwise nudged
-                the status/ID block left and right from row to row. */}
-            <div className="flex items-center justify-end gap-1.5 w-28 sm:w-40 shrink-0" onClick={(e) => e.stopPropagation()}>
+            {/* RIGHT — owned + public toggles. Shares flex-1 with the left column so the middle
+                block above lands at the centre. The inner box is a fixed width with the buttons
+                right-aligned, so "Unowned" vs "Owned" doesn't shift the row's right edge. */}
+            <div className="flex-1 min-w-0 flex justify-end" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-end gap-1.5 w-28 sm:w-40 shrink-0">
                 <button
                     onClick={() => toggleAnimalOwned(animal.id_public, !animal.isOwned)}
                     className={`px-2 py-1 text-[11px] font-semibold rounded-lg transition ${
@@ -141,6 +145,7 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                     }`}
                     title={animal.isDisplay ? 'Make Private' : 'Make Public'}
                 >{animal.isDisplay ? 'Public' : 'Private'}</button>
+              </div>
             </div>
         </div>
     );

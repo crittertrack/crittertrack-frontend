@@ -893,6 +893,9 @@ const AnimalList = ({
     const [showFeedingCareNeedsAttentionBreakdown, setShowFeedingCareNeedsAttentionBreakdown] = useState(false);
     // Lite mode: which collection/enclosure row is expanded to show its animals inline (see docs/lite-web-toggle-brainstorm.md)
     const [liteExpandedCollectionId, setLiteExpandedCollectionId] = useState(null);
+    // Which collection's "add animals" picker is open (null = none). The picker itself is the
+    // group card's expanded panel, so it's one piece of state rather than a modal.
+    const [liteAssigningCollectionId, setLiteAssigningCollectionId] = useState(null);
     const [liteExpandedEnclosureId, setLiteExpandedEnclosureId] = useState(null);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
@@ -5362,7 +5365,7 @@ useEffect(() => {
                     const capacity = parseInt(enc.capacity, 10);
                     const isExpanded = liteExpandedEnclosureId === enc._id;
                     return (
-                        <div key={enc._id} className="bg-white dark:bg-dark-card-bg rounded-xl shadow-sm overflow-hidden">
+                        <div key={enc._id} className="bg-white dark:bg-dark-card-bg border-2 border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden">
                             <button
                                 onClick={() => setLiteExpandedEnclosureId(prev => prev === enc._id ? null : enc._id)}
                                 className="w-full flex items-center gap-3 p-2.5 text-left active:scale-[0.99] transition"
@@ -5376,6 +5379,16 @@ useEffect(() => {
                                         {enc.enclosureType || 'Enclosure'} • {occupants.length}{capacity > 0 ? `/${capacity}` : ''} animals
                                     </p>
                                 </div>
+                                {/* Opens the same EnclosureDetailModal the Full enclosure view uses, which is
+                                    already wired for assign/unassign — Lite gets it without a second
+                                    implementation. */}
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); handleOpenDetail(enc); }}
+                                    className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-primary dark:hover:text-dark-primary rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover shrink-0"
+                                    title="Assign or remove animals"
+                                >
+                                    <Users size={15} />
+                                </button>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); openEnclosureModal(enc); }}
                                     className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-primary dark:hover:text-dark-primary rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover shrink-0"
@@ -5420,7 +5433,7 @@ useEffect(() => {
                         const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
                         const isExpanded = liteExpandedCollectionId === col.id;
                         return (
-                            <div key={col.id} className="bg-white dark:bg-dark-card-bg rounded-xl shadow-sm overflow-hidden">
+                            <div key={col.id} className="bg-white dark:bg-dark-card-bg border-2 border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden">
                                 <button
                                     onClick={() => setLiteExpandedCollectionId(prev => prev === col.id ? null : col.id)}
                                     className="w-full flex items-center gap-3 p-2.5 text-left active:scale-[0.99] transition"
@@ -5432,8 +5445,67 @@ useEffect(() => {
                                         <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">{col.name}</p>
                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">{colAnimals.length} animal{colAnimals.length === 1 ? '' : 's'}</p>
                                     </div>
-                                    {isExpanded ? <ChevronUp size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" /> : <ChevronDown size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" />}
+                                    <div className="flex items-center gap-0.5 shrink-0">
+                                        {/* Toggles the "add animals" picker below. stopPropagation so it
+                                            doesn't also expand/collapse the group card. */}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setLiteAssigningCollectionId(prev => prev === col.id ? null : col.id); }}
+                                            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-primary dark:hover:text-dark-primary rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover"
+                                            title="Add or remove animals"
+                                            aria-expanded={liteAssigningCollectionId === col.id}
+                                        >
+                                            <Plus size={15} />
+                                        </button>
+                                        {isExpanded ? <ChevronUp size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" /> : <ChevronDown size={18} className="text-gray-300 dark:text-dark-text-muted shrink-0" />}
+                                    </div>
                                 </button>
+                                {liteAssigningCollectionId === col.id && (
+                                    // Add/remove picker. Lists every owned animal not already in the
+                                    // collection, plus current members so they can be removed without
+                                    // opening each one. Reuses the same helpers the Full view uses, so
+                                    // localStorage + API stay in sync.
+                                    <div className="px-2.5 pb-2.5">
+                                        <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-sm p-2 max-h-64 overflow-y-auto">
+                                            {(() => {
+                                                const inCol = new Set(colAnimals.map(a => a.id_public));
+                                                const unassigned = allOwnedAnimals.filter(a => !inCol.has(a.id_public));
+                                                if (unassigned.length === 0 && colAnimals.length === 0) {
+                                                    return <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-2">No animals to add.</p>;
+                                                }
+                                                return (
+                                                    <>
+                                                        {colAnimals.length > 0 && (
+                                                            <p className="text-[11px] font-semibold text-gray-500 dark:text-dark-text-secondary px-1 pb-0.5">In this collection — click to remove</p>
+                                                        )}
+                                                        {colAnimals.map(a => (
+                                                            <button
+                                                                key={a.id_public}
+                                                                onClick={(e) => { e.stopPropagation(); removeAnimalFromCollection(a.id_public, col.id); }}
+                                                                className="w-full flex items-center gap-2 text-left text-xs px-1.5 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-gray-700 dark:text-dark-text-secondary"
+                                                            >
+                                                                <X size={12} className="text-red-500 shrink-0" />
+                                                                <span className="truncate">{formatAnimalDisplayName({ ...a, name: a.name || 'Unnamed' })}</span>
+                                                            </button>
+                                                        ))}
+                                                        {unassigned.length > 0 && (
+                                                            <p className="text-[11px] font-semibold text-gray-500 dark:text-dark-text-secondary px-1 pt-1.5 pb-0.5">Add to this collection</p>
+                                                        )}
+                                                        {unassigned.map(a => (
+                                                            <button
+                                                                key={a.id_public}
+                                                                onClick={(e) => { e.stopPropagation(); assignAnimalToCollection(a.id_public, col.id); }}
+                                                                className="w-full flex items-center gap-2 text-left text-xs px-1.5 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded text-gray-700 dark:text-dark-text-secondary"
+                                                            >
+                                                                <Plus size={12} className="text-primary dark:text-dark-primary shrink-0" />
+                                                                <span className="truncate">{formatAnimalDisplayName({ ...a, name: a.name || 'Unnamed' })}</span>
+                                                            </button>
+                                                        ))}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
                                 {isExpanded && (
                                     <div className="p-2 pt-0 space-y-2 bg-gray-50 dark:bg-dark-surface">
                                         {colAnimals.length === 0 ? (
