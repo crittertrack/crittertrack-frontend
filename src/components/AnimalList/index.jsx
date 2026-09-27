@@ -829,13 +829,17 @@ const AnimalList = ({
         setAnimalView(normalizeAnimalView(initialAnimalView));
     }, [initialAnimalView]);
 
-    // Defensive: these tabs no longer have a way to be reached in Lite mode, but if anything
-    // (e.g. a stale deep-link) sets animalView to one anyway, fall back to the main list.
+    // In Lite mode the Reproduction / Health / Feeding & Care tabs are hidden from the tab bar
+    // (LITE_HIDDEN_TABS above), but a stale deep-link or a router state can still land on one of
+    // them — bounce those back to the main list. MUST be scoped to isLite: in Full mode these are
+    // real, working tabs, and without this guard every click on them snapped straight back to
+    // 'list' (the effect below was unconditional, so it fired in Full too).
     useEffect(() => {
+        if (!isLite) return;
         if (['reproduction', 'health', 'feeding', 'supplies'].includes(animalView)) {
             setAnimalView('list');
         }
-    }, [animalView]);
+    }, [animalView, isLite]);
 
     // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })). The browser
     // keeps history.state for an entry across reloads/remounts, so the state must be explicitly cleared
