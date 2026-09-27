@@ -3714,40 +3714,33 @@ useEffect(() => {
 
     const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => {
         // Icon is passed in pre-sized (size={32}); strip that so the responsive w/h classes below can take over on mobile.
-        // Lite is more compact than Full, but the two modes size independently below sm: on a phone
-        // the value and label stack on two lines (a single 36px line truncates labels like
-        // "Animals Pregnant" mid-word), while from sm up they sit inline on one short pill.
-        const isCompactStacked = isLite;
+        // Both modes get the same compact treatment on a phone (value over label, 48px tall) —
+        // the old Full card was 72px there and ate the screen. From sm up they diverge: Lite
+        // stays a 36px single-line pill, Full keeps its larger card.
+        const isInlinePill = isLite;                // compact layout from sm up, Lite only
         const responsiveIcon = React.isValidElement(icon)
             ? React.cloneElement(icon, {
                 size: undefined,
-                className: `${icon.props.className || ''} ${isCompactStacked ? 'w-4 h-4 shrink-0' : 'w-6 h-6 sm:w-8 sm:h-8 shrink-0'}`.trim(),
+                className: `${icon.props.className || ''} w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 shrink-0`.trim(),
             })
             : icon;
         return (
             <div
-                className={`relative flex items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isCompactStacked
-                    ? 'h-[48px] px-2 py-1 gap-1.5 sm:h-[36px] sm:flex-row sm:items-center'
-                    : 'h-[72px] sm:h-[104px] p-2.5 sm:p-4'} ${colorClass}`}
+                className={`relative flex flex-col sm:flex-row sm:items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isInlinePill
+                    ? 'h-[48px] px-2 py-1 gap-1.5 sm:h-[36px] sm:px-2 sm:py-1 sm:gap-1.5'
+                    : 'h-[48px] px-2 py-1 gap-1.5 sm:h-[104px] sm:p-4 sm:gap-0'} ${colorClass}`}
                 onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
             >
                 {responsiveIcon}
-                {isCompactStacked ? (
-                    /* Phone: icon | value over label. Both lines get min-w-0 so a long label
-                       truncates cleanly with an ellipsis instead of overflowing the card. */
-                    <div className="flex flex-col min-w-0 flex-1 leading-tight">
-                        <span className="text-sm font-bold truncate">{value}</span>
-                        <span className="text-[10px] font-medium opacity-90 truncate">{label}</span>
-                    </div>
-                ) : (
-                    <div className="ml-2.5 sm:ml-4 min-w-0">
-                        <div className="text-base sm:text-2xl font-bold leading-tight">{value}</div>
-                        <div className="text-[11px] sm:text-sm font-medium opacity-90 line-clamp-2 leading-tight">{label}</div>
-                    </div>
-                )}
+                {/* Phone: value over label. min-w-0 + truncate so a long label like
+                    "Animals Pregnant" ellipsises instead of overflowing the card. */}
+                <div className="flex flex-col min-w-0 flex-1 sm:flex-none sm:ml-2.5 lg:ml-4 leading-tight">
+                    <span className="text-sm sm:text-2xl font-bold truncate">{value}</span>
+                    <span className="text-[10px] sm:text-sm font-medium opacity-90 truncate sm:line-clamp-2">{label}</span>
+                </div>
                 {hasDropdown && (
-                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className={`${isCompactStacked ? '' : 'absolute top-1 right-1 sm:top-2 sm:right-2'} p-1 text-inherit opacity-60 hover:opacity-100 shrink-0`}>
-                        <ChevronDown size={16} className={`${isCompactStacked ? '' : 'sm:w-5 sm:h-5'} transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className={`${isInlinePill ? '' : 'absolute top-1 right-1 sm:top-2 sm:right-2'} p-1 text-inherit opacity-60 hover:opacity-100 shrink-0`}>
+                        <ChevronDown size={16} className={`${isInlinePill ? '' : 'sm:w-5 sm:h-5'} transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                 )}
             </div>
