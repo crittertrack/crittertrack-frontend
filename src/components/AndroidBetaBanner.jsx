@@ -146,63 +146,56 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                         <span className="flex items-start sm:items-center gap-1.5 leading-snug">
                             <CheckCircle size={15} className="flex-shrink-0 mt-0.5 sm:mt-0" />
                             <span>
-                                You're opted in with <strong>{userProfile.androidBetaOptIn.googleEmail}</strong>. It
-                                can take up to <strong>24 hours</strong> for access to be granted.
+                                Opted in as <strong>{userProfile.androidBetaOptIn.googleEmail}</strong> — access can take
+                                up to <strong>24 hours</strong>.
                             </span>
                         </span>
-                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                            Click <strong>Open on Google Play</strong> below to check your access — there's no other
-                            confirmation besides the message the Play Store shows you there once you've been added
-                            as a tester.
-                        </p>
-                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                            Once you're in, please stay signed into the app for at least <strong>14 days</strong>,
-                            and send any feedback through the Google Play Store's beta feedback option rather than
-                            CritterTrack support.
-                        </p>
-                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                            <strong>Still seeing "App not available" after 24 hours?</strong> Make sure the Play Store on
-                            your device is signed in with the same Google account you entered above — the tester list is
-                            per-account, so being signed into a different one will show the same message.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={() => setShowHelp(v => !v)}
-                            aria-expanded={showHelp}
-                            className="mt-1.5 text-xs font-semibold text-white/90 hover:text-white underline underline-offset-2 transition"
-                        >
-                            {showHelp ? 'Hide install steps' : "Having trouble? Install steps & what you'll see"}
-                        </button>
-                        {showHelp && (
-                            <>
-                                <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                                    <strong>What you'll see:</strong> the page opens with a <strong>"Become a tester"</strong> button
-                                    — click it, then also click <strong>"Download it on Google Play"</strong> to actually install the
-                                    app on your device. Both steps are needed; the second one is the install.
-                                </p>
-                                <p className="mt-1.5 text-xs text-white/90 leading-snug">
-                                    <strong>Already have CritterTrack installed?</strong> Google will say{" "}
-                                    <em>"You'll receive an update to the CritterTrack app if you already have it installed on
-                                    your device."</em> That only refers to the Play Store app — it does <strong>not</strong> apply
-                                    to the separate app you installed from the purple{" "}
-                                    <strong>"Install CritterTrack (Web)"</strong> button on the login screen.
-                                </p>
-                                <p className="mt-1.5 text-xs font-semibold text-white leading-snug">
-                                    So if you used that button, <strong>uninstall that one and install this one</strong>. They're
-                                    separate apps — installing the Play Store beta does not replace or update the web app.
-                                </p>
-                            </>
-                        )}
-                        <div className="mt-2">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                             <button
                                 type="button"
                                 onClick={() => openExternalLink(ANDROID_PLAY_STORE_URL)}
-                                className="bg-white/20 hover:bg-white/30 font-semibold px-3 py-1.5 rounded-lg transition text-xs inline-flex items-center gap-1.5"
+                                className="bg-white/20 hover:bg-white/30 font-semibold px-2.5 py-1 rounded-lg transition text-xs inline-flex items-center gap-1.5"
                             >
                                 <Download size={14} />
                                 Open on Google Play
                             </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowHelp(v => !v)}
+                                aria-expanded={showHelp}
+                                className="text-xs font-semibold text-white/90 hover:text-white underline underline-offset-2 transition whitespace-nowrap"
+                            >
+                                {showHelp ? 'Hide instructions' : 'Instructions'}
+                            </button>
                         </div>
+                        {showHelp && (
+                            <div className="mt-1.5 space-y-1.5">
+                                <p className="text-xs text-white/90 leading-snug">
+                                    Click <strong>Open on Google Play</strong> to check your access — there's no other
+                                    confirmation besides the message the Play Store shows you there once you've been added
+                                    as a tester. On that page, click <strong>"Become a tester"</strong>, then also click{" "}
+                                    <strong>"Download it on Google Play"</strong> to actually install it — both steps are needed.
+                                </p>
+                                <p className="text-xs text-white/90 leading-snug">
+                                    <strong>Still seeing "App not available" after 24 hours?</strong> Make sure the Play Store on
+                                    your device is signed in with the same Google account you entered above — the tester list is
+                                    per-account, so being signed into a different one will show the same message.
+                                </p>
+                                <p className="text-xs text-white/90 leading-snug">
+                                    Once you're in, please stay signed into the app for at least <strong>14 days</strong>,
+                                    and send any feedback through the Google Play Store's beta feedback option rather than
+                                    CritterTrack support.
+                                </p>
+                                <p className="text-xs text-white/90 leading-snug">
+                                    <strong>Already have CritterTrack installed?</strong> Google may say{" "}
+                                    <em>"You'll receive an update to the CritterTrack app if you already have it installed on
+                                    your device."</em> That only refers to the Play Store app — it does <strong>not</strong> apply
+                                    to the separate app you installed from the purple{" "}
+                                    <strong>"Install CritterTrack (Web)"</strong> button on the login screen. If you used that
+                                    button, <strong>uninstall that one and install this one</strong>; they're separate apps.
+                                </p>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
