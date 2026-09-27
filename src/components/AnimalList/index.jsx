@@ -6427,6 +6427,8 @@ useEffect(() => {
                     — hidden in Lite mode, where LiteBottomNav switches between these views instead. */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 dark:border-dark-text-muted rounded-xl overflow-hidden shadow-sm">
+                {/* 3 tabs in Lite (My Animals / Collections / Enclosures), 6 in Full — both fit
+                    3 columns cleanly, so the grid stays grid-cols-3 either way. */}
                 <div className="grid grid-cols-3 sm:hidden">
                                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
                                     {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
@@ -6434,7 +6436,9 @@ useEffect(() => {
                                     {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'},
                                     {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
                                     {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
-                ].map(tab => (
+                // Same Lite filter the desktop tab bar uses (line ~6461). Without it these three
+                // tabs stayed visible on phones in Lite mode while desktop correctly hid them.
+                ].filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key)).map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                                                 className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
