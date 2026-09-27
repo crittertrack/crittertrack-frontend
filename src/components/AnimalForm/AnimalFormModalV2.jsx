@@ -3898,6 +3898,8 @@ const AnimalFormModalV2 = ({
     ];
     // Tabs the user chose to hide for this species stay out of the tab bar entirely; Customize is
     // always appended last so there's always a way back in to re-enable them.
+    const isLiteForm = Array.isArray(tabsOverride);
+
     // `tabs` (optional) trims further and may relabel. Lite passes Dashboard/Gallery/Pedigree
     // plus the health tab relabelled 'Records' — that's where the vet-visit/medication/
     // vaccination/deworming/condition/allergy editors already live, so Lite reuses them rather
@@ -4198,6 +4200,7 @@ const AnimalFormModalV2 = ({
                                         )}
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         )}
                         {activeTab === 'identification' && (
