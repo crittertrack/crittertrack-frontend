@@ -3714,27 +3714,40 @@ useEffect(() => {
 
     const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => {
         // Icon is passed in pre-sized (size={32}); strip that so the responsive w/h classes below can take over on mobile.
-        // In Lite the cards are a fraction of the Full size — the dashboard counters there are
-        // glanceable, not the main event, so they collapse to a single compact pill.
-        const iconSize = isLite ? 'w-4 h-4 shrink-0' : 'w-6 h-6 sm:w-8 sm:h-8 shrink-0';
+        // Lite is more compact than Full, but the two modes size independently below sm: on a phone
+        // the value and label stack on two lines (a single 36px line truncates labels like
+        // "Animals Pregnant" mid-word), while from sm up they sit inline on one short pill.
+        const isCompactStacked = isLite;
         const responsiveIcon = React.isValidElement(icon)
-            ? React.cloneElement(icon, { size: undefined, className: `${icon.props.className || ''} ${iconSize}`.trim() })
+            ? React.cloneElement(icon, {
+                size: undefined,
+                className: `${icon.props.className || ''} ${isCompactStacked ? 'w-4 h-4 shrink-0' : 'w-6 h-6 sm:w-8 sm:h-8 shrink-0'}`.trim(),
+            })
             : icon;
         return (
             <div
-                className={`relative flex items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isLite
-                    ? 'h-[36px] px-2 py-1 gap-1.5'
+                className={`relative flex items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isCompactStacked
+                    ? 'h-[48px] px-2 py-1 gap-1.5 sm:h-[36px] sm:flex-row sm:items-center'
                     : 'h-[72px] sm:h-[104px] p-2.5 sm:p-4'} ${colorClass}`}
                 onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
             >
                 {responsiveIcon}
-                <div className={isLite ? 'min-w-0 flex items-baseline gap-1.5' : 'ml-2.5 sm:ml-4 min-w-0'}>
-                    <div className={`${isLite ? 'text-sm font-bold leading-none' : 'text-base sm:text-2xl font-bold leading-tight'}`}>{value}</div>
-                    <div className={`${isLite ? 'text-[11px] font-medium opacity-90 leading-none truncate' : 'text-[11px] sm:text-sm font-medium opacity-90 line-clamp-2 leading-tight'}`}>{label}</div>
-                </div>
+                {isCompactStacked ? (
+                    /* Phone: icon | value over label. Both lines get min-w-0 so a long label
+                       truncates cleanly with an ellipsis instead of overflowing the card. */
+                    <div className="flex flex-col min-w-0 flex-1 leading-tight">
+                        <span className="text-sm font-bold truncate">{value}</span>
+                        <span className="text-[10px] font-medium opacity-90 truncate">{label}</span>
+                    </div>
+                ) : (
+                    <div className="ml-2.5 sm:ml-4 min-w-0">
+                        <div className="text-base sm:text-2xl font-bold leading-tight">{value}</div>
+                        <div className="text-[11px] sm:text-sm font-medium opacity-90 line-clamp-2 leading-tight">{label}</div>
+                    </div>
+                )}
                 {hasDropdown && (
-                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className={`${isLite ? '' : 'absolute top-1 right-1 sm:top-2 sm:right-2'} p-1 text-inherit opacity-60 hover:opacity-100 shrink-0`}>
-                        <ChevronDown size={16} className={`${isLite ? '' : 'sm:w-5 sm:h-5'} transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className={`${isCompactStacked ? '' : 'absolute top-1 right-1 sm:top-2 sm:right-2'} p-1 text-inherit opacity-60 hover:opacity-100 shrink-0`}>
+                        <ChevronDown size={16} className={`${isCompactStacked ? '' : 'sm:w-5 sm:h-5'} transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                 )}
             </div>
@@ -5939,9 +5952,10 @@ useEffect(() => {
 
         return (
             <div className={isLite ? 'mb-4' : 'mb-6'}>
-                {/* Lite: 3-up on mobile (the cards are only 36px tall, so 2-up wasted most of
-                    the row) and 5-up from sm, with tighter gaps. Full is unchanged. */}
-                <div className={`${isLite ? 'grid grid-cols-3 sm:grid-cols-5 gap-1.5 items-start' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start'}`}>
+                {/* Lite: 2-up on mobile (3 columns was too tight once the value/label stack on
+                    two lines) and 5-up from sm, where they collapse to a single inline pill.
+                    Full is unchanged. */}
+                <div className={`${isLite ? 'grid grid-cols-2 sm:grid-cols-5 gap-1.5 items-start' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start'}`}>
                     {/* Column 1: Total Animals */}
                     <div className="flex flex-col gap-2">
                         <StatCard
@@ -6353,11 +6367,13 @@ useEffect(() => {
                                 <X size={12} strokeWidth={3} />
                             </button>
                         )}
-                        {/* Find Duplicates — administrative tool, hidden in Lite mode */}
+                        {/* Find Duplicates — administrative tool. Hidden in Lite, and hidden on
+                            mobile generally: it's icon-only there, but it still occupies a slot in
+                            the wrapping header row and was pushing Add Animal onto its own line. */}
                         {!showArchiveScreen && (
                             <button
                                 onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 dark:bg-amber-700 text-white border-amber-500 dark:border-amber-700' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
+                                className={`${isLite ? 'hidden' : 'hidden sm:flex'} items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 dark:bg-amber-700 text-white border-amber-500 dark:border-amber-700' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
                                 title="Find Duplicate Animals"
                             >
                                 <Search size={14} className="sm:w-4 sm:h-4" />
