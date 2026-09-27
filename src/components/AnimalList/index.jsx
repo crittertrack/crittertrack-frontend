@@ -3714,22 +3714,27 @@ useEffect(() => {
 
     const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => {
         // Icon is passed in pre-sized (size={32}); strip that so the responsive w/h classes below can take over on mobile.
+        // In Lite the cards are a fraction of the Full size — the dashboard counters there are
+        // glanceable, not the main event, so they collapse to a single compact pill.
+        const iconSize = isLite ? 'w-4 h-4 shrink-0' : 'w-6 h-6 sm:w-8 sm:h-8 shrink-0';
         const responsiveIcon = React.isValidElement(icon)
-            ? React.cloneElement(icon, { size: undefined, className: `${icon.props.className || ''} w-6 h-6 sm:w-8 sm:h-8 shrink-0`.trim() })
+            ? React.cloneElement(icon, { size: undefined, className: `${icon.props.className || ''} ${iconSize}`.trim() })
             : icon;
         return (
             <div
-                className={`relative flex items-center h-[72px] sm:h-[104px] p-2.5 sm:p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
+                className={`relative flex items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isLite
+                    ? 'h-[36px] px-2 py-1 gap-1.5'
+                    : 'h-[72px] sm:h-[104px] p-2.5 sm:p-4'} ${colorClass}`}
                 onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
             >
                 {responsiveIcon}
-                <div className="ml-2.5 sm:ml-4 min-w-0">
-                    <div className="text-base sm:text-2xl font-bold leading-tight">{value}</div>
-                    <div className="text-[11px] sm:text-sm font-medium opacity-90 line-clamp-2 leading-tight">{label}</div>
+                <div className={isLite ? 'min-w-0 flex items-baseline gap-1.5' : 'ml-2.5 sm:ml-4 min-w-0'}>
+                    <div className={`${isLite ? 'text-sm font-bold leading-none' : 'text-base sm:text-2xl font-bold leading-tight'}`}>{value}</div>
+                    <div className={`${isLite ? 'text-[11px] font-medium opacity-90 leading-none truncate' : 'text-[11px] sm:text-sm font-medium opacity-90 line-clamp-2 leading-tight'}`}>{label}</div>
                 </div>
                 {hasDropdown && (
-                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-1 right-1 sm:top-2 sm:right-2 p-1 text-inherit opacity-60 hover:opacity-100">
-                        <ChevronDown size={16} className={`sm:w-5 sm:h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className={`${isLite ? '' : 'absolute top-1 right-1 sm:top-2 sm:right-2'} p-1 text-inherit opacity-60 hover:opacity-100 shrink-0`}>
+                        <ChevronDown size={16} className={`${isLite ? '' : 'sm:w-5 sm:h-5'} transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                 )}
             </div>
@@ -5933,8 +5938,10 @@ useEffect(() => {
         };
 
         return (
-            <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
+            <div className={isLite ? 'mb-4' : 'mb-6'}>
+                {/* Lite: 3-up on mobile (the cards are only 36px tall, so 2-up wasted most of
+                    the row) and 5-up from sm, with tighter gaps. Full is unchanged. */}
+                <div className={`${isLite ? 'grid grid-cols-3 sm:grid-cols-5 gap-1.5 items-start' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start'}`}>
                     {/* Column 1: Total Animals */}
                     <div className="flex flex-col gap-2">
                         <StatCard
