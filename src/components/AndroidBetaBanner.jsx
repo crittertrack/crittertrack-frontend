@@ -156,6 +156,27 @@ const AndroidBetaBanner = ({ userProfile, setUserProfile }) => {
                             and send any feedback through the Google Play Store's beta feedback option rather than
                             CritterTrack support.
                         </p>
+                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
+                            <strong>What you'll see:</strong> the page opens with a <strong>"Become a tester"</strong> button
+                            — click it, then also click <strong>"Download it on Google Play"</strong> to actually install the
+                            app on your device. Both steps are needed; the second one is the install.
+                        </p>
+                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
+                            <strong>Already have CritterTrack installed?</strong> Google will say{" "}
+                            <em>"You'll receive an update to the CritterTrack app if you already have it installed on
+                            your device."</em> That only refers to the Play Store app — it does <strong>not</strong> apply
+                            to the separate app you installed from the purple{" "}
+                            <strong>"Install CritterTrack (Web)"</strong> button on the login screen.
+                        </p>
+                        <p className="mt-1.5 text-xs font-semibold text-white leading-snug">
+                            So if you used that button, <strong>uninstall that one and install this one</strong>. They're
+                            separate apps — installing the Play Store beta does not replace or update the web app.
+                        </p>
+                        <p className="mt-1.5 text-xs text-white/90 leading-snug">
+                            <strong>Still seeing "App not available" after 24 hours?</strong> Make sure the Play Store on
+                            your device is signed in with the same Google account you entered above — the tester list is
+                            per-account, so being signed into a different one will show the same message.
+                        </p>
                         <div className="mt-2">
                             <button
                                 type="button"

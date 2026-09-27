@@ -5349,64 +5349,9 @@ useEffect(() => {
         );
     };
 
-    // Lite mode: compact row cards mirroring crittertrack-lite's own AnimalCard/Enclosures list style,
-    // in place of the full site's grid/table views (see docs/lite-web-toggle-brainstorm.md).
-    // `nested` = true for rows shown inside an Enclosure/Collection group card (white/light-gray
-    // background instead of the pink page bg), which needs a stronger border for separation —
-    // the main animals list sits directly on the pink bg and doesn't need one, matching native.
-    const renderLiteAnimalRow = (animal, nested = false) => {
-        const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-        const variety = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || animal.species;
-        let reproState = null;
-        if (animal.isPregnant) reproState = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300' };
-        else if (animal.isNursing) reproState = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300' };
-        else if (animal.isInMating) reproState = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300' };
-        else if (animal.isPlannedMating) reproState = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300' };
-        return (
-            <button
-                key={animal.id_public || animal._id}
-                onClick={() => onViewAnimal(animal)}
-                className={`w-full flex items-center gap-3 bg-white dark:bg-dark-card-bg rounded-xl p-2.5 shadow-sm text-left active:scale-[0.99] transition ${nested ? 'border-2 border-gray-300 dark:border-dark-text-muted' : ''}`}
-            >
-                <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface">
-                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate flex items-center gap-1">
-                        {animal.gender === 'Male' ? <Mars size={13} className="text-primary dark:text-dark-primary shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} className="text-accent shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} className="text-purple-500 shrink-0" /> : null}
-                        <span className="truncate">{formatAnimalDisplayName({ ...animal, name: animal.name || 'Unnamed' })}</span>
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{variety}</p>
-                    {ageStr && <p className="text-xs text-gray-400 dark:text-dark-text-muted">{animal.birthDate ? `${formatDateShort(animal.birthDate)} - ` : ''}{ageStr}</p>}
-                </div>
-                {(reproState || animal.status) && (
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        {reproState && (
-                            <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${reproState.color}`}>
-                                {reproState.label}
-                            </span>
-                        )}
-                        {animal.status && (
-                            <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary">
-                                {animal.status}
-                            </span>
-                        )}
-                    </div>
-                )}
-            </button>
-        );
-    };
-
-    const renderLiteAnimalsList = () => (
-        <div className="space-y-2">
-            {displayedAnimalsForList.length === 0 ? (
-                <div className="text-center py-16 text-gray-400 dark:text-dark-text-muted text-sm">No animals found.</div>
-            ) : (
-                displayedAnimalsForList.map(animal => renderLiteAnimalRow(animal))
-            )}
-        </div>
-    );
-
+    // Lite mode: compact horizontal rows (the shared LiteAnimalRow component) in place of the
+    // full site's grid/table views, for My Animals as well as the animals nested inside the
+    // Enclosure and Collections group cards (see docs/lite-web-toggle-brainstorm.md).
     const renderLiteEnclosuresList = () => (
         <div className="space-y-2">
             {enclosures.length === 0 ? (
@@ -5445,7 +5390,15 @@ useEffect(() => {
                                     {occupants.length === 0 ? (
                                         <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals assigned yet.</p>
                                     ) : (
-                                        occupants.map(a => renderLiteAnimalRow(a, true))
+                                        occupants.map(a => (
+                                            <LiteAnimalRow
+                                                key={a.id_public || a._id}
+                                                animal={a}
+                                                onViewAnimal={onViewAnimal}
+                                                toggleAnimalOwned={toggleAnimalOwned}
+                                                onUpdateAnimal={onUpdateAnimal}
+                                            />
+                                        ))
                                     )}
                                 </div>
                             )}
@@ -5486,7 +5439,15 @@ useEffect(() => {
                                         {colAnimals.length === 0 ? (
                                             <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals in this collection yet.</p>
                                         ) : (
-                                            colAnimals.map(a => renderLiteAnimalRow(a, true))
+                                            colAnimals.map(a => (
+                                                <LiteAnimalRow
+                                                    key={a.id_public || a._id}
+                                                    animal={a}
+                                                    onViewAnimal={onViewAnimal}
+                                                    toggleAnimalOwned={toggleAnimalOwned}
+                                                    onUpdateAnimal={onUpdateAnimal}
+                                                />
+                                            ))
                                         )}
                                     </div>
                                 )}
@@ -6562,7 +6523,9 @@ useEffect(() => {
                                 <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
                             ))}
                         </select>
-                        {breedingLineDefs && breedingLineDefs.length > 0 && (
+                        {/* Breeding-line filter is hidden in Lite: the "Lines" column it drives is
+                            Full-only, and Lite's rows are too narrow to show per-animal lines. */}
+                        {!isLite && breedingLineDefs && breedingLineDefs.length > 0 && (
                             <select
                                 value={blFilter.length > 0 ? blFilter[0] : ''}
                                 onChange={(e) => {
@@ -6599,7 +6562,7 @@ useEffect(() => {
                     </div>
             </div>
             )}
-             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
+             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? (isLite ? renderLiteEnclosuresList() : renderEnclosuresTab()) : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? (isLite ? renderLiteCollectionsList() : renderCollectionsView()) : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : isLite ? (
                 // Lite: flat horizontal rows instead of the species-grouped card grid.
