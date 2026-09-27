@@ -6301,8 +6301,13 @@ useEffect(() => {
             <div className={'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
                 {/* Lite mode: header row itself becomes the gradient bar mirroring crittertrack-lite's
                     TopBar (from-accent to-primary), with title/info/refresh/action buttons all in one row. */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4">
-                    <div className="flex items-center gap-2 min-w-0 flex-wrap w-full sm:w-auto sm:flex-1">
+                {/* One row at every width: the identity group takes the slack (flex-1 min-w-0) and
+                    the action group stays at its natural width (shrink-0). Previously this was
+                    flex-col below sm with w-full on both children, which stacked the action
+                    group onto a second row by construction — so Add Animal could never share the
+                    title's row on mobile no matter how many other controls were removed. */}
+                <div className="flex flex-row items-center w-full gap-2 min-w-0 mb-4">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                         {true && (
                             <>
                                 <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
@@ -6355,7 +6360,7 @@ useEffect(() => {
                         )}
                     </div>
                     {/* Right-aligned action buttons */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end w-full sm:w-auto">
+                    <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap justify-end shrink-0 min-w-0">
                         {/* Mobile: single tappable chip, pushed left via mr-auto so action buttons stay right-aligned on the same row */}
                         {isListLikeView && hasActiveFilters && (
                             <button
