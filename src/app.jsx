@@ -1994,7 +1994,7 @@ const App = () => {
 
                             <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
-                            {/* <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} /> */}
+                            <LiteModeToggle userProfile={userProfile} setUserProfile={setUserProfile} showModalMessage={showModalMessage} />
 
                             <button
                                 onClick={() => {
