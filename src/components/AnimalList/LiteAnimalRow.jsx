@@ -75,11 +75,13 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
     return (
         <div
             onClick={() => onViewAnimal(animal)}
-            className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-dark-card-bg border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition cursor-pointer"
+            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-3 py-2 bg-white dark:bg-dark-card-bg border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition cursor-pointer"
         >
-            {/* LEFT — image + identity + variety + birthdate/age. min-w-0 + truncate keeps a long
-                name/variety from pushing the middle column out of alignment. */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+            {/* LEFT — on mobile this is just the image + name line, and the variety/date/pills
+                below become full-width stacked rows (see the sm:hidden block further down). On
+                desktop it regroups into the single identity block it has always been.
+                min-w-0 + truncate keeps a long name/variety from pushing the middle column. */}
+            <div className="flex items-center gap-3 min-w-0 sm:flex-1">
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-surface flex-shrink-0">
                     <AnimalImage src={animal.imageUrl || animal.photoUrl} alt="" iconSize={20} FallbackIcon={CircleDot} />
                 </div>
@@ -94,13 +96,38 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                         {animal.gender === 'Male' && <Mars size={13} className="text-blue-500 shrink-0" />}
                         {animal.gender === 'Female' && <Venus size={13} className="text-pink-500 shrink-0" />}
                     </div>
+                    {/* Desktop only — hidden on mobile where these are stacked full-width below. */}
                     {varietyOf(animal) && (
-                        <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{varietyOf(animal)}</p>
+                        <p className="hidden sm:block text-xs text-gray-500 dark:text-dark-text-muted truncate">{varietyOf(animal)}</p>
                     )}
-                    <p className="text-xs text-gray-400 dark:text-dark-text-muted">
+                    <p className="hidden sm:block text-xs text-gray-400 dark:text-dark-text-muted">
                         {animal.birthDate ? formatLocalDate(animal.birthDate) : 'No birthdate'}
                         {age && <span> · {age}</span>}
                     </p>
+                </div>
+            </div>
+
+            {/* MOBILE-ONLY STACK — one line per piece of info, matching the layout in crittertrack-lite:
+                variety, then birthdate/age, then the status pills + CTC ID, then the toggles.
+                Everything here is sm:hidden; from sm up the three columns below take over. */}
+            <div className="sm:hidden flex flex-col gap-1 pl-[3.75rem] -mt-1">
+                {varietyOf(animal) && (
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{varietyOf(animal)}</p>
+                )}
+                <p className="text-xs text-gray-400 dark:text-dark-text-muted">
+                    {animal.birthDate ? formatLocalDate(animal.birthDate) : 'No birthdate'}
+                    {age && <span> · {age}</span>}
+                </p>
+                <div className="flex flex-wrap items-center gap-1">
+                    {reproState && (
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${reproState.color}`}>
+                            {reproState.label}
+                        </span>
+                    )}
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary">
+                        {animal.status || '—'}
+                    </span>
+                    <span className="text-[10px] font-mono text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
                 </div>
             </div>
 
@@ -121,11 +148,13 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                 <span className="text-[10px] font-mono text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
             </div>
 
-            {/* RIGHT — owned + public toggles. Shares flex-1 with the left column so the middle
-                block above lands at the centre. The inner box is a fixed width with the buttons
-                right-aligned, so "Unowned" vs "Owned" doesn't shift the row's right edge. */}
+            {/* RIGHT — owned + public toggles. On mobile these get their own full-width row at the
+                bottom of the card; from sm up they sit in a column beside the identity block and
+                share flex-1 with it so the MIDDLE block lands at the horizontal centre. The inner
+                box is a fixed width with the buttons right-aligned, so "Unowned" vs "Owned" doesn't
+                shift the row's right edge. */}
             <div className="flex-1 min-w-0 flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-end gap-1.5 w-28 sm:w-40 shrink-0">
+              <div className="flex items-center justify-end gap-1.5 w-full sm:w-40 shrink-0">
                 <button
                     onClick={() => toggleAnimalOwned(animal.id_public, !animal.isOwned)}
                     className={`px-2 py-1 text-[11px] font-semibold rounded-lg transition ${
