@@ -752,9 +752,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
             </div>
 
-            {/* Profile Header â€¢ two equal columns */}
+            {/* Profile Header • two equal columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b dark:border-dark-text">
-                {/* Left column: name â€¢ avatar â€¢ ctu â€¢ member since â€¢ country â€¢ centered */}
+                {/* Left column: name • avatar • ctu • member since • country • centered */}
                 <div className="flex flex-col items-center gap-1.5 text-center">
                     <div className="flex items-center justify-center flex-wrap">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text leading-tight inline">{displayName}</h2>
@@ -829,7 +829,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
             </div>
 
-            {/* Email + website + social â€¢ full width under both columns */}
+            {/* Email + website + social • full width under both columns */}
             {((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
              ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ||
              ((freshProfile?.showSocialMediaURL ?? profile.showSocialMediaURL) && (freshProfile?.socialMediaURL || profile.socialMediaURL)) ? (
@@ -1289,7 +1289,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             )}
                         </div>
                         
-                        {/* Second line: Sire â€¢ Dam mini-cards */}
+                        {/* Second line: Sire • Dam mini-cards */}
                         {(l.sireAnimal || l.damAnimal) && (
                             <div className="flex items-center gap-2">
                                 <ParentMiniCard role="Sire" animal={l.sireAnimal} />

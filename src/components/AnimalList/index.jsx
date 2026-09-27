@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { resolveLiteMode } from '../../utils/liteMode';
+import LiteAnimalRow from './LiteAnimalRow';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
@@ -6449,9 +6450,10 @@ useEffect(() => {
                 // Filter bar
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg">
                     <div className="flex flex-wrap items-center gap-2">
-                        {/* Cards/List toggle has no effect in Lite mode (it always renders its own fixed
-                            row layout), so showing it there would just be a dead control. */}
-                        {true && (
+                        {/* Cards/List toggle has no effect in Lite mode — it always renders its own
+                            horizontal row layout (LiteAnimalRow), so showing it there would just be
+                            a dead control. Hidden entirely in Lite. */}
+                        {!isLite && (
                         <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
                             <button onClick={() => {
                                 if (isCollectionsView) { setCollectionsViewMode('cards'); } else {
@@ -6599,7 +6601,20 @@ useEffect(() => {
             )}
              {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} onNodeClick={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
-            ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
+            ) : displayedAnimalCount === 0 ? ( <div /> ) : isLite ? (
+                // Lite: flat horizontal rows instead of the species-grouped card grid.
+                <div className="space-y-2">
+                    {Object.values(groupedAnimals).flat().map((animal) => (
+                        <LiteAnimalRow
+                            key={animal.id_public || animal._id}
+                            animal={animal}
+                            onViewAnimal={onViewAnimal}
+                            toggleAnimalOwned={toggleAnimalOwned}
+                            onUpdateAnimal={onUpdateAnimal}
+                        />
+                    ))}
+                </div>
+            ) : myAnimalsViewMode === 'list' ? (
                 <div className="relative">
                     {showColumnsDropdown && (
                         <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white dark:bg-dark-card-bg border rounded-lg shadow-lg p-3 z-20 w-48">

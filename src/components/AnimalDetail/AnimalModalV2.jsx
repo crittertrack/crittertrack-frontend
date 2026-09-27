@@ -340,9 +340,19 @@ useEffect(() => {
     // Lite variant; the rest of this modal is identical to the Full frontend.
     const isLite = resolveLiteMode(userProfile);
 
-    // `tabs` may be ids ('gallery') or full tab objects; either way it selects from ALL_TABS.
+    // `tabs` may be ids ('gallery') or objects ({ id, label }). The caller's ORDER wins — mapping
+    // over the override rather than filtering ALL_TABS is what lets Lite put Records before
+    // Gallery. Omit the prop and the full tab set shows in its natural order.
     const TABS = tabsOverride
-        ? ALL_TABS.filter((t) => tabsOverride.some((id) => (typeof id === 'string' ? id : id?.id) === t.id))
+        ? tabsOverride
+            .map((o) => {
+                const id = typeof o === 'string' ? o : o?.id;
+                const found = ALL_TABS.find((t) => t.id === id);
+                if (!found) return null;
+                const label = typeof o === 'string' ? null : o.label;
+                return label ? { ...found, label } : found;
+            })
+            .filter(Boolean)
         : ALL_TABS;
 
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
@@ -462,7 +472,7 @@ useEffect(() => {
                                     {!isHeaderCollapsed && (
                                         <>
                                             <p className="text-xs text-gray-700 dark:text-dark-text-secondary">
-                                                {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' â€¢ ')}
+                                                {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
                                             </p>
                                             <div className="flex items-center gap-2 mt-2 sm:mt-3 flex-wrap">
                                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text'}`}>
@@ -689,7 +699,7 @@ useEffect(() => {
                                                                 animal.eartagNumber,
                                                                 ...parseJsonArrayField(animal.identifiers).map(id => id.value)
                                                             ];
-                                                            const idString = idParts.filter(Boolean).join(' â€¢ ');
+                                                            const idString = idParts.filter(Boolean).join(' • ');
                                                             const linesComponent = lines.length > 0 ? (
                                                                 <span className="flex items-center gap-1">
                                                                     {lines.map(line => (
@@ -701,7 +711,7 @@ useEffect(() => {
                                                             return (
                                                                 <>
                                                                     {linesComponent}
-                                                                    {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">â€¢</span>}
+                                                                    {linesComponent && idComponent && <span className="text-gray-300 dark:text-dark-border mx-1">•</span>}
                                                                     {idComponent}
                                                                 </>
                                                             );
@@ -1192,7 +1202,7 @@ useEffect(() => {
                                                                 litter.femaleCount != null ||
                                                                 litter.unknownCount != null) && (
                                                                 <span className="text-gray-400 dark:text-dark-text-muted">
-                                                                    â€¢
+                                                                    •
                                                                 </span>
                                                             )}
 
@@ -1262,7 +1272,7 @@ useEffect(() => {
                                                 </span>
                                             ) : (
                                                 <span className="text-xs text-gray-400 dark:text-dark-text-muted">
-                                                    â€¢
+                                                    •
                                                 </span>
                                             )}
                                         </div>
@@ -1305,7 +1315,7 @@ useEffect(() => {
                                                         {litter.birthDate &&
                                                             litterAge(litter.birthDate) && (
                                                                 <span className="ml-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
-                                                                    â€¢ {litterAge(litter.birthDate)}
+                                                                    • {litterAge(litter.birthDate)}
                                                                 </span>
                                                             )}
                                                     </span>
@@ -1320,7 +1330,7 @@ useEffect(() => {
                                             <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">
                                                 {mate
                                                     ? formatAnimalDisplayName(mate)
-                                                    : 'â€¢'}
+                                                    : '•'}
                                             </span>
                                         </div>
 
@@ -1331,7 +1341,7 @@ useEffect(() => {
                                             <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
                                                 {litter.inbreedingCoefficient != null
                                                     ? `${litter.inbreedingCoefficient.toFixed(2)}%`
-                                                    : 'â€¢'}
+                                                    : '•'}
                                             </span>
                                         </div>
 
@@ -1342,7 +1352,7 @@ useEffect(() => {
                                                         Due
                                                     </span>
                                                     <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
-                                                        {formatDate(litter.expectedDueDate) || 'â€¢'}
+                                                        {formatDate(litter.expectedDueDate) || '•'}
                                                     </span>
                                                 </>
                                             ) : lIsMated ? (
@@ -1464,7 +1474,7 @@ useEffect(() => {
                                                     </div>
                                                 ) : (
                                                     <div className="text-base font-medium text-gray-300 dark:text-dark-border">
-                                                        â€¢
+                                                        •
                                                     </div>
                                                 )}
                                             </div>
@@ -1851,7 +1861,7 @@ useEffect(() => {
                                                                 >
                                                                     <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
                                                                         <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-2xl">
-                                                                            â€¢
+                                                                            •
                                                                         </div>
                                                                     </div>
 
@@ -1872,7 +1882,7 @@ useEffect(() => {
                                                                     <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
                                                                         <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted">
                                                                             {offspring.gender ||
-                                                                                'â€¢'}
+                                                                                '•'}
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -2082,7 +2092,7 @@ useEffect(() => {
                                             <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
                                                 {formatDate(
                                                     litter.birthDate
-                                                ) || 'â€¢'}
+                                                ) || '•'}
                                             </span>
                                         </div>
 
@@ -2095,7 +2105,7 @@ useEffect(() => {
                                                     ? formatAnimalDisplayName(
                                                           mate
                                                       )
-                                                    : 'â€¢'}
+                                                    : '•'}
                                             </span>
                                         </div>
 
@@ -2106,7 +2116,7 @@ useEffect(() => {
                                             <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
                                                 {coi != null
                                                     ? `${coi.toFixed(2)}%`
-                                                    : 'â€¢'}
+                                                    : '•'}
                                             </span>
                                         </div>
 
@@ -2169,7 +2179,7 @@ useEffect(() => {
                                                     </div>
                                                 ) : (
                                                     <div className="text-sm text-gray-400 dark:text-dark-text-muted italic">
-                                                        â€¢
+                                                        •
                                                     </div>
                                                 )}
                                             </div>
@@ -2185,7 +2195,7 @@ useEffect(() => {
                                                     </div>
                                                 ) : (
                                                     <div className="text-base font-medium text-gray-300 dark:text-dark-border">
-                                                        â€¢
+                                                        •
                                                     </div>
                                                 )}
                                             </div>
@@ -2238,7 +2248,7 @@ useEffect(() => {
                                                 </div>
                                             ) : (
                                                 <div className="text-base font-medium text-gray-300 dark:text-dark-border">
-                                                    â€¢
+                                                    •
                                                 </div>
                                             )}
                                         </div>
