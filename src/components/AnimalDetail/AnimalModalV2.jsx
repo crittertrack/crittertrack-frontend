@@ -2545,7 +2545,6 @@ useEffect(() => {
                                     animal={animal}
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
-                                    onUpdateAnimal={onUpdateAnimal}
                                 />
                             ) : (
                                 <RecordsTabContent animal={animal} API_BASE_URL={API_BASE_URL} />

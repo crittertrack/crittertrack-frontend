@@ -1528,7 +1528,10 @@ const AnimalFormModalV2 = ({
     // Optional: called with (species, { tabs, sections }) right after a Customize-tab hidden
     // sections save succeeds, so the parent can update its own userProfile state and avoid a
     // stale Customize tab if this modal (or another instance) is reopened before a full profile refetch.
-    onHiddenSectionsUpdate
+    onHiddenSectionsUpdate,
+    // Optional: trims the tab bar. Lite passes ['dashboard','gallery','pedigree','records'] so
+    // its edit form mirrors its trimmed view modal. Omit it and the full 11-tab form shows.
+    tabs: tabsOverride
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
@@ -3895,10 +3898,20 @@ const AnimalFormModalV2 = ({
     ];
     // Tabs the user chose to hide for this species stay out of the tab bar entirely; Customize is
     // always appended last so there's always a way back in to re-enable them.
+    // `tabs` (optional) trims further and may relabel. Lite passes Dashboard/Gallery/Pedigree
+    // plus the health tab relabelled 'Records' — that's where the vet-visit/medication/
+    // vaccination/deworming/condition/allergy editors already live, so Lite reuses them rather
+    // than duplicating the UI. See LiteAnimalFormModal.jsx.
+    const tabOverrides = (tabsOverride || []).map(t => (typeof t === 'string' ? { id: t } : t));
     const visibleTabs = [
         ...TABS.filter(tab => MANDATORY_TABS.includes(tab.id) || !isTabHidden(tab.id)),
         { id: 'customize', label: 'Customize', icon: Settings },
-    ];
+    ]
+        .filter(t => !tabsOverride || tabOverrides.some(o => o.id === t.id))
+        .map(t => {
+            const o = tabOverrides.find(x => x.id === t.id);
+            return o && o.label ? { ...t, label: o.label } : t;
+        });
 
     // Species template: prefer the real Species collection category (covers custom species too),
     // falling back to the static category map for species not present in speciesOptions yet.

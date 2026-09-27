@@ -1834,14 +1834,14 @@ const App = () => {
                 <div className="hidden md:flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     
-                    <nav className="flex space-x-3">
+                    <nav className={`flex space-x-3 ${isLite ? 'flex-1' : ''}`}>
                         {true && (
                         <>
-                        <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                        <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${isLite ? 'flex-1' : ''} ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
-                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${isLite ? 'flex-1' : ''} ${currentView === 'litters' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
@@ -2081,7 +2081,7 @@ const App = () => {
                     {/* Third & Fourth rows: legacy nav — hidden entirely in Lite mode, replaced by LiteBottomNav */}
                     {true && (
                     <>
-                    <nav className="grid grid-cols-4 gap-1 mb-1">
+                    <nav className={`grid grid-cols-${isLite ? '2' : '4'} gap-1 mb-1`}>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
@@ -2102,8 +2102,7 @@ const App = () => {
                         </>)}
                     </nav>
 
-                    <nav className="grid grid-cols-4 gap-1">
-                        {!isLite && (<>
+                    {!isLite && (<nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Calendar size={18} className="mb-0.5" />
                             <span>Calendar</span>
@@ -2130,8 +2129,7 @@ const App = () => {
                                 <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
                             )}
                         </div>
-                        </>)}
-                    </nav>
+                    </nav>)}
                     </>
                     )}
                 </div>
@@ -2355,7 +2353,7 @@ const App = () => {
             {animalToEdit && (
                 (() => {
                     const iCurrentlyOwn = animalToEdit.creatorId_public === userProfile?.id_public;
-                    const AnimalFormComponent = AnimalFormModalV2;
+                    const AnimalFormComponent = isLite ? LiteAnimalFormModal : AnimalFormModalV2;
                     return (
                         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                             {iCurrentlyOwn ? (
