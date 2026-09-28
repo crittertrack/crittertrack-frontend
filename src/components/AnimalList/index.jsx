@@ -2844,17 +2844,22 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Birthdate center-top - only show if not in selection mode */}
+                    {/* Birthdate top-centre - identical classes to the public card (top-2, text-xs,
+                        px-2). This previously used text-[10px] sm:text-xs with top-1 sm:top-2 and
+                        px-1 sm:px-2, so the badge rendered smaller and tighter on mobile than the
+                        public card's did. */}
                     {birth && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-1 sm:px-2 py-0.5 rounded">
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-2 py-0.5 rounded">
                             {birth}
                         </div>
                     )}
 
-                    {/* Gender badge top-right */}
+                    {/* Gender badge top-right - fixed 16px icons and the public card's exact
+                        colours. This previously used responsive w-3/w-4 sizing and different
+                        greys/purples, so it rendered smaller on mobile than the public card's. */}
                     {animal.gender && (
-                        <div className={`absolute top-1 sm:top-2 right-1 sm:right-2`} title={animal.gender}>
-                            {animal.gender === 'Male' ? <Mars className="w-3 h-3 sm:w-4 sm:h-4 text-primary dark:text-primary" strokeWidth={2.5} /> : animal.gender === 'Female' ? <Venus className="w-3 h-3 sm:w-4 sm:h-4 text-accent dark:text-accent" strokeWidth={2.5} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 dark:text-purple-400" strokeWidth={2.5} /> : <Circle className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" strokeWidth={2.5} />}
+                        <div className="absolute top-2 right-2" title={animal.gender}>
+                            {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500 dark:text-dark-text-muted" />}
                         </div>
                     )}
 
@@ -2866,7 +2871,7 @@ useEffect(() => {
                         the same explicit max-w-32 / max-h-28 lengths (percentages like max-h-full
                         resolve to none against an auto-height inline-block and silently do
                         nothing, which let portrait photos overflow). overflow-hidden backstops it. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28 shrink-0 overflow-hidden">
+                    <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
                         <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
@@ -2929,8 +2934,8 @@ useEffect(() => {
                             box, so it aligns to the start of its line box. The inner div is itself a
                             flex row with justify-center so the name+flag wrapper is centred as a
                             flex item, which keeps one- and two-line names both centred. */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 flex items-end justify-center">
-    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center">
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
@@ -2970,7 +2975,7 @@ useEffect(() => {
                     {/* Owned/Public toggles (left) and CTC ID (right). Sits directly above the
                         status bar, which carries the mt-auto that pushes the pair to the card's
                         bottom edge. */}
-                    <div className="w-full px-1.5 sm:px-2 pb-1 sm:pb-1.5 flex justify-between items-center shrink-0">
+                    <div className="w-full px-2 pb-2 flex justify-between items-center shrink-0">
                         {/* Privacy and Owned toggles bottom-left */}
                         {!isSelectable && !hideControls && (
                             <div className="flex items-center gap-1">
@@ -3027,7 +3032,7 @@ useEffect(() => {
                     </div>
                     {/* Status bar at bottom */}
                     {animal.status === 'Deceased' ? (
-                        <DeceasedBanner size="sm" />
+                        <DeceasedBanner />
                     ) : (
                         <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
                             <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">
