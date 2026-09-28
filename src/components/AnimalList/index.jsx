@@ -2876,31 +2876,6 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Reproductive state pill, in its own row directly above the image. It is the
-                        same fixed h-6 (24px) row it always was - only its position in the card
-                        changed - so the card's height is unchanged and a card with no pill still
-                        occupies the identical 24px, keeping every card the same height. */}
-                    <div className="relative w-full flex justify-center items-center h-6 px-1 shrink-0">
-                        {(() => {
-                            // Determine reproductive state to display (prioritized)
-                            let state = null;
-                            if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
-                            } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
-                            } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
-                            } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
-                            }
-                            return state ? (
-                                <span className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
-                                    {state.icon} {state.label}
-                                </span>
-                            ) : null;
-                        })()}
-                    </div>
-
                     {/* Photo. mt-0.5/mb-1 keep the vertical budget tight - the public card's mt-6
                         is dead space we no longer need because the birthdate is out of flow.
                         The tile is w-24 sm:w-28 md:w-32 to match the card's restored responsive
@@ -3021,6 +2996,32 @@ useEffect(() => {
                             whether or not the toggles to its left are shown. */}
                         <div className="h-5 flex items-center text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                     </div>
+                    {/* Reproductive state pill: the status bar's second row, directly above the
+                        status text. Sitting at the very bottom means a card with no pill reads as a
+                        clean two-part footer rather than a gap floating between the image and the
+                        name. The h-6 is the same fixed row it always was, just relocated, so the
+                        card's total height is unchanged. */}
+                    <div className="w-full h-6 flex justify-center items-center bg-gray-100 dark:bg-dark-surface border-t border-gray-300 dark:border-dark-border shrink-0">
+                        {(() => {
+                            // Determine reproductive state to display (prioritized)
+                            let state = null;
+                            if (animal.isPregnant) {
+                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
+                            } else if (animal.isNursing) {
+                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
+                            } else if (animal.isInMating) {
+                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
+                            } else if (animal.isPlannedMating) {
+                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
+                            }
+                            return state ? (
+                                <span className={`text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
+                                    {state.icon} {state.label}
+                                </span>
+                            ) : null;
+                        })()}
+                    </div>
+
                     {/* Status bar at bottom */}
                     {animal.status === 'Deceased' ? (
                         <DeceasedBanner />
