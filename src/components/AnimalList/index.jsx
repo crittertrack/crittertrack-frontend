@@ -6087,9 +6087,12 @@ useEffect(() => {
                         )}
                     </div>
 
-                    {/* Column 5: Needs Attention — mostly Feeding/Health/Reproduction alerts, dropped tabs in Lite mode */}
+                    {/* Column 5: Needs Attention — mostly Feeding/Health/Reproduction alerts, dropped tabs in Lite mode.
+                        The whole column (not just its StatCard) is hidden on mobile: an empty wrapper div
+                        is still a grid item, and with no order class it defaulted to 0 — sorting ahead of
+                        Total Animals' order-1 and taking the first grid cell on mobile. */}
                     {true && (
-                    <div className="flex flex-col gap-2">
+                    <div className="hidden sm:flex flex-col gap-2 order-5 sm:order-none">
                         {(() => {
                             const totalAttention = feedingCareDueDashboard.length + generalTaskDue.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
                             return (
