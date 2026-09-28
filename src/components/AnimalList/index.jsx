@@ -2840,32 +2840,23 @@ useEffect(() => {
                     {/* Transfer icon now lives in the status bar (see below), freeing the card's
                         top-left corner now that the birthdate/gender/repro icons share a row. */}
 
-                    {/* Breeding line diamonds, absolute top-left, stacked vertically so they run
-                        down from the top rather than across. A column suits the narrow top-left
-                        corner: horizontally they either wrapped unpredictably at max-w-[5rem] or
-                        ran into the centred birthdate. Vertical costs no card height either way,
-                        which is what keeps the card matching the public card's height. */}
-                    {!hideBreedingLines && (() => {
-                        const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
-                        if (activeLines.length === 0) return null;
-                        return (
-                            <div className="absolute top-1.5 left-1.5 z-10 flex flex-col items-start gap-0.5" onClick={(e) => e.stopPropagation()}>
-                                {activeLines.map(l => (
-                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-xs leading-none">{breedingLineGlyph(l.color)}</span>
-                                ))}
-                            </div>
-                        );
-                    })()}
+                    {/* Breeding line diamonds. These sit alongside the LEFT edge of the image rather
+                        than in the card's top-left corner, which the birthdate now occupies. They
+                        are absolutely positioned within the photo band (which is relative) so they
+                        hug the image and cost no card height - and they grow downward, so an animal
+                        with more lines simply gets a longer column beside its photo. */}
 
-                    {/* Birthdate top-centre. The gender icon sits absolute top-right and the
-                        breeding diamonds absolute top-left, so the birthdate is the only thing in
-                        this row and can sit centred on its own. */}
-                    <div className="w-full flex items-center justify-center px-2 pt-0.5 shrink-0">
-                        {birth && !isSelectable && (
-                            <span className="text-xs text-gray-600 dark:text-dark-text-secondary">{birth}</span>
-                        )}
-                    </div>
+                    {/* Birthdate, absolute hard against the top of the card. It is out of flow, so
+                        the row below is only a spacer that keeps the photo where it was - the
+                        card's height is unchanged. */}
+                    {birth && !isSelectable && (
+                        <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 z-10 text-xs text-gray-600 dark:text-dark-text-secondary">
+                            {birth}
+                        </div>
+                    )}
+
+                    {/* Spacer reserving the birthdate's row. */}
+                    <div className="w-full h-5 shrink-0" />
 
                     {/* Gender icon, absolute top-right. */}
                     {animal.gender && (
@@ -2885,7 +2876,7 @@ useEffect(() => {
                         slack shows up as white space above and below the image. A shorter band
                         means less of that dead area. mb-0.5 and the pill's -mt-1 close the rest
                         of the gap, and both are free - the card's total height is unchanged. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
+                    <div className="relative flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
                         <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
@@ -2902,18 +2893,49 @@ useEffect(() => {
                                 </>
                             )}
                         </div>
+                        {/* Breeding line diamonds, hugging the image's left edge inside the band and
+                            growing downward. Absolute, so they add no card height. */}
+                        {!hideBreedingLines && (() => {
+                            const assignedIds = animalBreedingLines[animal.id_public] || [];
+                            const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
+                            if (activeLines.length === 0) return null;
+                            return (
+                                <div className="absolute left-0.5 top-0 z-10 flex flex-col items-start gap-0.5" onClick={(e) => e.stopPropagation()}>
+                                    {activeLines.map(l => (
+                                        <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-xs leading-none">{breedingLineGlyph(l.color)}</span>
+                                    ))}
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* Info block: just the name, for now. flex-grow so it takes the card's spare
                         height, matching the public card, whose name block does the same. */}
                     <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
 
-                    {/* Reproductive state pill, above the name. Fixed height (h-6) so the card is the
-                        same height whether or not a pill is present.
-                        -mt-1 lifts the pill 4px toward the photo. The slack is above the pill, not
-                        below it, so this moves existing space rather than adding any - the card's
-                        total height is unchanged, and the gap under the image shrinks to match the
-                        one above the name. */}
+                    {/* Name first, then the reproductive pill below it.
+                        The name row is flex-1 (not flex-grow): it soaks up the block's spare
+                        height, and the block's justify-center then centres the name+pill pair as a
+                        unit. With no pill, the name is the only child and sits vertically centred
+                        in that space on its own. */}
+                        {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
+                            box, so it aligns to the start of its line box. The wrapper carries
+                            text-center so the name+flag box is centred as inline content. */}
+<div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-center justify-center text-center">
+    <div className="text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+        <AnimalNameWithFlag
+            animal={animal}
+            wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
+            textClassName="break-words leading-tight text-center"
+            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+        />
+    </div>
+</div>
+
+                    {/* Reproductive state pill, below the name. Fixed height (h-6) so the card is
+                        the same height whether or not a pill is present - an animal with no
+                        reproductive state gets the same layout with just the name, centred.
+                        -mt-1 keeps it tucked up toward the name. */}
                     <div className="relative w-full flex justify-center items-center h-6 px-1 -mt-1 shrink-0">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
@@ -2935,39 +2957,11 @@ useEffect(() => {
                         })()}
                     </div>
 
-                    {/* Prefix / Name under image. flex-grow + justify-center mirrors the public
-                        card exactly, so a one-line name leaves the spare space in this block and a
-                        two-line name simply grows the card - the public card is min-h-56, not a
-                        fixed height, so the two stay the same.
-                        The name is deliberately larger than the reproductive pill above it
-                        (text-xs/text-sm vs the pill's text-[10px]/sm:text-xs); they were the same
-                        size on mobile, which read oddly with the pill outweighing the name.
-                        pt-1 opens the gap between the pill and the name. The pill's own h-6 row
-                        is already completely filled by the pill, so the space has to come from
-                        this side. It comes out of the flex-grow block's slack, so the card does
-                        not grow. */}
-                        {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
-                            box, so it aligns to the start of its line box. The wrapper carries
-                            text-center so the name+flag box is centred as inline content. */}
-<div className="w-full px-1 sm:px-2 pt-1 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
-    <div className="text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
-        <AnimalNameWithFlag
-            animal={animal}
-            wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
-            textClassName="break-words leading-tight text-center"
-            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
-        />
-    </div>
-</div>
-
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* Breeding line diamonds: temporarily not rendered.
-                        The card is now sized to match the public card exactly, and this row's h-5
-                        (20px) is the one thing that would push it back over that budget. The
-                        reproductive state moved into the top row and the photo lost its mt-6,
-                        which together paid for the pill's removal - but not for this row as well.
-                        Left out until we pick a placement that costs no height. */}
+                    {/* Breeding line diamonds now render inside the photo band, absolutely
+                        positioned along the image's left edge (see above), so they cost no card
+                        height here. */}
                     </div>
 
                     {/* Management action buttons slot */}
