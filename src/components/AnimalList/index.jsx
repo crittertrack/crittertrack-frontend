@@ -2838,15 +2838,26 @@ useEffect(() => {
                         </div>
                     )}
                     {/* Transfer icon now lives in the status bar (see below), freeing the card's
-                        top-left corner now that the birthdate/gender/repro icons share a row. */}
+                        top-left corner for the breeding line diamonds. */}
 
-                    {/* Breeding line diamonds. These sit alongside the LEFT edge of the image rather
-                        than in the card's top-left corner, which the birthdate now occupies. They
-                        are absolutely positioned within the photo band (which is relative) so they
-                        hug the image and cost no card height - and they grow downward, so an animal
-                        with more lines simply gets a longer column beside its photo. */}
+                    {/* Breeding line diamonds, absolute top-left of the card, stacked vertically so
+                        they run down from the corner. The birthdate is centred and the gender icon
+                        is top-right, so this corner is free; being absolute, it costs no card
+                        height. */}
+                    {!hideBreedingLines && (() => {
+                        const assignedIds = animalBreedingLines[animal.id_public] || [];
+                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
+                        if (activeLines.length === 0) return null;
+                        return (
+                            <div className="absolute top-2.5 left-1.5 z-10 flex flex-col items-start gap-0.5" onClick={(e) => e.stopPropagation()}>
+                                {activeLines.map(l => (
+                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-xs leading-none">{breedingLineGlyph(l.color)}</span>
+                                ))}
+                            </div>
+                        );
+                    })()}
 
-                    {/* Birthdate, absolute hard against the top of the card. It is out of flow, so
+                    {/* Birthdate, absolute and centred at the top of the card. It is out of flow, so
                         the row below is only a spacer that keeps the photo where it was - the
                         card's height is unchanged. */}
                     {birth && !isSelectable && (
@@ -2876,7 +2887,7 @@ useEffect(() => {
                         slack shows up as white space above and below the image. A shorter band
                         means less of that dead area. mb-0.5 and the pill's -mt-1 close the rest
                         of the gap, and both are free - the card's total height is unchanged. */}
-                    <div className="relative flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
+                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
                         <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
@@ -2893,20 +2904,6 @@ useEffect(() => {
                                 </>
                             )}
                         </div>
-                        {/* Breeding line diamonds, hugging the image's left edge inside the band and
-                            growing downward. Absolute, so they add no card height. */}
-                        {!hideBreedingLines && (() => {
-                            const assignedIds = animalBreedingLines[animal.id_public] || [];
-                            const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
-                            if (activeLines.length === 0) return null;
-                            return (
-                                <div className="absolute left-0.5 top-0 z-10 flex flex-col items-start gap-0.5" onClick={(e) => e.stopPropagation()}>
-                                    {activeLines.map(l => (
-                                        <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-xs leading-none">{breedingLineGlyph(l.color)}</span>
-                                    ))}
-                                </div>
-                            );
-                        })()}
                     </div>
 
                     {/* Info block: just the name, for now. flex-grow so it takes the card's spare
