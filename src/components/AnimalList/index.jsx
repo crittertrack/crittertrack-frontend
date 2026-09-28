@@ -2837,41 +2837,45 @@ useEffect(() => {
                             />
                         </div>
                     )}
-                    {/* Transfer icon top-left */}
-                    {animal.originalCreatorId && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Received Animal">
-                            <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                        </div>
-                    )}
+                    {/* Transfer icon now lives in the status bar (see below), freeing the card's
+                        top-left corner now that the birthdate/gender/repro icons share a row. */}
 
-                    {/* Birthdate top-centre - identical classes to the public card (top-2, text-xs,
-                        px-2). This previously used text-[10px] sm:text-xs with top-1 sm:top-2 and
-                        px-1 sm:px-2, so the badge rendered smaller and tighter on mobile than the
-                        public card's did. */}
-                    {birth && !isSelectable && (
-                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-2 py-0.5 rounded">
-                            {birth}
-                        </div>
-                    )}
+                    {/* Top row: reproductive state icon | birthdate | gender icon.
+                        These three now share a single row in normal flow rather than floating
+                        independently. The photo's old mt-6 existed only to clear the absolutely
+                        positioned birthdate, so it is gone - the row does that job and the card
+                        gets shorter instead of taller. */}
+                    <div className="w-full flex items-center justify-center gap-2 px-2 pt-1 shrink-0">
+                        {/* Reproductive state icon (compact stand-in for the old labelled pill).
+                            Distinct icon per state, with the full label on the title attribute. */}
+                        {(() => {
+                            let state = null;
+                            if (animal.isPregnant) {
+                                state = { label: 'Pregnant', color: 'text-pink-600 dark:text-pink-400', icon: <ScanHeart size={14} className="fill-current" /> };
+                            } else if (animal.isNursing) {
+                                state = { label: 'Nursing', color: 'text-violet-600 dark:text-violet-400', icon: <Droplet size={14} /> };
+                            } else if (animal.isInMating) {
+                                state = { label: 'In Mating', color: 'text-sky-600 dark:text-sky-400', icon: <Hourglass size={14} /> };
+                            } else if (animal.isPlannedMating) {
+                                state = { label: 'Planned Mating', color: 'text-indigo-600 dark:text-indigo-400', icon: <Calendar size={14} /> };
+                            }
+                            return state ? (
+                                <span className={state.color} title={state.label}>{state.icon}</span>
+                            ) : null;
+                        })()}
+                        {birth && !isSelectable && (
+                            <span className="text-xs text-gray-600 dark:text-dark-text-secondary">{birth}</span>
+                        )}
+                        {animal.gender && (
+                            <span title={animal.gender}>
+                                {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500 dark:text-dark-text-muted" />}
+                            </span>
+                        )}
+                    </div>
 
-                    {/* Gender badge top-right - fixed 16px icons and the public card's exact
-                        colours. This previously used responsive w-3/w-4 sizing and different
-                        greys/purples, so it rendered smaller on mobile than the public card's. */}
-                    {animal.gender && (
-                        <div className="absolute top-2 right-2" title={animal.gender}>
-                            {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500 dark:text-dark-text-muted" />}
-                        </div>
-                    )}
-
-                    {/* No badge band needed: the public card's photo carries mt-6, which clears the
-                        absolutely positioned birthdate / gender / transfer icons. */}
-
-                    {/* Photo. Mirrors the public profile card: mt-6 clears the absolutely
-                        positioned birthdate / gender / transfer icons, and the image is capped with
-                        the same explicit max-w-32 / max-h-28 lengths (percentages like max-h-full
-                        resolve to none against an auto-height inline-block and silently do
-                        nothing, which let portrait photos overflow). overflow-hidden backstops it. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28 overflow-hidden">
+                    {/* Photo. mt-6 is gone - the top row above is real content in normal flow, so
+                        the photo no longer needs clearance for an absolutely positioned birthdate. */}
+                    <div className="flex items-center justify-center w-full px-2 mt-1 mb-2 h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
                         <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
@@ -2890,50 +2894,17 @@ useEffect(() => {
                         </div>
                     </div>
 
-                    {/* Info block: reproductive pill (if any), name, breeding line diamonds.
-                        flex-grow (not flex-1) so it takes the card's spare height, matching the
-                        public card where the name block soaks up the slack and the status bar's
-                        mt-auto pins to the bottom. justify-center keeps the rows grouped. Note
-                        this makes the card min-h-56 rather than a strict fixed height, exactly as
-                        the public card is - a two-line name grows the card instead of clipping. */}
+                    {/* Info block: just the name, for now. flex-grow so it takes the card's spare
+                        height, matching the public card, whose name block does the same. */}
                     <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
-                    {/* Reproductive State Pill. Fixed height (h-6/h-7) so the card is the same
-                        height whether or not a pill is present. The negative top margin that used
-                        to overlap the taller image is gone: the photo is now a fixed height, so
-                        pulling the pill up only made it collide with the photo and threw off the
-                        group's vertical centring. */}
-                    <div className="relative w-full flex justify-center items-center h-6 sm:h-7 px-1 shrink-0">
-                        {(() => {
-                            // Determine reproductive state to display (prioritized)
-                            let state = null;
-                            if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
-                            } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
-                            } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
-                            } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
-                            }
-                            return state ? (
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
-                                    {state.icon} {state.label}
-                                </span>
-                            ) : null;
-                        })()}
-                    </div>
-                    
-                    {/* Prefix / Name under image. Fixed height with overflow hidden so a name that
-                        wraps to two lines (e.g. "Fabulous Cowboy MafiaSpade") can never grow the
-                        card - all cards stay the same height and their controls/status bars line
-                        up across the row. The outer info block is flex-grow, so a one-line name
-                        leaves the spare space in that block and a two-line name simply grows the
-                        card - matching the public card, which is min-h-56 rather than a fixed
-                        height. items-end keeps the name sitting just above the diamonds. */}
+
+                    {/* Prefix / Name under image. flex-grow + justify-center mirrors the public
+                        card exactly, so a one-line name leaves the spare space in this block and a
+                        two-line name simply grows the card - the public card is min-h-56, not a
+                        fixed height, so the two stay the same. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
-                            box, so it aligns to the start of its line box. The inner div is itself a
-                            flex row with justify-center so the name+flag wrapper is centred as a
-                            flex item, which keeps one- and two-line names both centred. */}
+                            box, so it aligns to the start of its line box. The wrapper carries
+                            text-center so the name+flag box is centred as inline content. */}
 <div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
     <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
@@ -2947,23 +2918,12 @@ useEffect(() => {
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* Breeding line diamonds. Always renders a fixed-height row, even with no
-                        lines assigned or when the diamonds are hidden — returning null here made
-                        those cards shorter than tagged ones and broke the uniform card height. */}
-                    {(() => {
-                        const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
-                        return (
-                            <div className="w-full px-2 h-5 shrink-0 flex flex-wrap content-center gap-0.5 justify-center overflow-hidden">
-                                {/* Hidden diamonds still occupy their fixed-height row so cards in
-                                    the same grid stay the same height whether or not breeding
-                                    lines are shown. */}
-                                {hideBreedingLines ? null : activeLines.map(l => (
-                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-sm leading-none">{breedingLineGlyph(l.color)}</span>
-                                ))}
-                            </div>
-                        );
-                    })()}
+                    {/* Breeding line diamonds: temporarily not rendered.
+                        The card is now sized to match the public card exactly, and this row's h-5
+                        (20px) is the one thing that would push it back over that budget. The
+                        reproductive state moved into the top row and the photo lost its mt-6,
+                        which together paid for the pill's removal - but not for this row as well.
+                        Left out until we pick a placement that costs no height. */}
                     </div>
 
                     {/* Management action buttons slot */}
@@ -3034,7 +2994,15 @@ useEffect(() => {
                     {animal.status === 'Deceased' ? (
                         <DeceasedBanner />
                     ) : (
-                        <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                        <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto relative">
+                            {/* Transfer icon on the left of the status bar. It was text-black,
+                                which is invisible against this grey background in light mode, so
+                                it now uses the same muted colour as the status text. */}
+                            {animal.originalCreatorId && !isSelectable && (
+                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600 dark:text-dark-text-secondary" title="Received Animal">
+                                    <ArrowLeftRight size={12} strokeWidth={2.5} />
+                                </span>
+                            )}
                             <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">
                                 {animal.status || 'Unknown'}
                             </div>
