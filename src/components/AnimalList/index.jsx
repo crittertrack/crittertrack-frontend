@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2909,14 +2909,18 @@ useEffect(() => {
                         height, matching the public card, whose name block does the same. */}
                     <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
 
-                    {/* Name. flex-1 (not flex-grow) so it soaks up the block's spare height, and
-                        the block's justify-center then centres it in that space - so a card with
-                        no reproductive pill has its name vertically centred on its own. */}
+                    {/* Name. Fixed height sized to exactly two lines (h-8 at text-xs, h-9 at
+                        text-sm) with overflow-hidden, so a name that wraps - or a long name whose
+                        flag emoji pushes it onto a second line - can never grow the card past
+                        min-h-56. Without this the card height varied with the name length, which
+                        is most visible in the Collections grid where long names sit side by side.
+                        flex-1 keeps it soaking up spare height, and items-end keeps a one-line
+                        name sitting just above the row below. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The wrapper carries
                             text-center so the name+flag box is centred as inline content. */}
-<div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-center justify-center text-center">
-    <div className="text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+<div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-end justify-center text-center overflow-hidden">
+    <div className="w-full min-w-0 max-h-full overflow-hidden text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
