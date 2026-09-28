@@ -2840,42 +2840,43 @@ useEffect(() => {
                     {/* Transfer icon now lives in the status bar (see below), freeing the card's
                         top-left corner now that the birthdate/gender/repro icons share a row. */}
 
-                    {/* Top row: reproductive state icon | birthdate | gender icon.
-                        These three now share a single row in normal flow rather than floating
-                        independently. The photo's old mt-6 existed only to clear the absolutely
-                        positioned birthdate, so it is gone - the row does that job and the card
-                        gets shorter instead of taller. */}
-                    <div className="w-full flex items-center justify-center gap-2 px-2 pt-1 shrink-0">
-                        {/* Reproductive state icon (compact stand-in for the old labelled pill).
-                            Distinct icon per state, with the full label on the title attribute. */}
-                        {(() => {
-                            let state = null;
-                            if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'text-pink-600 dark:text-pink-400', icon: <ScanHeart size={14} className="fill-current" /> };
-                            } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'text-violet-600 dark:text-violet-400', icon: <Droplet size={14} /> };
-                            } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'text-sky-600 dark:text-sky-400', icon: <Hourglass size={14} /> };
-                            } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'text-indigo-600 dark:text-indigo-400', icon: <Calendar size={14} /> };
-                            }
-                            return state ? (
-                                <span className={state.color} title={state.label}>{state.icon}</span>
-                            ) : null;
-                        })()}
+                    {/* Breeding line diamonds, absolute top-left. The card's top-left corner is
+                        free - the selection checkbox only renders in select mode, and the transfer
+                        icon moved to the status bar. Absolute means this costs no card height,
+                        which is what keeps the card matching the public card's height. */}
+                    {!hideBreedingLines && (() => {
+                        const assignedIds = animalBreedingLines[animal.id_public] || [];
+                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
+                        if (activeLines.length === 0) return null;
+                        return (
+                            <div className="absolute top-1.5 left-1.5 z-10 flex flex-wrap gap-0.5 max-w-[5rem]" onClick={(e) => e.stopPropagation()}>
+                                {activeLines.map(l => (
+                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-xs leading-none">{breedingLineGlyph(l.color)}</span>
+                                ))}
+                            </div>
+                        );
+                    })()}
+
+                    {/* Birthdate top-centre. The gender icon sits absolute top-right and the
+                        breeding diamonds absolute top-left, so the birthdate is the only thing in
+                        this row and can sit centred on its own. */}
+                    <div className="w-full flex items-center justify-center px-2 pt-1 shrink-0">
                         {birth && !isSelectable && (
                             <span className="text-xs text-gray-600 dark:text-dark-text-secondary">{birth}</span>
                         )}
-                        {animal.gender && (
-                            <span title={animal.gender}>
-                                {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500 dark:text-dark-text-muted" />}
-                            </span>
-                        )}
                     </div>
 
-                    {/* Photo. mt-6 is gone - the top row above is real content in normal flow, so
-                        the photo no longer needs clearance for an absolutely positioned birthdate. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-1 mb-2 h-28 overflow-hidden">
+                    {/* Gender icon, absolute top-right. */}
+                    {animal.gender && (
+                        <div className="absolute top-2 right-2" title={animal.gender}>
+                            {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500 dark:text-dark-text-muted" />}
+                        </div>
+                    )}
+
+                    {/* Photo. mt-1/mb-1 keep the vertical budget tight now that the pill's h-6 is
+                        back in the card - the public card's mt-6 is dead space we no longer need
+                        because the birthdate is in normal flow. */}
+                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-1 h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
                         <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
@@ -2897,6 +2898,29 @@ useEffect(() => {
                     {/* Info block: just the name, for now. flex-grow so it takes the card's spare
                         height, matching the public card, whose name block does the same. */}
                     <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
+
+                    {/* Reproductive state pill, above the name. Fixed height (h-6) so the card is
+                        the same height whether or not a pill is present. */}
+                    <div className="relative w-full flex justify-center items-center h-6 px-1 shrink-0">
+                        {(() => {
+                            // Determine reproductive state to display (prioritized)
+                            let state = null;
+                            if (animal.isPregnant) {
+                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
+                            } else if (animal.isNursing) {
+                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
+                            } else if (animal.isInMating) {
+                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
+                            } else if (animal.isPlannedMating) {
+                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
+                            }
+                            return state ? (
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
+                                    {state.icon} {state.label}
+                                </span>
+                            ) : null;
+                        })()}
+                    </div>
 
                     {/* Prefix / Name under image. flex-grow + justify-center mirrors the public
                         card exactly, so a one-line name leaves the spare space in this block and a
