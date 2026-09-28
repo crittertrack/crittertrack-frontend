@@ -2850,7 +2850,7 @@ useEffect(() => {
                         the row below is only a spacer that keeps the photo where it was - the
                         card's height is unchanged. */}
                     {birth && !isSelectable && (
-                        <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 z-10 text-xs text-gray-600 dark:text-dark-text-secondary">
+                        <div className="absolute top-2.5 left-1/2 transform -translate-x-1/2 z-10 text-xs text-gray-600 dark:text-dark-text-secondary">
                             {birth}
                         </div>
                     )}
