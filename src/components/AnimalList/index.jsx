@@ -2921,8 +2921,12 @@ useEffect(() => {
                         up across the row. pt-1 keeps the name clear of the reproductive pill above
                         it, which the negative top margin otherwise pulls up into it; the row is
                         one step taller to pay for that padding so two-line names still fit. */}
+                        {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
+                            box, so it aligns to the start of its line box. The inner div is itself a
+                            flex row with justify-center so the name+flag wrapper is centred as a
+                            flex item, which keeps one- and two-line names both centred. */}
 <div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 h-8 sm:h-9 md:h-9 pt-1 sm:pt-1 md:pt-0 flex items-center justify-center overflow-hidden">
-    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full overflow-hidden">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center overflow-hidden">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
