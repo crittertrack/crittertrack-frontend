@@ -2858,8 +2858,12 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36">
+                    {/* Centered profile image. This block is the one that absorbs the card's spare
+                        height (flex-1), so the leftover room goes around the - and centres - the
+                        photo instead of being dumped into a single gap by the mt-auto elements
+                        below, which left the pill/name/controls bunched at the top. The min-heights
+                        keep it from collapsing on short cards. */}
+                    <div className="flex-1 min-h-[7rem] sm:min-h-[7rem] md:min-h-[9rem] flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1">
                         <div className="relative w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
@@ -2902,7 +2906,7 @@ useEffect(() => {
                     </div>
                     
                     {/* Prefix / Name under image */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 justify-center text-center">
     <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
