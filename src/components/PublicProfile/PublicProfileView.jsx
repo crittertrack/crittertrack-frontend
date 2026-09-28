@@ -1026,6 +1026,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     </div>
                                                 )}
 
+                                                {/* Spacer reserving the birthdate's row, as on the private
+                                                    card. The birthdate above is absolute (out of
+                                                    flow), so without this the image rides up under
+                                                    it - and the name's two-line floor pushes the
+                                                    photo band's height down with it. */}
+                                                <div className="w-full h-5 shrink-0" />
+
                                                 {/* Gender badge top-right */}
                                                 {animal.gender && (
                                                     <div className="absolute top-2 right-2" title={animal.gender}>
@@ -1036,13 +1043,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 {/* Centered profile image. The grey tile is only the
                                                     no-photo placeholder backdrop; with a photo it
                                                     showed through as a grey box around the
-                                                    letterboxed image, so the background is dropped. */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-24 sm:h-28">
-                                                    <div className={`relative w-24 sm:w-28 h-24 sm:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
+                                                    letterboxed image, so the background is dropped.
+                                                    The band is the card's flexible consumer (flex-1
+                                                    min-h-0) and matches the private card: the old
+                                                    mt-6 was 24px of dead space that left the
+                                                    two-line name below no room, so a wrapped name
+                                                    was clipped mid-line. */}
+                                                <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 flex-1 min-h-0 overflow-hidden">
+                                                    <div className={`relative w-24 sm:w-28 h-24 sm:h-28 max-h-full rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                                            <div className="relative inline-block max-w-24 sm:max-w-28 max-h-24 sm:max-h-28">
-                                                                <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 max-h-24 sm:max-h-28 w-auto h-auto object-contain rounded-md" />
+                                                            <div className="relative inline-block max-h-full max-w-24 sm:max-w-28 max-h-24 sm:max-h-28">
+                                                                <img src={imgSrc} alt={animal.name} className="block max-h-full max-w-24 sm:max-w-28 max-h-24 sm:max-h-28 w-auto h-auto object-contain rounded-md" />
                                                                 {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                                             </div>
                                                         ) : (
@@ -1059,12 +1071,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     {/* No icons for public profile - they don't apply */}
                                                 </div>
                                                 
-                                                {/* Prefix / Name under image. flex-1 + min-h-0 + overflow-hidden, matching
-                                                    the private card: the block absorbs the card's spare
-                                                    height instead of contributing to it, so a name that
-                                                    wraps to a second line can never push the ID and
-                                                    status bar down out of line with its neighbours. */}
-<div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-end justify-center text-center overflow-hidden">
+                                                {/* Prefix / Name under image. shrink-0 with a two-line
+                                                    min-h floor, matching the private card: the photo
+                                                    band above is the only flex consumer, so the name
+                                                    is guaranteed two lines and a wrapped name is
+                                                    never clipped mid-line. */}
+<div className="w-full px-1 sm:px-2 pb-1 min-h-[2.25rem] shrink-0 flex items-end justify-center text-center overflow-hidden">
     <div className="w-full min-w-0 max-h-full overflow-hidden text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
