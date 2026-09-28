@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-60 sm:h-64 md:h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2858,14 +2858,23 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Centered profile image - fixed height. The pill/name/line-diamond group below
-                        is what absorbs the card's spare height (flex-1) and centres itself in it. */}
-                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36 shrink-0">
-                        <div className="relative w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                    {/* Centered profile image. This block is the card's flexible element: it takes
+                        the leftover height (flex-1, capped by max-h-*) so that a card with extra
+                        rows below it (e.g. the enclosure "Remove" button) simply gets a slightly
+                        smaller photo instead of growing taller than its neighbours. The
+                        pill/name/line-diamond group below keeps its natural height, so nothing is
+                        ever clipped and every card ends up the same overall height. */}
+                    <div className="flex-1 min-h-0 flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 max-h-28 sm:max-h-28 md:max-h-36 overflow-hidden">
+                        {/* The gray tile only acts as a placeholder backdrop for animals with no
+                            photo (it hosts the Cat icon). When a real image is present it showed
+                            through as a grey box behind/around the letterboxed photo, so the
+                            background is dropped and the wrapper collapses to the image's own size. */}
+                        <div className={`relative w-auto h-24 sm:h-24 md:h-28 aspect-square max-h-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className="relative inline-block max-w-24 max-h-24 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28">
-                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-24 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28 w-auto h-auto object-contain rounded-md" />
+                                // max-h-full lets the photo scale down with the flexible tile instead of overflowing it on cards that carry an extra action row.
+                                <div className="relative inline-block max-w-24 max-h-full sm:max-w-24 md:max-w-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-full sm:max-w-24 md:max-w-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
@@ -2877,12 +2886,10 @@ useEffect(() => {
                         </div>
                     </div>
                     
-                    {/* Pill + name + line diamonds, grouped so they share the card's remaining
-                        height: this block takes flex-1 and centres the three together, so spare
-                        room is distributed around the text rather than dumped into a single gap.
-                        The pill row and line row keep their fixed heights so the card stays
-                        uniform whether or not a pill / lines are present. */}
-                    <div className="w-full flex-1 min-h-0 flex flex-col justify-center">
+                    {/* Pill + name + line diamonds, grouped. Each row inside keeps a fixed height
+                        (pill h-6/h-7, name h-7/h-8/h-9, diamonds h-5) so the card is identical in
+                        height whether or not a pill / long name / lines are present. */}
+                    <div className="w-full shrink-0 flex flex-col justify-center">
                     {/* Reproductive State Pill. Fixed height (h-6/h-7) so the card is the same
                         the same height whether or not a pill is present - previously the pill's own
                         height only appeared when there was a state, making those cards taller. The
@@ -2908,9 +2915,14 @@ useEffect(() => {
                         })()}
                     </div>
                     
-                    {/* Prefix / Name under image */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 justify-center text-center">
-    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+                    {/* Prefix / Name under image. Fixed height with overflow hidden so a name that
+                        wraps to two lines (e.g. "Fabulous Cowboy MafiaSpade") can never grow the
+                        card - all cards stay the same height and their controls/status bars line
+                        up across the row. pt-1 keeps the name clear of the reproductive pill above
+                        it, which the negative top margin otherwise pulls up into it; the row is
+                        one step taller to pay for that padding so two-line names still fit. */}
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 h-8 sm:h-9 md:h-9 pt-1 sm:pt-1 md:pt-0 flex items-center justify-center overflow-hidden">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full overflow-hidden">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
@@ -2923,14 +2935,17 @@ useEffect(() => {
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
                     {/* Breeding line diamonds. Always renders a fixed-height row, even with no
-                        lines assigned — returning null here made un-tagged cards shorter than
-                        tagged ones and broke the uniform card height. */}
-                    {!hideBreedingLines && (() => {
+                        lines assigned or when the diamonds are hidden — returning null here made
+                        those cards shorter than tagged ones and broke the uniform card height. */}
+                    {(() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
                         const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                         return (
-                            <div className="w-full px-2 h-5 shrink-0 flex flex-wrap content-center gap-0.5 justify-center">
-                                {activeLines.map(l => (
+                            <div className="w-full px-2 h-5 shrink-0 flex flex-wrap content-center gap-0.5 justify-center overflow-hidden">
+                                {/* Hidden diamonds still occupy their fixed-height row so cards in
+                                    the same grid stay the same height whether or not breeding
+                                    lines are shown. */}
+                                {hideBreedingLines ? null : activeLines.map(l => (
                                     <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-sm leading-none">{breedingLineGlyph(l.color)}</span>
                                 ))}
                             </div>
@@ -2997,7 +3012,11 @@ useEffect(() => {
                         )}
                         {/* Spacer if no toggles */}
                         {(isSelectable || hideControls) && <div></div>}
-                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-dark-text-secondary">{animal.id_public}</div>
+                        {/* Fixed-height, right-aligned row so the CTC ID always sits in the same
+                            place at the bottom-right - directly under the cardActions slot (e.g.
+                            the enclosure "Remove" button) and above the status bar - rather than
+                            shifting up on cards that have no cardActions. */}
+                        <div className="h-5 flex items-center text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-dark-text-secondary">{animal.id_public}</div>
                     </div>
                     {/* Status bar at bottom */}
                     {animal.status === 'Deceased' ? (
