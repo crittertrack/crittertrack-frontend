@@ -1014,9 +1014,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     
                                     return (
                                         <div key={animal.id_public} className="w-full flex justify-center">
+                                            {/* Height tracks the photo band: h-60 below md, md:h-64 at md
+                                                and up, so the space left for the name is the same on
+                                                both. A single fixed height left mobile ~16px more
+                                                slack than desktop, which the flex-grow name block
+                                                absorbed as dead white space. Stays 24px shorter than
+                                                the private card at every breakpoint - that is the
+                                                height of the h-6 reproductive pill row it lacks. */}
                                             <div
                                                 onClick={() => onViewAnimal(animal)}
-                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
+                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-60 md:h-64 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
                                             >
                                                 {/* Birthdate, absolute and centred at the top of the card -
                                                     identical to the private card. It is out of flow,
@@ -1067,7 +1074,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     renders an inline-flex box, so it aligns to the
                                                     start of its line box. */}
                                                 <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
-                                                    <div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-end justify-center text-center overflow-hidden">
+                                                    <div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-center justify-center text-center overflow-hidden">
                                                         <div className="w-full min-w-0 max-h-full overflow-hidden text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
                                                             <AnimalNameWithFlag
                                                                 animal={animal}
