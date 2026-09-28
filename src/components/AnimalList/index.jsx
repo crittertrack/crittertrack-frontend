@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
@@ -3712,7 +3712,7 @@ useEffect(() => {
         );
     };
 
-    const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => {
+    const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle, hideOnMobile = false }) => {
         // Icon is passed in pre-sized (size={32}); strip that so the responsive w/h classes below can take over on mobile.
         // Both modes get the same compact treatment on a phone (value over label, 48px tall) —
         // the old Full card was 72px there and ate the screen. From sm up they diverge: Lite
@@ -3726,14 +3726,15 @@ useEffect(() => {
             : icon;
         return (
             <div
-                className={`relative flex flex-col sm:flex-row sm:items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isInlinePill
+                className={`${hideOnMobile ? 'hidden sm:flex ' : ''}relative flex flex-row items-center rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${isInlinePill
                     ? 'h-[48px] px-2 py-1 gap-1.5 sm:h-[36px] sm:px-2 sm:py-1 sm:gap-1.5'
                     : 'h-[48px] px-2 py-1 gap-1.5 sm:h-[104px] sm:p-4 sm:gap-0'} ${colorClass}`}
                 onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
             >
                 {responsiveIcon}
-                {/* Phone: value over label. min-w-0 + truncate so a long label like
-                    "Animals Pregnant" ellipsises instead of overflowing the card. */}
+                {/* Icon stays left at every width; only the text next to it stacks on a phone
+                    (value over label) to keep the card short. sm:flex-none lets it size to
+                    content again in Full's wider card. */}
                 <div className="flex flex-col min-w-0 flex-1 sm:flex-none sm:ml-2.5 lg:ml-4 leading-tight">
                     <span className="text-sm sm:text-2xl font-bold truncate">{value}</span>
                     <span className="text-[10px] sm:text-sm font-medium opacity-90 truncate sm:line-clamp-2">{label}</span>
@@ -3833,6 +3834,7 @@ useEffect(() => {
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={needsAttentionCount}
+                            hideOnMobile={true}
                             colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={enclosuresNeedingAttention.length > 0}
                             isDropdownOpen={showNeedsAttentionBreakdown}
@@ -3884,6 +3886,7 @@ useEffect(() => {
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={reproNeedsAttentionList.length}
+                            hideOnMobile={true}
                             colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={reproNeedsAttentionList.length > 0}
                             isDropdownOpen={showReproNeedsAttentionBreakdown}
@@ -3921,6 +3924,7 @@ useEffect(() => {
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={healthNeedsAttentionList.length}
+                            hideOnMobile={true}
                             colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={healthNeedsAttentionList.length > 0}
                             isDropdownOpen={showHealthNeedsAttentionBreakdown}
@@ -3958,6 +3962,7 @@ useEffect(() => {
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={feedingCareNeedsAttentionList.length}
+                            hideOnMobile={true}
                             colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={feedingCareNeedsAttentionList.length > 0}
                             isDropdownOpen={showFeedingCareNeedsAttentionBreakdown}
@@ -6084,6 +6089,7 @@ useEffect(() => {
                                         icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                                         label="Needs Attention"
                                         value={totalAttention}
+                                        hideOnMobile={true}
                                         colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                                         hasDropdown={totalAttention > 0}
                                         isDropdownOpen={showMainAlertsBreakdown}
