@@ -5617,21 +5617,21 @@ useEffect(() => {
                             className="w-full pl-10 p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-primary focus:border-primary"
                         />
                     </div>
-                    <select value={enclosureStatusFilter} onChange={e => setEnclosureStatusFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary">
-                        <option value="">All Statuses</option>
+                    <select value={enclosureStatusFilter} onChange={e => setEnclosureStatusFilter(e.target.value)} className={`${FILTER_SELECT_CLS} bg-white dark:bg-dark-card-bg focus:ring-primary focus:border-primary`}>
+                        <option value="">Status</option>
                         <option value="occupied">Occupied</option>
                         <option value="empty">Empty</option>
                     </select>
-                    <select value={enclosureBuildingFilter} onChange={e => { setEnclosureBuildingFilter(e.target.value); setEnclosureRoomFilter(''); }} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary">
-                        <option value="">All Buildings</option>
+                    <select value={enclosureBuildingFilter} onChange={e => { setEnclosureBuildingFilter(e.target.value); setEnclosureRoomFilter(''); }} className={`${FILTER_SELECT_CLS} bg-white dark:bg-dark-card-bg focus:ring-primary focus:border-primary`}>
+                        <option value="">Building</option>
                         {locations.filter(l => l.type === 'building').map(building => ( <option key={building._id} value={building._id}>{building.name}</option> ))}
                     </select>
-                    <select value={enclosureRoomFilter} onChange={e => setEnclosureRoomFilter(e.target.value)} disabled={!enclosureBuildingFilter} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:cursor-not-allowed">
-                        <option value="">All Rooms</option>
+                    <select value={enclosureRoomFilter} onChange={e => setEnclosureRoomFilter(e.target.value)} disabled={!enclosureBuildingFilter} className={`${FILTER_SELECT_CLS} bg-white dark:bg-dark-card-bg focus:ring-primary focus:border-primary disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:cursor-not-allowed`}>
+                        <option value="">Room</option>
                         {enclosureBuildingFilter && locations .filter(l => l.type === 'room' && l.parentLocationId === enclosureBuildingFilter) .map(room => ( <option key={room._id} value={room._id}>{room.name}</option> )) }
                     </select>
-                    <select value={enclosureSpeciesFilter} onChange={e => setEnclosureSpeciesFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary">
-                        <option value="">All Suitable Species</option>
+                    <select value={enclosureSpeciesFilter} onChange={e => setEnclosureSpeciesFilter(e.target.value)} className={`${FILTER_SELECT_CLS} bg-white dark:bg-dark-card-bg focus:ring-primary focus:border-primary`}>
+                        <option value="">Suitable Species</option>
                         {enclosureSpeciesLabels.map(species => ( <option key={species} value={species}>{species}</option> ))}
                     </select>
                     <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:bg-dark-surface-hover rounded-lg flex items-center gap-1.5"> <Settings size={14} /> Manage Locations </button>
@@ -6287,6 +6287,13 @@ useEffect(() => {
         { key: 'feeding', icon: <Utensils size={14} className="shrink-0" />, label: 'Feeding & Care' },
     ].filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key))), [isLite]);
 
+    // Shared styling for every filter/sort <select> in the filter bar (category, species, status,
+    // gender, breeding lines, and the two sort controls). Tighter on mobile, normal from sm up.
+    // The filter selects also take flex-1 min-w-0 so they tile evenly across a phone's width
+    // instead of each sizing to its own (differing) label.
+    const FILTER_SELECT_CLS = 'px-2 py-1.5 text-xs sm:px-2.5 sm:py-2 sm:text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg min-w-0 flex-1 sm:flex-none';
+    const SORT_SELECT_CLS = 'px-2 py-1.5 text-xs sm:px-2.5 sm:py-2 sm:text-sm border rounded-lg min-w-0 flex-1 sm:flex-none';
+
     const pinDefaultView = (e, viewKey) => {
         e.stopPropagation();
         setDefaultAnimalView(viewKey);
@@ -6612,35 +6619,35 @@ useEffect(() => {
                         <select
                             value={categoryFilter}
                             onChange={(e) => { setCategoryFilter(e.target.value); setSpeciesFilter(''); }}
-                            className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                            className={FILTER_SELECT_CLS}
                         >
                             {allSpeciesCategories.map(cat => (
-                                <option key={cat} value={cat === 'All Categories' ? '' : cat}>{cat}</option>
+                                <option key={cat} value={cat === 'All Categories' ? '' : cat}>{cat === 'All Categories' ? 'Category' : cat}</option>
                             ))}
                         </select>
-                        <select 
+                        <select
                             value={speciesFilter}
                             onChange={(e) => { setSpeciesFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                            className={FILTER_SELECT_CLS}
                         >
-                            <option value="">All Species</option>
+                            <option value="">Species</option>
                             {filteredSpeciesNames.map(species => (
                                 <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                             ))}
                         </select>
                         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                            className={FILTER_SELECT_CLS}
                         >
-                            <option value="">All Statuses</option>
+                            <option value="">Status</option>
                             {STATUS_OPTIONS.map(status => (
                                 <option key={status} value={status}>{status}</option>
                             ))}
                         </select>
                         <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                            className={FILTER_SELECT_CLS}
                         >
                             {GENDER_OPTIONS.map(gender => (
-                                <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
+                                <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender === 'All Genders' ? 'Gender' : gender}</option>
                             ))}
                         </select>
                         {/* Breeding-line filter is hidden in Lite: the "Lines" column it drives is
@@ -6652,9 +6659,9 @@ useEffect(() => {
                                     const value = e.target.value;
                                     setBlFilter(value ? [value] : []);
                                 }}
-                                className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                                className={FILTER_SELECT_CLS}
                             >
-                                <option value="">All Lines</option>
+                                <option value="">Lines</option>
                                 {breedingLineDefs.filter(line => line.name && line.enabled !== false).map(line => (
                                     <option key={line.id} value={line.id}>{line.name}</option>
                                 ))}
@@ -6666,7 +6673,7 @@ useEffect(() => {
                         <select
                             value={sortConfig.key === 'name' ? sortConfig.direction : 'ascending'}
                             onChange={(e) => setSortOption('name', e.target.value)}
-                            className={`p-2 text-sm border rounded-lg ${sortConfig.key === 'name' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
+                            className={`${SORT_SELECT_CLS} ${sortConfig.key === 'name' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
                         >
                             <option value="ascending">A-Z</option>
                             <option value="descending">Z-A</option>
@@ -6674,7 +6681,7 @@ useEffect(() => {
                         <select
                             value={sortConfig.key === 'birthdate' ? sortConfig.direction : 'ascending'}
                             onChange={(e) => setSortOption('birthdate', e.target.value)}
-                            className={`p-2 text-sm border rounded-lg ${sortConfig.key === 'birthdate' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
+                            className={`${SORT_SELECT_CLS} ${sortConfig.key === 'birthdate' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
                         >
                             <option value="ascending">Oldest First</option>
                             <option value="descending">Youngest First</option>
