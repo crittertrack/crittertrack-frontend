@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 sm:h-60 md:h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 sm:h-60 md:h-68 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2860,8 +2860,9 @@ useEffect(() => {
 
                     {/* Top badge band. The birthdate / gender / transfer icons are absolutely
                         positioned, so this fixed-height spacer reserves their row and keeps the
-                        photo below them instead of underneath. */}
-                    <div className="w-full h-5 shrink-0" />
+                        photo below them instead of underneath. Slightly shorter at md, where the
+                        birthdate-to-photo gap reads as too wide. */}
+                    <div className="w-full h-5 sm:h-5 md:h-4 shrink-0" />
 
                     {/* Photo. Fixed height, not flexible. The info block below is the only
                         flexible row, so it centres itself in the height left over. */}
@@ -2920,12 +2921,15 @@ useEffect(() => {
                     {/* Prefix / Name under image. Fixed height with overflow hidden so a name that
                         wraps to two lines (e.g. "Fabulous Cowboy MafiaSpade") can never grow the
                         card - all cards stay the same height and their controls/status bars line
-                        up across the row. */}
+                        up across the row. items-end rather than items-center: a one-line name then
+                        sits directly above the diamonds, while a two-line name still fills the row
+                        and cannot clip - so the gap below the name halves without losing the
+                        second line. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The inner div is itself a
                             flex row with justify-center so the name+flag wrapper is centred as a
                             flex item, which keeps one- and two-line names both centred. */}
-<div className="w-full px-1 sm:px-2 shrink-0 h-8 sm:h-8 md:h-9 flex items-center justify-center overflow-hidden">
+<div className="w-full px-1 sm:px-2 shrink-0 h-8 sm:h-8 md:h-9 flex items-end justify-center overflow-hidden">
     <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center overflow-hidden">
         <AnimalNameWithFlag
             animal={animal}
