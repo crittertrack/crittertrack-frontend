@@ -1016,7 +1016,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                         <div key={animal.id_public} className="w-full flex justify-center">
                                             <div
                                                 onClick={() => onViewAnimal(animal)}
-                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
+                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
                                             >
                                                 {/* Birthdate, absolute and centred at the top of the card -
                                                     identical to the private card. It is out of flow,
