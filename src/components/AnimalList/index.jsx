@@ -2864,17 +2864,28 @@ useEffect(() => {
                         birthdate-to-photo gap reads as too wide. */}
                     <div className="w-full h-[18px] sm:h-5 md:h-4 shrink-0" />
 
-                    {/* Photo. Fixed height, not flexible. The info block below is the only
-                        flexible row, so it centres itself in the height left over. */}
-                    <div className="w-full shrink-0 h-20 sm:h-24 md:h-28 px-1 flex items-center justify-center">
+                    {/* Photo. Fixed height band, not flexible - the info block below is the only
+                        flexible row, so it centres itself in the height left over.
+                        overflow-hidden is a backstop: the image is capped by explicit max-h-*
+                        values below, but a backstop guarantees it can never spill over the rows
+                        underneath even if an image's intrinsic size or the band height changes. */}
+                    <div className="w-full shrink-0 h-20 sm:h-24 md:h-28 px-1 flex items-center justify-center overflow-hidden">
                         {/* The grey tile is only a placeholder backdrop for animals with no photo
                             (it hosts the Cat icon); with a photo it showed through as a grey box
-                            around the letterboxed image, so the background is dropped. */}
-                        <div className={`relative h-24 sm:h-24 md:h-28 aspect-square max-h-full max-w-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
+                            around the letterboxed image, so the background is dropped.
+                            Its h-* matches the band exactly, so it can never be the thing that
+                            overflows. */}
+                        <div className={`relative h-20 sm:h-24 md:h-28 aspect-square max-w-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className="relative inline-block max-w-24 max-h-full sm:max-w-24 md:max-w-28">
-                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-full sm:max-w-24 md:max-w-28 w-auto h-auto object-contain rounded-md" />
+                                // The image is capped by EXPLICIT max-h-20/sm:max-h-24/md:max-h-28 rather
+                                // than max-h-full. max-h-full is a percentage, and this wrapper is an
+                                // auto-height inline-block, so the percentage had nothing to resolve
+                                // against and resolved to none - leaving only max-w-24 in effect. A
+                                // portrait photo was then free to be ~130px tall at 96px wide and
+                                // overflowed the card. Explicit lengths always apply.
+                                <div className="relative inline-block max-w-full">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-20 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
