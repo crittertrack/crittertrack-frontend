@@ -2899,9 +2899,12 @@ useEffect(() => {
                         height, matching the public card, whose name block does the same. */}
                     <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
 
-                    {/* Reproductive state pill, above the name. Fixed height (h-6) so the card is
-                        the same height whether or not a pill is present. */}
-                    <div className="relative w-full flex justify-center items-center h-6 px-1 shrink-0">
+                    {/* Reproductive state pill, above the name. Fixed height (h-6) so the card is the
+                        same height whether or not a pill is present.
+                        -mt-0.5 lifts the pill 2px toward the photo, which is where the slack is:
+                        the gap under the image was twice the gap above the name. That moves the
+                        space rather than adding it, so the card's height is unchanged. */}
+                    <div className="relative w-full flex justify-center items-center h-6 px-1 -mt-0.5 shrink-0">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
