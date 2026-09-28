@@ -3977,19 +3977,6 @@ const AnimalFormModalV2 = ({
                     <div className="p-3 sm:p-6">
                         {activeTab === 'dashboard' && ( // DASHBOARD
                             <div className="space-y-4">
-                            {/* Lite only: the view modal's header "Notes" card renders animal.remarks,
-                                so surface the same field here as its own always-open block instead of
-                                leaving it buried in the collapsible Identity section (whose collapsed
-                                state persists to localStorage and can hide it indefinitely). The
-                                Identity copy below is suppressed in Lite so there's only one editor. */}
-                            {isLiteForm && (
-                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
-                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Notes</label>
-                                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="4"
-                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm focus:ring-primary focus:border-primary"
-                                        placeholder="General notes, observations, and records..." />
-                                </div>
-                            )}
                             <div className="flex flex-col md:flex-row gap-4">
                                 {/* Left Column: Image Upload */}
                                 <div className="w-full md:w-1/4 flex-shrink-0 flex flex-col gap-2">
@@ -4201,6 +4188,21 @@ const AnimalFormModalV2 = ({
                                     </div>
                                 </div>
                             </div>
+                            {/* Lite only: the view modal's "Notes" card renders animal.remarks, so
+                                surface the same field here as its own always-open block rather than
+                                leaving it buried in the collapsible Identity section (whose collapsed
+                                state persists to localStorage and can hide it indefinitely). The
+                                Identity copy is suppressed in Lite so there's only one editor.
+                                Sits below the Availability section on purpose - it used to be the
+                                first block on the tab, above the image and identity fields. */}
+                            {isLiteForm && (
+                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Notes</label>
+                                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="4"
+                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="General notes, observations, and records..." />
+                                </div>
+                            )}
                             </div>
                         )}
                         {activeTab === 'identification' && (
