@@ -6179,7 +6179,10 @@ useEffect(() => {
                                 </>
                             );
                         })()}
-                        <div className="relative w-full" ref={alertsDropdownRef}>
+                        {/* Alerts On/Off + its per-category dropdown. Hidden on mobile: it's a
+                            settings control rather than something you scan, and it occupied a
+                            full-width bar in the narrow phone layout. Desktop keeps it. */}
+                        <div className="hidden sm:block relative w-full" ref={alertsDropdownRef}>
                             <button
                                 onClick={() => setShowAlertsDropdown(prev => !prev)}
                                 title="Configure alerts"
