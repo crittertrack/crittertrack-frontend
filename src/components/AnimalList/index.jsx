@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-[222px] sm:h-60 md:h-68 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-44 min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2858,51 +2858,40 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Top badge band. The birthdate / gender / transfer icons are absolutely
-                        positioned, so this fixed-height spacer reserves their row and keeps the
-                        photo below them instead of underneath. Slightly shorter at md, where the
-                        birthdate-to-photo gap reads as too wide. */}
-                    <div className="w-full h-[18px] sm:h-5 md:h-4 shrink-0" />
+                    {/* No badge band needed: the public card's photo carries mt-6, which clears the
+                        absolutely positioned birthdate / gender / transfer icons. */}
 
-                    {/* Photo. Fixed height band, not flexible - the info block below is the only
-                        flexible row, so it centres itself in the height left over.
-                        overflow-hidden is a backstop: the image is capped by explicit max-h-*
-                        values below, but a backstop guarantees it can never spill over the rows
-                        underneath even if an image's intrinsic size or the band height changes. */}
-                    <div className="w-full shrink-0 h-20 sm:h-24 md:h-28 px-1 flex items-center justify-center overflow-hidden">
-                        {/* The grey tile is only a placeholder backdrop for animals with no photo
-                            (it hosts the Cat icon); with a photo it showed through as a grey box
-                            around the letterboxed image, so the background is dropped.
-                            Its h-* matches the band exactly, so it can never be the thing that
-                            overflows. */}
-                        <div className={`relative h-20 sm:h-24 md:h-28 aspect-square max-w-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
+                    {/* Photo. Mirrors the public profile card: mt-6 clears the absolutely
+                        positioned birthdate / gender / transfer icons, and the image is capped with
+                        the same explicit max-w-32 / max-h-28 lengths (percentages like max-h-full
+                        resolve to none against an auto-height inline-block and silently do
+                        nothing, which let portrait photos overflow). overflow-hidden backstops it. */}
+                    <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28 shrink-0 overflow-hidden">
+                        {/* Grey tile is only the no-photo placeholder backdrop, as on the public
+                            card; it is not drawn behind an actual image. */}
+                        <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                // The image is capped by EXPLICIT max-h-20/sm:max-h-24/md:max-h-28 rather
-                                // than max-h-full. max-h-full is a percentage, and this wrapper is an
-                                // auto-height inline-block, so the percentage had nothing to resolve
-                                // against and resolved to none - leaving only max-w-24 in effect. A
-                                // portrait photo was then free to be ~130px tall at 96px wide and
-                                // overflowed the card. Explicit lengths always apply.
-                                <div className="relative inline-block max-w-full">
-                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-20 sm:max-w-24 sm:max-h-24 md:max-w-28 md:max-h-28 w-auto h-auto object-contain rounded-md" />
-                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-0 right-0" />}
+                                <div className="relative inline-block max-w-32 max-h-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
                                 <>
-                                    <Cat className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10" />
-                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-3 right-0" />}
+                                    <Cat size={36} />
+                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
                                 </>
                             )}
                         </div>
                     </div>
 
                     {/* Info block: reproductive pill (if any), name, breeding line diamonds.
-                        This is the only flexible row, so it centres these three vertically in
-                        whatever space is left - reading the same whether it renders as
-                        pill + name + diamonds, pill + name, or name + diamonds. Each row has a
-                        fixed height so the block is the same size in all three cases. */}
-                    <div className="w-full flex-1 min-h-0 flex flex-col justify-center">
+                        flex-grow (not flex-1) so it takes the card's spare height, matching the
+                        public card where the name block soaks up the slack and the status bar's
+                        mt-auto pins to the bottom. justify-center keeps the rows grouped. Note
+                        this makes the card min-h-56 rather than a strict fixed height, exactly as
+                        the public card is - a two-line name grows the card instead of clipping. */}
+                    <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
                     {/* Reproductive State Pill. Fixed height (h-6/h-7) so the card is the same
                         height whether or not a pill is present. The negative top margin that used
                         to overlap the taller image is gone: the photo is now a fixed height, so
@@ -2932,16 +2921,16 @@ useEffect(() => {
                     {/* Prefix / Name under image. Fixed height with overflow hidden so a name that
                         wraps to two lines (e.g. "Fabulous Cowboy MafiaSpade") can never grow the
                         card - all cards stay the same height and their controls/status bars line
-                        up across the row. items-end rather than items-center: a one-line name then
-                        sits directly above the diamonds, while a two-line name still fills the row
-                        and cannot clip - so the gap below the name halves without losing the
-                        second line. */}
+                        up across the row. The outer info block is flex-grow, so a one-line name
+                        leaves the spare space in that block and a two-line name simply grows the
+                        card - matching the public card, which is min-h-56 rather than a fixed
+                        height. items-end keeps the name sitting just above the diamonds. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The inner div is itself a
                             flex row with justify-center so the name+flag wrapper is centred as a
                             flex item, which keeps one- and two-line names both centred. */}
-<div className="w-full px-1 sm:px-2 shrink-0 h-8 sm:h-8 md:h-9 flex items-end justify-center overflow-hidden">
-    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center overflow-hidden">
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 flex items-end justify-center">
+    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
@@ -3031,18 +3020,17 @@ useEffect(() => {
                         )}
                         {/* Spacer if no toggles */}
                         {(isSelectable || hideControls) && <div></div>}
-                        {/* Fixed-height, right-aligned row so the CTC ID always sits in the same
-                            place at the bottom-right - directly under the cardActions slot (e.g.
-                            the enclosure "Remove" button) and above the status bar - rather than
-                            shifting up on cards that have no cardActions. */}
-                        <div className="h-5 flex items-center text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-dark-text-secondary">{animal.id_public}</div>
+                        {/* Fixed-height, right-aligned CTC ID, matching the public card's
+                            px-2 pb-2 / text-xs treatment. h-5 keeps the row the same height
+                            whether or not the toggles to its left are shown. */}
+                        <div className="h-5 flex items-center text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                     </div>
                     {/* Status bar at bottom */}
                     {animal.status === 'Deceased' ? (
                         <DeceasedBanner size="sm" />
                     ) : (
-                        <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto bg-gray-100 dark:bg-dark-card-bg">
-                            <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
+                        <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                            <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">
                                 {animal.status || 'Unknown'}
                             </div>
                         </div>
