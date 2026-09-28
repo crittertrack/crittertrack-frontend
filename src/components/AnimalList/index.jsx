@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-60 sm:h-64 md:h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-52 sm:h-60 md:h-64 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2864,12 +2864,12 @@ useEffect(() => {
                         rows in it. A card carrying an extra row (e.g. the enclosure "Remove"
                         button) simply squeezes both blocks a little - nothing is ever clipped
                         and every card ends up the same overall height. */}
-                    <div className="flex-1 min-h-0 flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 max-h-28 sm:max-h-28 md:max-h-36 overflow-hidden">
+                    <div className="flex-1 min-h-0 flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 max-h-24 sm:max-h-28 md:max-h-32 overflow-hidden">
                         {/* The gray tile only acts as a placeholder backdrop for animals with no
                             photo (it hosts the Cat icon). When a real image is present it showed
                             through as a grey box behind/around the letterboxed photo, so the
                             background is dropped and the wrapper collapses to the image's own size. */}
-                        <div className={`relative w-auto h-24 sm:h-24 md:h-28 aspect-square max-h-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
+                        <div className={`relative w-auto h-24 sm:h-24 md:h-28 aspect-square max-h-full max-w-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
                                 // max-h-full lets the photo scale down with the flexible tile instead of overflowing it on cards that carry an extra action row.
