@@ -1018,9 +1018,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 onClick={() => onViewAnimal(animal)}
                                                 className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-44 min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
                                             >
-                                                {/* Birthdate top-left */}
+                                                {/* Birthdate top-centre - centred to match the private
+                                                    card, so the two read identically. */}
                                                 {birth && (
-                                                    <div className="absolute top-2 left-2 text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-2 py-0.5 rounded">
+                                                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-2 py-0.5 rounded">
                                                         {birth}
                                                     </div>
                                                 )}
