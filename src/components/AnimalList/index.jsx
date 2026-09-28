@@ -2857,23 +2857,24 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Photo. This band is the card's flexible consumer: it takes whatever height is
-                        left after the rows below have taken their fixed share, so the name always
-                        gets a guaranteed two lines and the image gives up the difference.
-                        Previously the band was a fixed h-24/h-28, which with pt-3 + the h-5
-                        birthdate spacer + the toggles row + the h-6 status row + the status bar
-                        left only ~4px for the name, so a two-line name was clipped mid-line by
-                        the overflow-hidden below. mb-0.5 and the pill's -mt-1 close the gap, and
-                        the image is capped by both max-h-full (the band's resolved height) and the
-                        old pixel caps, whichever is smaller. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 flex-1 min-h-0 overflow-hidden">
+                    {/* Photo. mt-0.5/mb-1 keep the vertical budget tight - the public card's mt-6
+                        is dead space we no longer need because the birthdate is out of flow.
+                        The tile is w-24 sm:w-28 md:w-32 to match the card's restored responsive
+                        widths: a fixed w-32 (128px) plus the px-2 padding (16px) needs 144px and
+                        would overflow the sm card's 140px max-width.
+                        The band is h-24 rather than h-28 because it is a FIXED height: the tile
+                        fills it exactly, and a landscape photo is letterboxed inside it, so the
+                        slack shows up as white space above and below the image. A shorter band
+                        means less of that dead area. mb-0.5 and the pill's -mt-1 close the rest
+                        of the gap, and both are free - the card's total height is unchanged. */}
+                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
-                        <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 max-h-full rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
+                        <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className="relative inline-block max-h-full max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28">
-                                    <img src={imgSrc} alt={animal.name} className="block max-h-full max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28 w-auto h-auto object-contain rounded-md" />
+                                <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
@@ -2885,22 +2886,21 @@ useEffect(() => {
                         </div>
                     </div>
 
-                    {/* Info block: the name. shrink-0 (not flex-grow) so the photo band above is the
-                        only flex consumer in the column - it absorbs the card's spare height, which
-                        is what keeps the name's two-line floor intact and the card a constant h-56. */}
-                    <div className="w-full shrink-0 flex flex-col justify-center">
+                    {/* Info block: just the name, for now. flex-grow so it takes the card's spare
+                        height, matching the public card, whose name block does the same. */}
+                    <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
 
-                    {/* Name row. min-h reserves exactly two lines (text-xs/text-sm at
-                        leading-tight) so a name that wraps - or a long name whose flag emoji
-                        pushes it onto a second line - always has room and is never clipped
-                        mid-line by this block's overflow-hidden. min-h-0 is deliberately NOT
-                        used: with the photo band above taking the slack via flex-1, the name's
-                        min-h is the floor that keeps the second line readable. items-end keeps
-                        a one-line name sitting just above the row below rather than floating. */}
+                    {/* Name. Fixed height sized to exactly two lines (h-8 at text-xs, h-9 at
+                        text-sm) with overflow-hidden, so a name that wraps - or a long name whose
+                        flag emoji pushes it onto a second line - can never grow the card past
+                        min-h-56. Without this the card height varied with the name length, which
+                        is most visible in the Collections grid where long names sit side by side.
+                        flex-1 keeps it soaking up spare height, and items-end keeps a one-line
+                        name sitting just above the row below. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The wrapper carries
                             text-center so the name+flag box is centred as inline content. */}
-<div className="w-full px-1 sm:px-2 pb-1 min-h-[2.25rem] flex items-end justify-center text-center overflow-hidden">
+<div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-end justify-center text-center overflow-hidden">
     <div className="w-full min-w-0 max-h-full overflow-hidden text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
