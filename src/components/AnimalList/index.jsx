@@ -4378,50 +4378,6 @@ useEffect(() => {
         );
     };
 
-    // -- For Sale Screen ----------------------------------------------------------
-    const renderForSaleScreen = () => {
-        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
-        const handleMarkRehomed = (e, animal) => {
-            e.stopPropagation();
-            if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
-            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
-            setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
-            apiClient.put(`/animals/${animal.id_public}`, { status: 'Rehomed' })
-                .catch(err => { console.error('Mark rehomed failed:', err); fetchAnimals(); });
-        };
-        return (
-            <div className="space-y-4 mt-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <ShoppingBag size={18} className="text-purple-600 dark:text-purple-400" />
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-dark-text">For Sale / Available</h3>
-                    <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">{availableList.length}</span>
-                </div>
-                {availableList.length === 0
-                    ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-8">No animals currently marked as Available.</div>
-                    : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                        {availableList.map(a => (
-                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species}
-                                isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                hideControls hideBreedingLines
-                                cardActions={<>
-                                    {a.isForSale && a.salePriceAmount && (
-                                        <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium truncate w-full text-center">
-                                            {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
-                                        </div>
-                                    )}
-                                    <button onClick={(e) => handleMarkRehomed(e, a)}
-                                        className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
-                                        <Check size={9} /> Rehomed
-                                    </button>
-                                </>}
-                            />
-                        ))}
-                    </div>
-                }
-            </div>
-        );
-    };
-    
     // -- Management View (view = 'enclosures' | 'reproduction' | 'health' | 'feeding') --
     const renderManagementView = (view = null) => {
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
