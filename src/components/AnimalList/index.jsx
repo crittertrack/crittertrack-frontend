@@ -2876,8 +2876,11 @@ useEffect(() => {
                         </div>
                     </div>
                     
-                    {/* Reproductive State Pill -- negative margin lets it overlap the taller image; relative positioning keeps it painted above */}
-                    <div className="relative w-full flex justify-center items-center py-1 sm:py-1.5 px-1 -mt-3 sm:-mt-4">
+                    {/* Reproductive State Pill. The row has a fixed height (h-6/h-7) so the card is
+                        the same height whether or not a pill is present - previously the pill's own
+                        height only appeared when there was a state, making those cards taller. The
+                        negative margin still lets it overlap the taller image above. */}
+                    <div className="relative w-full flex justify-center items-center h-6 sm:h-7 px-1 -mt-3 sm:-mt-4 shrink-0">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
@@ -2965,13 +2968,14 @@ useEffect(() => {
                         {(isSelectable || hideControls) && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-dark-text-secondary">{animal.id_public}</div>
                     </div>
-                    {/* Breeding line diamonds */}
+                    {/* Breeding line diamonds. Always renders a fixed-height row, even with no
+                        lines assigned — returning null here made un-tagged cards shorter than
+                        tagged ones and broke the uniform card height. */}
                     {!hideBreedingLines && (() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
                         const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
-                        if (activeLines.length === 0) return null;
                         return (
-                            <div className="w-full px-2 pb-1 flex flex-wrap gap-0.5 justify-center">
+                            <div className="w-full px-2 h-5 shrink-0 flex flex-wrap content-center gap-0.5 justify-center">
                                 {activeLines.map(l => (
                                     <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-sm leading-none">{breedingLineGlyph(l.color)}</span>
                                 ))}
