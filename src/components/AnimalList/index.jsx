@@ -2809,7 +2809,7 @@ useEffect(() => {
         }
     };
 
-    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned, hideControls, hideBreedingLines, cardActions }) => {
+    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned, hideControls, hideBreedingLines, cardActions, statusSlot }) => {
         const birth = animal.birthDate ? formatDate(animal.birthDate) : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
@@ -2996,13 +2996,13 @@ useEffect(() => {
                             whether or not the toggles to its left are shown. */}
                         <div className="h-5 flex items-center text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                     </div>
-                    {/* Reproductive state pill: the status bar's second row, directly above the
-                        status text. Sitting at the very bottom means a card with no pill reads as a
-                        clean two-part footer rather than a gap floating between the image and the
-                        name. The h-6 is the same fixed row it always was, just relocated, so the
-                        card's total height is unchanged. */}
+                    {/* Status bar row 1. Normally the reproductive state pill, but a caller can
+                        pass statusSlot to take the row over instead - the Collections and Enclosures
+                        views use it for their assign/unassign and remove actions, which previously
+                        sit in a separate cardActions strip above the toggles. Either way it is the same fixed
+                        h-6 row, so every card stays the same height. */}
                     <div className="w-full h-6 flex justify-center items-center bg-gray-100 dark:bg-dark-surface border-t border-gray-300 dark:border-dark-border shrink-0">
-                        {(() => {
+                        {statusSlot || (() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
                             if (animal.isPregnant) {
@@ -3598,15 +3598,17 @@ useEffect(() => {
                                                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
                                                     {colAnimals.map(animal => (
                                                         <div key={animal.id_public} className="relative">
-                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
-                                                            <button
-                                                                onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
-                                                                className="absolute top-2 left-2 z-20 bg-white/90 dark:bg-dark-card-bg/90 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 hover:text-red-600 dark:hover:text-red-400 rounded-full p-1.5 shadow-sm border border-gray-200 dark:border-dark-text-muted"
-                                                                title="Remove from this collection"
-                                                                aria-label={`Remove ${animal.name || 'animal'} from this collection`}
-                                                            >
-                                                                <X size={16} />
-                                                            </button>
+                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                statusSlot={
+                                                                    <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
+                                                                        className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full border border-red-200 dark:border-red-700/60 text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                                                        title="Remove from this collection"
+                                                                        aria-label={`Remove ${animal.name || 'animal'} from this collection`}
+                                                                    >
+                                                                        Remove
+                                                                    </button>
+                                                                }
+                                                            />
                                                         </div>
                                                     ))}
                                                 </div>
@@ -3690,17 +3692,27 @@ useEffect(() => {
                                                     {uncategorized.map(animal => (
                                                         <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
                                                             <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
-                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
-                                                            <div className="absolute top-2 left-2 z-20">
-                                                                {assigningCollectionAnimalId === animal.id_public && (
-                                                                    <div className="absolute left-0 top-9 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
-                                                                        <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Add to collection:</p>
-                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded flex items-center gap-1.5 text-gray-700 dark:text-dark-text-secondary">{React.createElement(getCollectionIcon(col.icon), { size: 11, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })} {col.name}</button>))}
-                                                                        <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded text-gray-400 dark:text-dark-text-muted mt-1">Cancel</button>
-                                                                    </div>
-                                                                )}
-                                                                <button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="bg-white/90 dark:bg-dark-card-bg/90 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 rounded-full p-1 shadow-sm border border-gray-200 dark:border-dark-border" title="Add to a collection"><Plus size={16} /></button>
-                                                            </div>
+                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                statusSlot={
+                                                                    <button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
+                                                                        className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-700/60 text-amber-600 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30"
+                                                                        title="Add to a collection"
+                                                                    >
+                                                                        Assign
+                                                                    </button>
+                                                                }
+                                                            />
+                                                            {/* The collection picker stays anchored to the card (not the button),
+                                                                so moving the trigger into the card's status row doesn't
+                                                                drag the dropdown with it. It opens upward from the
+                                                                bottom-left of the card, clear of the status bar. */}
+                                                            {assigningCollectionAnimalId === animal.id_public && (
+                                                                <div className="absolute left-1 bottom-12 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
+                                                                    <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Add to collection:</p>
+                                                                    {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded flex items-center gap-1.5 text-gray-700 dark:text-dark-text-secondary">{React.createElement(getCollectionIcon(col.icon), { size: 11, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })} {col.name}</button>))}
+                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded text-gray-400 dark:text-dark-text-muted mt-1">Cancel</button>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     ))}
                                                 </div>
@@ -5686,9 +5698,9 @@ useEffect(() => {
                                                         {occupants.map(a => (
                                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                                 hideControls hideBreedingLines
-                                                                cardActions={
+                                                                statusSlot={
                                                                     <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosureInline(a.id_public, ''); }}
-                                                                        className="text-[10px] text-gray-400 dark:text-dark-text-muted hover:text-red-500 border border-gray-200 dark:border-dark-border hover:border-red-200 rounded px-1.5 py-0.5 w-full">
+                                                                        className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full border border-red-200 dark:border-red-700/60 text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
                                                                         Remove
                                                                     </button>
                                                                 }
@@ -5718,19 +5730,19 @@ useEffect(() => {
                                                 {unassignedAnimals.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
-                                                        cardActions={
+                                                        statusSlot={
                                                             enclosures.length > 0 ? (
                                                                 assigningAnimalId === a.id_public ? (
                                                                     <select autoFocus defaultValue=""
                                                                         onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosureInline(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
                                                                         onBlur={() => setAssigningAnimalId(null)}
-                                                                        className="text-[10px] border border-blue-300 rounded p-1 w-full">
+                                                                        className="text-[10px] border border-blue-300 rounded p-1 max-w-full">
                                                                         <option value="" disabled>Select enclosure...</option>
                                                                         {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
                                                                     </select>
                                                                 ) : (
                                                                     <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
-                                                                        className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 dark:border-blue-700/60 rounded px-1.5 py-0.5 w-full whitespace-nowrap">
+                                                                        className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-700/60 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 whitespace-nowrap">
                                                                         Assign
                                                                     </button>
                                                                 )
