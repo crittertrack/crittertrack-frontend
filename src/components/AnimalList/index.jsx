@@ -2858,12 +2858,9 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Centered profile image. This block is the one that absorbs the card's spare
-                        height (flex-1), so the leftover room goes around the - and centres - the
-                        photo instead of being dumped into a single gap by the mt-auto elements
-                        below, which left the pill/name/controls bunched at the top. The min-heights
-                        keep it from collapsing on short cards. */}
-                    <div className="flex-1 min-h-[7rem] sm:min-h-[7rem] md:min-h-[9rem] flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1">
+                    {/* Centered profile image - fixed height. The pill/name/line-diamond group below
+                        is what absorbs the card's spare height (flex-1) and centres itself in it. */}
+                    <div className="flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 h-28 sm:h-28 md:h-36 shrink-0">
                         <div className="relative w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
@@ -2880,7 +2877,13 @@ useEffect(() => {
                         </div>
                     </div>
                     
-                    {/* Reproductive State Pill. The row has a fixed height (h-6/h-7) so the card is
+                    {/* Pill + name + line diamonds, grouped so they share the card's remaining
+                        height: this block takes flex-1 and centres the three together, so spare
+                        room is distributed around the text rather than dumped into a single gap.
+                        The pill row and line row keep their fixed heights so the card stays
+                        uniform whether or not a pill / lines are present. */}
+                    <div className="w-full flex-1 min-h-0 flex flex-col justify-center">
+                    {/* Reproductive State Pill. Fixed height (h-6/h-7) so the card is the same
                         the same height whether or not a pill is present - previously the pill's own
                         height only appeared when there was a state, making those cards taller. The
                         negative margin still lets it overlap the taller image above. */}
@@ -2919,8 +2922,32 @@ useEffect(() => {
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* ID + controls row */}
-                    <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center mt-auto">
+                    {/* Breeding line diamonds. Always renders a fixed-height row, even with no
+                        lines assigned — returning null here made un-tagged cards shorter than
+                        tagged ones and broke the uniform card height. */}
+                    {!hideBreedingLines && (() => {
+                        const assignedIds = animalBreedingLines[animal.id_public] || [];
+                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
+                        return (
+                            <div className="w-full px-2 h-5 shrink-0 flex flex-wrap content-center gap-0.5 justify-center">
+                                {activeLines.map(l => (
+                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-sm leading-none">{breedingLineGlyph(l.color)}</span>
+                                ))}
+                            </div>
+                        );
+                    })()}
+                    </div>
+
+                    {/* Management action buttons slot */}
+                    {cardActions && (
+                        <div className="w-full px-1 pt-1 pb-1 border-t border-gray-100 flex flex-wrap gap-1 justify-center shrink-0" onClick={e => e.stopPropagation()}>
+                            {cardActions}
+                        </div>
+                    )}
+                    {/* Owned/Public toggles (left) and CTC ID (right). Sits directly above the
+                        status bar, which carries the mt-auto that pushes the pair to the card's
+                        bottom edge. */}
+                    <div className="w-full px-1.5 sm:px-2 pb-1 sm:pb-1.5 flex justify-between items-center shrink-0">
                         {/* Privacy and Owned toggles bottom-left */}
                         {!isSelectable && !hideControls && (
                             <div className="flex items-center gap-1">
@@ -2972,26 +2999,6 @@ useEffect(() => {
                         {(isSelectable || hideControls) && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-dark-text-secondary">{animal.id_public}</div>
                     </div>
-                    {/* Breeding line diamonds. Always renders a fixed-height row, even with no
-                        lines assigned — returning null here made un-tagged cards shorter than
-                        tagged ones and broke the uniform card height. */}
-                    {!hideBreedingLines && (() => {
-                        const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
-                        return (
-                            <div className="w-full px-2 h-5 shrink-0 flex flex-wrap content-center gap-0.5 justify-center">
-                                {activeLines.map(l => (
-                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-sm leading-none">{breedingLineGlyph(l.color)}</span>
-                                ))}
-                            </div>
-                        );
-                    })()}
-                    {/* Management action buttons slot */}
-                    {cardActions && (
-                        <div className="w-full px-1 pt-1 pb-1 border-t border-gray-100 flex flex-wrap gap-1 justify-center shrink-0" onClick={e => e.stopPropagation()}>
-                            {cardActions}
-                        </div>
-                    )}
                     {/* Status bar at bottom */}
                     {animal.status === 'Deceased' ? (
                         <DeceasedBanner size="sm" />
