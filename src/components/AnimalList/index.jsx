@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-44 min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2873,17 +2873,20 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Photo. mt-1/mb-1 keep the vertical budget tight now that the pill's h-6 is
+                    {/* Photo. mt-0.5/mb-1 keep the vertical budget tight now that the pill's h-6 is
                         back in the card - the public card's mt-6 is dead space we no longer need
-                        because the birthdate is in normal flow. */}
+                        because the birthdate is in normal flow.
+                        The tile is w-24 sm:w-28 md:w-32 to match the card's restored responsive
+                        widths: a fixed w-32 (128px) plus the px-2 padding (16px) needs 144px and
+                        would overflow the sm card's 140px max-width. */}
                     <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-1 h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
-                        <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
+                        <div className={`relative w-24 sm:w-28 md:w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className="relative inline-block max-w-32 max-h-28">
-                                    <img src={imgSrc} alt={animal.name} className="block max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
+                                <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
@@ -2918,7 +2921,7 @@ useEffect(() => {
                                 state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
                             }
                             return state ? (
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
+                                <span className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
                                     {state.icon} {state.label}
                                 </span>
                             ) : null;
@@ -2928,12 +2931,15 @@ useEffect(() => {
                     {/* Prefix / Name under image. flex-grow + justify-center mirrors the public
                         card exactly, so a one-line name leaves the spare space in this block and a
                         two-line name simply grows the card - the public card is min-h-56, not a
-                        fixed height, so the two stay the same. */}
+                        fixed height, so the two stay the same.
+                        The name is deliberately larger than the reproductive pill above it
+                        (text-xs/text-sm vs the pill's text-[10px]/sm:text-xs); they were the same
+                        size on mobile, which read oddly with the pill outweighing the name. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The wrapper carries
                             text-center so the name+flag box is centred as inline content. */}
 <div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
-    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+    <div className="text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
