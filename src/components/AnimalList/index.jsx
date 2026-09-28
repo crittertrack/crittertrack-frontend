@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-60 sm:h-64 md:h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 sm:h-60 md:h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2925,7 +2925,7 @@ useEffect(() => {
                             box, so it aligns to the start of its line box. The inner div is itself a
                             flex row with justify-center so the name+flag wrapper is centred as a
                             flex item, which keeps one- and two-line names both centred. */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 h-8 sm:h-9 md:h-9 flex items-center justify-center overflow-hidden">
+<div className="w-full px-1 sm:px-2 shrink-0 h-8 sm:h-8 md:h-9 flex items-center justify-center overflow-hidden">
     <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center overflow-hidden">
         <AnimalNameWithFlag
             animal={animal}
