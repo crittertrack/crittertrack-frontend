@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-52 sm:h-60 md:h-64 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-60 sm:h-64 md:h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2858,21 +2858,20 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Centered profile image. Shares the card's spare height with the info group
-                        below (both are flex-1): the photo grows up to its max-h-* and any
-                        remaining slack is left to the group, which centres the pill/name/diamond
-                        rows in it. A card carrying an extra row (e.g. the enclosure "Remove"
-                        button) simply squeezes both blocks a little - nothing is ever clipped
-                        and every card ends up the same overall height. */}
-                    <div className="flex-1 min-h-0 flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 max-h-24 sm:max-h-28 md:max-h-32 overflow-hidden">
-                        {/* The gray tile only acts as a placeholder backdrop for animals with no
-                            photo (it hosts the Cat icon). When a real image is present it showed
-                            through as a grey box behind/around the letterboxed photo, so the
-                            background is dropped and the wrapper collapses to the image's own size. */}
-                        <div className={`relative w-auto h-24 sm:h-24 md:h-28 aspect-square max-h-full max-w-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
+                    {/* Top badge band. The birthdate / gender / transfer icons are absolutely
+                        positioned, so this fixed-height spacer reserves their row and keeps the
+                        photo below them instead of underneath. */}
+                    <div className="w-full h-5 shrink-0" />
+
+                    {/* Photo. Fixed height, not flexible. The info block below is the only
+                        flexible row, so it centres itself in the height left over. */}
+                    <div className="w-full shrink-0 h-20 sm:h-24 md:h-28 px-1 flex items-center justify-center">
+                        {/* The grey tile is only a placeholder backdrop for animals with no photo
+                            (it hosts the Cat icon); with a photo it showed through as a grey box
+                            around the letterboxed image, so the background is dropped. */}
+                        <div className={`relative h-24 sm:h-24 md:h-28 aspect-square max-h-full max-w-full rounded-md flex items-center justify-center ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-400 dark:text-dark-text-muted'}`}>
                             {imgSrc ? (
-                                // Shrink-wrapped to the rendered (letterboxed) image size, not the square tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                // max-h-full lets the photo scale down with the flexible tile instead of overflowing it on cards that carry an extra action row.
+                                // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
                                 <div className="relative inline-block max-w-24 max-h-full sm:max-w-24 md:max-w-28">
                                     <img src={imgSrc} alt={animal.name} className="block max-w-24 max-h-full sm:max-w-24 md:max-w-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-6 h-6 md:w-8 md:h-8" positionClassName="bottom-0 right-0" />}
@@ -2885,20 +2884,19 @@ useEffect(() => {
                             )}
                         </div>
                     </div>
-                    
-                    {/* Pill + name + line diamonds, grouped. This block shares the spare card
-                        height with the photo above (both flex-1) and centres its rows vertically,
-                        so the info sits centred in the available space whether it renders as
-                        pill + name + diamonds, pill + name, or name + diamonds. Each row inside
-                        keeps a fixed height (pill h-6/h-7, name h-8/h-9/h-9, diamonds h-5) so
-                        the info block is the same size in all three cases and the card height
-                        never changes. */}
+
+                    {/* Info block: reproductive pill (if any), name, breeding line diamonds.
+                        This is the only flexible row, so it centres these three vertically in
+                        whatever space is left - reading the same whether it renders as
+                        pill + name + diamonds, pill + name, or name + diamonds. Each row has a
+                        fixed height so the block is the same size in all three cases. */}
                     <div className="w-full flex-1 min-h-0 flex flex-col justify-center">
                     {/* Reproductive State Pill. Fixed height (h-6/h-7) so the card is the same
-                        the same height whether or not a pill is present - previously the pill's own
-                        height only appeared when there was a state, making those cards taller. The
-                        negative margin still lets it overlap the taller image above. */}
-                    <div className="relative w-full flex justify-center items-center h-6 sm:h-7 px-1 -mt-3 sm:-mt-4 shrink-0">
+                        height whether or not a pill is present. The negative top margin that used
+                        to overlap the taller image is gone: the photo is now a fixed height, so
+                        pulling the pill up only made it collide with the photo and threw off the
+                        group's vertical centring. */}
+                    <div className="relative w-full flex justify-center items-center h-6 sm:h-7 px-1 shrink-0">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
@@ -2922,14 +2920,12 @@ useEffect(() => {
                     {/* Prefix / Name under image. Fixed height with overflow hidden so a name that
                         wraps to two lines (e.g. "Fabulous Cowboy MafiaSpade") can never grow the
                         card - all cards stay the same height and their controls/status bars line
-                        up across the row. pt-1 keeps the name clear of the reproductive pill above
-                        it, which the negative top margin otherwise pulls up into it; the row is
-                        one step taller to pay for that padding so two-line names still fit. */}
+                        up across the row. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The inner div is itself a
                             flex row with justify-center so the name+flag wrapper is centred as a
                             flex item, which keeps one- and two-line names both centred. */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 h-8 sm:h-9 md:h-9 pt-1 sm:pt-1 md:pt-0 flex items-center justify-center overflow-hidden">
+<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 shrink-0 h-8 sm:h-9 md:h-9 flex items-center justify-center overflow-hidden">
     <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight w-full min-w-0 flex justify-center overflow-hidden">
         <AnimalNameWithFlag
             animal={animal}
