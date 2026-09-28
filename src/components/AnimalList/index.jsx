@@ -2858,12 +2858,12 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Centered profile image. This block is the card's flexible element: it takes
-                        the leftover height (flex-1, capped by max-h-*) so that a card with extra
-                        rows below it (e.g. the enclosure "Remove" button) simply gets a slightly
-                        smaller photo instead of growing taller than its neighbours. The
-                        pill/name/line-diamond group below keeps its natural height, so nothing is
-                        ever clipped and every card ends up the same overall height. */}
+                    {/* Centered profile image. Shares the card's spare height with the info group
+                        below (both are flex-1): the photo grows up to its max-h-* and any
+                        remaining slack is left to the group, which centres the pill/name/diamond
+                        rows in it. A card carrying an extra row (e.g. the enclosure "Remove"
+                        button) simply squeezes both blocks a little - nothing is ever clipped
+                        and every card ends up the same overall height. */}
                     <div className="flex-1 min-h-0 flex items-center justify-center w-full px-1 mt-0.5 sm:mt-1 max-h-28 sm:max-h-28 md:max-h-36 overflow-hidden">
                         {/* The gray tile only acts as a placeholder backdrop for animals with no
                             photo (it hosts the Cat icon). When a real image is present it showed
@@ -2886,10 +2886,14 @@ useEffect(() => {
                         </div>
                     </div>
                     
-                    {/* Pill + name + line diamonds, grouped. Each row inside keeps a fixed height
-                        (pill h-6/h-7, name h-7/h-8/h-9, diamonds h-5) so the card is identical in
-                        height whether or not a pill / long name / lines are present. */}
-                    <div className="w-full shrink-0 flex flex-col justify-center">
+                    {/* Pill + name + line diamonds, grouped. This block shares the spare card
+                        height with the photo above (both flex-1) and centres its rows vertically,
+                        so the info sits centred in the available space whether it renders as
+                        pill + name + diamonds, pill + name, or name + diamonds. Each row inside
+                        keeps a fixed height (pill h-6/h-7, name h-8/h-9/h-9, diamonds h-5) so
+                        the info block is the same size in all three cases and the card height
+                        never changes. */}
+                    <div className="w-full flex-1 min-h-0 flex flex-col justify-center">
                     {/* Reproductive State Pill. Fixed height (h-6/h-7) so the card is the same
                         the same height whether or not a pill is present - previously the pill's own
                         height only appeared when there was a state, making those cards taller. The
