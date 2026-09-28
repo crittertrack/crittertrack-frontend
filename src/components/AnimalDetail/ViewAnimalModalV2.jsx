@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
     X, Cat, Mars, Venus, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
@@ -555,11 +556,39 @@ useEffect(() => {
 
                                                     {/* Row 3 */}
                                                     <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
+                                                    {/* Owner and Breeder link to the linked user's public
+                                                        profile whenever breederId_public/ownerId_public
+                                                        is set. The *_id_public field is the link target,
+                                                        so the name only becomes clickable once it
+                                                        actually resolved to a real profile; otherwise it
+                                                        falls back to the manual/free-text name. */}
                                                     <InfoItem compact label="Owner">
-                                                        <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || 'N/A'}</span>
+                                                        {animal.ownerId_public ? (
+                                                            <RouterLink
+                                                                to={`/user/${animal.ownerId_public}`}
+                                                                className="text-accent hover:underline break-words"
+                                                                title={`View ${ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName) : animal.manualownerName || 'owner'}'s public profile`}
+                                                            >
+                                                                {ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || animal.ownerId_public}
+                                                            </RouterLink>
+                                                        ) : (
+                                                            <span>{animal.manualownerName || 'N/A'}</span>
+                                                        )}
                                                         {animal.coOwnership && <span className="text-gray-500 dark:text-dark-text-muted ml-1">({animal.coOwnership})</span>}
                                                     </InfoItem>
-                                                    <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                                    <InfoItem compact label="Breeder">
+                                                        {animal.breederId_public ? (
+                                                            <RouterLink
+                                                                to={`/user/${animal.breederId_public}`}
+                                                                className="text-accent hover:underline break-words"
+                                                                title={`View ${breederInfo ? (breederInfo.breederName || breederInfo.personalName) : animal.manualBreederName || 'breeder'}'s public profile`}
+                                                            >
+                                                                {breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || animal.breederId_public}
+                                                            </RouterLink>
+                                                        ) : (
+                                                            <span>{animal.manualBreederName || 'N/A'}</span>
+                                                        )}
+                                                    </InfoItem>
                                                 </dl>
                                             </div>
                                             <div className="hidden md:flex flex-col">
