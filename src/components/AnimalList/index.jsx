@@ -2840,16 +2840,17 @@ useEffect(() => {
                     {/* Transfer icon now lives in the status bar (see below), freeing the card's
                         top-left corner now that the birthdate/gender/repro icons share a row. */}
 
-                    {/* Breeding line diamonds, absolute top-left. The card's top-left corner is
-                        free - the selection checkbox only renders in select mode, and the transfer
-                        icon moved to the status bar. Absolute means this costs no card height,
+                    {/* Breeding line diamonds, absolute top-left, stacked vertically so they run
+                        down from the top rather than across. A column suits the narrow top-left
+                        corner: horizontally they either wrapped unpredictably at max-w-[5rem] or
+                        ran into the centred birthdate. Vertical costs no card height either way,
                         which is what keeps the card matching the public card's height. */}
                     {!hideBreedingLines && (() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
                         const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                         if (activeLines.length === 0) return null;
                         return (
-                            <div className="absolute top-1.5 left-1.5 z-10 flex flex-wrap gap-0.5 max-w-[5rem]" onClick={(e) => e.stopPropagation()}>
+                            <div className="absolute top-1.5 left-1.5 z-10 flex flex-col items-start gap-0.5" onClick={(e) => e.stopPropagation()}>
                                 {activeLines.map(l => (
                                     <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-xs leading-none">{breedingLineGlyph(l.color)}</span>
                                 ))}
@@ -2860,7 +2861,7 @@ useEffect(() => {
                     {/* Birthdate top-centre. The gender icon sits absolute top-right and the
                         breeding diamonds absolute top-left, so the birthdate is the only thing in
                         this row and can sit centred on its own. */}
-                    <div className="w-full flex items-center justify-center px-2 pt-1 shrink-0">
+                    <div className="w-full flex items-center justify-center px-2 pt-0.5 shrink-0">
                         {birth && !isSelectable && (
                             <span className="text-xs text-gray-600 dark:text-dark-text-secondary">{birth}</span>
                         )}
@@ -2940,11 +2941,15 @@ useEffect(() => {
                         fixed height, so the two stay the same.
                         The name is deliberately larger than the reproductive pill above it
                         (text-xs/text-sm vs the pill's text-[10px]/sm:text-xs); they were the same
-                        size on mobile, which read oddly with the pill outweighing the name. */}
+                        size on mobile, which read oddly with the pill outweighing the name.
+                        pt-1 opens the gap between the pill and the name. The pill's own h-6 row
+                        is already completely filled by the pill, so the space has to come from
+                        this side. It comes out of the flex-grow block's slack, so the card does
+                        not grow. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The wrapper carries
                             text-center so the name+flag box is centred as inline content. */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
+<div className="w-full px-1 sm:px-2 pt-1 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
     <div className="text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
