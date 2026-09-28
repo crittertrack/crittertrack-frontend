@@ -2878,15 +2878,20 @@ useEffect(() => {
                         because the birthdate is in normal flow.
                         The tile is w-24 sm:w-28 md:w-32 to match the card's restored responsive
                         widths: a fixed w-32 (128px) plus the px-2 padding (16px) needs 144px and
-                        would overflow the sm card's 140px max-width. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-1 h-28 overflow-hidden">
+                        would overflow the sm card's 140px max-width.
+                        The band is h-24 rather than h-28 because it is a FIXED height: the tile
+                        fills it exactly, and a landscape photo is letterboxed inside it, so the
+                        slack shows up as white space above and below the image. A shorter band
+                        means less of that dead area. mb-0.5 and the pill's -mt-1 close the rest
+                        of the gap, and both are free - the card's total height is unchanged. */}
+                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
-                        <div className={`relative w-24 sm:w-28 md:w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
+                        <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                             {imgSrc ? (
                                 // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-28">
-                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
+                                <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28">
+                                    <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28 w-auto h-auto object-contain rounded-md" />
                                     {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
@@ -2904,10 +2909,11 @@ useEffect(() => {
 
                     {/* Reproductive state pill, above the name. Fixed height (h-6) so the card is the
                         same height whether or not a pill is present.
-                        -mt-0.5 lifts the pill 2px toward the photo, which is where the slack is:
-                        the gap under the image was twice the gap above the name. That moves the
-                        space rather than adding it, so the card's height is unchanged. */}
-                    <div className="relative w-full flex justify-center items-center h-6 px-1 -mt-0.5 shrink-0">
+                        -mt-1 lifts the pill 4px toward the photo. The slack is above the pill, not
+                        below it, so this moves existing space rather than adding any - the card's
+                        total height is unchanged, and the gap under the image shrinks to match the
+                        one above the name. */}
+                    <div className="relative w-full flex justify-center items-center h-6 px-1 -mt-1 shrink-0">
                         {(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
