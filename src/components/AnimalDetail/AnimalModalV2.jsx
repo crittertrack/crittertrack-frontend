@@ -568,7 +568,7 @@ useEffect(() => {
                                             </button>
                                         ) : null;
                                     })()}
-                                    {onAddSibling && <button onClick={() => onAddSibling(animal)} className="p-2 bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-300 dark:hover:bg-dark-surface-hover transition"><Users size={16} /></button>}
+                                    {onAddSibling && <button onClick={() => onAddSibling(animal)} className="p-2 bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-300 dark:hover:bg-dark-surface-hover transition" title="Add sibling" aria-label="Add sibling"><Users size={16} /></button>}
                                     {onArchive && (
                                         <button
                                             onClick={() => onArchive(animal)}
@@ -585,14 +585,15 @@ useEffect(() => {
                                     {/* Share - same QR + copy-link sheet as ViewAnimalModalV2, so the
                                         private modal has one-tap access to the animal's public link.
                                         The URL is the public /animal/:id_public route, which is what
-                                        other people can actually open. */}
+                                        other people can actually open. Styled to match the archive /
+                                        sibling / transfer icon buttons beside it. */}
                                     <button
                                         onClick={() => setShowQR(true)}
-                                        className="p-2 text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"
+                                        className="p-2 bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-300 dark:hover:bg-dark-surface-hover transition"
                                         title="Share animal link"
                                         aria-label="Share animal link"
                                     >
-                                        <Share size={20} />
+                                        <Share size={16} />
                                     </button>
                                     <button onClick={onClose} className="p-2 text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={20} /></button>
                                 </div>
