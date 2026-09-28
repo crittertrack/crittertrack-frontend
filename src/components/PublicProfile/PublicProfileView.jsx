@@ -1033,9 +1033,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     </div>
                                                 )}
 
-                                                {/* Centered profile image */}
+                                                {/* Centered profile image. The grey tile is only the
+                                                    no-photo placeholder backdrop; with a photo it
+                                                    showed through as a grey box around the
+                                                    letterboxed image, so the background is dropped. */}
                                                 <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28">
-                                                    <div className="relative w-32 h-28 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                    <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
                                                             <div className="relative inline-block max-w-32 max-h-28">
