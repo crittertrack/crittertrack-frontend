@@ -3,7 +3,7 @@ import apiClient from '../../utils/apiClient';
 import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
-    ArrowLeft, ArrowDown, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
+    ArrowLeft, ArrowDown, ArrowLeftRight, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
     DollarSign, Flame, Gem, Globe, Heart, Hourglass, Key, Link, Loader2,
     Mail, Mars, MessageSquare, Moon, QrCode, ScanHeart, Search, Share2, Sparkles, Sprout,
     Star, User, Venus, VenusAndMars, X, Settings
@@ -1018,43 +1018,35 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 onClick={() => onViewAnimal(animal)}
                                                 className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
                                             >
-                                                {/* Birthdate top-centre - centred to match the private
-                                                    card, so the two read identically. */}
+                                                {/* Birthdate, absolute and centred at the top of the card -
+                                                    identical to the private card. It is out of flow,
+                                                    so the h-5 spacer below is what reserves its row. */}
                                                 {birth && (
-                                                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-2 py-0.5 rounded">
+                                                    <div className="absolute top-2.5 left-1/2 transform -translate-x-1/2 z-10 text-xs text-gray-600 dark:text-dark-text-secondary">
                                                         {birth}
                                                     </div>
                                                 )}
 
-                                                {/* Spacer reserving the birthdate's row, as on the private
-                                                    card. The birthdate above is absolute (out of
-                                                    flow), so without this the image rides up under
-                                                    it - and the name's two-line floor pushes the
-                                                    photo band's height down with it. */}
+                                                {/* Spacer reserving the birthdate's row, as on the private card. */}
                                                 <div className="w-full h-5 shrink-0" />
 
-                                                {/* Gender badge top-right */}
+                                                {/* Gender icon, absolute top-right. */}
                                                 {animal.gender && (
                                                     <div className="absolute top-2 right-2" title={animal.gender}>
                                                         {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500 dark:text-dark-text-muted" />}
                                                     </div>
                                                 )}
 
-                                                {/* Centered profile image. The grey tile is only the
-                                                    no-photo placeholder backdrop; with a photo it
-                                                    showed through as a grey box around the
-                                                    letterboxed image, so the background is dropped.
-                                                    The band is the card's flexible consumer (flex-1
-                                                    min-h-0) and matches the private card: the old
-                                                    mt-6 was 24px of dead space that left the
-                                                    two-line name below no room, so a wrapped name
-                                                    was clipped mid-line. */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 flex-1 min-h-0 overflow-hidden">
-                                                    <div className={`relative w-24 sm:w-28 h-24 sm:h-28 max-h-full rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
+                                                {/* Photo. Same band, tile and image caps as the private
+                                                    card (mt-0.5/mb-0.5, h-24 md:h-28, w-24 sm:w-28
+                                                    md:w-32) so both cards lay out identically. The grey
+                                                    tile is only the no-photo placeholder backdrop. */}
+                                                <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
+                                                    <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                                            <div className="relative inline-block max-h-full max-w-24 sm:max-w-28 max-h-24 sm:max-h-28">
-                                                                <img src={imgSrc} alt={animal.name} className="block max-h-full max-w-24 sm:max-w-28 max-h-24 sm:max-h-28 w-auto h-auto object-contain rounded-md" />
+                                                            <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28">
+                                                                <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28 w-auto h-auto object-contain rounded-md" />
                                                                 {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                                             </div>
                                                         ) : (
@@ -1066,40 +1058,55 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     </div>
                                                 </div>
                                                 
-                                                {/* Icon row */}
-                                                <div className="w-full flex justify-center items-center space-x-2 py-1">
-                                                    {/* No icons for public profile - they don't apply */}
+                                                {/* Name, in the same flex-grow info block and two-line-safe
+                                                    name row as the private card. The public card has no
+                                                    pill row, so this block absorbs the ~24px the
+                                                    private card gives to the h-6 reproductive-status
+                                                    row - which is what keeps both cards the same h-56.
+                                                    text-center alone is not enough: AnimalNameWithFlag
+                                                    renders an inline-flex box, so it aligns to the
+                                                    start of its line box. */}
+                                                <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
+                                                    <div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-end justify-center text-center overflow-hidden">
+                                                        <div className="w-full min-w-0 max-h-full overflow-hidden text-xs sm:text-sm md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+                                                            <AnimalNameWithFlag
+                                                                animal={animal}
+                                                                wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
+                                                                textClassName="break-words leading-tight text-center"
+                                                                flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                
-                                                {/* Prefix / Name under image. shrink-0 with a two-line
-                                                    min-h floor, matching the private card: the photo
-                                                    band above is the only flex consumer, so the name
-                                                    is guaranteed two lines and a wrapped name is
-                                                    never clipped mid-line. */}
-<div className="w-full px-1 sm:px-2 pb-1 min-h-[2.25rem] shrink-0 flex items-end justify-center text-center overflow-hidden">
-    <div className="w-full min-w-0 max-h-full overflow-hidden text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
-        <AnimalNameWithFlag
-            animal={animal}
-            wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
-            textClassName="break-words leading-tight text-center"
-            flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
-        />
-    </div>
-</div>
 
-                                                {/* ID bottom-right. shrink-0 so the fixed-height card gives up
-                                                    the slack in the name block above, never this row. */}
-                                                <div className="w-full px-2 pb-2 flex justify-end shrink-0">
-                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
+                                                {/* The private card's toggles row is a no-op here (the
+                                                    public card has no owned/privacy toggles), but the
+                                                    row and its fixed h-5 ID are kept so the ID sits at
+                                                    the same height and the total height matches. */}
+                                                <div className="w-full px-2 pb-2 flex justify-between items-center shrink-0">
+                                                    <div></div>
+                                                    <div className="h-5 flex items-center text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                                                 </div>
-                                                
-                                                {/* Status bar at bottom. shrink-0 keeps the footer a constant
-                                                    height on every card, so status text lines up across a row. */}
+
+                                                {/* Status bar at bottom, identical to the private card
+                                                    including the transfer icon on the left. */}
                                                 {animal.status === 'Deceased' ? (
-                                                    <div className="shrink-0"><DeceasedBanner /></div>
+                                                    <DeceasedBanner />
                                                 ) : (
-                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border shrink-0">
-                                                        <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
+                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto relative">
+                                                        {/* The public animal payload exposes
+                                                            originalCreatorId_public, not the private
+                                                            card's originalCreatorId - see
+                                                            syncPublicAnimals.js. Using the private
+                                                            name here would silently never render. */}
+                                                        {animal.originalCreatorId_public && (
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600 dark:text-dark-text-secondary" title="Received Animal">
+                                                                <ArrowLeftRight size={12} strokeWidth={2.5} />
+                                                            </span>
+                                                        )}
+                                                        <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">
+                                                            {animal.status || 'Unknown'}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
