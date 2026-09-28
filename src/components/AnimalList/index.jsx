@@ -2825,7 +2825,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 sm:h-60 md:h-68 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-[222px] sm:h-60 md:h-68 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -2862,7 +2862,7 @@ useEffect(() => {
                         positioned, so this fixed-height spacer reserves their row and keeps the
                         photo below them instead of underneath. Slightly shorter at md, where the
                         birthdate-to-photo gap reads as too wide. */}
-                    <div className="w-full h-5 sm:h-5 md:h-4 shrink-0" />
+                    <div className="w-full h-[18px] sm:h-5 md:h-4 shrink-0" />
 
                     {/* Photo. Fixed height, not flexible. The info block below is the only
                         flexible row, so it centres itself in the height left over. */}
