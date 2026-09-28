@@ -6347,7 +6347,7 @@ useEffect(() => {
     // unreadable. min-w-[7rem] is what forces the wrap - without it flex-1 squeezed all five into
     // a single unreadable row on a phone, since they can shrink below their content width.
     const FILTER_SELECT_CLS = 'px-2 py-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg min-w-[7rem] flex-1 sm:min-w-0 sm:flex-none';
-    const SORT_SELECT_CLS = 'px-2 py-2 text-sm border rounded-lg min-w-[7rem] flex-1 sm:min-w-0 sm:flex-none';
+    const SORT_SELECT_CLS = 'px-2 py-2 text-sm border rounded-lg min-w-[5.5rem] flex-1 sm:min-w-0 sm:flex-none';
 
     const pinDefaultView = (e, viewKey) => {
         e.stopPropagation();
@@ -6723,7 +6723,11 @@ useEffect(() => {
                             </select>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
+                    {/* w-full on mobile lets the two sort selects actually share the row: they
+                        already carry flex-1 from SORT_SELECT_CLS, but without a full-width parent
+                        that flex-1 has no space to expand into, so they sat at content width.
+                        sm:w-auto restores the natural, right-aligned sizing on desktop. */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto flex-wrap">
                         <span className="hidden sm:inline mx-1 text-gray-300 dark:text-dark-border">|</span>
                         <select
                             value={sortConfig.key === 'name' ? sortConfig.direction : 'ascending'}
