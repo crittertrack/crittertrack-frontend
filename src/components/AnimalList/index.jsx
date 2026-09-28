@@ -2876,9 +2876,33 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {/* Photo. mt-0.5/mb-1 keep the vertical budget tight now that the pill's h-6 is
-                        back in the card - the public card's mt-6 is dead space we no longer need
-                        because the birthdate is in normal flow.
+                    {/* Reproductive state pill, in its own row directly above the image. It is the
+                        same fixed h-6 (24px) row it always was - only its position in the card
+                        changed - so the card's height is unchanged and a card with no pill still
+                        occupies the identical 24px, keeping every card the same height. */}
+                    <div className="relative w-full flex justify-center items-center h-6 px-1 shrink-0">
+                        {(() => {
+                            // Determine reproductive state to display (prioritized)
+                            let state = null;
+                            if (animal.isPregnant) {
+                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
+                            } else if (animal.isNursing) {
+                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
+                            } else if (animal.isInMating) {
+                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
+                            } else if (animal.isPlannedMating) {
+                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
+                            }
+                            return state ? (
+                                <span className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
+                                    {state.icon} {state.label}
+                                </span>
+                            ) : null;
+                        })()}
+                    </div>
+
+                    {/* Photo. mt-0.5/mb-1 keep the vertical budget tight - the public card's mt-6
+                        is dead space we no longer need because the birthdate is out of flow.
                         The tile is w-24 sm:w-28 md:w-32 to match the card's restored responsive
                         widths: a fixed w-32 (128px) plus the px-2 padding (16px) needs 144px and
                         would overflow the sm card's 140px max-width.
@@ -2910,11 +2934,9 @@ useEffect(() => {
                         height, matching the public card, whose name block does the same. */}
                     <div className="w-full flex-grow min-h-0 flex flex-col justify-center">
 
-                    {/* Name first, then the reproductive pill below it.
-                        The name row is flex-1 (not flex-grow): it soaks up the block's spare
-                        height, and the block's justify-center then centres the name+pill pair as a
-                        unit. With no pill, the name is the only child and sits vertically centred
-                        in that space on its own. */}
+                    {/* Name. flex-1 (not flex-grow) so it soaks up the block's spare height, and
+                        the block's justify-center then centres it in that space - so a card with
+                        no reproductive pill has its name vertically centred on its own. */}
                         {/* text-center alone is not enough: AnimalNameWithFlag renders an inline-flex
                             box, so it aligns to the start of its line box. The wrapper carries
                             text-center so the name+flag box is centred as inline content. */}
@@ -2929,36 +2951,10 @@ useEffect(() => {
     </div>
 </div>
 
-                    {/* Reproductive state pill, below the name. Fixed height (h-6) so the card is
-                        the same height whether or not a pill is present - an animal with no
-                        reproductive state gets the same layout with just the name, centred.
-                        -mt-1 keeps it tucked up toward the name. */}
-                    <div className="relative w-full flex justify-center items-center h-6 px-1 -mt-1 shrink-0">
-                        {(() => {
-                            // Determine reproductive state to display (prioritized)
-                            let state = null;
-                            if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
-                            } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
-                            } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
-                            } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
-                            }
-                            return state ? (
-                                <span className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
-                                    {state.icon} {state.label}
-                                </span>
-                            ) : null;
-                        })()}
-                    </div>
-
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* Breeding line diamonds now render inside the photo band, absolutely
-                        positioned along the image's left edge (see above), so they cost no card
-                        height here. */}
+                    {/* Breeding line diamonds are absolute at the card's top-left corner (see above),
+                        so they cost no card height here. */}
                     </div>
 
                     {/* Management action buttons slot */}
