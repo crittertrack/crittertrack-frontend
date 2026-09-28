@@ -343,7 +343,6 @@ const AnimalList = ({
         });
     }, []);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
-    const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
     const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
@@ -552,17 +551,6 @@ const AnimalList = ({
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken]);
 
-    // Fetch ALL animals created by this user with status=Available (ignores ownership filter)
-    const fetchAvailableAnimals = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const res = await apiClient.get(`/animals`, {
-                params: { status: 'Available' }
-            });
-            setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
-        } catch (err) { console.error('[fetchAvailableAnimals]', err); }
-    }, [authToken]);
-
     // Fetch view-only/transferred animals — these are animals the user sold/transferred but retains view-only access to
     const fetchSoldTransferred = useCallback(async () => {
         if (!authToken) return;
@@ -624,7 +612,7 @@ const AnimalList = ({
     };
 
     // Duplicates state
-     const [showForSaleScreen, setShowForSaleScreen] = useState(false); const [defaultMyAnimalsViewMode, setDefaultMyAnimalsViewMode] = useState(() => {
+     const [defaultMyAnimalsViewMode, setDefaultMyAnimalsViewMode] = useState(() => {
         try { return localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
     });
     const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(defaultMyAnimalsViewMode);
@@ -1439,12 +1427,11 @@ useEffect(() => {
             try { fetchAnimals(); } catch (e) { /* ignore */ }
             try { fetchAllSpecies(); } catch (e) { /* ignore */ }
             try { fetchAllAnimals(); } catch (e) { /* ignore */ }
-            try { fetchAvailableAnimals(); } catch (e) { /* ignore */ }
             try { fetchSoldTransferred(); } catch (e) { /* ignore */ }
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals, fetchSoldTransferred, fetchLitters]);
+    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchSoldTransferred, fetchLitters]);
 
     // Patch a single updated animal in-place without reloading the full list
     useEffect(() => {
@@ -1453,10 +1440,6 @@ useEffect(() => {
             if (!updated?.id_public) return;
             setAnimals(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
-            setAvailableAnimalsRaw(prev => {
-                const next = prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a);
-                return next.filter(a => a.status === 'Available');
-            });
             setSoldTransferredRaw(prev =>
                 prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a).filter(a => a.isViewOnly)
             );
@@ -1477,7 +1460,6 @@ useEffect(() => {
     }, [fetchAnimals, fetchAllAnimals, showArchiveScreen]);
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
-    useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
     // Load collections from API on auth change — always overwrite state from server to prevent cross-user leakage
@@ -2285,7 +2267,6 @@ useEffect(() => {
     const nursingList = useMemo(() => allAnimals
         .filter(a => a.gender !== 'Male' && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a)) && !!a.isNursing)
         .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
-    const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
     const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(isTaskDue).length, 0);
@@ -3005,7 +2986,10 @@ useEffect(() => {
                         views use it for their assign/unassign and remove actions, which previously
                         sit in a separate cardActions strip above the toggles. Either way it is the same fixed
                         h-6 row, so every card stays the same height. */}
-                    <div className="w-full h-6 flex justify-center items-center bg-gray-100 dark:bg-dark-surface border-t border-gray-300 dark:border-dark-border shrink-0">
+                    {/* onClick stopPropagation: a caller-supplied statusSlot can hold an interactive
+                        control (the Enclosures view puts an enclosure <select> here). Without this,
+                        clicking it bubbles to the card's onClick and opens the animal instead. */}
+                    <div className="w-full h-6 flex justify-center items-center bg-gray-100 dark:bg-dark-surface border-t border-gray-300 dark:border-dark-border shrink-0" onClick={e => e.stopPropagation()}>
                         {statusSlot || (() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
@@ -4578,22 +4562,6 @@ useEffect(() => {
             } }));
         };
 
-        const handleMarkRehomed = (e, animal) => {
-            e.stopPropagation();
-            if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
-            // Optimistic update
-            setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
-            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed' } }));
-            apiClient.put(`/animals/${animal.id_public}`, { status: 'Rehomed' })
-                .catch(err => {
-                    console.error('Mark rehomed failed:', err);
-                    // Rollback
-                    setAvailableAnimalsRaw(prev => [...prev, { ...animal }]);
-                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Available' } : a));
-                });
-        };
-
         const handleMarkAnimalCareTaskDone = (e, animal, taskIdx) => {
             e.stopPropagation();
             const fieldName = 'animalCareTasks';
@@ -5257,38 +5225,6 @@ useEffect(() => {
                     )}
                 </div>)}
 
-                {/* -- 5. FOR SALE / AVAILABLE (moved to top-bar button) ------ */}
-                {!view && (<div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="available"
-                        icon={<ShoppingBag size={18} className="text-purple-600 dark:text-purple-400" />}
-                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50 dark:bg-purple-900/20" />
-                    {!collapsedMgmtSections['available'] && (
-                        <div className="p-3">
-                            {availableList.length === 0
-                                ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">No animals currently marked as Available.</div>
-                                : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                    {availableList.map(a => (
-                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                            hideControls hideBreedingLines
-                                            cardActions={<>
-                                                {a.isForSale && a.salePriceAmount && (
-                                                    <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium truncate w-full text-center">
-                                                        {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
-                                                    </div>
-                                                )}
-                                                <button onClick={(e) => handleMarkRehomed(e, a)}
-                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
-                                                    <Check size={9} /> Rehomed
-                                                </button>
-                                            </>}
-                                        />
-                                    ))}
-                                </div>
-                            }
-                        </div>
-                    )}
-                </div>)}
-
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
                 {/* -- Feeding Modal ------------------------------------------------------- */}
@@ -5740,7 +5676,7 @@ useEffect(() => {
                                                                     <select autoFocus defaultValue=""
                                                                         onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosureInline(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
                                                                         onBlur={() => setAssigningAnimalId(null)}
-                                                                        className="text-[10px] border border-blue-300 rounded p-1 max-w-full">
+                                                                        className="text-[10px] leading-none h-5 max-w-full px-1 py-0 border border-blue-300 rounded align-middle">
                                                                         <option value="" disabled>Select enclosure...</option>
                                                                         {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
                                                                     </select>
@@ -6091,7 +6027,7 @@ useEffect(() => {
                         />
                         {!showDuplicatesScreen && (
                             <button
-                                onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
+                                onClick={() => { setShowArchiveScreen(v => !v); }}
                                 className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'}`}
                                 title="Archive"
                             >
@@ -6301,7 +6237,7 @@ useEffect(() => {
         }
     }, [allAnimalsRaw, onViewAnimal, navigate, showModalMessageRef]);
 
-    const liteViewTitle = animalView === 'list' ? 'My Animals' : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals';
+    const liteViewTitle = animalView === 'list' ? 'My Animals' : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : 'My Animals';
 
     // The one and only definition of the animal-view tab bar. Both the mobile (sm:hidden) and
     // desktop (hidden sm:flex) bars below map over this — they previously had their own hardcoded
@@ -6414,7 +6350,7 @@ useEffect(() => {
                             the wrapping header row and was pushing Add Animal onto its own line. */}
                         {!showArchiveScreen && (
                             <button
-                                onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
+                                onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); }}
                                 className={`${isLite ? 'hidden' : 'hidden sm:flex'} items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 dark:bg-amber-700 text-white border-amber-500 dark:border-amber-700' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
                                 title="Find Duplicate Animals"
                             >
@@ -6443,7 +6379,7 @@ useEffect(() => {
                                 </div>
                                 {!showDuplicatesScreen && (
                                     <button
-                                        onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
+                                        onClick={() => { setShowArchiveScreen(v => !v); }}
                                         className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'}`}
                                         title="Archive"
                                     >

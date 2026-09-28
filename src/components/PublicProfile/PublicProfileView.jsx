@@ -1016,7 +1016,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                         <div key={animal.id_public} className="w-full flex justify-center">
                                             <div
                                                 onClick={() => onViewAnimal(animal)}
-                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-44 min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
+                                                className="relative bg-white dark:bg-dark-card-bg rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 dark:border-dark-text pt-3"
                                             >
                                                 {/* Birthdate top-centre - centred to match the private
                                                     card, so the two read identically. */}
@@ -1037,12 +1037,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     no-photo placeholder backdrop; with a photo it
                                                     showed through as a grey box around the
                                                     letterboxed image, so the background is dropped. */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-28">
-                                                    <div className={`relative w-32 h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
+                                                <div className="flex items-center justify-center w-full px-2 mt-6 mb-2 h-24 sm:h-28">
+                                                    <div className={`relative w-24 sm:w-28 h-24 sm:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
-                                                            <div className="relative inline-block max-w-32 max-h-28">
-                                                                <img src={imgSrc} alt={animal.name} className="block max-w-32 max-h-28 w-auto h-auto object-contain rounded-md" />
+                                                            <div className="relative inline-block max-w-24 sm:max-w-28 max-h-24 sm:max-h-28">
+                                                                <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 max-h-24 sm:max-h-28 w-auto h-auto object-contain rounded-md" />
                                                                 {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                                             </div>
                                                         ) : (
@@ -1059,9 +1059,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     {/* No icons for public profile - they don't apply */}
                                                 </div>
                                                 
-                                                {/* Prefix / Name under image */}
-<div className="w-full px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow justify-center text-center">
-    <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
+                                                {/* Prefix / Name under image. flex-1 + min-h-0 + overflow-hidden, matching
+                                                    the private card: the block absorbs the card's spare
+                                                    height instead of contributing to it, so a name that
+                                                    wraps to a second line can never push the ID and
+                                                    status bar down out of line with its neighbours. */}
+<div className="w-full px-1 sm:px-2 pb-1 flex-1 min-h-0 flex items-end justify-center text-center overflow-hidden">
+    <div className="w-full min-w-0 max-h-full overflow-hidden text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text leading-tight">
         <AnimalNameWithFlag
             animal={animal}
             wrapperClassName="inline-flex max-w-full items-start justify-center gap-1"
@@ -1071,16 +1075,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     </div>
 </div>
 
-                                                {/* ID bottom-right */}
-                                                <div className="w-full px-2 pb-2 flex justify-end">
+                                                {/* ID bottom-right. shrink-0 so the fixed-height card gives up
+                                                    the slack in the name block above, never this row. */}
+                                                <div className="w-full px-2 pb-2 flex justify-end shrink-0">
                                                     <div className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                                                 </div>
                                                 
-                                                {/* Status bar at bottom */}
+                                                {/* Status bar at bottom. shrink-0 keeps the footer a constant
+                                                    height on every card, so status text lines up across a row. */}
                                                 {animal.status === 'Deceased' ? (
-                                                    <DeceasedBanner />
+                                                    <div className="shrink-0"><DeceasedBanner /></div>
                                                 ) : (
-                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                    <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border shrink-0">
                                                         <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
                                                     </div>
                                                 )}
