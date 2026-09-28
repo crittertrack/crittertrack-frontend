@@ -106,7 +106,7 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                                             {formatAnimalDisplayName(animal)}
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">
-                                            {animal.species} • {animal.gender} • {animal.id_public}
+                                            {animal.species} Ã¢â‚¬Â¢ {animal.gender} Ã¢â‚¬Â¢ {animal.id_public}
                                         </p>
                                     </div>
                                 </button>
@@ -338,7 +338,7 @@ const EnclosureDetailModal = ({
         }
     };
 
-// Handle add note — uses PATCH $push to append to notesHistory
+// Handle add note Ã¢â‚¬â€ uses PATCH $push to append to notesHistory
     const handleAddNote = async () => {
         if (!newNote.trim()) return;
         const noteEntry = {
@@ -445,7 +445,7 @@ const EnclosureDetailModal = ({
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                         <h2 className="text-2xl font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{enclosure.name}</h2>
                         <p className="text-sm text-gray-200" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-                            {enclosure.enclosureType && `${enclosure.enclosureType} • `}
+                            {enclosure.enclosureType && `${enclosure.enclosureType} Ã¢â‚¬Â¢ `}
                             {enclosure.locationName || enclosure.location || 'No location set'}
                         </p>
                     </div>
@@ -511,7 +511,7 @@ const EnclosureDetailModal = ({
                                 <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-2 border border-gray-100 dark:border-dark-text-muted">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Temperature</p>
                                     <p className="text-lg font-bold mt-0.5 text-gray-800 dark:text-dark-text">
-                                        {enclosure.tempMin ? `${enclosure.tempMin}°` : '?'} - {enclosure.tempMax ? `${enclosure.tempMax}°` : '?'}
+                                        {enclosure.tempMin ? `${enclosure.tempMin}Ã‚Â°` : '?'} - {enclosure.tempMax ? `${enclosure.tempMax}Ã‚Â°` : '?'}
                                     </p>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-2 border border-gray-100 dark:border-dark-text-muted">
@@ -548,7 +548,7 @@ const EnclosureDetailModal = ({
                                       <div className="text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Type</span>
-                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.enclosureType || '—'}</span>
+                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.enclosureType || 'Ã¢â‚¬â€'}</span>
                                         </div>
                                          <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Purpose</span>
@@ -562,7 +562,7 @@ const EnclosureDetailModal = ({
                                         )}
                                          <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Location</span>
-                                              <span className="text-gray-800 dark:text-dark-text">{enclosure.locationName || enclosure.location || '—'}</span>
+                                              <span className="text-gray-800 dark:text-dark-text">{enclosure.locationName || enclosure.location || 'Ã¢â‚¬â€'}</span>
                                         </div>
                                         {enclosure.location?.address && (
                                             <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted">
@@ -580,7 +580,7 @@ const EnclosureDetailModal = ({
                                                     if (typeof dims === 'object' && dims !== null) {
                                                         return `${dims.length || '?'}x${dims.width || '?'}x${dims.height || '?'} ${dims.unit || 'in'}`;
                                                     }
-                                                    return dims || '—';
+                                                    return dims || 'Ã¢â‚¬â€';
                                                 })()}
                                             </span>
                                         </div>
@@ -591,7 +591,7 @@ const EnclosureDetailModal = ({
                                                     enclosure.lightTimeFormat === '12h'
                                                         ? `${new Date('1970-01-01T' + enclosure.lightsOnTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${new Date('1970-01-01T' + enclosure.lightsOffTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
                                                         : `${enclosure.lightsOnTime} - ${enclosure.lightsOffTime}`
-                                                ) : (enclosure.lightingSchedule || enclosure.lighting || '—')}
+                                                ) : (enclosure.lightingSchedule || enclosure.lighting || 'Ã¢â‚¬â€')}
                                                 </span>
                                         </div>
                                         {enclosure.lightingType && (
@@ -728,14 +728,19 @@ const EnclosureDetailModal = ({
                                                     {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                 </p>
                                                 <p className="text-xs text-gray-500 dark:text-dark-text-muted">
-                                                    {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
+                                                    {animal.species} Ã¢â‚¬Â¢ {animal.gender} Ã¢â‚¬Â¢ {animal.status || 'Unknown'}
                                                 </p>
                                             </div>
                                             <span className="text-[11px] text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
+                                            {/* Always visible, not hover-only: touch devices have no
+                                                hover, so an opacity-0 group-hover:opacity-100 button
+                                                was completely unreachable on mobile - and even on
+                                                desktop nothing signalled it was there. */}
                                             <button
                                                 onClick={() => onUnassignAnimal(animal)}
-                                                className="p-2 rounded-lg text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title="Unassign from enclosure"
+                                                className="p-2 rounded-lg text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                                                title="Remove from enclosure"
+                                                aria-label={`Remove ${animal.name} from enclosure`}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -758,12 +763,12 @@ const EnclosureDetailModal = ({
                                     <div className="flex items-center gap-3">
                                         <div className="text-center">
                                             <p className="text-2xl font-bold text-blue-600">{enclosure.tempMin || '?'}</p>
-                                            <p className="text-[11px] text-gray-500 dark:text-dark-text-muted">Min (°C)</p>
+                                            <p className="text-[11px] text-gray-500 dark:text-dark-text-muted">Min (Ã‚Â°C)</p>
                                         </div>
-                                        <span className="text-gray-300 dark:text-dark-text-muted text-xl">—</span>
+                                        <span className="text-gray-300 dark:text-dark-text-muted text-xl">Ã¢â‚¬â€</span>
                                         <div className="text-center">
                                             <p className="text-2xl font-bold text-red-600">{enclosure.tempMax || '?'}</p>
-                                            <p className="text-[11px] text-gray-500 dark:text-dark-text-muted">Max (°C)</p>
+                                            <p className="text-[11px] text-gray-500 dark:text-dark-text-muted">Max (Ã‚Â°C)</p>
                                         </div>
                                     </div>
                                 </div>
@@ -778,7 +783,7 @@ const EnclosureDetailModal = ({
                                             <p className="text-2xl font-bold text-blue-600">{enclosure.humidityMin || '?'}</p>
                                             <p className="text-[11px] text-gray-500 dark:text-dark-text-muted">Min (%)</p>
                                         </div>
-                                        <span className="text-gray-300 dark:text-dark-text-muted text-xl">—</span>
+                                        <span className="text-gray-300 dark:text-dark-text-muted text-xl">Ã¢â‚¬â€</span>
                                         <div className="text-center">
                                             <p className="text-2xl font-bold text-red-600">{enclosure.humidityMax || '?'}</p>
                                             <p className="text-[11px] text-gray-500 dark:text-dark-text-muted">Max (%)</p>
@@ -956,8 +961,9 @@ const EnclosureDetailModal = ({
                                                     {!note.pending && (
                                                         <button
                                                             onClick={() => handleDeleteNote(note.id)}
-                                                            className="p-1 rounded text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            className="p-1 rounded text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 transition-colors shrink-0"
                                                             title="Delete note"
+                                                            aria-label="Delete note"
                                                         >
                                                             <Trash2 size={14} />
                                                         </button>
