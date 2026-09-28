@@ -3555,10 +3555,11 @@ useEffect(() => {
                                                             <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
-                                                                className="absolute top-1 left-1 z-20 bg-white/90 dark:bg-dark-card-bg/90 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-full p-0.5 shadow-sm border border-gray-200 dark:border-dark-text-muted"
+                                                                className="absolute top-2 left-2 z-20 bg-white/90 dark:bg-dark-card-bg/90 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 hover:text-red-600 dark:hover:text-red-400 rounded-full p-1.5 shadow-sm border border-gray-200 dark:border-dark-text-muted"
                                                                 title="Remove from this collection"
+                                                                aria-label={`Remove ${animal.name || 'animal'} from this collection`}
                                                             >
-                                                                <X size={11} />
+                                                                <X size={16} />
                                                             </button>
                                                         </div>
                                                     ))}
@@ -3600,7 +3601,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-right">
-                                                                            <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white dark:bg-dark-card-bg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200 dark:border-dark-text-muted" title="Remove from this collection"><X size={11} /></button>
+                                                                            <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white dark:bg-dark-card-bg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 hover:text-red-600 rounded-full p-1.5 shadow-sm border border-gray-200 dark:border-dark-text-muted" title="Remove from this collection" aria-label="Remove from this collection"><X size={16} /></button>
                                                                         </td>
                                                                     </tr>
                                                                 );
@@ -5501,9 +5502,9 @@ useEffect(() => {
                                                             <button
                                                                 key={a.id_public}
                                                                 onClick={(e) => { e.stopPropagation(); removeAnimalFromCollection(a.id_public, col.id); }}
-                                                                className="w-full flex items-center gap-2 text-left text-xs px-1.5 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-gray-700 dark:text-dark-text-secondary"
+                                                                className="w-full flex items-center gap-2 text-left text-xs px-1.5 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-gray-700 dark:text-dark-text-secondary"
                                                             >
-                                                                <X size={12} className="text-red-500 shrink-0" />
+                                                                <X size={16} className="text-red-500 shrink-0" />
                                                                 <span className="truncate">{formatAnimalDisplayName({ ...a, name: a.name || 'Unnamed' })}</span>
                                                             </button>
                                                         ))}
@@ -6298,9 +6299,10 @@ useEffect(() => {
     // gender, breeding lines, and the two sort controls). The filter selects also take flex-1
     // min-w-0 so they tile evenly across a phone's width instead of each sizing to its own label.
     // Text stays at text-sm everywhere: dropping to text-xs on mobile made the selects genuinely
-    // unreadable, so the compaction comes from the padding and the shorter labels instead.
-    const FILTER_SELECT_CLS = 'px-2 py-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg min-w-0 flex-1 sm:flex-none';
-    const SORT_SELECT_CLS = 'px-2 py-2 text-sm border rounded-lg min-w-0 flex-1 sm:flex-none';
+    // unreadable. min-w-[7rem] is what forces the wrap - without it flex-1 squeezed all five into
+    // a single unreadable row on a phone, since they can shrink below their content width.
+    const FILTER_SELECT_CLS = 'px-2 py-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg min-w-[7rem] flex-1 sm:min-w-0 sm:flex-none';
+    const SORT_SELECT_CLS = 'px-2 py-2 text-sm border rounded-lg min-w-[7rem] flex-1 sm:min-w-0 sm:flex-none';
 
     const pinDefaultView = (e, viewKey) => {
         e.stopPropagation();
