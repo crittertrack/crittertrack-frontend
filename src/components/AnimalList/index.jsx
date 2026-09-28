@@ -5954,8 +5954,8 @@ useEffect(() => {
                     two lines) and 5-up from sm, where they collapse to a single inline pill.
                     Full is unchanged. */}
                 <div className={`${isLite ? 'grid grid-cols-2 sm:grid-cols-5 gap-1.5 items-start' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start'}`}>
-                    {/* Column 1: Total Animals */}
-                    <div className="flex flex-col gap-2">
+                    {/* Column 1: Total Animals. order-1 on mobile so it stays first. */}
+                    <div className="flex flex-col gap-2 order-1 sm:order-none">
                         <StatCard
                             icon={<Cat size={32} className="text-blue-800 dark:text-blue-200" />}
                             label="Total Animals"
@@ -6001,14 +6001,16 @@ useEffect(() => {
                                 All
                             </button>
                         </div>
-                        <div className="text-center text-[10px] text-gray-400 dark:text-dark-text-muted mt-1">
+                        {/* Hidden on mobile: it is a desktop-only clarification, and it cost a
+                            whole line in the narrow phone layout. */}
+                        <div className="hidden sm:block text-center text-[10px] text-gray-400 dark:text-dark-text-muted mt-1">
                             Applies to all tabs
                         </div>
                     </div>
 
                     {/* Column 2: Owned — bulk owned/unowned setter, not shown in Lite mode */}
                     {true && (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 order-3 sm:order-none">
                         <StatCard
                             icon={<Heart size={32} className="text-red-800 dark:text-red-200" />}
                             label="Owned"
@@ -6034,7 +6036,7 @@ useEffect(() => {
 
                     {/* Column 3: Public — bulk public/private setter, not shown in Lite mode */}
                     {true && (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 order-4 sm:order-none">
                         <StatCard
                             icon={<Eye size={32} className="text-green-800 dark:text-green-200" />}
                             label="Public"
@@ -6058,8 +6060,10 @@ useEffect(() => {
                     </div>
                     )}
 
-                    {/* Column 4: Sold/Archived */}
-                    <div className="flex flex-col gap-2">
+                    {/* Column 4: Sold/Archived. order-2 on mobile — second position, right after
+                        Total Animals, since it's the one a keeper checks often. From sm up the
+                        natural document order is restored. */}
+                    <div className="flex flex-col gap-2 order-2 sm:order-none">
                         <StatCard
                             icon={<Archive size={32} className="text-purple-800 dark:text-purple-200" />}
                             label="Sold / Archived"
@@ -6288,11 +6292,12 @@ useEffect(() => {
     ].filter(tab => !isLite || !LITE_HIDDEN_TABS.includes(tab.key))), [isLite]);
 
     // Shared styling for every filter/sort <select> in the filter bar (category, species, status,
-    // gender, breeding lines, and the two sort controls). Tighter on mobile, normal from sm up.
-    // The filter selects also take flex-1 min-w-0 so they tile evenly across a phone's width
-    // instead of each sizing to its own (differing) label.
-    const FILTER_SELECT_CLS = 'px-2 py-1.5 text-xs sm:px-2.5 sm:py-2 sm:text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg min-w-0 flex-1 sm:flex-none';
-    const SORT_SELECT_CLS = 'px-2 py-1.5 text-xs sm:px-2.5 sm:py-2 sm:text-sm border rounded-lg min-w-0 flex-1 sm:flex-none';
+    // gender, breeding lines, and the two sort controls). The filter selects also take flex-1
+    // min-w-0 so they tile evenly across a phone's width instead of each sizing to its own label.
+    // Text stays at text-sm everywhere: dropping to text-xs on mobile made the selects genuinely
+    // unreadable, so the compaction comes from the padding and the shorter labels instead.
+    const FILTER_SELECT_CLS = 'px-2 py-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text rounded-lg min-w-0 flex-1 sm:flex-none';
+    const SORT_SELECT_CLS = 'px-2 py-2 text-sm border rounded-lg min-w-0 flex-1 sm:flex-none';
 
     const pinDefaultView = (e, viewKey) => {
         e.stopPropagation();
