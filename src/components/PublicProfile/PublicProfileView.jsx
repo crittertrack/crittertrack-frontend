@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
+import { userShareUrl } from '../../utils/publicUrl';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import ReportButton from '../ReportButton';
@@ -502,7 +503,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     }, [profile?.id_public, profile, API_BASE_URL]);
     
     const handleShare = () => {
-        const url = `${window.location.origin}/user/${(freshProfile?.id_public || profile.id_public)}`;
+        const url = userShareUrl(freshProfile?.id_public || profile.id_public);
         navigator.clipboard.writeText(url).then(() => {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
@@ -738,7 +739,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <QrCode size={16} />
                                 Share Profile
                             </button>
-                            {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
+                            {showQR && <QRModal url={userShareUrl(freshProfile?.id_public || profile.id_public)} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
                             <ReportButton
                                 contentType="profile"
                                 contentId={profile.id_public}

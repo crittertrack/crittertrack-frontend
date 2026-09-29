@@ -11,6 +11,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { openExternalLink } from '../../utils/externalLink';
+import { animalShareUrl } from '../../utils/publicUrl';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
@@ -101,6 +102,9 @@ const ViewAnimalModalV2 = ({
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal?.imageUrl || animal?.photoUrl);
     const [showQR, setShowQR] = useState(false);
+    // Absolute public link, resolved against the real site origin (see utils/publicUrl.js —
+    // the native WebView's own origin is "https://localhost", which is not shareable).
+    const shareUrl = animalShareUrl(animal.id_public);
     const [isFavorited, setIsFavorited] = useState(false);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
@@ -2540,7 +2544,7 @@ useEffect(() => {
                         </div>
                         <div className="p-3 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-xl">
                             <QRCodeSVG 
-                                value={`${window.location.origin}/animal/${animal.id_public}`} 
+                                value={shareUrl} 
                                 size={196} 
                                 bgColor="#ffffff" 
                                 fgColor="#111827" 
@@ -2548,11 +2552,11 @@ useEffect(() => {
                             />
                         </div>
                         <p className="text-xs text-gray-400 dark:text-dark-text-muted break-all text-center leading-relaxed">
-                            {`${window.location.origin}/animal/${animal.id_public}`}
+                            {shareUrl}
                         </p>
                         <button
                             onClick={() => {
-                                navigator.clipboard.writeText(`${window.location.origin}/animal/${animal.id_public}`);
+                                navigator.clipboard.writeText(shareUrl);
                                 alert('Link copied to clipboard!');
                             }}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"

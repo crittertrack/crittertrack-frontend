@@ -812,8 +812,9 @@ const AnimalList = ({
             }
             return;
         }
-        // Subsequent changes are real in-app navigation (e.g. LiteBottomNav) — always sync,
-        // otherwise navigating back to "Animals" gets stuck showing the previous tab until refresh.
+        // Subsequent changes are real in-app navigation (e.g. switching animal view tabs) —
+        // always sync, otherwise navigating back to "Animals" gets stuck showing the previous
+        // tab until refresh.
         setAnimalView(normalizeAnimalView(initialAnimalView));
     }, [initialAnimalView]);
 
@@ -5964,7 +5965,7 @@ useEffect(() => {
                     </div>
 
                     {/* Column 2: Owned — bulk owned/unowned setter, not shown in Lite mode */}
-                    {true && (
+                    {!isLite && (
                     <div className="flex flex-col gap-2 order-3 sm:order-none">
                         <StatCard
                             icon={<Heart size={32} className="text-red-800 dark:text-red-200" />}
@@ -5990,7 +5991,7 @@ useEffect(() => {
                     )}
 
                     {/* Column 3: Public — bulk public/private setter, not shown in Lite mode */}
-                    {true && (
+                    {!isLite && (
                     <div className="flex flex-col gap-2 order-4 sm:order-none">
                         <StatCard
                             icon={<Eye size={32} className="text-green-800 dark:text-green-200" />}
@@ -6041,7 +6042,7 @@ useEffect(() => {
                         The whole column (not just its StatCard) is hidden on mobile: an empty wrapper div
                         is still a grid item, and with no order class it defaulted to 0 — sorting ahead of
                         Total Animals' order-1 and taking the first grid cell on mobile. */}
-                    {true && (
+                    {!isLite && (
                     <div className="hidden sm:flex flex-col gap-2 order-5 sm:order-none">
                         {(() => {
                             const totalAttention = feedingCareDueDashboard.length + generalTaskDue.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
@@ -6281,7 +6282,7 @@ useEffect(() => {
                     title's row on mobile no matter how many other controls were removed. */}
                 <div className="flex flex-row items-center w-full gap-2 min-w-0 mb-4">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                        {true && (
+                        {!isLite && (
                             <>
                                 <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
                                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate min-w-0" data-tutorial-target="my-animals-title">
@@ -6289,7 +6290,7 @@ useEffect(() => {
                                 </h2>
                             </>
                         )}
-                        {false && (
+                        {isLite && (
                             <>
                                 <ClipboardList size={20} className="shrink-0" />
                                 <h2 className="text-lg font-bold truncate shrink-0" data-tutorial-target="my-animals-title">{liteViewTitle}</h2>
@@ -6359,7 +6360,7 @@ useEffect(() => {
                             </button>
                         )}
                         {/* Lite mode: just the Owned/All toggle + Archive button, no counters, standing in for the full dashboard grid */}
-                        {false && isListLikeView && (
+                        {isLite && isListLikeView && (
                             <>
                                 <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
                                     <button
@@ -6449,7 +6450,7 @@ useEffect(() => {
                 )}
 
                 {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies
-                    — hidden in Lite mode, where LiteBottomNav switches between these views instead. */}
+                    — shown in both modes, trimmed to 3 tabs in Lite and 6 in Full. */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 dark:border-dark-text-muted rounded-xl overflow-hidden shadow-sm">
                 {/* 3 tabs in Lite (My Animals / Collections / Enclosures), 6 in Full — both fit

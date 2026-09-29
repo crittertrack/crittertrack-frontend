@@ -31,7 +31,6 @@ import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import LiteModeToggle from './components/LiteModeToggle';
-import LiteBottomNav from './components/LiteBottomNav';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
 import SyncFailureBanner from './components/shared/SyncFailureBanner';
@@ -308,11 +307,10 @@ const App = () => {
     // Derive currentView from URL path
     const currentView = location.pathname.split('/')[1] || 'list';
 
-    // Lite mode is desktop/PWA web only — never on the native Android/iOS full app (that has
-    // its own separate crittertrack-lite app already). See docs/lite-web-toggle-brainstorm.md.
     // Lite mode ──────────────────────────────────────────────────────────────
     // Lite is reachable via the header toggle (LiteModeToggle), which sets the account's
-    // uiMode. Lite is the Full frontend with a deliberately smaller surface:
+    // uiMode, on both web and the native Android app. Lite is the Full frontend with a
+    // deliberately smaller surface:
     //   - main nav drops Contacts, Marketplace, Calendar, Community, Tools, Finance
     //   - management drops the Reproduction, Health and Feeding & Care tabs
     // Every other surface is the Full frontend — the old per-branch Lite conditionals have
@@ -2078,7 +2076,9 @@ const App = () => {
                         </div>
                     </div>
 
-                    {/* Third & Fourth rows: legacy nav — hidden entirely in Lite mode, replaced by LiteBottomNav */}
+                    {/* Third & Fourth rows: legacy nav — Contacts/Marketplace hidden in Lite mode,
+                        and the Calendar/Community row is skipped entirely (the conditional below
+                        already unwraps this block when isLite). */}
                     {true && (
                     <>
                     <nav className={`grid grid-cols-${isLite ? '2' : '4'} gap-1 mb-1`}>
@@ -2520,8 +2520,6 @@ const App = () => {
                   API_BASE_URL={API_BASE_URL}
                 />
             </main>
-
-            {false && <LiteBottomNav />}
 
             {/* Image Enlarge Modal */}
             {showImageModal && enlargedImageUrl && (

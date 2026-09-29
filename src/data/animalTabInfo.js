@@ -6,13 +6,14 @@ export const ANIMAL_FORM_TAB_INFO = {
     identification: { title: 'Identification', lessonId: 'animal-tab-identification', body: 'ID numbers, classification, origin, and tags.' },
     appearance: { title: 'Appearance', lessonId: 'animal-tab-appearance', body: 'Descriptive traits, the visual Genetic Code Builder, Life Stage, and growth tracking.' },
     health: { title: 'Health', lessonId: 'animal-tab-health', body: 'Quarantine/treatment status, vaccinations, and medical history.' },
-    care: { title: 'Routine Care', lessonId: 'animal-tab-care', body: 'Feeding, grooming, training, and enrichment schedules.' },
+    care: { title: 'Routine Care', lessonId: 'animal-tab-care', body: 'Feeding, enclosure and environment needs, grooming, and care tasks.' },
     behavior: { title: 'Behavior', lessonId: 'animal-tab-behavior', body: 'Temperament notes, socialization, and behavioral logs.' },
     breeding: { title: 'Breeding', lessonId: 'animal-tab-breeding', body: 'Breeding status, past pairings, and manual breeding history notes.' },
-    pedigree: { title: 'Pedigree', lessonId: 'animal-tab-pedigree', body: 'Editing ancestry (Manual or Link CTC) three generations deep.' },
+    pedigree: { title: 'Pedigree', lessonId: 'animal-tab-pedigree', body: 'Linking real ancestor records, three generations deep.' },
     gallery: { title: 'Gallery', lessonId: 'animal-tab-gallery', body: 'Additional photos beyond the main Dashboard image.' },
     timeline: { title: 'Timeline', lessonId: 'animal-tab-timeline', body: 'A chronological history of everything logged for this animal.' },
     records: { title: 'Records', lessonId: 'animal-tab-records', body: 'Seller/Buyer, price, legal/licensing info, and uploaded documents.' },
+    customize: { title: 'Customize', lessonId: 'animal-tab-customize', body: 'Hide tabs and sections you don\'t use, per species.' },
 };
 
 // The read-only view shares most tab content with the edit form, but Dashboard and Pedigree

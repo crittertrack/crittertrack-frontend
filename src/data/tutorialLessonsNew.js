@@ -1,4 +1,6 @@
 // Tutorial lessons content is being reworked — rebuilt one lesson at a time.
+import ANDROID_APK_URL from '../utils/appDownloads';
+
 const GETTING_STARTED_LESSONS = [
   {
     id: 'getting-started-layout-tour',
@@ -65,7 +67,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 4,
         title: 'The form is organized into tabs',
-        content: 'Dashboard, Identification, Appearance, Health, Routine Care, Behavior, Breeding, Pedigree, Gallery, Timeline, and Records. You don\'t need to fill out every tab right away — save with just the required field and come back later.',
+        content: 'Dashboard, Identification, Appearance, Health, Routine Care, Behavior, Breeding, Pedigree, Gallery, Timeline, and Records — plus a Customize tab at the end where you can hide any tabs or sections you don\'t use for that species. You don\'t need to fill out every tab right away — save with just the required field and come back later.',
       },
       {
         stepNumber: 5,
@@ -75,7 +77,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Linking a Sire/Dam',
-        content: 'On the Pedigree tab, each ancestor slot (Sire, Dam, and further generations) has a Manual / Link CTC toggle. "Link CTC" searches for a real animal already on CritterTrack to connect as the actual parent — it can be one of your own animals, or any other public animal on the site. To link this way, the parent needs to already exist as an animal record on CritterTrack. "Manual" just lets you type in a name and details by hand for a parent that isn\'t tracked in CritterTrack — this only fills in the display for this specific animal\'s own pedigree, it doesn\'t create a real link, doesn\'t carry over to siblings/offspring/other relatives, and isn\'t used in COI calculations.',
+        content: 'On the Pedigree tab, every ancestor slot (Sire, Dam, and further generations) links to a real animal already on CritterTrack. Click a slot and search to connect the actual parent — it can be one of your own animals, or any other public animal on the site, and the search filters to the correct gender for that slot (e.g. only males for a Sire slot). The parent needs to already exist as an animal record on CritterTrack, so if an ancestor isn\'t tracked yet, add them as their own animal first, then come back and link them. Because these are real records, a linked parent feeds the pedigree tree everywhere it should: the full chart, the parent cards, and COI/AVK calculations.',
       },
       {
         stepNumber: 7,
@@ -151,8 +153,8 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Settings has 7 tabs',
-        content: 'Profile, Info & Adoption, Directory, Ratings, Breeding Lines, Data Portability, and Account.',
+        title: 'Settings has 8 tabs',
+        content: 'Profile, Info & Adoption, Directory, Ratings, Breeding Lines, Dropdown Lists, Data Portability, and Account. "Dropdown Lists" is a tidy-up tool for your own form entries: every value you\'ve typed into a dropdown-style field (like Color) on the Animal form is saved here per species and suggested again next time. Use it to rename a typo (which fixes it everywhere, including on animals already using it) or remove a value you no longer want suggested. It is not a place to pre-load brand new options — values appear here automatically once you\'ve typed them into an animal form at least once.',
       },
       {
         stepNumber: 3,
@@ -482,28 +484,23 @@ const ANIMAL_RECORD_TAB_LESSONS = [
   {
     id: 'animal-tab-pedigree',
     title: 'Animal Record: Pedigree Tab',
-    description: 'Editing ancestry directly on the animal record, three generations deep.',
+    description: 'Linking real ancestor records, three generations deep, and building a pedigree certificate.',
     steps: [
       {
         stepNumber: 1,
-        title: 'Manual vs. Link CTC, and what actually counts',
-        content: 'As covered in the Getting Started tour, every ancestor slot has a Manual / Link CTC toggle. It\'s worth repeating here because it drives everything else on this tab: only Link CTC ancestors (real animal records on CritterTrack) are used for COI calculations and the main pedigree chart. Manual entries are purely for this animal\'s own display — they don\'t create a real link, don\'t affect COI, and don\'t propagate to that ancestor\'s other relatives\' pedigrees. Nothing here saves until you click Save Animal.',
+        title: 'Ancestors are always real CritterTrack animals',
+        content: 'Every ancestor slot links to an actual animal record on CritterTrack — there is no free-text "manual" option. This is deliberate: manual entries never fed COI/AVK or the parent cards (only real linked parents do), so they left gaps users kept tripping over. If an ancestor isn\'t tracked yet, add them as their own animal record first, then come back and link them into this pedigree. Nothing here saves until you click Save Animal.',
       },
       {
         stepNumber: 2,
         title: 'Linking a CritterTrack ancestor',
-        content: 'Switch a slot to "Link CTC" and click "Search CTC Animal?" to open the search modal — it can match one of your own animals or any other public animal on the site, and automatically filters to the correct gender for that slot (e.g. only males for a Sire slot). Once linked, the slot shows that animal\'s photo, name, variety, and CTC ID; click "Unlink" to remove the connection without deleting anything.',
+        content: 'Click a slot and search to open the search modal — it can match one of your own animals or any other public animal on the site, and automatically filters to the correct gender for that slot (e.g. only males for a Sire slot). Once linked, the slot shows that animal\'s photo, name, variety, and CTC ID; click "Unlink" to remove the connection without deleting anything.',
         screenshotCount: 3,
       },
       {
         stepNumber: 3,
-        title: 'Entering a manual ancestor',
-        content: 'Switch a slot to "Manual" to type in Name, Variety/Morph, Genetic Code, Birth Date, and Breeder Name by hand, plus optionally upload a photo just for this ancestor slot. Use this for ancestors that aren\'t (or can\'t be) tracked as real CritterTrack records.',
-      },
-      {
-        stepNumber: 4,
         title: 'Three generations of ancestors',
-        content: 'Generation 1 is Sire and Dam. Generation 2 splits into Paternal (Grandsire/Granddam via the Sire) and Maternal (Grandsire/Granddam via the Dam). Generation 3 goes one step further — Great-Grandparents are grouped by which grandparent they came through ("via Grandsire" / "via Granddam") on each side. Every one of these slots supports Manual or Link CTC independently, so you can mix and match — for example, a linked Sire with a manual, unlinked Great-Grandsire.',
+        content: 'Generation 1 is Sire and Dam. Generation 2 splits into Paternal (Grandsire/Granddam via the Sire) and Maternal (Grandsire/Granddam via the Dam). Generation 3 goes one step further — Great-Grandparents are grouped by which grandparent they came through ("via Grandsire" / "via Granddam") on each side. Each slot is linked independently, and because the pedigree builds off real records, an ancestor you link here also shows up correctly on that animal\'s own record and on any of their relatives\' pedigrees.',
       },
     ],
   },
@@ -614,13 +611,45 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 4,
         title: 'Coefficient of Inbreeding (COI)',
-        content: 'When both parents are linked via "Link CTC" (not manually entered), the Dashboard view automatically calculates and displays this animal\'s actual Coefficient of Inbreeding as a percentage, plus how many common ancestors it was calculated from. To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead — currently supported for Fancy Mouse and Fancy Rat.',
+        content: 'When both parents are linked as real CritterTrack animals, the Dashboard view automatically calculates and displays this animal\'s actual Coefficient of Inbreeding as a percentage, plus how many common ancestors it was calculated from. To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead — currently supported for Fancy Mouse and Fancy Rat.',
       },
       {
         stepNumber: 5,
         title: 'Pedigree Certificates',
-        content: 'On the read-only Pedigree tab, "Open Horizontal Certificate" and "Open Vertical Certificate" generate a formatted, printable/shareable pedigree chart spanning several generations — combining both Linked CTC ancestors and Manual entries into one certificate layout, distinct from the simple ancestor list shown underneath. A generation slider (1–4) controls how many ancestor rows are shown, and a "Customise" panel lets you set the certificate\'s title text, footer text, font colour, border colour, background colour, and even upload your own background image — these preferences are saved in your browser and reused for every certificate you open afterward. The "Breeder" and "Current Owner" shown on the certificate are looked up automatically: Breeder comes from the animal\'s linked breeder account if one is set, falling back to the free-text "Manual Breeder Name" if not; "Current Owner" only appears at all when the animal\'s current owner differs from that original breeder (e.g. after a transfer or sale) — if the two are the same person, only "Breeder" is shown.',
+        content: 'On the read-only Pedigree tab, "Open Horizontal Certificate" and "Open Vertical Certificate" generate a formatted, printable/shareable pedigree chart spanning several generations, built from your real linked ancestors and laid out differently from the simple ancestor list shown underneath. A generation slider (1–4) controls how many ancestor rows are shown, and a "Customise" button opens a panel with six controls: Top-right title, Bottom-left text, Font colour, Border colour, Background colour, and Background image. The three colour pickers each pair a swatch with a text box, so you can click to choose or type a hex code directly. For the background image, pick any image from your device — it is automatically downscaled before being stored, so a large photo won\'t bloat your browser storage — and a "Remove" link clears it again. These preferences are saved in your browser and reused for every certificate you open afterward, so you only set them up once. The "Breeder" and "Current Owner" shown on the certificate are looked up automatically: Breeder comes from the animal\'s linked breeder account if one is set, falling back to the free-text "Manual Breeder Name" if not; "Current Owner" only appears at all when the animal\'s current owner differs from that original breeder (e.g. after a transfer or sale) — if the two are the same person, only "Breeder" is shown. Use "Download PDF" once images have finished loading to save or share the finished certificate.',
         screenshotCount: 3,
+      },
+    ],
+  },
+  {
+    id: 'animal-tab-customize',
+    title: 'Animal Record: Customize Tab',
+    description: 'Hiding tabs and individual sections you don\'t use, per species.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Why hide anything?',
+        content: 'The animal form is long, and most breeders only care about a handful of sections for any given species. The "Customize" tab is always the last tab in the form and lets you strip that form down to just what you actually fill in — everything you switch off disappears from the tab bar entirely, so the form is shorter and faster to get through.',
+      },
+      {
+        stepNumber: 2,
+        title: 'It applies per species, and syncs',
+        content: 'Choices are saved against the species you\'re currently working with (shown in the heading, "Customizing sections for: <species>"), so hiding something on your Fancy Mouse animals leaves your snake form untouched. Preferences are saved to your account automatically — a "Saved" indicator confirms it — so they follow you between the web site and the Android app, and you never need to click a save button.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Hiding whole tabs',
+        content: 'Each hideable tab has a "Show <Tab> tab" checkbox — Identification, Appearance, Health, Routine Care, Behavior, Breeding, Timeline, and Records can all be switched off. Dashboard, Pedigree, and Gallery can never be hidden, since they carry the animal\'s core identity, ancestry, and photos.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Hiding individual sections',
+        content: 'With a tab still visible, its sections appear indented underneath as their own checkboxes, so you can be more surgical — keep "Identification Numbers" and "Origin" but drop "Tags" and "Classification", for example. Hiding a whole tab also hides its sections, so you don\'t need to untick them one by one.',
+      },
+      {
+        stepNumber: 5,
+        title: 'This only changes the form, not your data',
+        content: 'Customizing is purely cosmetic for data entry — it does not delete anything, and it does not change what shows on the read-only view other people (or you) see when viewing an animal. Untick anything here at any time to bring it straight back. The Customize tab itself never hides, so there\'s always a way back in.',
       },
     ],
   },
@@ -917,7 +946,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
   },
 ];
 
-// "Profile & Settings: A Tab-by-Tab Tour" section — the 7 tabs under the avatar → Profile → Profile Settings page.
+// "Profile & Settings: A Tab-by-Tab Tour" section — the 8 tabs under the avatar → Profile → Profile Settings page.
 const SETTINGS_TAB_LESSONS = [
   {
     id: 'profile-view',
@@ -1073,6 +1102,33 @@ const SETTINGS_TAB_LESSONS = [
         stepNumber: 4,
         title: 'Remember to save',
         content: 'Name, color, and enabled/disabled changes are all just a local draft until you click "Save Breeding Lines."',
+      },
+    ],
+  },
+  {
+    id: 'settings-appearance-options',
+    title: 'Settings: Dropdown Lists',
+    description: 'Tidying the values that get suggested in dropdown-style fields on the Animal form.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Where these values come from',
+        content: 'Every value you type into a dropdown-style field (like Color, Markings, Coat, or Variety) on the Animal form is remembered per species, and suggested again the next time you fill that field in for the same species. So this tab is a record of what you\'ve already used — not a place to pre-load new options. A value only shows up here after you\'ve typed it into an animal form at least once.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Narrowing the list',
+        content: 'Use the species and field dropdowns to focus on just what you care about (for example Fancy Mouse → Color only), and the search box to find a specific value. The species dropdown shows a count next to each option, including "All species" with the total, so you can tell at a glance how much is saved where.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Renaming a typo',
+        content: 'Renaming a value fixes it everywhere at once — including on animals you\'ve already saved with the old spelling. This is the fastest way to clean up a value you misspelled when you first typed it in.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Removing a value',
+        content: 'Remove a value you no longer want suggested and it stops appearing in that field\'s dropdown going forward. This only affects the suggestions — it does not clear the value off animals already using it.',
       },
     ],
   },
@@ -1307,6 +1363,70 @@ const LITTER_MANAGEMENT_LESSONS = [
 // "More Pages & Tools" section — Contacts, Marketplace, Calendar, Community, the Tools
 // calculators, Finance, Messages/Notifications, Breeder Directory, and support pages.
 const MORE_PAGES_LESSONS = [
+  {
+    id: 'lite-mode',
+    title: 'Lite Mode',
+    description: 'A simpler version of CritterTrack with fewer sections, for people who want the essentials without the full feature set.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Switching to Lite',
+        content: 'Click the feather icon in the header (next to the other top-right icons) to switch between Full and Lite. You\'ll get a confirmation prompt either way. Lite is tied to your account, not your device, so it follows you between the website and the Android app — switch it on one and it\'s on in the other. You can switch back whenever you like; nothing is lost either way.',
+      },
+      {
+        stepNumber: 2,
+        title: 'What Lite hides',
+        content: 'To keep things uncluttered, Lite drops the Contacts, Marketplace, Calendar, and Community pages from the navigation. Everything else — your animals, pedigree, litter records, health and vet history, and photos — is still there. If you need Contacts or Marketplace, switch back to Full mode.',
+      },
+      {
+        stepNumber: 3,
+        title: 'The trimmed animal view',
+        content: 'Animal records open with only four tabs in Lite: Dashboard, Records, Gallery, and Pedigree. In Full mode there are eleven, so this is the most noticeable difference. The sections themselves work exactly as they do in Full — you\'re just not shown the tabs you don\'t need.',
+      },
+      {
+        stepNumber: 4,
+        title: 'The trimmed animal form',
+        content: 'The edit form matches, with the same four tabs — and note that Lite relabels Health to Records, because the vet visits, medications, vaccinations, deworming, medical conditions, and allergies that live there are what most people actually need day to day. Anything you can\'t see in Lite is still saved on the animal; you can always switch to Full to reach it.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Which parts of the site Lite still covers',
+        content: 'Lite includes the standalone Collections and Enclosures pages, a trimmed notifications page, and a reduced settings page. It\'s a good fit if you keep animals for your own records and pedigree but don\'t need the breeder-facing tools like the Marketplace and Contacts.',
+      },
+    ],
+  },
+  {
+    id: 'install-the-app',
+    title: 'Installing the Android App',
+    description: 'Getting CritterTrack on your phone — from the Play Store, or from a direct APK file.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'From the Play Store (recommended)',
+        content: 'Sign in to crittertrack.net on your phone\'s browser, tap the Android app option on the login screen, and follow the Play Store link. Play Store installs and updates the app for you automatically, so this is the easiest route and the one that keeps you on the newest version. If the app is in closed testing, you need to join the tester list first and wait up to 24 hours for Google to add your Google account email.',
+      },
+      {
+        stepNumber: 2,
+        title: 'From a direct APK file',
+        content: 'If you\'d rather not use the Play Store, an APK file can be downloaded using the button below and installed directly. It\'s the same app with the same features and the same account — it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you\'d rather sideload than join a testing track. Note that installing outside the Play Store means updates are entirely manual: you\'ll need to download and install each new version yourself, and you\'ll want to keep an eye on which version you\'re on.',
+        link: {
+          label: 'Download the Android APK',
+          url: ANDROID_APK_URL,
+          download: true,
+        },
+      },
+      {
+        stepNumber: 3,
+        title: 'Allowing installs from your browser',
+        content: 'Android blocks app installs from outside the Play Store by default, so your browser will ask you to allow it. When the download starts, tap the notification or the prompt to open Settings, and turn on "Allow from this source" for the browser you\'re using (Chrome is usually the one that asks). Turn the permission back off afterwards if you prefer — it only affects future installs, not the app you already have.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Before you install an update',
+        content: 'Android requires the new version to have a higher version number than what\'s already installed, so you can\'t install an older build over a newer one. You also can\'t install the regular app over an existing Play Store install of the same app unless it\'s signed with the same key — if you switch between Play Store and APK versions, uninstall the old one first. Your data lives in your account, not on the phone, so uninstalling never loses your animals; just sign back in afterwards.',
+      },
+    ],
+  },
   {
     id: 'contacts-overview',
     title: 'Contacts',

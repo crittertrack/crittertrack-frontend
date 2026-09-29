@@ -2,9 +2,15 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
 import {
     AlertCircle, Ban, Bean, Cat, CheckCircle, Eye, EyeOff,
-    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, Smartphone, UserPlus, Users, Wrench
+    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users, Wrench
 } from 'lucide-react';
 import InstallPWA from '../InstallPWA';
+
+// APK download lives in utils/appDownloads.js, consumed only by the "Installing the Android
+// App" tutorial lesson. Deliberately NOT on this login screen. The Play Store button is also
+// held back until the app has a public Production listing: the closed-testing opt-in link
+// only resolves for Google accounts already on the tester list, so a new visitor tapping it
+// would just hit Google's "not available" page and bounce.
 
 const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy, userCount }) => {
     const [email, setEmail] = useState('');
@@ -785,14 +791,12 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <div className="mt-4">
                         <InstallPWA />
                         <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted text-center mt-3">Android (Coming soon)</p>
-                        <div className="grid grid-cols-2 gap-1.5 mt-1">
+                        {/* One app only - Lite is now a mode toggle inside this same app
+                            (see utils/liteMode.js), so there's no second app to promote. */}
+                        <div className="mt-1">
                             <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
                                 <Smartphone size={13} className="flex-shrink-0" />
                                 <span className="truncate">CritterTrack</span>
-                            </div>
-                            <div className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted text-[11px] font-medium">
-                                <Smartphone size={13} className="flex-shrink-0" />
-                                <span className="truncate">Lite</span>
                             </div>
                         </div>
                     </div>

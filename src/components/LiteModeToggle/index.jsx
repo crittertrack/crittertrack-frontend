@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Feather } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { setCachedUiMode } from '../../utils/uiModeCache';
 
@@ -8,13 +7,11 @@ import { setCachedUiMode } from '../../utils/uiModeCache';
 // Mirrors PushToggleButton's layout/style so it slots in alongside the other header icons.
 // NOTE: this only persists the preference for now — the actual Lite-mode simplified nav/UI
 // (bottom bar, logo swap, tab consolidation) is not wired up to this flag yet.
-// Desktop/PWA web only — the native Android app is the separate crittertrack-lite app already,
-// so this toggle (and lite mode itself) must never appear/apply there.
+// Available on web AND in the native Android app — the app renders the same components, so
+// Lite works there too.
 const LiteModeToggle = ({ userProfile, setUserProfile, showModalMessage }) => {
     const [busy, setBusy] = useState(false);
     const isLite = userProfile?.uiMode === 'lite';
-
-    if (Capacitor.isNativePlatform()) return null;
 
     const handleToggle = async () => {
         const next = isLite ? 'full' : 'lite';

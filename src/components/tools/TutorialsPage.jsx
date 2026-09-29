@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu, Download, ExternalLink } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
 import { getStepScreenshot, titleToFilename } from '../../data/tutorialScreenshots';
 import InfoButton from '../shared/InfoButton';
@@ -185,6 +187,32 @@ const TutorialsPage = () => {
                             <div className="flex-1">
                               <h3 className="font-bold text-gray-800 dark:text-dark-text text-lg">{currentStep.title}</h3>
                               <p className="text-gray-600 dark:text-dark-text-secondary text-sm mt-1">{currentStep.content}</p>
+                              {/* Optional per-step action button (e.g. the APK download on the
+                                  "Installing the Android App" lesson). Steps that don't set
+                                  `link` render exactly as before. Renders nothing when the
+                                  step has a link but the underlying URL is still unset. */}
+                              {currentStep.link?.url && (
+                                <a
+                                    href={currentStep.link.url}
+                                  download={currentStep.link.download ? '' : undefined}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => {
+                                    // Inside the native Android WebView a plain <a download>
+                                    // does nothing (no browser chrome to handle it), so hand
+                                    // these to the system browser instead — same as
+                                    // utils/externalLink.js does elsewhere.
+                                    if (Capacitor.isNativePlatform()) {
+                                      e.preventDefault();
+                                      Browser.open({ url: currentStep.link.url });
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-primary dark:bg-dark-primary text-black text-xs font-semibold hover:bg-primary/90 transition"
+                                >
+                                  {currentStep.link.download ? <Download size={13} /> : <ExternalLink size={13} />}
+                                  {currentStep.link.label}
+                                </a>
+                              )}
                             </div>
                           </div>
 
