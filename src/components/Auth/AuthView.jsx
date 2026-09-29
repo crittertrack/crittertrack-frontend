@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
 import {
     AlertCircle, Ban, Bean, Cat, CheckCircle, Eye, EyeOff,
-    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users, Wrench
+    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, Smartphone, UserPlus, Users, Wrench
 } from 'lucide-react';
 import InstallPWA from '../InstallPWA';
 
