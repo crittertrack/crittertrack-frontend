@@ -23,22 +23,22 @@ const GETTING_STARTED_LESSONS = [
         content: 'The Tools dropdown holds: Tutorials (this page), Offspring Calculator, COI Calculator, Target Outcome Calculator, and Family Tree Explorer.',
       },
       {
-        stepNumber: 5,
+        stepNumber: 4,
         title: 'Finance menu',
         content: 'The Finance dropdown holds: Budget Tracker and Supplies.',
       },
       {
-        stepNumber: 6,
+        stepNumber: 5,
         title: 'Top-right icons',
-        content: 'From left to right: the theme toggle (light/dark/auto), a push notifications quick-toggle for this device, the Notifications bell (purple badge = unread count), and the Messages icon (red badge = a message from CritterTrack staff, purple = a message from another user).',
+        content: 'From left to right: the theme toggle (light/dark/auto), a push notifications quick-toggle for this device, the Lite mode toggle (feather icon), the Notifications bell (purple badge = unread count), and the Messages icon (red badge = a message from CritterTrack staff, purple = a message from another user). The feather icon switches between Full and Lite mode — you\'ll get a confirmation prompt either way. It\'s tied to your account rather than your device, so it follows you between the website and the Android app. Lite is the same app with a smaller surface: the navigation drops Contacts, Marketplace, Calendar and Community, and each animal opens with just four tabs (Dashboard, Records, Gallery, Pedigree) instead of eleven. Nothing is lost when you switch — anything hidden in Lite is still saved and waiting in Full. See the "Lite Mode" lesson in More Pages & Tools for the full detail.',
       },
       {
-        stepNumber: 7,
+        stepNumber: 6,
         title: 'Your profile avatar',
         content: 'Click your avatar (top-right corner) to open a menu with Profile, Report an Issue and Logout.',
       },
       {
-        stepNumber: 8,
+        stepNumber: 7,
         title: 'Info buttons',
         content: 'Look for a small ⓘ icon near a page\'s title — click it for a quick contextual hint about that page, including a link to a related tutorial like this one when available.',
       },

@@ -133,7 +133,7 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     // Start with original dimensions limits from opts or defaults
-    let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
+    let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200, forceJpeg = false } = opts;
 
     // Load original image to get dimensions
     const image = await new Promise((resolve, reject) => {
@@ -156,7 +156,11 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(image, 0, 0, w, h);
-        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        // forceJpeg: canvas.toBlob ignores the quality argument for PNG, so a PNG input can
+        // never be shrunk by the quality loop and stays oversized (phone screenshots are often
+        // PNG). Callers that only ever store opaque photos can opt into JPEG so the quality
+        // reduction actually applies.
+        const outputType = (forceJpeg || file.type !== 'image/png') ? 'image/jpeg' : 'image/png';
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
         return blob;
     };
@@ -1733,6 +1737,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleLitterImageUpload = async (file) => {
+        // The server rejects image uploads for a still-Planned litter (litterRoutes.js returns
+        // 400 "Images can only be added to born litters"). The Photos panel below is shown
+        // unconditionally so photos can be added while converting a planned litter to born -
+        // but that conversion is only persisted on Save, so uploading mid-edit always failed.
+        // Fail fast with a clear message instead of round-tripping to a server 400.
+        if (editingLitter && litters.find((l) => l._id === editingLitter)?.isPlanned) {
+            showModalMessage('Cannot add photos yet', 'This litter is still marked as Planned. Record the birth (and save) first, then add photos to it.');
+            return;
+        }
         if (litterImages.length >= 5) {
             showModalMessage('Error', 'Maximum of 5 images per litter');
             return;
@@ -1742,9 +1755,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         setLitterImages(prev => [...prev, { url: localPreview, r2Key: '__uploading__' }]);
         setLitterImageUploading(true);
         try {
-            const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+            const SERVER_MAX_BYTES = 500 * 1024;
+            // Target well under the server's multer cap rather than just beneath it:
+            // compressImageToMaxSize is best-effort and returns the largest size it managed, so
+            // a lower target gives real headroom. Phone photos are far bigger than laptop
+            // screenshots, which is why this used to fail on mobile but not on desktop.
+            const TARGET_BYTES = 400 * 1024;
+            const compressedBlob = await compressImageToMaxSize(file, TARGET_BYTES, { maxWidth: 1600, maxHeight: 1600, startQuality: 0.82, forceJpeg: true });
+            // Belt and braces: if it still exceeds the cap the server rejects it before the
+            // route handler runs, so multer returns an HTML 500 with no JSON body and the user
+            // just sees a generic failure. Catch it here and say something useful instead.
+            if (compressedBlob.size > SERVER_MAX_BYTES) {
+                throw new Error(`That photo is too large (${Math.round(compressedBlob.size / 1024)} KB). Please pick a smaller image or crop it first.`);
+            }
             const fd = new FormData();
-            fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
+            // Always send .jpg: the compressor keeps PNG output for PNG inputs, and
+            // canvas.toBlob ignores the quality argument for PNG, so a phone screenshot can
+            // stay oversized no matter how many times the quality loop runs.
+            fd.append('image', compressedBlob, 'litter-photo.jpg');
             const resp = await apiClient.post(`/litters/${editingLitter}/images`, fd);
             URL.revokeObjectURL(localPreview);
             setLitterImages(resp.data.images || []);
@@ -1752,7 +1780,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch (err) {
             URL.revokeObjectURL(localPreview);
             setLitterImages(prev => prev.filter(img => img.r2Key !== '__uploading__'));
-            showModalMessage('Error', err.response?.data?.message || 'Failed to upload image');
+            // Prefer the server's message when there is one; otherwise fall back to our own
+            // Error (e.g. the client-side size guard), which is far more useful than the
+            // generic "Failed to upload image".
+            showModalMessage('Error', err.response?.data?.message || err.message || 'Failed to upload image');
         } finally {
             setLitterImageUploading(false);
         }
@@ -2255,6 +2286,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
                                             <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
                                         </h4>
+                                        {/* Photos can only be stored against a litter that is no longer
+                                            Planned. Say so up front rather than letting the user pick a
+                                            photo and then fail server-side. */}
+                                        {editingLitter && litters.find((l) => l._id === editingLitter)?.isPlanned && (
+                                            <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                                                This litter is still marked as Planned, so photos can't be added yet. Record the birth and save first.
+                                            </p>
+                                        )}
 
                                         {/* Thumbnail grid */}
                                         {editingLitter ? (
@@ -2305,7 +2344,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                                                 <input
                                                     type="file"
-                                                    accept="image/png,image/jpeg"
+                                                    accept="image/*"
                                                     className="hidden"
                                                     onChange={(e) => {
                                                         const file = e.target.files?.[0];
