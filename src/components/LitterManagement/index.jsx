@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import apiClient from '../../utils/apiClient';
+import { decodeImageFile, decodeErrorMessage } from '../../utils/imageDecode';
 import {
     Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronUp, ClipboardList,
@@ -87,13 +88,7 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
     // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
-    const img = await new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const image = new Image();
-        image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
-        image.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error('Failed to load image for compression')); };
-        image.src = url;
-    });
+    const img = await decodeImageFile(file);
 
     const origWidth = img.width;
     const origHeight = img.height;
@@ -135,14 +130,10 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     // Start with original dimensions limits from opts or defaults
     let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200, forceJpeg = false } = opts;
 
-    // Load original image to get dimensions
-    const image = await new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-        img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error('Failed to load image for compression')); };
-        img.src = url;
-    });
+    // Decode via the shared robust decoder - see utils/imageDecode.js. The previous inline
+    // <img>+objectURL decode fired a bare "Failed to load image for compression" onerror on
+    // very large phone photos, because a 200 MP decode can exceed WebView bitmap limits.
+    const image = await decodeImageFile(file);
 
     let targetW = Math.min(image.width, maxWidth);
     let targetH = Math.min(image.height, maxHeight);
@@ -1783,7 +1774,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Prefer the server's message when there is one; otherwise fall back to our own
             // Error (e.g. the client-side size guard), which is far more useful than the
             // generic "Failed to upload image".
-            showModalMessage('Error', err.response?.data?.message || err.message || 'Failed to upload image');
+            showModalMessage('Error', err.response?.data?.message || decodeErrorMessage(err) || 'Failed to upload image');
         } finally {
             setLitterImageUploading(false);
         }

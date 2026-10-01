@@ -26,6 +26,7 @@ import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
+import { decodeImageFile, releaseDecodedImage, decodeErrorMessage } from '../../utils/imageDecode';
 
 // Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
 // (see appearanceOptionsMap / ComboBoxField below).
@@ -714,117 +715,97 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
         }
     };
 
-    const rotateImageFile = (file, degrees) => {
-        return new Promise((resolve, reject) => {
-            const objectUrl = URL.createObjectURL(file);
-            const img = new Image();
-            img.onload = () => {
-                URL.revokeObjectURL(objectUrl);
-                const canvas = document.createElement('canvas');
-                const radians = (degrees * Math.PI) / 180;
-                const sin = Math.abs(Math.sin(radians));
-                const cos = Math.abs(Math.cos(radians));
-                canvas.width = img.height * sin + img.width * cos;
-                canvas.height = img.height * cos + img.width * sin;
+    const rotateImageFile = async (file, degrees) => {
+        const img = await decodeImageFile(file);
+        const canvas = document.createElement('canvas');
+        const radians = (degrees * Math.PI) / 180;
+        const sin = Math.abs(Math.sin(radians));
+        const cos = Math.abs(Math.cos(radians));
+        canvas.width = img.height * sin + img.width * cos;
+        canvas.height = img.height * cos + img.width * sin;
 
-                const ctx = canvas.getContext('2d');
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(radians);
-                ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(radians);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
 
-                canvas.toBlob(resolve, 'image/jpeg', 0.85);
-            };
-            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
-            img.src = objectUrl;
-        });
+        const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.85));
+        releaseDecodedImage(img);
+        return blob;
     };
 
-    const cropImageFile = (file, cropBox) => {
-        return new Promise((resolve, reject) => {
-            const objectUrl = URL.createObjectURL(file);
-            const img = new Image();
-            img.onload = () => {
-                URL.revokeObjectURL(objectUrl);
-                const canvas = document.createElement('canvas');
-                const scaleX = img.width / 100;
-                const scaleY = img.height / 100;
-                canvas.width = cropBox.width * scaleX;
-                canvas.height = cropBox.height * scaleY;
+    const cropImageFile = async (file, cropBox) => {
+        const img = await decodeImageFile(file);
+        const canvas = document.createElement('canvas');
+        const scaleX = img.width / 100;
+        const scaleY = img.height / 100;
+        canvas.width = cropBox.width * scaleX;
+        canvas.height = cropBox.height * scaleY;
 
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(
-                    img,
-                    cropBox.x * scaleX,
-                    cropBox.y * scaleY,
-                    cropBox.width * scaleX,
-                    cropBox.height * scaleY,
-                    0,
-                    0,
-                    cropBox.width * scaleX,
-                    cropBox.height * scaleY
-                );
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(
+            img,
+            cropBox.x * scaleX,
+            cropBox.y * scaleY,
+            cropBox.width * scaleX,
+            cropBox.height * scaleY,
+            0,
+            0,
+            cropBox.width * scaleX,
+            cropBox.height * scaleY
+        );
 
-                canvas.toBlob(resolve, 'image/jpeg', 0.85);
-            };
-            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
-            img.src = objectUrl;
-        });
+        const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.85));
+        releaseDecodedImage(img);
+        return blob;
     };
 
-    const compressImageFile = (file) => {
-        return new Promise((resolve, reject) => {
-            const objectUrl = URL.createObjectURL(file);
-            const img = new Image();
-            img.onload = () => {
-                URL.revokeObjectURL(objectUrl);
+    // Decode via the shared robust decoder - see utils/imageDecode.js. The previous inline
+    // <img> + objectURL decode threw 'Failed to decode image' on very large phone photos
+    // (e.g. 200 MP from an S24 Ultra), because a full-resolution decode can exceed the
+    // Android WebView's bitmap limits. createImageBitmap handles those far more gracefully.
+    const compressImageFile = async (file) => {
+        const img = await decodeImageFile(file);
+        const renderAt = async (maxDim, quality) => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+                if (width > maxDim) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
+                }
+            } else {
+                if (height > maxDim) {
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            return new Promise((res, rej) => {
+                canvas.toBlob((b) => {
+                    if (!b) { rej(new Error('Failed to encode compressed image')); return; }
+                    res(b);
+                }, 'image/jpeg', quality);
+            });
+        };
 
-                const renderAt = (maxDim, quality) => new Promise((res, rej) => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height) {
-                        if (width > maxDim) {
-                            height = Math.round((height * maxDim) / width);
-                            width = maxDim;
-                        }
-                    } else {
-                        if (height > maxDim) {
-                            width = Math.round((width * maxDim) / height);
-                            height = maxDim;
-                        }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    canvas.toBlob((blob) => {
-                        if (!blob) { rej(new Error('Failed to encode compressed image')); return; }
-                        res(blob);
-                    }, 'image/jpeg', quality);
-                });
-
-                (async () => {
-                    try {
-                        // Progressively shrink dimensions/quality until under MAX_FILE_SIZE instead of
-                        // giving up after one fixed-quality pass (which left large photos over the limit).
-                        const attempts = [
-                            [1200, 0.8], [1200, 0.6], [1000, 0.5], [800, 0.4], [600, 0.35], [500, 0.3],
-                        ];
-                        let bestBlob = null;
-                        for (const [maxDim, quality] of attempts) {
-                            const blob = await renderAt(maxDim, quality);
-                            if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
-                            if (blob.size <= MAX_FILE_SIZE) break;
-                        }
-                        resolve(new File([bestBlob], file.name, { type: 'image/jpeg' }));
-                    } catch (err) {
-                        reject(err);
-                    }
-                })();
-            };
-            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
-            img.src = objectUrl;
-        });
+        // Progressively shrink dimensions/quality until under MAX_FILE_SIZE instead of
+        // giving up after one fixed-quality pass (which left large photos over the limit).
+        const attempts = [
+            [1200, 0.8], [1200, 0.6], [1000, 0.5], [800, 0.4], [600, 0.35], [500, 0.3],
+        ];
+        let bestBlob = null;
+        for (const [maxDim, quality] of attempts) {
+            const blob = await renderAt(maxDim, quality);
+            if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+            if (blob.size <= MAX_FILE_SIZE) break;
+        }
+        releaseDecodedImage(img);
+        return new File([bestBlob], file.name, { type: 'image/jpeg' });
     };
 
     const current = files[currentIndex];

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import apiClient from '../../utils/apiClient';
+import { decodeImageFile } from '../../utils/imageDecode';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
     AlertTriangle, ArrowLeft, Check, CheckCircle, ChevronDown, ChevronUp,
@@ -156,13 +157,8 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
 
     // Load original image to get dimensions
-    const image = await new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-        img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error('Failed to load image for compression')); };
-        img.src = url;
-    });
+    // Decode via the shared robust decoder - see utils/imageDecode.js.
+    const image = await decodeImageFile(file);
 
     console.log('[COMPRESSION DEBUG] Original image dimensions:', {
         width: image.width,
