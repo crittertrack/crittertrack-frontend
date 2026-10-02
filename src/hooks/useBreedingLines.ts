@@ -57,7 +57,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
             try {
                 const response = await apiClient.get('/users/breeding-lines');
 
-                console.log('[BREEDING LINES] Loaded from backend');
+                void 0
 
                 // Always overwrite from backend - even empty arrays clear stale data from previous user
                 const defs =
@@ -132,13 +132,13 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      */
     const toggleAnimalBreedingLine = useCallback(
         (animalId: any, lineId: any) => {
-            console.log('[BREEDING LINES] Toggle called:', { animalId, lineId });
+            void 0
             setAnimalBreedingLines((prevAssignments: any) => {
                 const current = prevAssignments[animalId] || [];
                 const updated = current.includes(lineId) ? current.filter((id: any) => id !== lineId) : [...current, lineId];
                 const next = { ...prevAssignments, [animalId]: updated };
 
-                console.log('[BREEDING LINES] Toggle update:', { current, updated, next });
+                void 0
 
                 try {
                     localStorage.setItem('ct_blassign', JSON.stringify(next));
@@ -155,7 +155,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
                                 animalBreedingLines: next
                             }
                         )
-                        .then(() => console.log('[BREEDING LINES] Toggle saved to backend'))
+                        .then(() => void 0)
                         .catch(err => console.error('[BREEDING LINES] Failed to save assignment to backend:', err));
                 }
 

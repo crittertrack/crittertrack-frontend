@@ -302,12 +302,7 @@ useEffect(() => {
 }, [animal?.id_public, authToken, API_BASE_URL]);
 
 useEffect(() => {
-    console.log("OFFSPRING DEBUG", {
-        animalId: animal?.id_public,
-        authToken: !!authToken,
-        animalLitters,
-        pedigreeOffspring
-    });
+    void 0
 }, [animal?.id_public, authToken, animalLitters, pedigreeOffspring]);
 
     // Listen for animal updates and refetch litters and pedigree data

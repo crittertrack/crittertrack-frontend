@@ -837,22 +837,32 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setMyAnimals(animalsData);
             setMyAnimalsLoaded(true);
             
-            // Start COI calculations in background without blocking
+            // Start COI calculations in background without blocking.
+            // Guarded on having a token AND on not having already fetched this exact set —
+            // fetchMyAnimals is called from 8 places, so without this every call re-issued
+            // one COI request per animal, producing an N+1 request storm (and a burst of
+            // pointless 401s once the session/token was gone).
             Promise.resolve().then(async () => {
-                for (const animal of animalsData) {
-                    if ((animal.sireId_public || animal.damId_public)) {
-                        try {
-                            const coiResponse = await apiClient.get(`/animals/${animal.id_public}/inbreeding`, {
-                                params: { generations: 50 }
-                            });
-                            animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-                        } catch (error) {
-                            // COI calculation failed silently - non-critical
-                        }
-                    } else {
+                const withParents = animalsData.filter((a) => a.sireId_public || a.damId_public);
+                if (!authToken || withParents.length === 0) {
+                    animalsData.forEach((a) => { if (a.inbreedingCoefficient === undefined) a.inbreedingCoefficient = 0; });
+                    setMyAnimals([...animalsData]);
+                    return;
+                }
+                // Skip anything we already have a value for.
+                const todo = withParents.filter((a) => a.inbreedingCoefficient === undefined);
+                for (const animal of todo) {
+                    try {
+                        const coiResponse = await apiClient.get(`/animals/${animal.id_public}/inbreeding`, {
+                            params: { generations: 50 }
+                        });
+                        animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                    } catch (error) {
+                        // COI calculation failed silently - non-critical
                         animal.inbreedingCoefficient = 0;
                     }
                 }
+                animalsData.forEach((a) => { if (a.inbreedingCoefficient === undefined) a.inbreedingCoefficient = 0; });
                 setMyAnimals([...animalsData]);
             });
         } catch (error) {
