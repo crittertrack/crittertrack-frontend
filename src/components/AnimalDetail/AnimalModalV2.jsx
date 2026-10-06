@@ -50,6 +50,16 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
+// Most recent weight entry for the header: latest dated growth record wins,
+// falling back to the snapshot fields for records entered the old way.
+const getLatestWeightValue = (animal) => {
+    const latest = parseJsonArrayField(animal.growthRecords)
+        .filter(r => r && r.date && r.weight)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    const weight = latest?.weight ?? animal.weight ?? animal.bodyWeight ?? null;
+    return weight ? `${weight}${animal.measurementUnits?.weight || 'g'}` : null;
+};
+
 const StatusIndicator = ({ status, icon }) => {
     const statusStyles = {
         'Healthy': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300',
@@ -618,7 +628,7 @@ useEffect(() => {
                                                     </InfoItem>
 
                                                     {/* Row 2 */}
-                                                    <InfoItem compact label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
+                                                    <InfoItem compact label="Weight" value={getLatestWeightValue(animal)} />
                                                     <InfoItem compact label="Birthdate">
                                                         {animal.birthDate ? (
                                                             <>
