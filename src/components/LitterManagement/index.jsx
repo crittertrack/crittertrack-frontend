@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import apiClient from '../../utils/apiClient';
-import { decodeImageFile, decodeErrorMessage } from '../../utils/imageDecode';
+import { decodeErrorMessage } from '../../utils/imageDecode';
+import { compressImageToMaxSize as compressImageToMaxSizeShared } from '../../utils/imageCompression';
 import {
     Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
-    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning, Info,
+    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, Info,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
@@ -80,173 +81,6 @@ const getSpeciesLatinName = (species) => {
     };
     return latinNames[species] || null;
 };
-
-// Helper function to get flag class from country code (for flag-icons library)
-
-async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
-
-    const img = await decodeImageFile(file);
-
-    const origWidth = img.width;
-    const origHeight = img.height;
-    let targetWidth = origWidth;
-    let targetHeight = origHeight;
-
-    // Calculate target size preserving aspect ratio
-    if (origWidth > maxWidth || origHeight > maxHeight) {
-        const widthRatio = maxWidth / origWidth;
-        const heightRatio = maxHeight / origHeight;
-        const ratio = Math.min(widthRatio, heightRatio);
-        targetWidth = Math.round(origWidth * ratio);
-        targetHeight = Math.round(origHeight * ratio);
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext('2d');
-    // Fill background white for JPEG to avoid black background on transparent PNGs
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, targetWidth, targetHeight);
-    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-    // Always output JPEG for better compatibility (especially with mobile browsers)
-    const outputType = 'image/jpeg';
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
-    return blob || file;
-}
-
-// Compress an image File to be under `maxBytes` if possible.
-// Tries decreasing quality first, then scales down dimensions and retries.
-// Returns a Blob (best-effort). Throws if input isn't an image.
-async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
-
-    // Start with original dimensions limits from opts or defaults
-    let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200, forceJpeg = false } = opts;
-
-    // Decode via the shared robust decoder - see utils/imageDecode.js. The previous inline
-    // <img>+objectURL decode fired a bare "Failed to load image for compression" onerror on
-    // very large phone photos, because a 200 MP decode can exceed WebView bitmap limits.
-    const image = await decodeImageFile(file);
-
-    let targetW = Math.min(image.width, maxWidth);
-    let targetH = Math.min(image.height, maxHeight);
-
-    // Helper to run compression with given dims and quality
-    const tryCompress = async (w, h, quality) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(image, 0, 0, w, h);
-        // forceJpeg: canvas.toBlob ignores the quality argument for PNG, so a PNG input can
-        // never be shrunk by the quality loop and stays oversized (phone screenshots are often
-        // PNG). Callers that only ever store opaque photos can opt into JPEG so the quality
-        // reduction actually applies.
-        const outputType = (forceJpeg || file.type !== 'image/png') ? 'image/jpeg' : 'image/png';
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
-        return blob;
-    };
-
-    // First pass: try with decreasing quality at initial dimensions
-    let quality = startQuality;
-    while (quality >= minQuality) {
-        const blob = await tryCompress(targetW, targetH, quality);
-        if (!blob) break;
-        if (blob.size <= maxBytes) {
-            return blob;
-        }
-        quality -= qualityStep;
-    }
-
-    // Second pass: gradually reduce dimensions while preserving aspect ratio
-    const aspectRatio = image.width / image.height;
-    while (Math.max(targetW, targetH) > minDimension) {
-        // Reduce dimensions proportionally to maintain aspect ratio
-        const scale = 0.8;
-        targetW = Math.round(targetW * scale);
-        targetH = Math.round(targetH * scale);
-        
-        // Ensure neither dimension goes below minDimension while preserving aspect ratio
-        if (Math.max(targetW, targetH) < minDimension) {
-            if (aspectRatio >= 1) {
-                targetW = minDimension;
-                targetH = Math.round(minDimension / aspectRatio);
-            } else {
-                targetH = minDimension;
-                targetW = Math.round(minDimension * aspectRatio);
-            }
-        }
-        
-        quality = startQuality;
-        while (quality >= minQuality) {
-            const blob = await tryCompress(targetW, targetH, quality);
-            if (!blob) break;
-            if (blob.size <= maxBytes) {
-                return blob;
-            }
-            quality -= qualityStep;
-        }
-    }
-
-    // As a last resort, return the smallest we could create (use minQuality and minimum dimensions while preserving aspect ratio)
-    const finalW = aspectRatio >= 1 ? minDimension : Math.round(minDimension * aspectRatio);
-    const finalH = aspectRatio <= 1 ? minDimension : Math.round(minDimension / aspectRatio);
-    const finalBlob = await tryCompress(finalW, finalH, minQuality);
-    return finalBlob || file;
-}
-
-// Attempt to compress an image in a Web Worker (public/imageWorker.js).
-// Returns a Blob on success, or null if worker not available or reports an error.
-const compressImageWithWorker = (file, maxBytes = 200 * 1024, opts = {}) => {
-    return new Promise((resolve, reject) => {
-        // Try to create a worker pointing to the public folder path
-        let worker;
-        try {
-            worker = new Worker('/imageWorker.js');
-        } catch (e) {
-            resolve(null); // Worker couldn't be created (e.g., bundler/public path issue)
-            return;
-        }
-
-        const id = Math.random().toString(36).slice(2);
-
-        const onMessage = (ev) => {
-            if (!ev.data || ev.data.id !== id) return;
-            if (ev.data.error) {
-                worker.removeEventListener('message', onMessage);
-                worker.terminate();
-                resolve(null);
-                return;
-            }
-            // Received blob
-            const blob = ev.data.blob;
-            worker.removeEventListener('message', onMessage);
-            worker.terminate();
-            resolve(blob);
-        };
-
-        worker.addEventListener('message', onMessage);
-
-        // Post file (structured clone) to worker
-        try {
-            worker.postMessage({ id, file, maxBytes, opts });
-        } catch (e) {
-            worker.removeEventListener('message', onMessage);
-            worker.terminate();
-            resolve(null);
-        }
-    });
-};
-
 
 const ParentSearchModal = ({ 
     title, 
@@ -1258,7 +1092,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (pendingLitterImages.length > 0) {
                 for (const { file } of pendingLitterImages) {
                     try {
-                        const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                        const compressedBlob = await compressImageToMaxSizeShared(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
                         const fd = new FormData();
                         fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
                         const imgResp = await apiClient.post(`/litters/${litterId}/images`, fd);
@@ -1762,7 +1596,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // a lower target gives real headroom. Phone photos are far bigger than laptop
             // screenshots, which is why this used to fail on mobile but not on desktop.
             const TARGET_BYTES = 400 * 1024;
-            const compressedBlob = await compressImageToMaxSize(file, TARGET_BYTES, { maxWidth: 1600, maxHeight: 1600, startQuality: 0.82, forceJpeg: true });
+            const compressedBlob = await compressImageToMaxSizeShared(file, TARGET_BYTES, { maxWidth: 1600, maxHeight: 1600, startQuality: 0.82, forceJpeg: true });
             // Belt and braces: if it still exceeds the cap the server rejects it before the
             // route handler runs, so multer returns an HTML 500 with no JSON body and the user
             // just sees a generic failure. Catch it here and say something useful instead.

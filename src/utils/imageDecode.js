@@ -22,6 +22,8 @@
  * @throws {Error} with a user-facing message when the browser can't decode the file
  */
 export async function decodeImageFile(file) {
+    let bestBitmap = null;
+
     // 1) Preferred path: createImageBitmap. Also try an explicitly downscaled decode, which
     //    on very large photos can succeed where a full-resolution decode cannot.
     if (typeof createImageBitmap === 'function') {
@@ -30,17 +32,34 @@ export async function decodeImageFile(file) {
         } catch (e) {
             // Fall through to the <img> path below.
         }
-        // Retry asking for a modest bitmap. Without known dimensions we request a fixed
-        // generous size; canvas scaling from here keeps the aspect ratio handled by the
-        // caller via drawImage's source rect.
+
+        // Resize one axis at a time so the browser preserves the source aspect ratio.
         for (const dim of [2048, 1600]) {
-            try {
-                return await createImageBitmap(file, { resizeWidth: dim, resizeHeight: dim, resizeQuality: 'high' });
-            } catch (e) {
-                // keep trying smaller
+            for (const resizeDimension of ['resizeWidth', 'resizeHeight']) {
+                let bitmap;
+                try {
+                    bitmap = await createImageBitmap(file, { [resizeDimension]: dim, resizeQuality: 'high' });
+                } catch (e) {
+                    continue;
+                }
+
+                const longestSide = Math.max(bitmap.width, bitmap.height);
+                const bestLongestSide = bestBitmap ? Math.max(bestBitmap.width, bestBitmap.height) : Infinity;
+                if (longestSide < bestLongestSide) {
+                    releaseDecodedImage(bestBitmap);
+                    bestBitmap = bitmap;
+                } else {
+                    releaseDecodedImage(bitmap);
+                }
+
+                if (longestSide <= dim) {
+                    return bestBitmap;
+                }
             }
         }
     }
+
+    if (bestBitmap) return bestBitmap;
 
     // 2) Fallback: the classic object-URL + <img> decode.
     const url = URL.createObjectURL(file);

@@ -217,8 +217,6 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      */
     const handleSaveAnimal = useCallback(async (method: string, url: string, data: Animal | FormData) => {
         try {
-            void 0
-            
             if (!authToken) {
                 throw new Error('Authentication token is missing. Please log in again.');
             }
@@ -465,10 +463,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                         }
                     });
 
-                    void 0
                     setOffspringData(allOffspring);
                 } catch (e: any) {
-                    void 0
                     setOffspringData([]);
                 }
             } catch (error) {

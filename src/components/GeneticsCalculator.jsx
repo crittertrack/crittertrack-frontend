@@ -1867,19 +1867,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     if (selectingForParent === 'parent1') {
       setParent1({ ...newDefaults, ...parsedGenotype });
       setParent1PossibleHets((POSSIBLE_HET_LOCI_BY_SPECIES[selectedSpecies] || []).length ? (animal.possibleHets || []) : []);
-      if (process.env.NODE_ENV !== 'production') {
-        setTimeout(() => {
-          void 0
-        }, 100);
-      }
     } else if (selectingForParent === 'parent2') {
       setParent2({ ...newDefaults, ...parsedGenotype });
       setParent2PossibleHets((POSSIBLE_HET_LOCI_BY_SPECIES[selectedSpecies] || []).length ? (animal.possibleHets || []) : []);
-      if (process.env.NODE_ENV !== 'production') {
-        setTimeout(() => {
-          void 0
-        }, 100);
-      }
     }
 
     closeAnimalSelector();

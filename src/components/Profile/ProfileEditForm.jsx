@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import apiClient from '../../utils/apiClient';
-import { decodeImageFile } from '../../utils/imageDecode';
+import { compressImageToMaxSize as compressImageToMaxSizeShared } from '../../utils/imageCompression';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
     AlertTriangle, ArrowLeft, Check, CheckCircle, ChevronDown, ChevronUp,
@@ -141,100 +141,7 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     );
 };
 
-﻿async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
-
-    void 0
-
-    // Start with original dimensions limits from opts or defaults
-    let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
-
-    // Load original image to get dimensions
-    // Decode via the shared robust decoder - see utils/imageDecode.js.
-    const image = await decodeImageFile(file);
-
-    void 0
-
-    let targetW = Math.min(image.width, maxWidth);
-    let targetH = Math.min(image.height, maxHeight);
-
-    // Helper to run compression with given dims and quality
-    const tryCompress = async (w, h, quality) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(image, 0, 0, w, h);
-        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
-        return blob;
-    };
-
-    // First pass: try with decreasing quality at initial dimensions
-    let quality = startQuality;
-    while (quality >= minQuality) {
-        const blob = await tryCompress(targetW, targetH, quality);
-        if (!blob) break;
-        void 0
-        if (blob.size <= maxBytes) {
-            void 0
-            return blob;
-        }
-        quality -= qualityStep;
-    }
-
-    // Second pass: gradually reduce dimensions while preserving aspect ratio
-    const aspectRatio = image.width / image.height;
-    void 0
-    while (Math.max(targetW, targetH) > minDimension) {
-        // Reduce dimensions proportionally to maintain aspect ratio
-        const scale = 0.8;
-        targetW = Math.round(targetW * scale);
-        targetH = Math.round(targetH * scale);
-        
-        void 0
-        
-        // Ensure neither dimension goes below minDimension while preserving aspect ratio
-        if (Math.max(targetW, targetH) < minDimension) {
-            if (aspectRatio >= 1) {
-                targetW = minDimension;
-                targetH = Math.round(minDimension / aspectRatio);
-            } else {
-                targetH = minDimension;
-                targetW = Math.round(minDimension * aspectRatio);
-            }
-            void 0
-        }
-        
-        quality = startQuality;
-        while (quality >= minQuality) {
-            const blob = await tryCompress(targetW, targetH, quality);
-            if (!blob) break;
-            if (blob.size <= maxBytes) {
-                void 0
-                return blob;
-            }
-            quality -= qualityStep;
-        }
-    }
-
-    // As a last resort, return the smallest we could create (use minQuality and minimum dimensions while preserving aspect ratio)
-    const finalW = aspectRatio >= 1 ? minDimension : Math.round(minDimension * aspectRatio);
-    const finalH = aspectRatio <= 1 ? minDimension : Math.round(minDimension / aspectRatio);
-    void 0
-    const finalBlob = await tryCompress(finalW, finalH, minQuality);
-    void 0
-    return finalBlob || file;
-}
-
-// Attempt to compress an image in a Web Worker (public/imageWorker.js).
-// Returns a Blob on success, or null if worker not available or reports an error.
-
-﻿const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
+const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
     <div className="flex flex-col items-center space-y-3">
         <div 
             className="w-24 h-24 bg-gray-200 dark:bg-dark-surface rounded-lg flex items-center justify-center text-gray-500 dark:text-dark-text-muted overflow-hidden shadow-inner cursor-pointer" 
@@ -265,7 +172,7 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     </div>
 );
 
-﻿﻿const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disabled, className }) => {
+const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disabled, className }) => {
     const taRef = useRef(null);
     const applyFormat = (prefix, suffix) => {
         const ta = taRef.current;
@@ -611,7 +518,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         if (e.target.files && e.target.files[0]) {
             const original = e.target.files[0];
             try {
-                const compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                const compressedBlob = await compressImageToMaxSizeShared(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
                 const mime = compressedBlob.type || original.type;
                 const baseName = original.name.replace(/\.[^/.]+$/, '');
                 const ext = mime === 'image/png' ? '.png' : '.jpg';

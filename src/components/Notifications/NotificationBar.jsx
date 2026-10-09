@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +35,7 @@ const isFeedingDue = (lastDate, intervalHours) => {
   return (Date.now() - d.getTime()) / 3600000 >= Number(intervalHours);
 };
 
-// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays â€” convert so isTaskDue works.
+// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
 const cleaningTaskFreqDays = (t) => {
   if (t.frequencyDays) return t.frequencyDays;
   if (!t.frequency) return null;
@@ -71,7 +71,7 @@ const describeNotification = (n) => {
 // Matches AnimalList's own [prefix, name, suffix] display convention.
 const animalDisplayName = (a) => formatAnimalDisplayName({ ...a, name: a?.name || 'Unnamed' });
 
-// "(Name1, Name2 +N more)" â€” keeps the ticker text from growing unbounded.
+// "(Name1, Name2 +N more)" — keeps the ticker text from growing unbounded.
 const formatNameList = (names, max = 2) => {
   if (!names.length) return '';
   if (names.length <= max) return `(${names.join(', ')})`;
@@ -84,12 +84,12 @@ const defaultAlertSettings = () =>
 // Single global banner shown on every page: unread messages/notifications, moderator
 // warnings/notices, and the user's optional care/breeding alert categories. Auto-scrolls
 // (ticker-style, matching NewsTickerBanner's motion) when there's more than one item.
-// Ids of ticker items covered by the Lite web Notifications quick-actions page â€” in Lite mode
+// Ids of ticker items covered by the Lite web Notifications quick-actions page — in Lite mode
 // these route there instead of their normal onClick (mostly navigate('/', {state:{animalView}})
 // calls that Lite's defensive animalView guard just bounces back to 'list', making them no-ops).
 
 const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifications, setShowMessages }) => {
-  // Lite renders identically to Full â€” see utils/liteMode.js.
+  // Lite renders identically to Full — see utils/liteMode.js.
   const navigate = useNavigate();
   const userKey = useMemo(() => getUserKey(authToken), [authToken]);
 
@@ -129,7 +129,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       const response = await apiClient.get(`/notifications`);
       const all = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
       setModMessages(all.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
-      // Backend already sorts newest-first â€” grab the most recent unread, non-admin notification
+      // Backend already sorts newest-first — grab the most recent unread, non-admin notification
       // so the ticker can say what it's actually about (e.g. "regarding <animal name>").
       const unread = all.filter(n => !n.read && n.status === 'pending' && !['broadcast', 'announcement', 'moderator_message'].includes(n.type));
       setLatestNotification(unread[0] || null);
@@ -154,7 +154,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         .filter(c => c.unreadCount > 0)
         .sort((a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate));
       // Prefer a non-staff sender, but a conversation that once had a mod message (flagged
-      // "isStaff") can still carry an unread regular reply counted in regularMessageCount â€”
+      // "isStaff") can still carry an unread regular reply counted in regularMessageCount —
       // fall back to it rather than leaving the preview blank.
       const preview = unreadConvos.find(c => !c.otherUser?.isStaff) || unreadConvos[0] || null;
       setLatestMessageSender(preview?.otherUser || null);
@@ -190,7 +190,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const fetchCareData = useCallback(async () => {
     if (!authToken) return;
     try {
-      // Deliberately NOT passing isOwned=true â€” the Dashboard's own "Needs Attention" widgets
+      // Deliberately NOT passing isOwned=true — the Dashboard's own "Needs Attention" widgets
       // (AnimalList's activeAnimalsForDashboard) include every non-archived, non-view-only animal
       // regardless of ownership, so restricting to owned-only here silently hid alerts for
       // animals not marked "owned" and made the ticker disagree with the Dashboard.
@@ -217,7 +217,11 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   useEffect(() => {
     fetchCareData();
     const interval = setInterval(fetchCareData, 5 * 60 * 1000); // refresh every 5 minutes
-    return () => clearInterval(interval);
+    window.addEventListener('animals-changed', fetchCareData);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('animals-changed', fetchCareData);
+    };
   }, [fetchCareData]);
 
   // -- Compute the optional care/breeding alert items, gated by alertSettings --
@@ -244,30 +248,61 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     }
     if (alertSettings.careTasks) {
       const due = generalCareTasks.filter(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t)));
-      if (due.length > 0) items.push({ id: 'careTasks', icon: ClipboardList, iconColor: 'text-blue-300', text: `Custom Tasks: ${due.length} task${due.length !== 1 ? 's' : ''} due ${formatNameList(due.map(t => t.taskName))}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
+      const taskNames = due.map(task => {
+        const assignedNames = (task.assignedAnimals || [])
+          .map(id => animals.find(animal => animal.id_public === id))
+          .filter(Boolean)
+          .map(animalDisplayName);
+        const taskName = task.taskName || 'Custom task';
+        return assignedNames.length ? `${taskName} — ${formatNameList(assignedNames)}` : taskName;
+      });
+      if (due.length > 0) items.push({ id: 'careTasks', icon: ClipboardList, iconColor: 'text-blue-300', text: `Custom Tasks: ${due.length} task${due.length !== 1 ? 's' : ''} due ${formatNameList(taskNames)}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
     }
     if (alertSettings.reproduction) {
-      let mated = 0, due = 0, weaned = 0;
+      let mated = 0;
+      const matedAnimals = [];
+      const dueAnimals = [];
+      const weanedAnimals = [];
+      const animalNameForId = (id) => {
+        if (!id) return null;
+        const animal = animals.find(a => a.id_public === id);
+        return animal ? animalDisplayName(animal) : id;
+      };
+      const litterName = litter => litter.litter_id_public || litter.breedingPairCodeName || 'Litter';
+
       litters.forEach(l => {
         if (l.matingDate && !l.pregnancyDate && !l.birthDate) {
           const d = parseLocalDate(l.matingDate);
-          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) === 0) mated++;
+          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) === 0) {
+            mated++;
+            const parentNames = [...new Set([animalNameForId(l.damId_public), animalNameForId(l.sireId_public)].filter(Boolean))];
+            matedAnimals.push(parentNames.length ? parentNames.join(' × ') : litterName(l));
+          }
         }
         if (l.expectedDueDate && !l.birthDate) {
           const d = parseLocalDate(l.expectedDueDate);
-          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) due++;
+          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) {
+            dueAnimals.push(animalNameForId(l.damId_public) || litterName(l));
+          }
         }
         if (l.birthDate && !l.weaningConfirmed && l.weaningDate) {
           const d = parseLocalDate(l.weaningDate);
-          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) weaned++;
+          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) {
+            weanedAnimals.push(animalNameForId(l.damId_public) || litterName(l));
+          }
         }
       });
+      const due = dueAnimals.length;
+      const weaned = weanedAnimals.length;
       const total = mated + due + weaned;
       if (total > 0) {
         const parts = [];
-        if (mated > 0) parts.push(`${mated} mating${mated !== 1 ? 's' : ''} today`);
-        if (due > 0) parts.push(`${due} birth${due !== 1 ? 's' : ''} due`);
-        if (weaned > 0) parts.push(`${weaned} weaning${weaned !== 1 ? 's' : ''} due`);
+        const matedNames = formatNameList([...new Set(matedAnimals)]);
+        const dueNames = formatNameList([...new Set(dueAnimals.filter(Boolean))]);
+        const weanedNames = formatNameList([...new Set(weanedAnimals.filter(Boolean))]);
+        if (mated > 0) parts.push(`${mated} mating${mated !== 1 ? 's' : ''} today${matedNames ? ` ${matedNames}` : ''}`);
+        if (due > 0) parts.push(`${due} birth${due !== 1 ? 's' : ''} due${dueNames ? ` ${dueNames}` : ''}`);
+        if (weaned > 0) parts.push(`${weaned} weaning${weaned !== 1 ? 's' : ''} due${weanedNames ? ` ${weanedNames}` : ''}`);
         items.push({ id: 'reproduction', icon: Heart, iconColor: 'text-pink-300', text: `Reproduction: ${parts.join(', ')}`, onClick: () => navigate('/', { state: { animalView: 'reproduction' } }) });
       }
     }
@@ -280,8 +315,8 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       if (due.length > 0) items.push({ id: 'maintenance', icon: Wrench, iconColor: 'text-orange-300', text: `Maintenance: ${due.length} enclosure${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(enc => enc.name || 'Unnamed'))}`, onClick: () => navigate('/', { state: { animalView: 'enclosures' } }) });
     }
     if (alertSettings.supplies) {
-      const count = supplies.filter(s => (s.reorderThreshold != null && Number(s.currentStock) <= Number(s.reorderThreshold)) || (s.nextOrderDate && parseLocalDate(s.nextOrderDate) <= today)).length;
-      if (count > 0) items.push({ id: 'supplies', icon: Package, iconColor: 'text-cyan-300', text: `Supplies: ${count} item${count !== 1 ? 's' : ''} need restocking`, onClick: () => navigate('/supplies') });
+      const due = supplies.filter(s => (s.reorderThreshold != null && Number(s.currentStock) <= Number(s.reorderThreshold)) || (s.nextOrderDate && parseLocalDate(s.nextOrderDate) <= today));
+      if (due.length > 0) items.push({ id: 'supplies', icon: Package, iconColor: 'text-cyan-300', text: `Supplies: ${due.length} item${due.length !== 1 ? 's' : ''} need restocking ${formatNameList(due.map(s => s.name || 'Unnamed supply'))}`, onClick: () => navigate('/supplies') });
     }
     if (alertSettings.birthdays) {
       const due = animals.filter(a => {
@@ -413,7 +448,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
               </div>
               {expandedWarnings.length >= 3 && (
                 <p className="text-xs mt-2 text-red-600 font-semibold">
-                  You have reached 3 warnings â€” your account is suspended. Contact moderators for appeal.
+                  You have reached 3 warnings — your account is suspended. Contact moderators for appeal.
                 </p>
               )}
             </div>

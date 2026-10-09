@@ -1,41 +1,58 @@
 // Compress an image File in the browser by resizing it to fit within max dimensions
-// and re-encoding to JPEG (or PNG for original PNG files). GIFs are returned as-is.
+// and re-encoding to JPEG (or PNG for original PNG files). GIFs are rejected.
 // Returns a Promise that resolves to a Blob.
-import { decodeImageFile } from './imageDecode';
+import { decodeImageFile, releaseDecodedImage } from './imageDecode';
+
+function validateImageOptions({ maxWidth, maxHeight, quality }) {
+    if (![maxWidth, maxHeight].every(value => Number.isFinite(value) && value > 0)) {
+        throw new RangeError('Image dimensions must be positive numbers');
+    }
+    if (!Number.isFinite(quality) || quality < 0 || quality > 1) {
+        throw new RangeError('Image quality must be between 0 and 1');
+    }
+}
+
+function getScaledDimensions(width, height, maxWidth, maxHeight) {
+    const scale = Math.min(1, maxWidth / width, maxHeight / height);
+    return {
+        width: Math.max(1, Math.round(width * scale)),
+        height: Math.max(1, Math.round(height * scale)),
+    };
+}
+
+async function encodeImage(image, width, height, type, quality) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('IMAGE_CANVAS_UNAVAILABLE');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(image, 0, 0, width, height);
+
+    return new Promise((resolve, reject) => {
+        try {
+            canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('IMAGE_ENCODE_FAILED')), type, quality);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 export async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
     // Reject GIFs (animations not allowed) – the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
+    validateImageOptions({ maxWidth, maxHeight, quality });
     const img = await decodeImageFile(file);
-
-    const origWidth = img.width;
-    const origHeight = img.height;
-    let targetWidth = origWidth;
-    let targetHeight = origHeight;
-
-    // Calculate target size preserving aspect ratio
-    if (origWidth > maxWidth || origHeight > maxHeight) {
-        const widthRatio = maxWidth / origWidth;
-        const heightRatio = maxHeight / origHeight;
-        const ratio = Math.min(widthRatio, heightRatio);
-        targetWidth = Math.round(origWidth * ratio);
-        targetHeight = Math.round(origHeight * ratio);
+    try {
+        const { width, height } = getScaledDimensions(img.width, img.height, maxWidth, maxHeight);
+        return await encodeImage(img, width, height, 'image/jpeg', quality);
+    } finally {
+        releaseDecodedImage(img);
     }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext('2d');
-    // Fill background white for JPEG to avoid black background on transparent PNGs
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, targetWidth, targetHeight);
-    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-    // Always output JPEG for better compatibility (especially with mobile browsers)
-    const outputType = 'image/jpeg';
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
-    return blob || file;
 }
 
 // Compress an image File to be under `maxBytes` if possible.
@@ -46,89 +63,53 @@ export async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts =
     // Reject GIFs (animations not allowed) – the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
-    void 0
+    const {
+        maxWidth = 1200,
+        maxHeight = 1200,
+        startQuality = 0.85,
+        minQuality = 0.35,
+        qualityStep = 0.05,
+        minDimension = 200,
+        forceJpeg = false,
+    } = opts;
+    validateImageOptions({ maxWidth, maxHeight, quality: startQuality });
+    if (!Number.isFinite(minQuality) || minQuality < 0 || minQuality > startQuality) {
+        throw new RangeError('Minimum image quality must be between 0 and the starting quality');
+    }
+    if (!Number.isFinite(qualityStep) || qualityStep <= 0) {
+        throw new RangeError('Image quality step must be a positive number');
+    }
+    if (!Number.isFinite(minDimension) || minDimension < 1) {
+        throw new RangeError('Minimum image dimension must be a positive number');
+    }
+    if (!Number.isFinite(maxBytes) || maxBytes <= 0) {
+        throw new RangeError('Maximum image size must be a positive number');
+    }
 
-    // Start with original dimensions limits from opts or defaults
-    let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
-
-    // Load original image to get dimensions. Goes through the shared robust decoder so very
-    // large phone photos (e.g. 200 MP from an S24 Ultra) don't fail to decode.
     const image = await decodeImageFile(file);
+    try {
+        const dimensions = getScaledDimensions(image.width, image.height, maxWidth, maxHeight);
+        let { width: targetW, height: targetH } = dimensions;
+        const outputType = file.type === 'image/png' && !forceJpeg ? 'image/png' : 'image/jpeg';
+        let smallestBlob;
 
-    void 0
-
-    let targetW = Math.min(image.width, maxWidth);
-    let targetH = Math.min(image.height, maxHeight);
-
-    // Helper to run compression with given dims and quality
-    const tryCompress = async (w, h, quality) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(image, 0, 0, w, h);
-        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
-        return blob;
-    };
-
-    // First pass: try with decreasing quality at initial dimensions
-    let quality = startQuality;
-    while (quality >= minQuality) {
-        const blob = await tryCompress(targetW, targetH, quality);
-        if (!blob) break;
-        void 0
-        if (blob.size <= maxBytes) {
-            void 0
-            return blob;
-        }
-        quality -= qualityStep;
-    }
-
-    // Second pass: gradually reduce dimensions while preserving aspect ratio
-    const aspectRatio = image.width / image.height;
-    void 0
-    while (Math.max(targetW, targetH) > minDimension) {
-        // Reduce dimensions proportionally to maintain aspect ratio
-        const scale = 0.8;
-        targetW = Math.round(targetW * scale);
-        targetH = Math.round(targetH * scale);
-        
-        void 0
-        
-        // Ensure neither dimension goes below minDimension while preserving aspect ratio
-        if (Math.max(targetW, targetH) < minDimension) {
-            if (aspectRatio >= 1) {
-                targetW = minDimension;
-                targetH = Math.round(minDimension / aspectRatio);
-            } else {
-                targetH = minDimension;
-                targetW = Math.round(minDimension * aspectRatio);
+        while (true) {
+            for (let quality = startQuality; quality >= minQuality; quality -= qualityStep) {
+                const blob = await encodeImage(image, targetW, targetH, outputType, quality);
+                smallestBlob = blob;
+                if (blob.size <= maxBytes) return blob;
             }
-            void 0
-        }
-        
-        quality = startQuality;
-        while (quality >= minQuality) {
-            const blob = await tryCompress(targetW, targetH, quality);
-            if (!blob) break;
-            if (blob.size <= maxBytes) {
-                void 0
-                return blob;
-            }
-            quality -= qualityStep;
-        }
-    }
 
-    // As a last resort, return the smallest we could create (use minQuality and minimum dimensions while preserving aspect ratio)
-    const finalW = aspectRatio >= 1 ? minDimension : Math.round(minDimension * aspectRatio);
-    const finalH = aspectRatio <= 1 ? minDimension : Math.round(minDimension / aspectRatio);
-    void 0
-    const finalBlob = await tryCompress(finalW, finalH, minQuality);
-    void 0
-    return finalBlob || file;
+            const longestSide = Math.max(targetW, targetH);
+            if (longestSide <= minDimension) return smallestBlob;
+
+            const scale = Math.max(0.8, minDimension / longestSide);
+            targetW = Math.max(1, Math.round(targetW * scale));
+            targetH = Math.max(1, Math.round(targetH * scale));
+        }
+    } finally {
+        releaseDecodedImage(image);
+    }
 }
 
 // Attempt to compress an image in a Web Worker (public/imageWorker.js).

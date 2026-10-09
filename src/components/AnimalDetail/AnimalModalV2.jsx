@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
@@ -111,7 +111,7 @@ const AnimalModalV2 = ({
     setShowImageModal,
     setEnlargedImageUrl,
     // Optional tab override. Omit it and the modal shows the full tab set; Lite passes a
-    // trimmed list (Dashboard / Gallery / Pedigree / Records) â€” see LiteAnimalModal.jsx.
+    // trimmed list (Dashboard / Gallery / Pedigree / Records) — see LiteAnimalModal.jsx.
     tabs: tabsOverride
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -144,7 +144,7 @@ const AnimalModalV2 = ({
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
-    // Same aggregated event list as the Timeline tab â€” Recent Activity is just its top 5.
+    // Same aggregated event list as the Timeline tab — Recent Activity is just its top 5.
     const animalTimelineEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
 
     useEffect(() => {
@@ -259,7 +259,7 @@ const AnimalModalV2 = ({
         run();
     }, [authToken, API_BASE_URL, animal?.id_public]);
 
-    // Fetch litters where this animal is sire or dam â€” includes litters registered by
+    // Fetch litters where this animal is sire or dam — includes litters registered by
     // OTHER users using this animal, not just ones this user created themselves.
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
@@ -310,10 +310,6 @@ useEffect(() => {
         cancelled = true;
     };
 }, [animal?.id_public, authToken, API_BASE_URL]);
-
-useEffect(() => {
-    void 0
-}, [animal?.id_public, authToken, animalLitters, pedigreeOffspring]);
 
     // Listen for animal updates and refetch litters and pedigree data
     useEffect(() => {
@@ -510,8 +506,8 @@ useEffect(() => {
                                                     const reproState = getReproductionState(animal);
                                                     return reproState ? <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${reproState.color}`}>{reproState.icon} {reproState.label}</span> : null;
                                                 })()}
-                                                {animal.isForSale && <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` Â· ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}</span>}
-                                                {animal.availableForBreeding && <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` Â· ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}</span>}
+                                                {animal.isForSale && <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}</span>}
+                                                {animal.availableForBreeding && <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}</span>}
                                             </div>
                                         </>
                                     )}
@@ -643,7 +639,7 @@ useEffect(() => {
                                                                         if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
                                                                         if (months < 0) { years--; months += 12; }
                                                                         const age = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                                                        return `(${animal.deceasedDate ? `Lived ${age} â€  ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
+                                                                        return `(${animal.deceasedDate ? `Lived ${age} † ${formatDate(animal.deceasedDate)}` : `~${age}`})`;
                                                                     })()}
                                                                 </span>
                                                             </>
@@ -794,7 +790,7 @@ useEffect(() => {
                     </div>
                 </div>
 
-                {/* Tabs â€” sticky so it's still reachable when the header (image/info) is taller than the viewport */}
+                {/* Tabs — sticky so it's still reachable when the header (image/info) is taller than the viewport */}
                 <div className="sticky top-0 z-10 bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-border">
                     <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-4 -mb-px px-2 sm:px-4">
                         <button
@@ -817,7 +813,7 @@ useEffect(() => {
                     </nav>
                 </div>
 
-                {/* Content â€” the modal box itself scrolls now, so this no longer needs its own scroll region */}
+                {/* Content — the modal box itself scrolls now, so this no longer needs its own scroll region */}
                 <div className="p-3 sm:p-6 rounded-b-xl flex-1">
                     {activeTab === 'dashboard' && (
                         <div className="space-y-6">
@@ -858,7 +854,7 @@ useEffect(() => {
                                             <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
                                                 <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
                                                 <InfoButton title="Average Kinship (AVK)">
-                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data â€” calculated purely from recorded pedigree relationships).</p>
+                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
                                                     <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
                                                 </InfoButton>
                                             </div>
@@ -2526,7 +2522,7 @@ useEffect(() => {
                                                                                         flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
                                                                                     />
                                                                                 </div>
-                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` Â· ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` Â· ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
