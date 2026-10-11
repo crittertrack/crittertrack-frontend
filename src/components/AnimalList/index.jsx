@@ -854,7 +854,7 @@ const AnimalList = ({
         buildingId: '', roomId: '',
         purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
         lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-        cleaningTasks: [],
+        cleaningTasks: [], showDetailsOnPublicProfile: false,
         bedding: '', lightingType: '', enrichment: ''
     });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
@@ -930,7 +930,7 @@ const AnimalList = ({
             buildingId: '', roomId: '',
             purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
             lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-            cleaningTasks: [],
+            cleaningTasks: [], showDetailsOnPublicProfile: false,
             bedding: '', lightingType: '', enrichment: ''
         });
         setEnclosureImageFile(null);
@@ -1035,6 +1035,7 @@ const AnimalList = ({
                 lightTimeFormat: dataToSave.lightTimeFormat,
                 notes: dataToSave.notes?.trim(),
                 cleaningTasks: dataToSave.cleaningTasks,
+                showDetailsOnPublicProfile: Boolean(dataToSave.showDetailsOnPublicProfile),
                 tags: dataToSave.tags,
                 speciesLabels: dataToSave.speciesLabels,
                 bedding: dataToSave.bedding,
@@ -1557,6 +1558,7 @@ useEffect(() => {
                 tags: enclosure.tags || [],
                 speciesLabels: enclosure.speciesLabels || [],
                 cleaningTasks: enclosure.cleaningTasks || [],
+                showDetailsOnPublicProfile: Boolean(enclosure.showDetailsOnPublicProfile),
             });
             setEnclosureImagePreview(enclosure.imageUrl || null);
             setEnclosureImageFile(null);
@@ -1568,7 +1570,7 @@ useEffect(() => {
                 name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in', buildingId: '', roomId: '',
                 purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
                 lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-                cleaningTasks: [],
+                cleaningTasks: [], showDetailsOnPublicProfile: false,
                 bedding: '', lightingType: '', enrichment: '',
                 ...defaultValues
             });
@@ -4843,6 +4845,7 @@ useEffect(() => {
                                                                     humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '', buildingId: enc.buildingId || '', roomId: enc.roomId || '',
                                                                     lightingSchedule: enc.lightingSchedule || '',
                                                                     notes: enc.notes || '',
+                                                                    showDetailsOnPublicProfile: Boolean(enc.showDetailsOnPublicProfile),
                                                                     tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
                                                                     cleaningTasks: enc.cleaningTasks || [],
                                                                     purpose: enc.purpose || 'general',

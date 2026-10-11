@@ -170,15 +170,28 @@ const ViewAnimalModalV2 = ({
 
     useEffect(() => {
         const fetchEnclosure = async () => {
-            if (animal?.enclosureId && authToken) {
+            if (isPublic && animal?.id_public) {
+                try {
+                    const response = await apiClient.get(`/public/animal/${encodeURIComponent(animal.id_public)}/enclosure`);
+                    setEnclosureInfo(response.data);
+                } catch (error) {
+                    if (error.response?.status !== 404) console.error('Failed to fetch public enclosure details:', error);
+                    setEnclosureInfo(null);
+                }
+            } else if (animal?.enclosureId && authToken) {
                 try {
                     const response = await apiClient.get(`/enclosures/${animal.enclosureId}`);
                     setEnclosureInfo(response.data);
-                } catch { setEnclosureInfo(null); }
-            } else { setEnclosureInfo(null); }
+                } catch (error) {
+                    console.error('Failed to fetch enclosure details:', error);
+                    setEnclosureInfo(null);
+                }
+            } else {
+                setEnclosureInfo(null);
+            }
         };
         fetchEnclosure();
-    }, [animal?.enclosureId, API_BASE_URL, authToken]);
+    }, [animal?.enclosureId, animal?.id_public, API_BASE_URL, authToken, isPublic]);
 
     useEffect(() => {
         const fetchCOI = async () => {
@@ -2484,6 +2497,7 @@ useEffect(() => {
                         <CareTabContent
                             animal={animal}
                             enclosureInfo={enclosureInfo}
+                            isPublic={isPublic}
                         />
                     )}
                     {activeTab === 'behavior' && (

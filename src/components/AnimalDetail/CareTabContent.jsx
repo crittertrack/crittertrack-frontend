@@ -27,7 +27,7 @@ const TaskList = ({ tasks, label }) => {
     );
 };
 
-export const CareTabContent = ({ animal, enclosureInfo }) => {
+export const CareTabContent = ({ animal, enclosureInfo, isPublic = false }) => {
     const species = animal.species;
     const hidden = (field) => isFieldHiddenForSpecies(field, species);
     const label = (field, def) => getFieldLabel(field, species, def);
@@ -97,6 +97,7 @@ export const CareTabContent = ({ animal, enclosureInfo }) => {
                 <EnclosureCard enclosureInfo={enclosureInfo} />
             ) : (
                 <InfoCard title="Enclosure" icon={<Home size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                    {isPublic && <p className="mb-3 text-sm text-gray-400 dark:text-dark-text-muted">No public enclosure details are available.</p>}
                     {hasLegacyHousing || hasEnvironment ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.housingType && <InfoItem label="Housing Type" value={animal.housingType} />}
@@ -104,7 +105,7 @@ export const CareTabContent = ({ animal, enclosureInfo }) => {
                             {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
                             {animal.humidity && <InfoItem label="Humidity" value={animal.humidity} icon={<Wind size={14} />} />}
                         </div>
-                    ) : <p className="text-sm text-gray-400 dark:text-dark-text-muted">No enclosure assigned. Housing details can be found on the animal record.</p>}
+                    ) : !isPublic && <p className="text-sm text-gray-400 dark:text-dark-text-muted">No enclosure assigned. Housing details can be found on the animal record.</p>}
                 </InfoCard>
             )}
 

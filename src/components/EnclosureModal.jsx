@@ -191,6 +191,19 @@ const EnclosureModal = ({
                         </div>
                     </div>
 
+                    <label className="flex items-start gap-2 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50/60 dark:bg-blue-900/10 p-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={Boolean(enclosureFormData.showDetailsOnPublicProfile)}
+                            onChange={e => setNewEnclosureForm(p => ({ ...p, showDetailsOnPublicProfile: e.target.checked }))}
+                            className="mt-0.5"
+                        />
+                        <span>
+                            <span className="block text-sm font-medium text-gray-800 dark:text-dark-text">Show enclosure details and tasks on public animal profiles</span>
+                            <span className="block text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">Includes environment, notes, task names, schedules, and task notes for animals assigned here.</span>
+                        </span>
+                    </label>
+
                     <div className="sm:col-span-2 pt-2">
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b dark:border-dark-text-muted pb-1 mb-2">Environment</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
