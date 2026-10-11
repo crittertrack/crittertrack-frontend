@@ -2158,7 +2158,7 @@ useEffect(() => {
             .filter(item => item.count > 0);
     }, [enclosuresNeedingAttention]);
 
-    // Flattened enclosure cleaningTasks for the Feeding & Care management tab — same `enclosures`
+    // Flattened enclosure tasks for the Feeding & Care management tab — same `enclosures`
     // state and `isTaskDue` used by the enclosure cards/detail modal, just a 2nd display surface.
     const enclosureCleaningFlat = useMemo(() => {
         return enclosures.flatMap(enc => (enc.cleaningTasks || []).map(task => ({ enclosure: enc, task })));
@@ -4299,7 +4299,7 @@ useEffect(() => {
         );
     };
 
-    // Enclosure cleaning task row for the Feeding & Care tab — separate UI surface from the
+    // Enclosure task row for the Feeding & Care tab — separate UI surface from the
     // enclosure cards/detail modal, but reads/writes the exact same Enclosure.cleaningTasks data.
     const EnclosureCleaningTaskBar = ({ enclosure, task, handleMarkEnclosureCleaningTaskDone, handleDeleteEnclosureCleaningTask }) => {
         const due = isTaskDue(task);
@@ -4320,7 +4320,10 @@ useEffect(() => {
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{freqLabel}</div>
 
-                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.taskName}</div>
+                <div className="sm:col-span-2 min-w-0">
+                    <div className="text-xs text-gray-700 dark:text-dark-text truncate">{task.taskName}</div>
+                    <div className="text-xs text-gray-400 dark:text-dark-text-muted truncate">Type: {task.type || 'Other'}</div>
+                </div>
 
                 <div className="text-center">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
@@ -4986,9 +4989,9 @@ useEffect(() => {
                                         renderRow: entry => <AnimalCareTaskBar key={`${entry.animal.id_public}_${entry.taskIdx}`} animal={entry.animal} taskIdx={entry.taskIdx} task={entry.task} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkAnimalCareTaskDone={handleMarkAnimalCareTaskDone} handleSkipAnimalCareTask={handleSkipAnimalCareTask} handleDeleteAnimalCareTask={handleDeleteAnimalCareTask} />,
                                     },
                                     {
-                                        key: 'enclosurecleaning', title: 'Enclosure Cleaning', icon: <Wrench size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
+                                        key: 'enclosurecleaning', title: 'Enclosure Tasks', icon: <Wrench size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...enclosureCleaningDue, ...enclosureCleaningOk], dueCount: enclosureCleaningDue.length, colLabels: ['Last Done', 'Task'], entityLabel: 'Enclosure',
-                                        emptyText: "No enclosure cleaning tasks. Add tasks when creating/editing an enclosure in the Enclosures tab.",
+                                        emptyText: "No enclosure tasks. Add tasks when creating/editing an enclosure in the Enclosures tab.",
                                         renderRow: entry => <EnclosureCleaningTaskBar key={`${entry.enclosure._id}_${entry.task._id}`} enclosure={entry.enclosure} task={entry.task} handleMarkEnclosureCleaningTaskDone={handleMarkEnclosureCleaningTaskDone} handleDeleteEnclosureCleaningTask={handleDeleteEnclosureCleaningTask} />,
                                     },
                                 ];
