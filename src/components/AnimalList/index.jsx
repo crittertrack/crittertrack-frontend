@@ -4318,20 +4318,25 @@ useEffect(() => {
 
     // Enclosure task row for the Feeding & Care tab — separate UI surface from the
     // enclosure cards/detail modal, but reads/writes the exact same Enclosure.cleaningTasks data.
-    const EnclosureCleaningTaskBar = ({ enclosure, task, handleMarkEnclosureCleaningTaskDone, handleDeleteEnclosureCleaningTask }) => {
+    const EnclosureCleaningTaskBar = ({ enclosure, task, onViewEnclosure, handleMarkEnclosureCleaningTaskDone, handleDeleteEnclosureCleaningTask }) => {
         const due = isTaskDue(task);
         const freqLabel = task.frequencyDays ? `Every ${task.frequencyDays}d` : (task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—');
         return (
             <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
-                <div className="sm:col-span-2 flex items-center gap-3">
+                <button
+                    type="button"
+                    onClick={() => onViewEnclosure(enclosure)}
+                    className="sm:col-span-2 flex items-center gap-3 text-left rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label={`View details for ${enclosure.name}`}
+                >
                     <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {enclosure.imageUrl ? <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" /> : <Home size={16} className="text-gray-400 dark:text-dark-text-muted" />}
+                        {enclosure.imageUrl ? <img src={enclosure.imageUrl} alt="" className="w-full h-full object-cover" /> : <Home size={16} className="text-gray-400 dark:text-dark-text-muted" />}
                     </div>
                     <div className="min-w-0">
                         <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{enclosure.name}</div>
                         <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{enclosure.enclosureType || 'Enclosure'}</div>
                     </div>
-                </div>
+                </button>
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
 
@@ -5017,7 +5022,7 @@ useEffect(() => {
                                         key: 'enclosurecleaning', title: 'Enclosure Tasks', icon: <Wrench size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...enclosureCleaningDue, ...enclosureCleaningOk], dueCount: enclosureCleaningDue.length, colLabels: ['Last Done', 'Task'], entityLabel: 'Enclosure',
                                         emptyText: "No enclosure tasks. Add tasks when creating/editing an enclosure in the Enclosures tab.",
-                                        renderRow: entry => <EnclosureCleaningTaskBar key={`${entry.enclosure._id}_${entry.task._id}`} enclosure={entry.enclosure} task={entry.task} handleMarkEnclosureCleaningTaskDone={handleMarkEnclosureCleaningTaskDone} handleDeleteEnclosureCleaningTask={handleDeleteEnclosureCleaningTask} />,
+                                        renderRow: entry => <EnclosureCleaningTaskBar key={`${entry.enclosure._id}_${entry.task._id}`} enclosure={entry.enclosure} task={entry.task} onViewEnclosure={handleOpenDetail} handleMarkEnclosureCleaningTaskDone={handleMarkEnclosureCleaningTaskDone} handleDeleteEnclosureCleaningTask={handleDeleteEnclosureCleaningTask} />,
                                     },
                                 ];
 
