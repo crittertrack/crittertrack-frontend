@@ -38,6 +38,7 @@ import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLine
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
+import { getDietSupplyLabels } from '../../utils/feedingDisplay';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
@@ -4197,6 +4198,7 @@ useEffect(() => {
 
     const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding, handleDeleteFeedingSchedule }) => {
         const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
+        const dietSupplies = getDietSupplyLabels(animal.dietSupplies);
         return (
             <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
@@ -4212,7 +4214,12 @@ useEffect(() => {
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
 
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted">
-                    <div>{animal.dietType || ''}</div>
+                    {animal.dietType && <div>{animal.dietType}</div>}
+                    {dietSupplies.length > 0 && (
+                        <div className="mt-0.5 text-gray-600 dark:text-dark-text-secondary" title={dietSupplies.join(', ')}>
+                            Food: {dietSupplies.join(', ')}
+                        </div>
+                    )}
                 </div>
 
                 <div className="text-center">

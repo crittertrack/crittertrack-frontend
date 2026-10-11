@@ -1,5 +1,6 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v33'; // Increment version to force cache update
+const CACHE_PREFIX = 'crittertrack-';
+const CACHE_NAME = 'crittertrack-v34';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,20 +12,10 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing new service worker...', CACHE_NAME);
   event.waitUntil(
-    // Delete all old caches immediately on install
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          console.log('[SW] Deleting old cache during install:', cacheName);
-          return caches.delete(cacheName);
-        })
-      );
-    }).then(() => {
-      // Open new cache and add resources
-      return caches.open(CACHE_NAME);
-    }).then((cache) => {
+    caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Opened new cache:', CACHE_NAME);
-      return cache.addAll(urlsToCache).catch(err => {
+      const freshRequests = urlsToCache.map((url) => new Request(url, { cache: 'reload' }));
+      return cache.addAll(freshRequests).catch(err => {
         console.warn('[SW] Initial cache failed (ok for offline):', err);
       });
     }).catch(err => console.error('[SW] Cache setup failed:', err))
@@ -36,7 +27,8 @@ const isLocalhost = (url) => url.includes('localhost') || url.includes('127.0.0.
 
 const fetchNetworkFirst = async (request) => {
   try {
-    const response = await fetch(request);
+    // Don't let the browser HTTP cache return a stale app shell or unhashed asset.
+    const response = await fetch(new Request(request, { cache: 'no-cache' }));
     if (response && response.status === 200 && response.type !== 'error') {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone()).catch(err => console.error('[SW] Cache put failed:', err));
@@ -78,18 +70,18 @@ const shouldUseNetworkFirst = (request, url) => {
   if (url.pathname.startsWith('/static/')) {
     return false;
   }
-  if (request.destination === 'script' || request.destination === 'style' || request.destination === 'font') {
-    return true;
-  }
-  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.map')) {
-    return true;
-  }
-  return false;
+  // Non-hashed assets (images, icons, manifests, and other files) can change in place,
+  // so prefer fresh network content while retaining a cached copy for offline use.
+  return true;
 };
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  if (url.origin !== self.location.origin) {
+    return;
+  }
 
   if (isLocalhost(request.url)) {
     return;
@@ -127,13 +119,10 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating new service worker version:', CACHE_NAME);
-  const cacheWhitelist = [CACHE_NAME];
-
   event.waitUntil(
-    // Double-check: delete any remaining old caches during activation
     caches.keys().then((cacheNames) => {
       return Promise.all(cacheNames.map((cacheName) => {
-        if (!cacheWhitelist.includes(cacheName)) {
+        if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
           console.log('[SW] Deleting old cache during activation:', cacheName);
           return caches.delete(cacheName);
         }
