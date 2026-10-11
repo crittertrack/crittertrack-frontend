@@ -97,7 +97,7 @@ export const CareTabContent = ({ animal, enclosureInfo, isPublic = false }) => {
                 <EnclosureCard enclosureInfo={enclosureInfo} />
             ) : (
                 <InfoCard title="Enclosure" icon={<Home size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
-                    {isPublic && <p className="mb-3 text-sm text-gray-400 dark:text-dark-text-muted">No public enclosure details are available.</p>}
+                    {isPublic && <p className="mb-3 text-sm text-gray-400 dark:text-dark-text-muted">No enclosure is assigned to this animal.</p>}
                     {hasLegacyHousing || hasEnvironment ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.housingType && <InfoItem label="Housing Type" value={animal.housingType} />}

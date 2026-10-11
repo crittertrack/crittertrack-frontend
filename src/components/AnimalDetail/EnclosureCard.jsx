@@ -113,13 +113,18 @@ export const EnclosureCard = ({ enclosureInfo }) => {
     if (!enclosureInfo) return null;
 
     const dimensions = formatDimensions(enclosureInfo.dimensions);
+    const detailsShared = enclosureInfo.detailsShared !== false;
+    const CardContainer = detailsShared ? 'button' : 'div';
+
     return (
         <>
-            <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                aria-label={`View all details for ${enclosureInfo.name}`}
-                className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-sm transition hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary dark:border-dark-border dark:bg-dark-card-bg"
+            <CardContainer
+                {...(detailsShared ? {
+                    type: 'button',
+                    onClick: () => setIsModalOpen(true),
+                    'aria-label': `View all details for ${enclosureInfo.name}`,
+                } : {})}
+                className={`block w-full overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-sm dark:border-dark-border dark:bg-dark-card-bg${detailsShared ? ' transition hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary' : ''}`}
             >
                 <div className="grid grid-cols-1 md:grid-cols-3">
                     <div className="flex aspect-video items-center justify-center bg-gray-100 dark:bg-dark-surface md:col-span-1 md:aspect-auto">
@@ -157,11 +162,13 @@ export const EnclosureCard = ({ enclosureInfo }) => {
                                 </div>
                             </InfoItem>
                         </div>
-                        <p className="mt-3 text-xs font-medium text-primary">Click to view all details and tasks</p>
+                        {detailsShared
+                            ? <p className="mt-3 text-xs font-medium text-primary">Click to view all details and tasks</p>
+                            : <p className="mt-3 text-xs text-gray-400 dark:text-dark-text-muted">Additional enclosure details and tasks are not shared publicly.</p>}
                     </div>
                 </div>
-            </button>
-            {isModalOpen && <EnclosureDetailsModal enclosureInfo={enclosureInfo} onClose={() => setIsModalOpen(false)} />}
+            </CardContainer>
+            {detailsShared && isModalOpen && <EnclosureDetailsModal enclosureInfo={enclosureInfo} onClose={() => setIsModalOpen(false)} />}
         </>
     );
 };
