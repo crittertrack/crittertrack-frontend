@@ -640,10 +640,10 @@ const EnclosureDetailModal = ({
                                                             </span>
                                                         )}
                                                         {task.assignedSupplies && task.assignedSupplies.length > 0 && (
-                                                            <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
+                                                            <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity}${s.unit ? ` ${s.unit}` : ''} x ${s.supplyName}`).join(', ')}>
                                                                 <Package size={12} />
                                                                 {task.assignedSupplies.length === 1
-                                                                    ? `${task.assignedSupplies[0].quantity} x ${task.assignedSupplies[0].supplyName}`
+                                                                    ? `${task.assignedSupplies[0].quantity}${task.assignedSupplies[0].unit ? ` ${task.assignedSupplies[0].unit}` : ''} x ${task.assignedSupplies[0].supplyName}`
                                                                     : `${task.assignedSupplies.length} supplies`
                                                                 }
                                                             </span>
@@ -871,10 +871,10 @@ const EnclosureDetailModal = ({
                                                             </span>
                                                         )}
                                                         {task.assignedSupplies && task.assignedSupplies.length > 0 && (
-                                                            <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
+                                                            <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity}${s.unit ? ` ${s.unit}` : ''} x ${s.supplyName}`).join(', ')}>
                                                                 <Package size={12} />
                                                                 {task.assignedSupplies.length === 1
-                                                                    ? `${task.assignedSupplies[0].quantity} x ${task.assignedSupplies[0].supplyName}`
+                                                                    ? `${task.assignedSupplies[0].quantity}${task.assignedSupplies[0].unit ? ` ${task.assignedSupplies[0].unit}` : ''} x ${task.assignedSupplies[0].supplyName}`
                                                                     : `${task.assignedSupplies.length} supplies`
                                                                 }
                                                             </span>

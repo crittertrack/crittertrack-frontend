@@ -304,7 +304,7 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                 <div className="p-4 overflow-y-auto flex-1">
                     {mode === 'user' && (
                         <div className="space-y-2">
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or CTU ID" className="w-full p-2 border rounded-md" onKeyPress={e => e.key === 'Enter' && handleUserSearch()} />
                                 <button type="button" onClick={handleUserSearch} disabled={loading} className="p-2 bg-primary dark:bg-dark-primary rounded-md disabled:opacity-50">{loading ? <Loader2 className="animate-spin" /> : <Search />}</button>
                             </div>
@@ -1719,14 +1719,14 @@ const AnimalFormModalV2 = ({
     const [availableDietSupplies, setAvailableDietSupplies] = useState([]);
     const [dietSupplySearch, setDietSupplySearch] = useState('');
     const [loadingDietSupplies, setLoadingDietSupplies] = useState(false);
-    const [dietManualEntry, setDietManualEntry] = useState({ name: '' });
+    const [dietManualEntry, setDietManualEntry] = useState({ name: '', quantity: '', unit: '' });
 
     // Supplement supply selection states
     const [supplementMode, setSupplementMode] = useState('manual'); // 'manual' | 'supply'
     const [selectedSupplementSupply, setSelectedSupplementSupply] = useState(null);
     const [availableSupplementSupplies, setAvailableSupplementSupplies] = useState([]);
     const [supplementSupplySearch, setSupplementSupplySearch] = useState('');
-    const [supplementManualEntry, setSupplementManualEntry] = useState({ name: '', dosage: '' });
+    const [supplementManualEntry, setSupplementManualEntry] = useState({ name: '', dosage: '', quantity: '', unit: '' });
     const [loadingSupplementSupplies, setLoadingSupplementSupplies] = useState(false);
 
     // Health status override states
@@ -5370,25 +5370,43 @@ const AnimalFormModalV2 = ({
                                                                 type="text"
                                                                 placeholder="e.g., Brand X Pellets"
                                                                 value={dietManualEntry.name}
-                                                                onChange={(e) => setDietManualEntry({ name: e.target.value })}
+                                                                onChange={(e) => setDietManualEntry(prev => ({ ...prev, name: e.target.value }))}
                                                                 onKeyDown={(e) => {
                                                                     if (e.key === 'Enter') {
                                                                         e.preventDefault();
                                                                         if (!dietManualEntry.name.trim()) return;
                                                                         const existing = parseJsonArrayField(formData.dietSupplies) || [];
-                                                                        setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim() }] }));
-                                                                        setDietManualEntry({ name: '' });
+                                                                        setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim(), quantity: dietManualEntry.quantity ? Number(dietManualEntry.quantity) : undefined, unit: dietManualEntry.unit.trim() }] }));
+                                                                        setDietManualEntry({ name: '', quantity: '', unit: '' });
                                                                     }
                                                                 }}
                                                                 className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                min="0.01"
+                                                                step="any"
+                                                                placeholder="Qty"
+                                                                aria-label="Diet supply quantity"
+                                                                value={dietManualEntry.quantity}
+                                                                onChange={(e) => setDietManualEntry(prev => ({ ...prev, quantity: e.target.value }))}
+                                                                className="w-20 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
+                                                            />
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Unit"
+                                                                aria-label="Diet supply unit"
+                                                                value={dietManualEntry.unit}
+                                                                onChange={(e) => setDietManualEntry(prev => ({ ...prev, unit: e.target.value }))}
+                                                                className="w-20 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                             />
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
                                                                     if (!dietManualEntry.name.trim()) return;
                                                                     const existing = parseJsonArrayField(formData.dietSupplies) || [];
-                                                                    setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim() }] }));
-                                                                    setDietManualEntry({ name: '' });
+                                                                    setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim(), quantity: dietManualEntry.quantity ? Number(dietManualEntry.quantity) : undefined, unit: dietManualEntry.unit.trim() }] }));
+                                                                    setDietManualEntry({ name: '', quantity: '', unit: '' });
                                                                 }}
                                                                 className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark flex items-center gap-1 flex-shrink-0"
                                                             >
@@ -5398,8 +5416,31 @@ const AnimalFormModalV2 = ({
                                                         {parseJsonArrayField(formData.dietSupplies).length > 0 ? (
                                                             <div className="space-y-1">
                                                                 {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
-                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded text-xs">
-                                                                        <span>{s.name}</span>
+                                                                    <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded text-xs">
+                                                                        <span>{s.name}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            min="0.01"
+                                                                            step="any"
+                                                                            aria-label={`${s.name} quantity`}
+                                                                            value={s.quantity ?? ''}
+                                                                            onChange={(e) => {
+                                                                                const updated = parseJsonArrayField(formData.dietSupplies).map((item, idx) => idx === i ? { ...item, quantity: e.target.value === '' ? undefined : Number(e.target.value) } : item);
+                                                                                setFormData(prev => ({ ...prev, dietSupplies: updated }));
+                                                                            }}
+                                                                            className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                                                                        />
+                                                                        <input
+                                                                            type="text"
+                                                                            aria-label={`${s.name} unit`}
+                                                                            placeholder="Unit"
+                                                                            value={s.unit || ''}
+                                                                            onChange={(e) => {
+                                                                                const updated = parseJsonArrayField(formData.dietSupplies).map((item, idx) => idx === i ? { ...item, unit: e.target.value } : item);
+                                                                                setFormData(prev => ({ ...prev, dietSupplies: updated }));
+                                                                            }}
+                                                                            className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                                                                        />
                                                                         <button type="button" onClick={() => {
                                                                             const updated = parseJsonArrayField(formData.dietSupplies).filter((_, idx) => idx !== i);
                                                                             setFormData(prev => ({ ...prev, dietSupplies: updated }));
@@ -5428,7 +5469,7 @@ const AnimalFormModalV2 = ({
                                                                     <div key={supply.id} className="p-2 border-b hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer flex justify-between items-center text-xs" onClick={() => {
                                                                         setSelectedDietSupply(supply);
                                                                         const existing = parseJsonArrayField(formData.dietSupplies) || [];
-                                                                        const newSupply = { id: supply.id, name: supply.name, category: supply.category };
+                                                                        const newSupply = { id: supply.id, name: supply.name, category: supply.category, quantity: 1, unit: supply.unit || '' };
                                                                         setFormData(prev => ({ ...prev, dietSupplies: [...existing, newSupply] }));
                                                                         setDietSupplySearch('');
                                                                     }}>
@@ -5440,8 +5481,31 @@ const AnimalFormModalV2 = ({
                                                         </div>
                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                                             {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
-                                                                <div key={i} className="flex justify-between items-center p-1 bg-blue-50 dark:bg-blue-900/20 rounded mt-1">
-                                                                    <span>{s.name}</span>
+                                                                <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1 bg-blue-50 dark:bg-blue-900/20 rounded mt-1">
+                                                                    <span>{s.name}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0.01"
+                                                                        step="any"
+                                                                        aria-label={`${s.name} quantity`}
+                                                                        value={s.quantity ?? ''}
+                                                                        onChange={(e) => {
+                                                                            const updated = parseJsonArrayField(formData.dietSupplies).map((item, idx) => idx === i ? { ...item, quantity: e.target.value === '' ? undefined : Number(e.target.value) } : item);
+                                                                            setFormData(prev => ({ ...prev, dietSupplies: updated }));
+                                                                        }}
+                                                                        className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        aria-label={`${s.name} unit`}
+                                                                        placeholder="Unit"
+                                                                        value={s.unit || ''}
+                                                                        onChange={(e) => {
+                                                                            const updated = parseJsonArrayField(formData.dietSupplies).map((item, idx) => idx === i ? { ...item, unit: e.target.value } : item);
+                                                                            setFormData(prev => ({ ...prev, dietSupplies: updated }));
+                                                                        }}
+                                                                        className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                                                                    />
                                                                     <button type="button" onClick={() => {
                                                                         const updated = parseJsonArrayField(formData.dietSupplies).filter((_, idx) => idx !== i);
                                                                         setFormData(prev => ({ ...prev, dietSupplies: updated }));
@@ -5478,19 +5542,21 @@ const AnimalFormModalV2 = ({
                                                                         e.preventDefault();
                                                                         if (!supplementManualEntry.name.trim()) return;
                                                                         const existing = parseJsonArrayField(formData.supplementSupplies) || [];
-                                                                        setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim() }] }));
-                                                                        setSupplementManualEntry({ name: '', dosage: '' });
+                                                                        setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim(), quantity: supplementManualEntry.quantity ? Number(supplementManualEntry.quantity) : undefined, unit: supplementManualEntry.unit.trim() }] }));
+                                                                        setSupplementManualEntry({ name: '', dosage: '', quantity: '', unit: '' });
                                                                     }
                                                                 }}
                                                                 className="w-full sm:w-32 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                             />
+                                                            <input type="number" min="0.01" step="any" placeholder="Qty" aria-label="Supplement quantity" value={supplementManualEntry.quantity} onChange={e => setSupplementManualEntry(prev => ({ ...prev, quantity: e.target.value }))} className="w-20 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                            <input type="text" placeholder="Unit" aria-label="Supplement unit" value={supplementManualEntry.unit} onChange={e => setSupplementManualEntry(prev => ({ ...prev, unit: e.target.value }))} className="w-20 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
                                                                     if (!supplementManualEntry.name.trim()) return;
                                                                     const existing = parseJsonArrayField(formData.supplementSupplies) || [];
-                                                                    setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim() }] }));
-                                                                    setSupplementManualEntry({ name: '', dosage: '' });
+                                                                    setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim(), quantity: supplementManualEntry.quantity ? Number(supplementManualEntry.quantity) : undefined, unit: supplementManualEntry.unit.trim() }] }));
+                                                                    setSupplementManualEntry({ name: '', dosage: '', quantity: '', unit: '' });
                                                                 }}
                                                                 className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark flex items-center justify-center gap-1 flex-shrink-0 w-full sm:w-auto"
                                                             >
@@ -5500,8 +5566,16 @@ const AnimalFormModalV2 = ({
                                                         {parseJsonArrayField(formData.supplementSupplies).length > 0 ? (
                                                             <div className="space-y-1">
                                                                 {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
-                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-purple-50 dark:bg-purple-900/20 rounded text-xs">
-                                                                        <span>{s.name} {s.dosage && `(${s.dosage})`}</span>
+                                                                    <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1.5 bg-purple-50 dark:bg-purple-900/20 rounded text-xs">
+                                                                        <span>{s.name} {s.dosage && `(${s.dosage})`}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                        <input type="number" min="0.01" step="any" aria-label={`${s.name} quantity`} value={s.quantity ?? ''} onChange={e => {
+                                                                            const updated = parseJsonArrayField(formData.supplementSupplies).map((item, idx) => idx === i ? { ...item, quantity: e.target.value === '' ? undefined : Number(e.target.value) } : item);
+                                                                            setFormData(prev => ({ ...prev, supplementSupplies: updated }));
+                                                                        }} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" />
+                                                                        <input type="text" aria-label={`${s.name} unit`} placeholder="Unit" value={s.unit || ''} onChange={e => {
+                                                                            const updated = parseJsonArrayField(formData.supplementSupplies).map((item, idx) => idx === i ? { ...item, unit: e.target.value } : item);
+                                                                            setFormData(prev => ({ ...prev, supplementSupplies: updated }));
+                                                                        }} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" />
                                                                         <button type="button" onClick={() => {
                                                                             const updated = parseJsonArrayField(formData.supplementSupplies).filter((_, idx) => idx !== i);
                                                                             setFormData(prev => ({ ...prev, supplementSupplies: updated }));
@@ -5530,7 +5604,7 @@ const AnimalFormModalV2 = ({
                                                                     <div key={supply.id} className="p-2 border-b hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer flex justify-between items-center text-xs" onClick={() => {
                                                                         setSelectedSupplementSupply(supply);
                                                                         const existing = parseJsonArrayField(formData.supplementSupplies) || [];
-                                                                        const newSupply = { id: supply.id, name: supply.name, category: supply.category, dosage: supply.dosage || '' };
+                                                                        const newSupply = { id: supply.id, name: supply.name, category: supply.category, dosage: supply.dosage || '', quantity: 1, unit: supply.unit || '' };
                                                                         setFormData(prev => ({ ...prev, supplementSupplies: [...existing, newSupply] }));
                                                                         setSupplementSupplySearch('');
                                                                     }}>
@@ -5542,8 +5616,16 @@ const AnimalFormModalV2 = ({
                                                         </div>
                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                                             {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
-                                                                <div key={i} className="flex justify-between items-center p-1 bg-purple-50 dark:bg-purple-900/20 rounded mt-1">
-                                                                    <span>{s.name} {s.dosage && `(${s.dosage})`}</span>
+                                                                <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1 bg-purple-50 dark:bg-purple-900/20 rounded mt-1">
+                                                                    <span>{s.name} {s.dosage && `(${s.dosage})`}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                    <input type="number" min="0.01" step="any" aria-label={`${s.name} quantity`} value={s.quantity ?? ''} onChange={e => {
+                                                                        const updated = parseJsonArrayField(formData.supplementSupplies).map((item, idx) => idx === i ? { ...item, quantity: e.target.value === '' ? undefined : Number(e.target.value) } : item);
+                                                                        setFormData(prev => ({ ...prev, supplementSupplies: updated }));
+                                                                    }} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" />
+                                                                    <input type="text" aria-label={`${s.name} unit`} placeholder="Unit" value={s.unit || ''} onChange={e => {
+                                                                        const updated = parseJsonArrayField(formData.supplementSupplies).map((item, idx) => idx === i ? { ...item, unit: e.target.value } : item);
+                                                                        setFormData(prev => ({ ...prev, supplementSupplies: updated }));
+                                                                    }} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" />
                                                                     <button type="button" onClick={() => {
                                                                         const updated = parseJsonArrayField(formData.supplementSupplies).filter((_, idx) => idx !== i);
                                                                         setFormData(prev => ({ ...prev, supplementSupplies: updated }));

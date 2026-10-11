@@ -38,7 +38,7 @@ import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLine
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
-import { getDietSupplyLabels } from '../../utils/feedingDisplay';
+import { getAssignedDietSupplyQuantity, getDietSupplyLabels } from '../../utils/feedingDisplay';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
@@ -4343,7 +4343,7 @@ useEffect(() => {
                     {task.assignedSupplies?.length > 0 && (
                         <div className="mt-0.5 text-xs text-gray-600 dark:text-dark-text-secondary truncate" title={task.assignedSupplies.map(supply => supply.supplyName).filter(Boolean).join(', ')}>
                             Supplies: {task.assignedSupplies
-                                .map(supply => `${supply.quantity || 1} × ${supply.supplyName || 'Supply'}`)
+                                .map(supply => `${supply.quantity || 1}${supply.unit ? ` ${supply.unit}` : ''} × ${supply.supplyName || 'Supply'}`)
                                 .join(', ')}
                         </div>
                     )}
@@ -5273,7 +5273,15 @@ useEffect(() => {
                                 <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Food / Supply</label>
                                 <select
                                     value={feedingForm.supplyId}
-                                    onChange={e => setFeedingForm(f => ({ ...f, supplyId: e.target.value, qty: '1' }))}
+                                    onChange={e => {
+                                        const selectedSupply = supplies.find(supply => supply._id === e.target.value);
+                                        const assignedQuantity = getAssignedDietSupplyQuantity(feedingModal.animal.dietSupplies, selectedSupply);
+                                        setFeedingForm(f => ({
+                                            ...f,
+                                            supplyId: e.target.value,
+                                            qty: assignedQuantity != null ? String(assignedQuantity) : '1',
+                                        }));
+                                    }}
                                     className="w-full border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                 >
                                     <option value="">No food selected</option>

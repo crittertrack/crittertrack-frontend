@@ -92,7 +92,7 @@ const EnclosureDetailsModal = ({ enclosureInfo, onClose }) => {
                                             {task.assignedSupplies?.length > 0 && (
                                                 <span className="inline-flex items-center gap-1">
                                                     <Package size={12} />
-                                                    {task.assignedSupplies.map(supply => `${supply.quantity || 1} × ${supply.supplyName || 'Supply'}`).join(', ')}
+                                                    {task.assignedSupplies.map(supply => `${supply.quantity || 1}${supply.unit ? ` ${supply.unit}` : ''} × ${supply.supplyName || 'Supply'}`).join(', ')}
                                                 </span>
                                             )}
                                         </div>

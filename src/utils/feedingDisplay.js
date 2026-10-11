@@ -1,13 +1,31 @@
-export const getDietSupplyLabels = (dietSupplies) => {
+const parseDietSupplies = (dietSupplies) => {
     let supplies = dietSupplies;
     if (typeof supplies === 'string') {
         try {
             supplies = JSON.parse(supplies);
         } catch {
-            return [];
+            return null;
         }
     }
-    if (!Array.isArray(supplies)) return [];
+    return Array.isArray(supplies) ? supplies : null;
+};
+
+export const getAssignedDietSupplyQuantity = (dietSupplies, inventorySupply) => {
+    const supplies = parseDietSupplies(dietSupplies);
+    if (!supplies || !inventorySupply) return undefined;
+    const assigned = supplies.find((supply) => {
+        if (!supply || typeof supply !== 'object') return false;
+        if (supply.id && inventorySupply._id && String(supply.id) === String(inventorySupply._id)) return true;
+        return typeof supply.name === 'string' &&
+            typeof inventorySupply.name === 'string' &&
+            supply.name.toLowerCase() === inventorySupply.name.toLowerCase();
+    });
+    return assigned?.quantity;
+};
+
+export const getDietSupplyLabels = (dietSupplies) => {
+    const supplies = parseDietSupplies(dietSupplies);
+    if (!supplies) return [];
 
     return supplies
         .map((supply) => {
@@ -15,9 +33,10 @@ export const getDietSupplyLabels = (dietSupplies) => {
             if (!supply || typeof supply !== 'object') return '';
             const name = typeof supply.name === 'string' ? supply.name.trim() : '';
             if (!name) return '';
-            return supply.quantity != null && supply.quantity !== ''
-                ? `${name} (${supply.quantity})`
-                : name;
+            const amount = supply.quantity != null && supply.quantity !== ''
+                ? `${supply.quantity}${supply.unit ? ` ${supply.unit}` : ''}`
+                : '';
+            return amount ? `${name} (${amount})` : name;
         })
         .filter(Boolean);
 };

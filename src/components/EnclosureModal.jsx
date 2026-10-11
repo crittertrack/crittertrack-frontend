@@ -66,7 +66,7 @@ const EnclosureModal = ({
 
     const handleAddSupplyToTask = (supply) => {
         if (!newCleaningTaskSupplies.find(s => s.supplyId === supply._id)) {
-            setNewCleaningTaskSupplies([...newCleaningTaskSupplies, { supplyId: supply._id, supplyName: supply.name, quantity: 1 }]);
+            setNewCleaningTaskSupplies([...newCleaningTaskSupplies, { supplyId: supply._id, supplyName: supply.name, quantity: 1, unit: supply.unit || '' }]);
         }
     };
 
@@ -74,7 +74,23 @@ const EnclosureModal = ({
         setNewCleaningTaskSupplies(newCleaningTaskSupplies.filter(s => s.supplyId !== supplyId));
     };
     const handleSupplyQuantityChange = (supplyId, quantity) => {
-        setNewCleaningTaskSupplies(newCleaningTaskSupplies.map(s => s.supplyId === supplyId ? { ...s, quantity: Math.max(1, Number(quantity)) } : s));
+        setNewCleaningTaskSupplies(newCleaningTaskSupplies.map(s => s.supplyId === supplyId ? { ...s, quantity: quantity === '' ? '' : Number(quantity) } : s));
+    };
+    const handleSupplyUnitChange = (supplyId, unit) => {
+        setNewCleaningTaskSupplies(newCleaningTaskSupplies.map(s => s.supplyId === supplyId ? { ...s, unit } : s));
+    };
+    const handleExistingTaskSupplyChange = (taskIndex, supplyIndex, field, value) => {
+        setNewEnclosureForm(previous => ({
+            ...previous,
+            cleaningTasks: (previous.cleaningTasks || []).map((task, index) => index === taskIndex
+                ? {
+                    ...task,
+                    assignedSupplies: (task.assignedSupplies || []).map((supply, index) => index === supplyIndex
+                        ? { ...supply, [field]: field === 'quantity' ? (value === '' ? '' : Number(value)) : value }
+                        : supply),
+                }
+                : task),
+        }));
     };
 
     return (
@@ -357,10 +373,12 @@ const EnclosureModal = ({
                                                 <div className="mt-2 pt-2 border-t border-gray-100 dark:border-dark-text-muted">
                                                     <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Supplies:</p>
                                                     <ul className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1 space-y-0.5">
-                                                        {task.assignedSupplies.map(s => (
-                                                            <li key={s.supplyId} className="flex items-center gap-1">
+                                                        {task.assignedSupplies.map((s, supplyIndex) => (
+                                                            <li key={s.supplyId || `${s.supplyName}-${supplyIndex}`} className="flex items-center gap-1">
                                                                 <Package size={12} />
-                                                                <span>{s.quantity} x {s.supplyName}</span>
+                                                                <span className="flex-1">{s.supplyName}</span>
+                                                                <input type="number" min="0.01" step="any" aria-label={`${s.supplyName} quantity`} value={s.quantity ?? 1} onChange={e => handleExistingTaskSupplyChange(idx, supplyIndex, 'quantity', e.target.value)} onBlur={e => handleExistingTaskSupplyChange(idx, supplyIndex, 'quantity', Math.max(0.01, Number(e.target.value) || 1))} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" />
+                                                                <input type="text" aria-label={`${s.supplyName} unit`} placeholder="Unit" value={s.unit || ''} onChange={e => handleExistingTaskSupplyChange(idx, supplyIndex, 'unit', e.target.value)} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" />
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -395,7 +413,8 @@ const EnclosureModal = ({
                                                 {newCleaningTaskSupplies.map(supply => (
                                                     <div key={supply.supplyId} className="flex items-center gap-2 text-xs bg-white dark:bg-dark-card-bg dark:text-dark-text p-1 rounded border dark:border-dark-text-muted">
                                                         <span className="flex-1">{supply.supplyName}</span>
-                                                        <input type="number" value={supply.quantity} onChange={e => handleSupplyQuantityChange(supply.supplyId, e.target.value)} className="w-12 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" min="1" />
+                                                        <input type="number" value={supply.quantity} onChange={e => handleSupplyQuantityChange(supply.supplyId, e.target.value)} onBlur={e => handleSupplyQuantityChange(supply.supplyId, Math.max(0.01, Number(e.target.value) || 1))} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" min="0.01" step="any" aria-label={`${supply.supplyName} quantity`} />
+                                                        <input type="text" value={supply.unit || ''} onChange={e => handleSupplyUnitChange(supply.supplyId, e.target.value)} className="w-20 p-1 border dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg dark:text-dark-text" placeholder="Unit" aria-label={`${supply.supplyName} unit`} />
                                                         <button type="button" onClick={() => handleRemoveSupplyFromTask(supply.supplyId)} className="text-red-500"><Trash2 size={12} /></button>
                                                     </div>
                                                 ))}
@@ -413,7 +432,7 @@ const EnclosureModal = ({
                                             showModalMessage('Task name required', 'Please enter a name for this task before adding it.');
                                             return;
                                         }
-                                        const newTask = { taskName: newCleaningTaskName.trim(), type: newCleaningTaskType, frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies, lastDoneDate: null };
+                                        const newTask = { taskName: newCleaningTaskName.trim(), type: newCleaningTaskType, frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies.map(supply => ({ ...supply, quantity: Math.max(0.01, Number(supply.quantity) || 1) })), lastDoneDate: null };
                                         setNewEnclosureForm(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), newTask] }));
                                         setNewCleaningTaskName(''); setNewCleaningTaskFreq(''); setNewCleaningTaskFreqUnit('days'); setNewCleaningTaskNotes(''); setNewCleaningTaskSupplies([]); setNewCleaningTaskType('Cleaning');
                                     }} className="w-full px-2 py-1.5 text-xs bg-blue-600 dark:bg-dark-info-blue text-white rounded font-medium hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover">+ Add Task</button>
