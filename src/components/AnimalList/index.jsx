@@ -4198,7 +4198,15 @@ useEffect(() => {
 
     const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding, handleDeleteFeedingSchedule }) => {
         const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
+        const fullAnimal = animals.find(a =>
+            (animal.id_public && a.id_public === animal.id_public) ||
+            (animal._id && a._id === animal._id)
+        );
+        const dietType = animal.dietType || fullAnimal?.dietType;
         const dietSupplies = getDietSupplyLabels(animal.dietSupplies);
+        const displayedDietSupplies = dietSupplies.length > 0
+            ? dietSupplies
+            : getDietSupplyLabels(fullAnimal?.dietSupplies);
         return (
             <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
@@ -4214,10 +4222,10 @@ useEffect(() => {
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
 
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted">
-                    {animal.dietType && <div>{animal.dietType}</div>}
-                    {dietSupplies.length > 0 && (
-                        <div className="mt-0.5 text-gray-600 dark:text-dark-text-secondary" title={dietSupplies.join(', ')}>
-                            Food: {dietSupplies.join(', ')}
+                    {dietType && <div>{dietType}</div>}
+                    {displayedDietSupplies.length > 0 && (
+                        <div className="mt-0.5 text-gray-600 dark:text-dark-text-secondary" title={displayedDietSupplies.join(', ')}>
+                            Food: {displayedDietSupplies.join(', ')}
                         </div>
                     )}
                 </div>
