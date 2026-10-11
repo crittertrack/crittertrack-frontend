@@ -137,7 +137,7 @@ self.addEventListener('activate', (event) => {
           client.postMessage({ 
             type: 'SW_ACTIVATED', 
             cacheName: CACHE_NAME,
-            action: 'FORCE_RELOAD'
+            action: 'UPDATE_READY'
           });
         });
       })

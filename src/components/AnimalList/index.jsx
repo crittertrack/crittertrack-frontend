@@ -4332,6 +4332,13 @@ useEffect(() => {
                 <div className="sm:col-span-2 min-w-0">
                     <div className="text-xs text-gray-700 dark:text-dark-text truncate">{task.taskName}</div>
                     <div className="text-xs text-gray-400 dark:text-dark-text-muted truncate">Type: {task.type || 'Other'}</div>
+                    {task.assignedSupplies?.length > 0 && (
+                        <div className="mt-0.5 text-xs text-gray-600 dark:text-dark-text-secondary truncate" title={task.assignedSupplies.map(supply => supply.supplyName).filter(Boolean).join(', ')}>
+                            Supplies: {task.assignedSupplies
+                                .map(supply => `${supply.quantity || 1} × ${supply.supplyName || 'Supply'}`)
+                                .join(', ')}
+                        </div>
+                    )}
                 </div>
 
                 <div className="text-center">
