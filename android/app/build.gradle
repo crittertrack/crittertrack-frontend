@@ -17,8 +17,8 @@ android {
         applicationId "com.crittertrack.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "1.2.18"
+        versionCode 22
+        versionName "1.2.19"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -41,9 +41,21 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+tasks.register('excludeSideloadApkFromAndroidAssets') {
+    doLast {
+        delete file("$projectDir/src/main/assets/public/downloads/CritterTrack.apk")
+    }
+}
+tasks.named('preBuild').configure {
+    dependsOn tasks.named('excludeSideloadApkFromAndroidAssets')
 }
 
 repositories {
