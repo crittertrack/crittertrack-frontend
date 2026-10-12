@@ -8,7 +8,7 @@ import { parseApiError, withRetry } from '../../utils/errorHandler';
 import './UserManagementPanel.css';
 import themeColors from '../../utils/themeColors';
 
-const UserManagementPanel = () => {
+const UserManagementPanel = ({ onStartAccountMode }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -23,6 +23,10 @@ const UserManagementPanel = () => {
     const [currentUserRole, setCurrentUserRole] = useState('user');
     const [showBadgeModal, setShowBadgeModal] = useState(false);
     const [badgeUser, setBadgeUser] = useState(null);
+    const [accountSessionUser, setAccountSessionUser] = useState(null);
+    const [accountSessionReason, setAccountSessionReason] = useState('');
+    const [accountSessionError, setAccountSessionError] = useState('');
+    const [startingAccountSession, setStartingAccountSession] = useState(false);
 
     useEffect(() => {
         fetchUsers();
@@ -255,6 +259,29 @@ const UserManagementPanel = () => {
         setShowActionModal(true);
     };
 
+    const handleStartAccountMode = async () => {
+        const reason = accountSessionReason.trim();
+        if (reason.length < 10 || reason.length > 1000) {
+            setAccountSessionError('Provide a reason between 10 and 1000 characters.');
+            return;
+        }
+        if (!onStartAccountMode) {
+            setAccountSessionError('Account viewing is unavailable. Please refresh and try again.');
+            return;
+        }
+        setStartingAccountSession(true);
+        setAccountSessionError('');
+        try {
+            await onStartAccountMode(accountSessionUser, reason);
+            setAccountSessionUser(null);
+            setAccountSessionReason('');
+        } catch (error) {
+            setAccountSessionError(error.response?.data?.message || error.message || 'Could not start the account session.');
+        } finally {
+            setStartingAccountSession(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="user-management-panel">
@@ -464,6 +491,20 @@ const UserManagementPanel = () => {
                                             {user.monthlyDonationActive ? '💎' : user.lastDonationDate ? '🔥' : '🏅'}
                                         </button>
                                     )}
+                                    {currentUserRole === 'admin' && user.role === 'user' && user.accountStatus === 'normal' && (
+                                        <button
+                                            className="action-btn"
+                                            onClick={() => {
+                                                setAccountSessionUser(user);
+                                                setAccountSessionReason('');
+                                                setAccountSessionError('');
+                                            }}
+                                            title="View account as this user"
+                                            aria-label={`View ${user.personalName || user.breederName || user.email}'s account as this user`}
+                                        >
+                                            <LogIn size={14} />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -536,6 +577,39 @@ const UserManagementPanel = () => {
                     onBan={handleBanUser}
                     onChangeRole={handleChangeRole}
                 />
+            )}
+
+            {accountSessionUser && (
+                <div className="modal-overlay" onClick={() => !startingAccountSession && setAccountSessionUser(null)}>
+                    <div className="modal-content" onClick={event => event.stopPropagation()}>
+                        <h3>View account as user</h3>
+                        <p>
+                            You will have full access to this account for up to 30 minutes. Actions will be performed as the user and audited under your administrator account.
+                        </p>
+                        <p className="font-semibold">
+                            {accountSessionUser.personalName || accountSessionUser.breederName || accountSessionUser.email}
+                            {' '}({accountSessionUser.id_public})
+                        </p>
+                        <label htmlFor="account-session-reason">Reason for access (required)</label>
+                        <textarea
+                            id="account-session-reason"
+                            value={accountSessionReason}
+                            onChange={event => setAccountSessionReason(event.target.value)}
+                            maxLength={1000}
+                            rows={4}
+                            disabled={startingAccountSession}
+                            placeholder="Describe the support issue or account check."
+                        />
+                        <p className="text-xs text-gray-600">{accountSessionReason.trim().length}/1000 characters (minimum 10)</p>
+                        {accountSessionError && <p className="error-message">{accountSessionError}</p>}
+                        <div className="modal-actions">
+                            <button type="button" onClick={() => setAccountSessionUser(null)} disabled={startingAccountSession}>Cancel</button>
+                            <button type="button" onClick={handleStartAccountMode} disabled={startingAccountSession}>
+                                {startingAccountSession ? 'Starting…' : 'Continue as user'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

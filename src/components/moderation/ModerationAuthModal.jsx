@@ -41,7 +41,7 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
                 setStep('request-code');
                 setPassword('');
             } else {
-                onSuccess();
+                onSuccess(data.moderationProofToken);
             }
         } catch (err) {
             setError(err.message);
@@ -121,7 +121,7 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
                 throw new Error(data.error || 'Invalid 2FA code');
             }
 
-            onSuccess();
+            onSuccess(data.moderationProofToken);
         } catch (err) {
             setError(err.message);
         } finally {

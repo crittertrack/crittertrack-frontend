@@ -107,6 +107,10 @@ export function useAppAuth(
         const onError = (error: any) => {
             const status = error?.response?.status;
             const message = String(error?.response?.data?.message || error?.message || '').toLowerCase();
+            if (error?.response?.data?.adminAccountSessionExpired) {
+                window.dispatchEvent(new CustomEvent('admin-account-session-expired'));
+                return Promise.reject(error);
+            }
             const tokenExpired = status === 401 && (
                 error?.response?.data?.expired === true ||
                 message.includes('token expired') ||
@@ -161,6 +165,10 @@ export function useAppAuth(
                 setCachedUiMode(user.uiMode || null);
             } catch (error: any) {
                 console.error('Failed to fetch user profile:', error);
+                if (error.response?.data?.adminAccountSessionExpired) {
+                    window.dispatchEvent(new CustomEvent('admin-account-session-expired'));
+                    return;
+                }
 
                 // Only log out if it's a 401 or 403 (token expired/invalid/forbidden), not for network errors
                 if (error.response?.status === 401 || error.response?.status === 403) {

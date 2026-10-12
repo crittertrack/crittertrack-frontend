@@ -13,6 +13,7 @@ import { cacheGet, cacheSet } from './offlineCache';
 import { enqueueWrite, getQueuedWrites, removeQueuedWrite } from './offlineQueue';
 
 const apiClient = axios.create({ baseURL: API_BASE_URL });
+const isAdminAccountMode = () => sessionStorage.getItem('adminAccountMode') === 'active';
 
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('authToken');
@@ -48,7 +49,7 @@ apiClient.interceptors.response.use(
     (response) => {
         window.dispatchEvent(new CustomEvent('api-network-status', { detail: { online: true } }));
         // Fire-and-forget: cache successful GET bodies so they can be served back when offline.
-        if (response.config.method === 'get') {
+        if (response.config.method === 'get' && !isAdminAccountMode()) {
             cacheSet(cacheKeyFor(response.config), response.data);
         }
         return response;
@@ -58,7 +59,7 @@ apiClient.interceptors.response.use(
             window.dispatchEvent(new CustomEvent('api-network-status', { detail: { online: false } }));
             // Only GET requests get served from cache — writes must never be silently
             // faked while offline, so those still reject and the caller handles the failure.
-            if (error.config?.method === 'get') {
+            if (error.config?.method === 'get' && !isAdminAccountMode()) {
                 const cached = await cacheGet(cacheKeyFor(error.config));
                 if (cached) {
                     return {
@@ -78,7 +79,7 @@ apiClient.interceptors.response.use(
             // that instead rely on `response.data` being the full updated document should treat
             // it as a merge, not a replace — this synthetic response only echoes the sent
             // payload, not a server-computed document).
-            if (error.config?.method && QUEUEABLE_METHODS.has(error.config.method)) {
+            if (error.config?.method && QUEUEABLE_METHODS.has(error.config.method) && !isAdminAccountMode()) {
                 const data = parseQueuedData(error.config.data);
                 await enqueueWrite({ method: error.config.method, url: error.config.url, data });
                 return {
@@ -100,7 +101,7 @@ apiClient.interceptors.response.use(
 // stall everything queued after them. Safe to call repeatedly — no-ops while already running.
 let flushing = false;
 export const flushWriteQueue = async () => {
-    if (flushing) return;
+    if (flushing || isAdminAccountMode()) return;
     flushing = true;
     try {
         const queued = await getQueuedWrites();
@@ -125,7 +126,7 @@ export const flushWriteQueue = async () => {
 
 let wasOnline = true;
 window.addEventListener('api-network-status', (e) => {
-    if (e.detail.online && !wasOnline) flushWriteQueue();
+    if (e.detail.online && !wasOnline && !isAdminAccountMode()) flushWriteQueue();
     wasOnline = e.detail.online;
 });
 
@@ -136,7 +137,8 @@ window.addEventListener('api-network-status', (e) => {
 const inFlightGets = new Map();
 const rawGet = apiClient.get.bind(apiClient);
 apiClient.get = (url, config) => {
-    const key = `${url}${config?.params ? `?${JSON.stringify(config.params)}` : ''}`;
+    const token = localStorage.getItem('authToken') || 'anonymous';
+    const key = `${token}:${url}${config?.params ? `?${JSON.stringify(config.params)}` : ''}`;
     if (inFlightGets.has(key)) return inFlightGets.get(key);
     const promise = rawGet(url, config).finally(() => inFlightGets.delete(key));
     inFlightGets.set(key, promise);
