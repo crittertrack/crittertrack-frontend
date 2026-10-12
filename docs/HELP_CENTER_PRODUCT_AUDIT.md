@@ -35,9 +35,9 @@ Capacitor-based Android app.
 | Login and registration | Log in, register, verify registration, keep signed in, recover/reset password, accept Terms and Privacy links. Login presents **Get the Android app on Google Play** above the PWA install option. |
 | Main navigation | Open Animals, Litters, Contacts, Marketplace, Calendar, Community, Tools, and Finance. Desktop and mobile have different layouts. |
 | Header actions | Global search for users/animals; theme preference; push-notification controls; Lite/Full mode switch; notifications; messages; profile avatar menu. |
-| Profile menu | Open own public profile, report an issue, moderation/panel entry where authorized, and log out. This is the intended place to add **Help Center**. |
+| Profile menu | Open own public profile, Help Center, report an issue, moderation/panel entry where authorized, and log out. |
 | Contextual help | `InfoButton` popovers give local explanations and sometimes link to a lesson. These hints should become short contextual links/snippets that point to the same canonical Help Center article, not separate competing answers. |
-| Responsive/native behavior | Mobile navigation; PWA add-to-home-screen prompt and iOS instructions; Android Play Store listing; Android hardware back navigation. The native app shares the frontend UI. |
+| Responsive/native behavior | Mobile navigation; PWA add-to-home-screen prompt and iOS instructions; Android Play Store listing and direct APK download from `/downloads/CritterTrack.apk`; Android hardware back navigation. The native app shares the frontend UI. |
 | Lite mode | A user-selectable reduced navigation and workflow mode; it trims some views and hides Contacts, Marketplace, Calendar, and Community from the primary navigation. It is not a separate animal-data system. |
 | Global feedback and alerts | News ticker, offline/sync banners, notification strip, modal confirmations/errors, and report/support entry points. Explain what users can do from a banner only where that action is user-controllable. |
 
@@ -124,12 +124,12 @@ documentation links.
 
 ## Current tutorial catalog
 
-The catalog contains **60 lessons, 265 prose steps, and six sections**. It is organized as
+The catalog contains **60 lessons, 267 prose steps, and six sections**. It is organized as
 tab/feature tours rather than as searchable answers to user questions.
 
 | Existing section | Current lessons |
 |---|---|
-| Getting Started (5) | App Layout Tour; Creating and Editing Animals; Transferring Animal Ownership; Account Settings & the Breeder Registry; My Animals — The Basics |
+| Getting Started (5) | App Layout Tour; Creating and Editing Animals; Transferring Animal Ownership; Account Settings & the Breeder Registry; My Animals: The Basics |
 | The Animal Record (13) | Dashboard; Identification; Appearance; Health; Routine Care; Behavior; Breeding; Pedigree; Gallery; Timeline; Records; View-Only Extras; Customize |
 | The Animal List (7) | My Animals: The Main List; Organizing Animals with Collections; Managing Enclosures; Tracking Reproduction; Tracking Health; Feeding & Care; Archive, Duplicates & Alerts |
 | Profile & Settings (9) | Viewing a Profile; Profile; Info & Adoption; Directory; Ratings; Breeding Lines; Dropdown Lists; Data Portability; Account |
@@ -156,12 +156,15 @@ Existing navigation/access patterns:
   lesson ID routes to the new guide. Other existing lessons remain individual text articles
   until each is deliberately rewritten; recommendations and related links point to existing
   canonical articles rather than copying answers.
+- The Help Center adds canonical guides for account access/recovery, PWA installation,
+  voluntary CritterTrack support, and adding/requesting species. The navigation guide also
+  documents global breeder and animal search, including public ID prefixes.
 
 ## Coverage assessment
 
 | Product topic | Current coverage | Consolidation assessment |
 |---|---|---|
-| Navigation/onboarding | Layout tour, list basics, settings and InfoButton explanations | Merge into one “Getting around CritterTrack” article. Keep concise, note desktop/mobile/Lite differences once. |
+| Navigation/onboarding | Layout tour, global breeder/animal search, list basics, settings and InfoButton explanations | Covered across the navigation and Lite guides. Keep concise, note desktop/mobile/Lite differences once. |
 | Animal creation and records | Broad add/edit lesson plus per-tab animal-record tours and contextual hints | Strong coverage, but split by a user's task rather than one article per tab. One “Create/edit an animal” overview links to canonical articles for identity, health/care, genetics, pedigree, images, reproduction, records and visibility. Avoid repeating save/edit basics in each. |
 | Animal list and organization | Main list basics plus collection/enclosure and archive lessons | Merge list search/filter/sort/view actions into one list article; keep collections, enclosures and archive/duplicate resolution as distinct task articles. |
 | Care and reminders | Separate feeding, health and reproduction lessons; alert ticker and notifications lessons | Explain the source-of-truth state in each canonical workflow article; one separate “Understand notifications and reminders” article explains where to act and why derived reminders appear/disappear. |
@@ -172,15 +175,49 @@ Existing navigation/access patterns:
 | Calculators and family tree | Dedicated article per tool | Retain one article per tool, but remove repeated generic navigation instructions and describe inputs, outputs, prerequisites and limitations. |
 | Calendar, budget, inventory | One article per area | Keep separate canonical task articles; link budget/inventory when explaining supply deductions and care events. |
 | Messages and reports | Dedicated messages/report lessons; contextual links also exist | Keep one article for each distinct workflow, with role-gated moderator messaging clearly labeled. |
-| Help/resources and Android/PWA | Helpful Resources and Installing Android App lessons | Keep resource discovery and installing the app as canonical articles. Update Play Store information to public release; explain PWA separately, not as an Android beta alternative. |
+| Help/resources and Android/PWA | Helpful Resources and Installing Android App lessons, plus a dedicated PWA install guide | Covered separately for Play Store Android installation, a first-party direct APK download, PWA web installation, resource discovery, and support. |
+| Account access | New account, email verification, login, and password-recovery guide | Covered by one canonical account-access guide; settings and account-security options remain in the account settings guide. |
+| Donation and supporters | New voluntary-support guide for the donation page and public supporter list | Covered without implying donations are required or that the public list includes every supporter. |
+| Species management | New add/request species guide, plus species selection in the add-animal guide | Covers the shared species list, category/scientific name, favorites, duplicate avoidance, and customization requests. |
 | Screenshots | Legacy viewer and screenshot assets were removed for the text-only Help Center | No screenshot UI, assets, screenshot resolver, or image-generation script remains. |
+
+### Coverage check (2026-10-12)
+
+The legacy catalog has **60 unique lesson IDs**, all represented as Help Center articles; the
+former animal-creation lesson ID opens the purpose-written replacement guide. Four additional
+canonical guides cover account access, PWA installation, supporting CritterTrack, and species
+management, for **64 articles total**. This maps all known general-user product areas in the
+inventory above. It does not claim every conditional control or privileged admin/moderation
+action is documented.
+
+The signed Android APK is included as a first-party static download at
+`public/downloads/CritterTrack.apk`, exposed to the Android installation article at
+`/downloads/CritterTrack.apk`. Replace this asset with the next signed `assembleRelease` APK
+when publishing a new sideload release.
+
+The coverage pass updated the existing guides to explain global animal/breeder search, the
+feeding modal's assigned food,
+prefilled amount/unit, compatible units, and unchecked-by-default stock deduction; enclosure
+task supply quantities and the public-details checkbox (on by default); and the weaning action's
+effect on the active weaning alert.
+
+Remaining validation work:
+
+- The remaining lesson text is largely inherited from the old feature-tour tutorials and has
+  not yet been checked line by line against the current deployed UI. In particular, conditional
+  controls, permission-gated/admin workflows, and platform-specific behavior are not yet
+  exhaustively documented.
+- Admin and moderator workflows are intentionally not included in the general-user article
+  catalog. If those role-specific instructions are needed, publish a separately permission-
+  gated help area rather than exposing privileged operations to all users.
 
 ### Known content/implementation issues to reconcile
 
 - Some animal-form and litter `InfoButton`s only show inline hints, not lesson links. The
-  Help Center plan should keep useful hints short and link to the one matching article.
-- A Breeder Directory info link appears to target the Community lesson; verify and correct it
-  when contextual Help Center links are migrated.
+  Help Center plan should keep useful hints short and link to the one matching article where
+  a dedicated guide exists.
+- The Breeder Directory info link now opens the Directory settings guide instead of the
+  unrelated Community guide.
 - Browser/native entry resolution is not assumed by this content audit. Confirm the shipped
   build entry separately before writing platform-specific routing instructions.
 

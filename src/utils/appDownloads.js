@@ -1,9 +1,5 @@
-// Where the sideloadable Android APK is hosted for the installation tutorial.
-//
-// The Play Store build (.aab) can't be sideloaded, so this must point at an .apk produced
-// by `gradlew assembleRelease` (not bundleRelease). Set to null to hide the APK download
-// in the tutorial until hosting is set up.
-const ANDROID_APK_URL = null;
+// Replace public/downloads/CritterTrack.apk with each signed sideload release before deploy.
+const ANDROID_APK_URL = '/downloads/CritterTrack.apk';
 
 export const ANDROID_PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.crittertrack.app';

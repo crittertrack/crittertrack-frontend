@@ -484,8 +484,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 </div>
             )}
             {!forgotPasswordStep && !verificationStep && (
-                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg flex items-center gap-4 shadow">
-                    <Users size={32} className="text-primary-dark dark:text-dark-primary" />
+                <div className="mb-6 flex items-center gap-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 p-4 shadow lg:hidden dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg">
+                    <Users size={30} className="flex-shrink-0 text-primary-dark dark:text-dark-primary" />
                     <div>
                         <div className="text-lg font-bold text-gray-800 dark:text-dark-text">
                             Join {userCount} breeders & keepers!

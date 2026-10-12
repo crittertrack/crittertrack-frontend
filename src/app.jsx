@@ -1566,7 +1566,7 @@ const App = () => {
                             onClick={() => navigate('/calculator')}
                             className="px-2.5 py-1.5 text-sm bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                         >
-                            <Cat size={16} className="mr-1" /> {Capacitor.getPlatform() === 'android' ? 'Calculator' : 'Offspring Calculator'}
+                            <Cat size={16} className="mr-1" /> Calculator
                         </button>
                     </div>
                 </header>
@@ -1604,8 +1604,36 @@ const App = () => {
                 
                 {/* 3-Column Layout: Donation | Auth Form | Features */}
                 <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                    <div className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-lg dark:bg-dark-card-bg lg:hidden">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                            <div className="flex-shrink-0 rounded-full bg-gradient-to-r from-pink-500 to-red-500 p-2">
+                                <Heart size={17} className="fill-current text-white" />
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="text-sm font-bold text-gray-800 dark:text-dark-text">Support CritterTrack</h3>
+                                <p className="text-xs leading-snug text-gray-600 dark:text-dark-text-secondary">Help keep it free for everyone.</p>
+                            </div>
+                        </div>
+                        {Capacitor.isNativePlatform() ? (
+                            <button
+                                type="button"
+                                onClick={() => openExternalLink('https://ko-fi.com/crittertrack')}
+                                className="flex-shrink-0 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 px-3 py-2 text-xs font-semibold text-white shadow transition hover:from-pink-600 hover:to-red-600"
+                            >
+                                Support
+                            </button>
+                        ) : (
+                            <RouterLink
+                                to="/donation"
+                                className="flex-shrink-0 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 px-3 py-2 text-xs font-semibold text-white shadow transition hover:from-pink-600 hover:to-red-600"
+                            >
+                                Support
+                            </RouterLink>
+                        )}
+                    </div>
+
                     {/* LEFT: Donation Section — condensed on the native Android app, which links straight to Ko-fi and drops the Mouse Magic upsell */}
-                    <div className={Capacitor.isNativePlatform() ? "bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg" : "bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg"}>
+                    <div className={`hidden rounded-xl bg-white shadow-lg dark:bg-dark-card-bg lg:block ${Capacitor.isNativePlatform() ? 'p-4' : 'p-6'}`}>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="bg-gradient-to-r from-pink-500 to-red-500 p-2.5 rounded-full">
                                 <Heart size={24} className="text-white fill-current" />
@@ -1680,13 +1708,26 @@ const App = () => {
                     </div>
                     
                     {/* RIGHT: Features Summary */}
-                    <div className="bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4">What's Included</h3>
+                    <div className="hidden lg:block">
+                        <div className="mb-6 flex items-center gap-4 rounded-xl bg-gradient-to-r from-blue-100 to-purple-100 p-5 shadow dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg">
+                            <Users size={32} className="flex-shrink-0 text-primary-dark dark:text-dark-primary" />
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">
+                                    Join {userCount} breeders & keepers!
+                                </h3>
+                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                    Be part of a growing community. Register now and connect with passionate breeders and keepers worldwide!
+                                </p>
+                            </div>
+                        </div>
+                        <div className="rounded-xl bg-white p-6 shadow-lg dark:bg-dark-card-bg">
+                            <h3 className="mb-4 text-xl font-bold text-gray-800 dark:text-dark-text">What's Included</h3>
                         
                         <div className="space-y-3">
                             <div className="flex items-start gap-3">
                                 <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
                                     <Cat size={18} className="text-primary-dark dark:text-dark-primary" />
+                                    </div>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Animal Management</h4>

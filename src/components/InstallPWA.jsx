@@ -111,27 +111,30 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="mx-auto w-full max-w-[320px]">
         <button
           onClick={handleInstallClick}
           disabled={!installPrompt && !isIOSSafari}
-          className={`flex-1 font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border-2 ${
+          className={`flex aspect-[239/71] w-full items-center justify-center gap-2 rounded-xl border-2 px-4 text-center font-semibold transition duration-150 ${
             installPrompt || isIOSSafari
               ? 'bg-purple-100 hover:bg-purple-200 text-purple-800 border-purple-300 cursor-pointer'
               : 'bg-gray-100 text-gray-500 border-gray-200 cursor-default'
           }`}
         >
-          <Download size={20} />
+          <Download size={20} className="flex-shrink-0" />
           Install CritterTrack (Web)
         </button>
-        <button
-          type="button"
-          onClick={() => setShowInfo(prev => !prev)}
-          className="flex-shrink-0 p-2 rounded-lg border-2 border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition"
-          title="What does this do?"
-        >
-          <Info size={18} />
-        </button>
+        <div className="mt-1 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowInfo(prev => !prev)}
+            className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-gray-500 transition hover:text-gray-700 dark:text-dark-text-muted dark:hover:text-dark-text"
+            aria-expanded={showInfo}
+          >
+            <Info size={15} />
+            What does this do?
+          </button>
+        </div>
       </div>
       {showInfo && (
         <p className="text-xs text-gray-400 text-center mt-1.5">

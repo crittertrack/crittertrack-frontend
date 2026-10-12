@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, BookOpen, Bug, CalendarDays, ChevronRight,
+  ArrowLeft, ArrowRight, BookOpen, Bug, CalendarDays, ChevronRight, Download,
   Dna, HeartPulse, HeartHandshake, Lightbulb, Link2, PawPrint, Search, Settings,
   Sparkles, Sprout, ThumbsDown, ThumbsUp
 } from 'lucide-react';
@@ -183,6 +183,122 @@ const HOW_TO_ADD_ANIMAL = {
   ],
 };
 
+const ACCOUNT_ACCESS_ARTICLE = {
+  id: 'account-access-and-recovery',
+  title: 'Create an account, sign in, or reset your password',
+  description: 'Register with email verification, sign in to CritterTrack, or recover access if you forget your password.',
+  topicId: 'getting-started',
+  searchTerms: ['register', 'registration', 'verify email', 'verification code', 'forgot password', 'login'],
+  steps: [
+    {
+      title: 'Create your account',
+      content: 'On the welcome screen, choose “Register Here.” Enter your personal name, email address, password, and password confirmation, then agree to the Terms of Service and Privacy Policy. Select Register to request a verification code.',
+    },
+    {
+      title: 'Verify your email',
+      content: 'Enter the 6-digit code sent to your email address and choose “Verify & Create Account.” The code expires after 10 minutes. If it expires or does not arrive, use “Resend Code” or “Change Email or Start Over.” Successful verification creates your account and signs you in.',
+    },
+    {
+      title: 'Sign in',
+      content: 'Enter the email address and password for your account on the welcome screen and choose Log In. Select “Keep me signed in” if you want this browser or app to retain your sign-in.',
+    },
+    {
+      title: 'Reset a forgotten password',
+      content: 'Choose “Forgot Password?” and enter the email address associated with your account. Open the password-reset email and select its reset button. The link expires after 1 hour. Enter and confirm a new password, then choose Reset Password. Return to the welcome screen and sign in with the new password.',
+    },
+  ],
+  tips: [
+    'Check your spam or junk folder if a verification or password-reset email is not in your inbox.',
+    'If a verification code expires, request a new one instead of repeatedly submitting the expired code.',
+  ],
+  relatedArticleIds: ['install-crittertrack-pwa', 'getting-started-account-settings'],
+};
+
+const PWA_INSTALL_ARTICLE = {
+  id: 'install-crittertrack-pwa',
+  title: 'Install CritterTrack as a web app',
+  description: 'Add the CritterTrack website to your phone or computer home screen so it opens like an app.',
+  topicId: 'getting-started',
+  searchTerms: ['PWA', 'web app', 'add to home screen', 'install website', 'iPhone', 'iPad'],
+  steps: [
+    {
+      title: 'Open the install option',
+      content: 'On the CritterTrack welcome screen, find “Install CritterTrack (Web)” below the Google Play app option. On supported desktop and Android browsers, select it and accept the browser’s install prompt. The option may be unavailable in browsers that do not support web-app installation.',
+    },
+    {
+      title: 'Add it from iPhone or iPad',
+      content: 'Open CritterTrack in Safari, select Share, scroll down and choose “Add to Home Screen,” then confirm with Add. The web install button opens these instructions on iOS because Safari does not provide the same automatic install prompt.',
+    },
+    {
+      title: 'Open CritterTrack from your home screen',
+      content: 'Use the new CritterTrack icon to open the web app. Sign in with your existing account. It uses your CritterTrack account and can keep changes available offline to sync when you are online again.',
+    },
+  ],
+  tips: [
+    'On Android, the Google Play app is a separate native app and is listed above the web install option.',
+    'If the web install option is disabled, try a supported browser. On iPhone or iPad, use Safari and follow the Add to Home Screen steps.',
+  ],
+  relatedArticleIds: ['install-the-app', 'lite-mode', 'account-access-and-recovery'],
+};
+
+const SUPPORT_CRITTERTRACK_ARTICLE = {
+  id: 'support-crittertrack',
+  title: 'Support CritterTrack and view its supporters',
+  description: 'Learn how voluntary support works and where to see the community members who choose to be listed.',
+  topicId: 'planning',
+  searchTerms: ['donate', 'donation', 'Ko-fi', 'supporters', 'monthly member'],
+  steps: [
+    {
+      title: 'Open the support page',
+      content: 'From the web welcome screen, choose “Learn More & Donate.” In the Android app, choose “Support CritterTrack” to open Ko-fi directly. CritterTrack is free to use, with no required subscription or premium tier. Donations are voluntary and help fund hosting, maintenance, and development.',
+    },
+    {
+      title: 'Choose whether to support',
+      content: 'On the Support CritterTrack page, choose “Support on Ko-fi” to make a one-time donation or become a monthly member. Ko-fi processes payments and manages monthly subscriptions. Supporting the project is optional and is not required to use CritterTrack.',
+      link: {
+        label: 'Open CritterTrack on Ko-fi',
+        url: 'https://ko-fi.com/crittertrack',
+      },
+    },
+    {
+      title: 'View public supporters',
+      content: 'Choose a supporter name or the supporter link in the scrolling news ticker to open the public Supporters list. It only displays people who chose to be shown publicly on Ko-fi, so it is not a complete list of everyone who has supported CritterTrack.',
+    },
+  ],
+  relatedArticleIds: ['helpful-resources', 'report-an-issue'],
+};
+
+const CUSTOM_SPECIES_ARTICLE = {
+  id: 'add-custom-species',
+  title: 'Add or request a species',
+  description: 'Add a species that is missing from the picker, or request changes to the fields used for a species.',
+  topicId: 'getting-started',
+  searchTerms: ['custom species', 'new species', 'scientific name', 'latin name', 'species fields'],
+  steps: [
+    {
+      title: 'Open species management',
+      content: 'When adding an animal, choose “Add New Species” from the species picker. You can also open Manage Species from the species-selection screen.',
+    },
+    {
+      title: 'Add the missing species',
+      content: 'Enter the species name, choose its category, and optionally enter its Latin or scientific name. Select Add. Species you contribute are added to the shared list and become available to all users, so search the list first to avoid adding a duplicate.',
+    },
+    {
+      title: 'Find a species in the picker',
+      content: 'Search by common or Latin name, or filter by category. Use the star on a species to add or remove it from your favorites. Favorites are saved in this browser and appear near the top of the picker.',
+    },
+    {
+      title: 'Request different species fields',
+      content: 'If a species needs different or additional animal-record fields, choose “Request Species Customization” in Manage Species. Select the species, describe the fields that should change or be added, and send the request for review.',
+    },
+  ],
+  tips: [
+    'The species name is locked on an animal after you create its record. Confirm the selection before saving.',
+    'Default species are locked in the management list. Community-added species appear as shared entries.',
+  ],
+  relatedArticleIds: ['how-to-add-an-animal', 'animal-tab-customize'],
+};
+
 const LESSONS = TUTORIAL_LESSONS.sections.flatMap(section =>
   section.lessons.map(lesson => ({ ...lesson, sourceSectionId: section.id }))
 );
@@ -193,6 +309,10 @@ const LEGACY_LESSON_TO_ARTICLE = new Map(LESSONS.map(lesson => [
 
 const ARTICLES = [
   HOW_TO_ADD_ANIMAL,
+  ACCOUNT_ACCESS_ARTICLE,
+  PWA_INSTALL_ARTICLE,
+  SUPPORT_CRITTERTRACK_ARTICLE,
+  CUSTOM_SPECIES_ARTICLE,
   ...LESSONS.filter(lesson => lesson.id !== 'getting-started-animals').map(lesson => {
     const topicId = getTopicId(lesson, lesson.sourceSectionId);
     return {
@@ -210,9 +330,9 @@ const ARTICLES = [
 
 const POPULAR_ARTICLE_IDS = [
   'how-to-add-an-animal',
-  'litter-planned-mating',
-  'offspring-calculator',
-  'health-tracking',
+  'account-access-and-recovery',
+  'install-crittertrack-pwa',
+  'support-crittertrack',
 ];
 
 const HelpCenterPage = () => {
@@ -242,6 +362,7 @@ const HelpCenterPage = () => {
       article.title,
       article.description,
       article.topicTitle,
+      ...(article.searchTerms || []),
       ...article.steps.flatMap(step => [step.title, step.content]),
     ].join(' ').toLocaleLowerCase();
     return searchableText.includes(normalizedQuery);
@@ -523,7 +644,7 @@ const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVo
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary-dark dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:text-dark-primary"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary-dark dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:text-dark-primary lg:hidden"
           >
             <ArrowLeft size={14} />
             {backLabel}
@@ -598,11 +719,12 @@ const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVo
                   {step.link?.url && (
                     <a
                       href={step.link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      download={step.link.download || undefined}
+                      target={step.link.download ? undefined : '_blank'}
+                      rel={step.link.download ? undefined : 'noopener noreferrer'}
                       className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-dark hover:underline dark:text-dark-primary"
                     >
-                      {step.link.label}<ArrowRight size={13} />
+                      {step.link.label}{step.link.download ? <Download size={13} /> : <ArrowRight size={13} />}
                     </a>
                   )}
                 </div>

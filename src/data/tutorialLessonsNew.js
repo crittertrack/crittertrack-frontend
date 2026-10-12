@@ -14,7 +14,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'The scrolling news ticker',
-        content: 'A scrolling banner above the nav bar links to Ko-fi support, Report a Bug, and Helpful Resources, plus the latest community announcements/polls — clicking any of those jumps to Community. This is separate from the alerts banner just below the nav bar, which covers unread messages/notifications and care alerts instead.',
+        content: 'A scrolling banner above the nav bar links to Ko-fi support, Report a Bug, and Helpful Resources, plus the latest community announcements/polls - clicking any of those jumps to Community. This is separate from the alerts banner just below the nav bar, which covers unread messages/notifications and care alerts instead.',
       },
       {
         stepNumber: 3,
@@ -29,7 +29,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Top-right icons',
-        content: 'From left to right: the theme toggle (light/dark/auto), a push notifications quick-toggle for this device, the Lite mode toggle (feather icon), the Notifications bell (purple badge = unread count), and the Messages icon (red badge = a message from CritterTrack staff, purple = a message from another user). The feather icon switches between Full and Lite mode — you\'ll get a confirmation prompt either way. It\'s tied to your account rather than your device, so it follows you between the website and the Android app. Lite is the same app with a smaller surface: the navigation drops Contacts, Marketplace, Calendar and Community, and each animal opens with just four tabs (Dashboard, Records, Gallery, Pedigree) instead of eleven. Nothing is lost when you switch — anything hidden in Lite is still saved and waiting in Full. See the "Lite Mode" lesson in More Pages & Tools for the full detail.',
+        content: 'From left to right: the theme toggle (light/dark/auto), a push notifications quick-toggle for this device, the Lite mode toggle (feather icon), the Notifications bell (purple badge = unread count), and the Messages icon (red badge = a message from CritterTrack staff, purple = a message from another user). The feather icon switches between Full and Lite mode - you\'ll get a confirmation prompt either way. It\'s tied to your account rather than your device, so it follows you between the website and the Android app. Lite is the same app with a smaller surface: the navigation drops Contacts, Marketplace, Calendar and Community, and each animal opens with just four tabs (Dashboard, Records, Gallery, Pedigree) instead of eleven. Nothing is lost when you switch - anything hidden in Lite is still saved and waiting in Full. See the "Lite Mode" lesson in More Pages & Tools for the full detail.',
       },
       {
         stepNumber: 6,
@@ -40,6 +40,11 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 7,
         title: 'Info buttons',
         content: 'Look for a small ⓘ icon near a page\'s title for a quick contextual hint. When a related guide is available, follow its link to open that article in the Help Center.',
+      },
+      {
+        stepNumber: 8,
+        title: 'Search for animals and breeders',
+        content: 'Use the global search in the header to look up public animals or breeder profiles by name, species, or public ID. Enter at least two characters for a text search. A CTC ID searches for an animal, and a CTU ID searches for a breeder profile.',
       },
     ],
   },
@@ -61,22 +66,22 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Fill out the new animal form',
-        content: 'Picking a species opens the "Add New [Species]" form. Name is the only field you truly have to fill in — everything else can be filled in now or left for later.',
+        content: 'Picking a species opens the "Add New [Species]" form. Name is the only field you truly have to fill in - everything else can be filled in now or left for later.',
       },
       {
         stepNumber: 4,
         title: 'The form is organized into tabs',
-        content: 'Dashboard, Identification, Appearance, Health, Routine Care, Behavior, Breeding, Pedigree, Gallery, Timeline, and Records — plus a Customize tab at the end where you can hide any tabs or sections you don\'t use for that species. You don\'t need to fill out every tab right away — save with just the required field and come back later.',
+        content: 'Dashboard, Identification, Appearance, Health, Routine Care, Behavior, Breeding, Pedigree, Gallery, Timeline, and Records - plus a Customize tab at the end where you can hide any tabs or sections you don\'t use for that species. You don\'t need to fill out every tab right away - save with just the required field and come back later.',
       },
       {
         stepNumber: 5,
         title: 'Editing an existing animal',
-        content: 'Open the animal\'s detail view and click Edit in the header — that\'s the only way in.',
+        content: 'Open the animal\'s detail view and click Edit in the header - that\'s the only way in.',
       },
       {
         stepNumber: 6,
         title: 'Linking a Sire/Dam',
-        content: 'On the Pedigree tab, every ancestor slot (Sire, Dam, and further generations) links to a real animal already on CritterTrack. Click a slot and search to connect the actual parent — it can be one of your own animals, or any other public animal on the site, and the search filters to the correct gender for that slot (e.g. only males for a Sire slot). The parent needs to already exist as an animal record on CritterTrack, so if an ancestor isn\'t tracked yet, add them as their own animal first, then come back and link them. Because these are real records, a linked parent feeds the pedigree tree everywhere it should: the full chart, the parent cards, and COI/AVK calculations.',
+        content: 'On the Pedigree tab, every ancestor slot (Sire, Dam, and further generations) links to a real animal already on CritterTrack. Click a slot and search to connect the actual parent - it can be one of your own animals, or any other public animal on the site, and the search filters to the correct gender for that slot (e.g. only males for a Sire slot). The parent needs to already exist as an animal record on CritterTrack, so if an ancestor isn\'t tracked yet, add them as their own animal first, then come back and link them. Because these are real records, a linked parent feeds the pedigree tree everywhere it should: the full chart, the parent cards, and COI/AVK calculations.',
       },
       {
         stepNumber: 7,
@@ -86,19 +91,19 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 8,
         title: 'Owned vs. Unowned',
-        content: 'Every animal you create defaults to "Owned." Use the Heart / Heart-off button on its card to flip this label — handy for animals you created but don\'t currently have in your possession (co-owned, borrowed, or only added for pedigree). The "Owned"/"All" buttons at the top of the list just filter by this same label, and bulk actions exist to mark many animals at once. Flipping this label never sells, transfers, or archives an animal — actually transferring ownership to another user is a separate process, covered in the next lesson.',
+        content: 'Every animal you create defaults to "Owned." Use the Heart / Heart-off button on its card to flip this label - handy for animals you created but don\'t currently have in your possession (co-owned, borrowed, or only added for pedigree). The "Owned"/"All" buttons at the top of the list just filter by this same label, and bulk actions exist to mark many animals at once. Flipping this label never sells, transfers, or archives an animal - actually transferring ownership to another user is a separate process, covered in the next lesson.',
       },
       {
         stepNumber: 9,
         title: 'A few features live here but are managed elsewhere',
-        content: 'Enclosure assignment, Health/Quarantine & Treatment, Feeding/Grooming/Training schedules, Marketplace availability, Breeding Line assignment, and Seller/Buyer contact linkage can all be set from this same edit form, but you\'ll do the day-to-day work on their own dedicated pages — each covered in a later lesson.',
+        content: 'Enclosure assignment, Health/Quarantine & Treatment, Feeding/Grooming/Training schedules, Marketplace availability, Breeding Line assignment, and Seller/Buyer contact linkage can all be set from this same edit form, but you\'ll do the day-to-day work on their own dedicated pages - each covered in a later lesson.',
       },
     ],
   },
   {
     id: 'getting-started-transfers',
     title: 'Transferring Animal Ownership',
-    description: 'A closer look at the Transfer feature — this one trips people up, so it gets its own lesson.',
+    description: 'A closer look at the Transfer feature - this one trips people up, so it gets its own lesson.',
     steps: [
       {
         stepNumber: 1,
@@ -113,7 +118,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Nothing changes until they accept',
-        content: 'Sending a transfer doesn\'t move ownership right away — the recipient gets a notification with Accept or Decline options, and the animal stays fully yours until they act on it.',
+        content: 'Sending a transfer doesn\'t move ownership right away - the recipient gets a notification with Accept or Decline options, and the animal stays fully yours until they act on it.',
       },
       {
         stepNumber: 4,
@@ -128,12 +133,12 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Where transferred animals end up on your list',
-        content: 'Once accepted, the recipient becomes the new owner with full edit access, while you\'re automatically kept on as the original breeder with permanent view-only access so pedigree and history stay intact. The animal is also pulled from your active My Animals list and counted under "Sold/Archived" instead — a dedicated lesson later covers that Archive section in full.',
+        content: 'Once accepted, the recipient becomes the new owner with full edit access, while you\'re automatically kept on as the original breeder with permanent view-only access so pedigree and history stay intact. The animal is also pulled from your active My Animals list and counted under "Sold/Archived" instead - a dedicated lesson later covers that Archive section in full.',
       },
       {
         stepNumber: 7,
         title: 'Accepting a returned animal',
-        content: 'A return doesn\'t happen instantly either — the original breeder gets a Pending Requests notification (e.g. "X wants to return Tutorial (CTC1234) to you") with Accept or Decline options, and must accept it before ownership actually moves back.',
+        content: 'A return doesn\'t happen instantly either - the original breeder gets a Pending Requests notification (e.g. "X wants to return Tutorial (CTC1234) to you") with Accept or Decline options, and must accept it before ownership actually moves back.',
       },
     ],
   },
@@ -150,39 +155,39 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'Settings has 8 tabs',
-        content: 'Profile, Info & Adoption, Directory, Ratings, Breeding Lines, Dropdown Lists, Data Portability, and Account. "Dropdown Lists" is a tidy-up tool for your own form entries: every value you\'ve typed into a dropdown-style field (like Color) on the Animal form is saved here per species and suggested again next time. Use it to rename a typo (which fixes it everywhere, including on animals already using it) or remove a value you no longer want suggested. It is not a place to pre-load brand new options — values appear here automatically once you\'ve typed them into an animal form at least once.',
+        content: 'Profile, Info & Adoption, Directory, Ratings, Breeding Lines, Dropdown Lists, Data Portability, and Account. "Dropdown Lists" is a tidy-up tool for your own form entries: every value you\'ve typed into a dropdown-style field (like Color) on the Animal form is saved here per species and suggested again next time. Use it to rename a typo (which fixes it everywhere, including on animals already using it) or remove a value you no longer want suggested. It is not a place to pre-load brand new options - values appear here automatically once you\'ve typed them into an animal form at least once.',
       },
       {
         stepNumber: 3,
         title: 'Public Profile Visibility',
-        content: 'On the Profile tab, a "Public Profile Visibility" checklist controls what shows on your public profile card: Display Personal Name, Display Breeder Name (only appears once you\'ve set a breeder name), Display Email Address, Display Website URL, Display Social Media Link, Display Bio, and Show Stats tab. Only Display Personal Name is on by default — if your public profile looks empty or your breeder name isn\'t showing, check these boxes first.',
+        content: 'On the Profile tab, a "Public Profile Visibility" checklist controls what shows on your public profile card: Display Personal Name, Display Breeder Name (only appears once you\'ve set a breeder name), Display Email Address, Display Website URL, Display Social Media Link, Display Bio, and Show Stats tab. Only Display Personal Name is on by default - if your public profile looks empty or your breeder name isn\'t showing, check these boxes first.',
       },
       {
         stepNumber: 4,
         title: 'Fully anonymous is possible, but hides you completely',
-        content: "If you turn off both Display Personal Name and Display Breeder Name, you won't be visible anywhere on the site's public side — including the Breeders Registry, Community Feed, and Marketplace listings — even if you've opted into any of those separately.",
+        content: "If you turn off both Display Personal Name and Display Breeder Name, you won't be visible anywhere on the site's public side - including the Breeders Registry, Community Feed, and Marketplace listings - even if you've opted into any of those separately.",
       },
       {
         stepNumber: 5,
         title: 'The Breeder Registry (Directory tab)',
-        content: 'This isn\'t one on/off switch — it\'s a "Species & Breeding Status" dropdown per species you own animals of: 🏠 Owner (default, not listed), ⭐ Active Breeder, or 🌙 Retired Breeder. Marking a species as Active or Retired Breeder is what makes you searchable there. Save with the "Save Breeding Status" button.',
+        content: 'This isn\'t one on/off switch - it\'s a "Species & Breeding Status" dropdown per species you own animals of: 🏠 Owner (default, not listed), ⭐ Active Breeder, or 🌙 Retired Breeder. Marking a species as Active or Retired Breeder is what makes you searchable there. Save with the "Save Breeding Status" button.',
       },
       {
         stepNumber: 6,
         title: 'Directory listing also needs a public name',
-        content: "Opting a species into the Registry isn't enough on its own — you also need Display Personal Name or Display Breeder Name checked on the Profile tab, or you still won't appear in Directory search results.",
+        content: "Opting a species into the Registry isn't enough on its own - you also need Display Personal Name or Display Breeder Name checked on the Profile tab, or you still won't appear in Directory search results.",
       },
     ],
   },
   {
     id: 'getting-started-list-basics',
-    title: 'My Animals — The Basics',
+    title: 'My Animals: The Basics',
     description: 'The one thing worth knowing early about your main list, before the full tour later on.',
     steps: [
       {
         stepNumber: 1,
         title: 'A stat row lives up top',
-        content: 'Total Animals, Owned, Public, Sold/Archived, and Needs Attention — most are clickable for a quick breakdown. The Owned/All toggle here filters every tab (Collections, Enclosures, Reproduction, Health, Feeding & Care), not just this list.',
+        content: 'Total Animals, Owned, Public, Sold/Archived, and Needs Attention - most are clickable for a quick breakdown. The Owned/All toggle here filters every tab (Collections, Enclosures, Reproduction, Health, Feeding & Care), not just this list.',
       },
       {
         stepNumber: 2,
@@ -193,7 +198,7 @@ const GETTING_STARTED_LESSONS = [
   },
 ];
 
-// "The Animal Record" section — one lesson per form tab, built one at a time.
+// "The Animal Record" section - one lesson per form tab, built one at a time.
 const ANIMAL_RECORD_TAB_LESSONS = [
   {
     id: 'animal-tab-dashboard',
@@ -208,7 +213,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 2,
         title: 'Identity',
-        content: 'Prefix / Name / Suffix, Gender, Date of Birth, Status (with a Deceased Date field that only appears once Status is set to Deceased). Changing Status to Rehomed pops up a confirmation asking if you\'d also like to archive the animal\'s record — archiving hides it from your main lists but keeps it fully intact in pedigrees. A free-text Remarks box is also here for general notes.',
+        content: 'Prefix / Name / Suffix, Gender, Date of Birth, Status (with a Deceased Date field that only appears once Status is set to Deceased). Changing Status to Rehomed pops up a confirmation asking if you\'d also like to archive the animal\'s record - archiving hides it from your main lists but keeps it fully intact in pedigrees. A free-text Remarks box is also here for general notes.',
       },
       {
         stepNumber: 3,
@@ -218,24 +223,24 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 4,
         title: 'Co-Ownership Details',
-        content: 'A free-text note field below Breeder/Owner for writing out co-ownership terms, breeding rights, or any other arrangement — this is just a note, not a linked contact.',
+        content: 'A free-text note field below Breeder/Owner for writing out co-ownership terms, breeding rights, or any other arrangement - this is just a note, not a linked contact.',
       },
       {
         stepNumber: 5,
         title: 'Availability',
-        content: 'Two independent checkboxes: "Available for Sale" (with a price + currency, or "Negotiable") and "Available for Stud/Breeding" (with a fee + currency). Checking one is what actually puts the animal on the Marketplace — but only once the animal\'s own Public/Private toggle is also set to Public.',
+        content: 'Two independent checkboxes: "Available for Sale" (with a price + currency, or "Negotiable") and "Available for Stud/Breeding" (with a fee + currency). Checking one is what actually puts the animal on the Marketplace - but only once the animal\'s own Public/Private toggle is also set to Public.',
       },
     ],
   },
   {
     id: 'animal-tab-identification',
     title: 'Animal Record: Identification Tab',
-    description: 'ID numbers, classification, origin, and tags — all in collapsible sections.',
+    description: 'ID numbers, classification, origin, and tags - all in collapsible sections.',
     steps: [
       {
         stepNumber: 1,
         title: 'Identification Numbers',
-        content: 'Breeder Assigned ID and Colony ID are always available. Microchip Number, Pedigree Registration ID, Tattoo ID, Ring ID, and Ear Tag only appear if your species uses them — this keeps the form from showing irrelevant fields like "Ear Tag" on a fish.',
+        content: 'Breeder Assigned ID and Colony ID are always available. Microchip Number, Pedigree Registration ID, Tattoo ID, Ring ID, and Ear Tag only appear if your species uses them - this keeps the form from showing irrelevant fields like "Ear Tag" on a fish.',
       },
       {
         stepNumber: 2,
@@ -255,7 +260,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 5,
         title: 'Tags',
-        content: 'A free-form tagging field for anything you want to group by — lines, enclosures, projects, etc. Type a tag and press Enter or comma to add it, Backspace on an empty field removes the last tag, and each tag shows as a pill you can click the × on to remove individually.',
+        content: 'A free-form tagging field for anything you want to group by - lines, enclosures, projects, etc. Type a tag and press Enter or comma to add it, Backspace on an empty field removes the last tag, and each tag shows as a pill you can click the × on to remove individually.',
       },
     ],
   },
@@ -267,27 +272,27 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Appearance fields',
-        content: 'Color, Coat Type, Markings, Eye Color, Size, and Carrier Traits are free text so you can describe your animal however your species/hobby community does. A few fields are species-specific and only appear when relevant — e.g. Earset only shows up for Rats.',
+        content: 'Color, Coat Type, Markings, Eye Color, Size, and Carrier Traits are free text so you can describe your animal however your species/hobby community does. A few fields are species-specific and only appear when relevant - e.g. Earset only shows up for Rats.',
       },
       {
         stepNumber: 2,
         title: 'Genetic Code Builder',
-        content: 'For Fancy Mouse and Fancy Rat, click the "Add" button to open a full visual builder: a dropdown per gene locus, with a live-updating Phenotype and Carried gene preview as you pick genotypes. Use "Switch to Manual" to type/paste a code directly instead (e.g. "A/A B/b C/C"). For every other species, it\'s a simple manual text field — if your species isn\'t supported yet, you can click "Submit Genetics Info" to help the community add it.',
+        content: 'For Fancy Mouse and Fancy Rat, click the "Add" button to open a full visual builder: a dropdown per gene locus, with a live-updating Phenotype and Carried gene preview as you pick genotypes. Use "Switch to Manual" to type/paste a code directly instead (e.g. "A/A B/b C/C"). For every other species, it\'s a simple manual text field - if your species isn\'t supported yet, you can click "Submit Genetics Info" to help the community add it.',
       },
       {
         stepNumber: 3,
         title: 'Life Stage',
-        content: 'A dropdown: Newborn, Juvenile, Sub-Adult, Adult, Senior, or Mixed. This isn\'t auto-calculated from age — you set it manually.',
+        content: 'A dropdown: Newborn, Juvenile, Sub-Adult, Adult, Senior, or Mixed. This isn\'t auto-calculated from age - you set it manually.',
       },
       {
         stepNumber: 4,
         title: 'Adding a measurement',
-        content: 'Under "Add New Measurement," pick a date and enter Weight, Body Length, Height at Withers, Chest Girth, and/or a Body Condition Score (the BCS scale itself changes based on species — Dogs use a 1-9 scale, Cats and others use 1-5). Add optional Notes, then click "Add Measurement" to save it as a new dated entry.',
+        content: 'Under "Add New Measurement," pick a date and enter Weight, Body Length, Height at Withers, Chest Girth, and/or a Body Condition Score (the BCS scale itself changes based on species - Dogs use a 1-9 scale, Cats and others use 1-5). Add optional Notes, then click "Add Measurement" to save it as a new dated entry.',
       },
       {
         stepNumber: 5,
         title: 'Tracking growth over time',
-        content: 'A "Current Measurements" summary always shows the most recent values. Once you\'ve logged 2+ weight entries, a Weight Growth Curve chart appears automatically — hover any point to see its exact date/weight/notes. You can switch Weight and Length units anytime (g/kg/lb/oz, cm/m/in/ft), and delete any past entry from the Measurements list with the trash icon.',
+        content: 'A "Current Measurements" summary always shows the most recent values. Once you\'ve logged 2+ weight entries, a Weight Growth Curve chart appears automatically - hover any point to see its exact date/weight/notes. You can switch Weight and Length units anytime (g/kg/lb/oz, cm/m/in/ft), and delete any past entry from the Measurements list with the trash icon.',
       },
     ],
   },
@@ -299,37 +304,37 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Health Status & Manual Override',
-        content: 'The badge at the top (Healthy / Monitoring / Concern / Critical) is calculated automatically from what\'s recorded on this tab — hover the info icon to see exactly which factors are driving it. Disagree with the calculation? Click "Enable Override" to set your own status and write a reason (e.g. "well-managed chronic condition, good prognosis") — the calculated status is still shown alongside it for reference.',
+        content: 'The badge at the top (Healthy / Monitoring / Concern / Critical) is calculated automatically from what\'s recorded on this tab - hover the info icon to see exactly which factors are driving it. Disagree with the calculation? Click "Enable Override" to set your own status and write a reason (e.g. "well-managed chronic condition, good prognosis") - the calculated status is still shown alongside it for reference.',
       },
       {
         stepNumber: 2,
         title: 'Quarantine Status',
-        content: 'Set Status to Quarantine or Isolation, pick a Type/Reason (Preventive - New Arrival, Medical - Contagious Disease, Behavioral - Aggression, etc.), and a Start Date. Add an End Date once it\'s over — a past/today End Date automatically clears the status. Quarantined animals also collect in the Health management tab (My Animals → Health) under a dedicated Quarantine section, where you can review Type/Start/End at a glance and click "Release" to end quarantine without opening the animal at all.',
+        content: 'Set Status to Quarantine or Isolation, pick a Type/Reason (Preventive - New Arrival, Medical - Contagious Disease, Behavioral - Aggression, etc.), and a Start Date. Add an End Date once it\'s over - a past/today End Date automatically clears the status. Quarantined animals also collect in the Health management tab (My Animals → Health) under a dedicated Quarantine section, where you can review Type/Start/End at a glance and click "Release" to end quarantine without opening the animal at all.',
       },
       {
         stepNumber: 3,
         title: 'Treatment (Medications)',
-        content: 'Adding an active medication is what marks the animal as "In Treatment" and factors into its health status. Choose "Manual Entry" to type a medication\'s name/dose/reason/dates yourself, or "From Supplies" to search and pick one from your own tracked Supplies inventory (which pre-fills the name and lets you set dose/reason/dates on top of it). Either way, set an optional recurring Interval (e.g. every 12 hours) if it\'s a repeating dose. Like Quarantine, animals In Treatment collect in the Health management tab\'s In Treatment section, showing each active medication\'s next dose due time with quick Confirm/Prolong/Finish buttons — the Finish button only closes out that one medication, while the "End Full Treatment" button closes out every active medication at once.',
+        content: 'Adding an active medication is what marks the animal as "In Treatment" and factors into its health status. Choose "Manual Entry" to type a medication\'s name/dose/reason/dates yourself, or "From Supplies" to search and pick one from your own tracked Supplies inventory (which pre-fills the name and lets you set dose/reason/dates on top of it). Either way, set an optional recurring Interval (e.g. every 12 hours) if it\'s a repeating dose. Like Quarantine, animals In Treatment collect in the Health management tab\'s In Treatment section, showing each active medication\'s next dose due time with quick Confirm/Prolong/Finish buttons - the Finish button only closes out that one medication, while the "End Full Treatment" button closes out every active medication at once.',
       },
       {
         stepNumber: 4,
         title: 'Medical Conditions & Allergies',
-        content: 'Two simple running lists below Treatment — add a Condition or Allergy with a name and optional notes, and remove any entry with its trash icon. These are separate from Treatment: a chronic condition doesn\'t need an active medication to be logged here.',
+        content: 'Two simple running lists below Treatment - add a Condition or Allergy with a name and optional notes, and remove any entry with its trash icon. These are separate from Treatment: a chronic condition doesn\'t need an active medication to be logged here.',
       },
       {
         stepNumber: 5,
         title: 'Preventive Care',
-        content: 'Log Vaccinations, Deworming, and Parasite Control treatments, each with a date and notes. For recurring prevention (e.g. monthly flea/tick treatment), use "Prevention Schedule" to set a treatment name, start date, and repeat interval — this creates a recurring reminder rather than a one-time record.',
+        content: 'Log Vaccinations, Deworming, and Parasite Control treatments, each with a date and notes. For recurring prevention (e.g. monthly flea/tick treatment), use "Prevention Schedule" to set a treatment name, start date, and repeat interval - this creates a recurring reminder rather than a one-time record.',
       },
       {
         stepNumber: 6,
         title: 'Health Clearances & Screening',
-        content: 'Add structured clearances like OFA Hips/Elbows/Cardiac/Eyes, PennHIP, CAER Eyes, or a general Genetic Test/Health Panel — each with a Result, Date Issued, and optional Certificate ID. Below that, a few free-text "Other Health Information" fields remain for Spay/Neuter Date, Heartworm Status, Genetic Test Results, and Chronic Conditions notes.',
+        content: 'Add structured clearances like OFA Hips/Elbows/Cardiac/Eyes, PennHIP, CAER Eyes, or a general Genetic Test/Health Panel - each with a Result, Date Issued, and optional Certificate ID. Below that, a few free-text "Other Health Information" fields remain for Spay/Neuter Date, Heartworm Status, Genetic Test Results, and Chronic Conditions notes.',
       },
       {
         stepNumber: 7,
         title: 'Procedures, Labs & Vet Visits',
-        content: 'Medical Procedures and Lab Results are both simple dated entries with a name/test and notes or result. Veterinary Care holds your Primary Veterinarian\'s name plus a running log of Veterinary Visits (date, reason, notes) — useful for a quick history without digging through the Timeline tab.',
+        content: 'Medical Procedures and Lab Results are both simple dated entries with a name/test and notes or result. Veterinary Care holds your Primary Veterinarian\'s name plus a running log of Veterinary Visits (date, reason, notes) - useful for a quick history without digging through the Timeline tab.',
       },
       {
         stepNumber: 8,
@@ -346,17 +351,17 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Nutrition',
-        content: 'Set a Feeding Schedule with "Feed Every (hours)" — type a value or click a quick preset chip (6h, 8h, 12h, 24h, 48h, 72h, 1wk); Last Fed is read-only here and only updates when you log a "Fed" action in the Feeding & Care tab. This schedule is what drives that animal\'s entry in the Feeding & Care management view, showing you exactly when it\'s next due to be fed. For Diet and Supplements, choose "Manual Entry" to type a name (and dosage, for supplements) yourself, or "From Supplies" to search and add items straight from your own tracked Supplies inventory — either way you can add multiple and remove any with its trash icon. Round it out with free-text Portion Size, Feeding Method, Feeding Location, Water Access, and Feeding Pace & Behavior Notes.',
+        content: 'Set a Feeding Schedule with "Feed Every (hours)" - type a value or click a quick preset chip (6h, 8h, 12h, 24h, 48h, 72h, 1wk); Last Fed is read-only here and only updates when you log a "Fed" action in the Feeding & Care tab. This schedule is what drives that animal\'s entry in the Feeding & Care management view, showing you exactly when it\'s next due to be fed. For Diet and Supplements, choose "Manual Entry" to type a name (and dosage, for supplements) yourself, or "From Supplies" to search and add items straight from your own tracked Supplies inventory - either way you can add multiple and remove any with its trash icon. Round it out with free-text Portion Size, Feeding Method, Feeding Location, Water Access, and Feeding Pace & Behavior Notes.',
       },
       {
         stepNumber: 2,
         title: 'Enclosure Assignment',
-        content: 'Click "Search & Assign Enclosure" to open the enclosure picker. Once assigned, the enclosure\'s card shows its photo, occupancy (current/capacity), dimensions, purpose, type, temperature/humidity ranges, lighting, bedding, and enrichment at a glance — click the unlink icon to unassign without deleting the enclosure itself.',
+        content: 'Click "Search & Assign Enclosure" to open the enclosure picker. Once assigned, the enclosure\'s card shows its photo, occupancy (current/capacity), dimensions, purpose, type, temperature/humidity ranges, lighting, bedding, and enrichment at a glance - click the unlink icon to unassign without deleting the enclosure itself.',
       },
       {
         stepNumber: 3,
         title: 'Creating a new enclosure on the fly',
-        content: 'Don\'t have the right enclosure yet? In that same picker, switch to the "Create" tab instead of "Search". Fill in Name (required), Type, Purpose, Building/Room, Dimensions, Capacity, and Environment details (temperature/humidity range, lighting, bedding, enrichment), then click Confirm — the enclosure is created and automatically assigned to this animal in one step, no need to leave the animal record first. It also immediately shows up in the Enclosures management tab (My Animals → Enclosures) alongside every other enclosure, ready to edit, view occupancy, or reassign later.',
+        content: 'Don\'t have the right enclosure yet? In that same picker, switch to the "Create" tab instead of "Search". Fill in Name (required), Type, Purpose, Building/Room, Dimensions, Capacity, and Environment details (temperature/humidity range, lighting, bedding, enrichment), then click Confirm - the enclosure is created and automatically assigned to this animal in one step, no need to leave the animal record first. It also immediately shows up in the Enclosures management tab (My Animals → Enclosures) alongside every other enclosure, ready to edit, view occupancy, or reassign later.',
       },
       {
         stepNumber: 4,
@@ -366,17 +371,17 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 5,
         title: 'Grooming & Coat Care',
-        content: 'Covers General Grooming Needs & Shedding Level, Brushing & Bathing Frequency (plus Coat/Feather/Scale Care Notes), and Specialized Care like Nail/Claw/Hoof, Beak/Hoof/Scale, Skin & Ear, and Dental care requirements. Most of these have their own optional recurring schedule ("Every N days") — set the frequency here, then mark each one done from the Feeding & Care management view, which is also where its "last done" date will show up.',
+        content: 'Covers General Grooming Needs & Shedding Level, Brushing & Bathing Frequency (plus Coat/Feather/Scale Care Notes), and Specialized Care like Nail/Claw/Hoof, Beak/Hoof/Scale, Skin & Ear, and Dental care requirements. Most of these have their own optional recurring schedule ("Every N days") - set the frequency here, then mark each one done from the Feeding & Care management view, which is also where its "last done" date will show up.',
       },
       {
         stepNumber: 6,
         title: 'Special Requirements & Preferences',
-        content: 'Dietary Requirements & Restrictions and Dietary Preferences cover food-specific notes (allergies, favorite treats, refusals). Special Care Needs and Special Observations (each with their own optional recurring schedule) are for anything else worth tracking on a schedule — medication timing quirks, molting isolation, heat lamp requirements. Additional Special Requirements is a catch-all free-text box for anything that doesn\'t fit elsewhere.',
+        content: 'Dietary Requirements & Restrictions and Dietary Preferences cover food-specific notes (allergies, favorite treats, refusals). Special Care Needs and Special Observations (each with their own optional recurring schedule) are for anything else worth tracking on a schedule - medication timing quirks, molting isolation, heat lamp requirements. Additional Special Requirements is a catch-all free-text box for anything that doesn\'t fit elsewhere.',
       },
       {
         stepNumber: 7,
         title: 'Animal Care Tasks',
-        content: 'For direct, hands-on tasks that aren\'t feeding and aren\'t medical (e.g. Nail Trim, Weigh-In, Litter Box Spot-Change, Handling/Socialization Session) — type a task name (suggestions appear as you type), an optional recurring frequency in days, and optional notes, then click "+ Add Animal Care Task". Every task you add here shows up in the "Scheduled Care" section of the Feeding & Care management view, where you\'ll actually mark it done day to day.',
+        content: 'For direct, hands-on tasks that aren\'t feeding and aren\'t medical (e.g. Nail Trim, Weigh-In, Litter Box Spot-Change, Handling/Socialization Session) - type a task name (suggestions appear as you type), an optional recurring frequency in days, and optional notes, then click "+ Add Animal Care Task". Every task you add here shows up in the "Scheduled Care" section of the Feeding & Care management view, where you\'ll actually mark it done day to day.',
       },
     ],
   },
@@ -388,12 +393,12 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Behavior & Temperament',
-        content: 'The basics: free-text Temperament (e.g. friendly, skittish, aggressive), Handling Tolerance (how well it takes being handled), and Social Structure (who it lives with — cage mates, solitary, group housing).',
+        content: 'The basics: free-text Temperament (e.g. friendly, skittish, aggressive), Handling Tolerance (how well it takes being handled), and Social Structure (who it lives with - cage mates, solitary, group housing).',
       },
       {
         stepNumber: 2,
         title: 'Activity & Training',
-        content: 'Activity Cycle is a dropdown (Diurnal/Nocturnal/Crepuscular). Exercise Requirements and Daily Exercise (minutes), Training Level, and Training Disciplines are species-conditional free-text/number fields. Checkboxes mark Crate Trained, Litter Trained, Leash Trained, and Free-Flight Trained — whichever apply to that species.',
+        content: 'Activity Cycle is a dropdown (Diurnal/Nocturnal/Crepuscular). Exercise Requirements and Daily Exercise (minutes), Training Level, and Training Disciplines are species-conditional free-text/number fields. Checkboxes mark Crate Trained, Litter Trained, Leash Trained, and Free-Flight Trained - whichever apply to that species.',
       },
       {
         stepNumber: 3,
@@ -430,12 +435,12 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Current Reproductive State',
-        content: 'Planned Mating, In Mating, Pregnant, and Nursing flags are all auto-calculated from real Litter Management records — you don\'t normally set these directly. Once a cycle fully wraps up, click "Finish Cycle / Clear State" to reset all four flags at once. Need to correct the calculation? Click "Enable Override" to manually check/uncheck each flag and give a Reason — a running Pregnancy History list (with delete buttons) also appears here once there are past pregnancies on record. Whichever state is active shows as a colored pill right on the animal\'s card in My Animals (Pregnant takes priority, then Nursing, then In Mating, then Planned Mating), and all of these animals are grouped together in the Reproduction management tab (My Animals → Reproduction).',
+        content: 'Planned Mating, In Mating, Pregnant, and Nursing flags are all auto-calculated from real Litter Management records - you don\'t normally set these directly. Once a cycle fully wraps up, click "Finish Cycle / Clear State" to reset all four flags at once. Need to correct the calculation? Click "Enable Override" to manually check/uncheck each flag and give a Reason - a running Pregnancy History list (with delete buttons) also appears here once there are past pregnancies on record. Whichever state is active shows as a colored pill right on the animal\'s card in My Animals (Pregnant takes priority, then Nursing, then In Mating, then Planned Mating), and all of these animals are grouped together in the Reproduction management tab (My Animals → Reproduction).',
       },
       {
         stepNumber: 2,
         title: 'Fertility Status',
-        content: 'A single dropdown — Fertile, Subfertile, Infertile, Spayed/Neutered/Castrated, Unknown, or Not Applicable (gender determines which spay/neuter option shows). This choice controls what else appears further down: the Reproductive Cycle, Conception & Mating History, and Pregnancy/Development Details sections only show up when Fertility Status is Fertile, Subfertile, Infertile, or Unknown.',
+        content: 'A single dropdown - Fertile, Subfertile, Infertile, Spayed/Neutered/Castrated, Unknown, or Not Applicable (gender determines which spay/neuter option shows). This choice controls what else appears further down: the Reproductive Cycle, Conception & Mating History, and Pregnancy/Development Details sections only show up when Fertility Status is Fertile, Subfertile, Infertile, or Unknown.',
       },
       {
         stepNumber: 3,
@@ -445,7 +450,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 4,
         title: 'Pregnancy/Development Details',
-        content: 'Not shown for males. Covers Development Period Start and Length (days), Expected Delivery Date, and Development Method (Natural, Assisted, Artificial Incubation, Unknown) — useful for anything from live-bearing gestation to egg incubation.',
+        content: 'Not shown for males. Covers Development Period Start and Length (days), Expected Delivery Date, and Development Method (Natural, Assisted, Artificial Incubation, Unknown) - useful for anything from live-bearing gestation to egg incubation.',
       },
       {
         stepNumber: 5,
@@ -460,7 +465,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 7,
         title: 'Add Breeding Record (Manual Log)',
-        content: 'A red warning banner is there for a reason: this only adds a manual note — it does NOT create a real Litter, link offspring, or affect pedigree/COI calculations. Use it for quick historical logging (Breeding Method, Mating Date, Mate — pick "Select from DB" to link an existing animal or type a name manually, Outcome, Birth/Lay Date, Litter Size, Notes). For anything that should actually appear in pedigrees and inbreeding calculations, use Litter Management instead to record a real litter.',
+        content: 'A red warning banner is there for a reason: this only adds a manual note - it does NOT create a real Litter, link offspring, or affect pedigree/COI calculations. Use it for quick historical logging (Breeding Method, Mating Date, Mate - pick "Select from DB" to link an existing animal or type a name manually, Outcome, Birth/Lay Date, Litter Size, Notes). For anything that should actually appear in pedigrees and inbreeding calculations, use Litter Management instead to record a real litter.',
       },
     ],
   },
@@ -472,17 +477,17 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Ancestors are always real CritterTrack animals',
-        content: 'Every ancestor slot links to an actual animal record on CritterTrack — there is no free-text "manual" option. This is deliberate: manual entries never fed COI/AVK or the parent cards (only real linked parents do), so they left gaps users kept tripping over. If an ancestor isn\'t tracked yet, add them as their own animal record first, then come back and link them into this pedigree. Nothing here saves until you click Save Animal.',
+        content: 'Every ancestor slot links to an actual animal record on CritterTrack - there is no free-text "manual" option. This is deliberate: manual entries never fed COI/AVK or the parent cards (only real linked parents do), so they left gaps users kept tripping over. If an ancestor isn\'t tracked yet, add them as their own animal record first, then come back and link them into this pedigree. Nothing here saves until you click Save Animal.',
       },
       {
         stepNumber: 2,
         title: 'Linking a CritterTrack ancestor',
-        content: 'Click a slot and search to open the search modal — it can match one of your own animals or any other public animal on the site, and automatically filters to the correct gender for that slot (e.g. only males for a Sire slot). Once linked, the slot shows that animal\'s photo, name, variety, and CTC ID; click "Unlink" to remove the connection without deleting anything.',
+        content: 'Click a slot and search to open the search modal - it can match one of your own animals or any other public animal on the site, and automatically filters to the correct gender for that slot (e.g. only males for a Sire slot). Once linked, the slot shows that animal\'s photo, name, variety, and CTC ID; click "Unlink" to remove the connection without deleting anything.',
       },
       {
         stepNumber: 3,
         title: 'Three generations of ancestors',
-        content: 'Generation 1 is Sire and Dam. Generation 2 splits into Paternal (Grandsire/Granddam via the Sire) and Maternal (Grandsire/Granddam via the Dam). Generation 3 goes one step further — Great-Grandparents are grouped by which grandparent they came through ("via Grandsire" / "via Granddam") on each side. Each slot is linked independently, and because the pedigree builds off real records, an ancestor you link here also shows up correctly on that animal\'s own record and on any of their relatives\' pedigrees.',
+        content: 'Generation 1 is Sire and Dam. Generation 2 splits into Paternal (Grandsire/Granddam via the Sire) and Maternal (Grandsire/Granddam via the Dam). Generation 3 goes one step further - Great-Grandparents are grouped by which grandparent they came through ("via Grandsire" / "via Granddam") on each side. Each slot is linked independently, and because the pedigree builds off real records, an ancestor you link here also shows up correctly on that animal\'s own record and on any of their relatives\' pedigrees.',
       },
     ],
   },
@@ -494,12 +499,12 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Adding photos (from the Dashboard tab)',
-        content: 'Photos aren\'t added from the Gallery tab itself — click the "+" tile next to the main photo on the Dashboard tab (or the empty main image box) to pick one or more files at once. Each file opens one at a time in an editor for rotating/cropping before it\'s added; images are also automatically compressed toward a small file size so galleries stay fast to load.',
+        content: 'Photos aren\'t added from the Gallery tab itself - click the "+" tile next to the main photo on the Dashboard tab (or the empty main image box) to pick one or more files at once. Each file opens one at a time in an editor for rotating/cropping before it\'s added; images are also automatically compressed toward a small file size so galleries stay fast to load.',
       },
       {
         stepNumber: 2,
         title: 'Rotating and cropping each photo',
-        content: 'In the editor, click "Rotate 90°" repeatedly (or pick a value from the dropdown) to spin the image in 90° steps. Check "Enable Crop" to reveal a draggable crop box — drag its corner handles right on the preview, or type exact X/Y/Width/Height percentages, then click "Next Image" (or "Finish & Add to Gallery" on the last one) to apply the rotation and crop and move on.',
+        content: 'In the editor, click "Rotate 90°" repeatedly (or pick a value from the dropdown) to spin the image in 90° steps. Check "Enable Crop" to reveal a draggable crop box - drag its corner handles right on the preview, or type exact X/Y/Width/Height percentages, then click "Next Image" (or "Finish & Add to Gallery" on the last one) to apply the rotation and crop and move on.',
       },
       {
         stepNumber: 3,
@@ -509,7 +514,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 4,
         title: 'Managing the gallery',
-        content: 'Once you have photos, switch to the Gallery tab for the full management view. Hover any image for controls: the star sets it as the primary photo (the one shown on cards and as the main Dashboard image — outlined in your accent color), the left/right arrows reorder it, and the trash icon deletes it. A number badge on each photo always shows its current position, with position 1 being primary.',
+        content: 'Once you have photos, switch to the Gallery tab for the full management view. Hover any image for controls: the star sets it as the primary photo (the one shown on cards and as the main Dashboard image - outlined in your accent color), the left/right arrows reorder it, and the trash icon deletes it. A number badge on each photo always shows its current position, with position 1 being primary.',
       },
     ],
   },
@@ -521,22 +526,22 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Event Filters',
-        content: 'The Timeline auto-aggregates events from across the whole animal record — Health Events, Breeding Events, Keeper & Ownership Events, Show Events, Milestones, Status Changes, Feeding History, Care Schedule Updates, and Field Edits. Uncheck any category here to hide it from the Timeline Events list below without deleting anything.',
+        content: 'The Timeline auto-aggregates events from across the whole animal record - Health Events, Breeding Events, Keeper & Ownership Events, Show Events, Milestones, Status Changes, Feeding History, Care Schedule Updates, and Field Edits. Uncheck any category here to hide it from the Timeline Events list below without deleting anything.',
       },
       {
         stepNumber: 2,
         title: 'Milestones',
-        content: 'Add your own custom timeline entries that aren\'t auto-generated — a Label, a Date, and an optional recurring Interval (every N weeks/months/years) for things like "First Show" or a recurring "Anniversary of Adoption". Remove any milestone with its trash icon.',
+        content: 'Add your own custom timeline entries that aren\'t auto-generated - a Label, a Date, and an optional recurring Interval (every N weeks/months/years) for things like "First Show" or a recurring "Anniversary of Adoption". Remove any milestone with its trash icon.',
       },
       {
         stepNumber: 3,
         title: 'Timeline Events',
-        content: 'All events (auto-aggregated + your Milestones) appear here in one combined list, each showing its date, type, and description. Click the star on any event to pin it — pinned events move up into their own "Pinned Events" section above "All Events", so the moments that matter most stay easy to find without scrolling. This same event list also seeds the "Recent Activity" card on the animal\'s read-only Dashboard view (its top 5 most recent events) — so anything the Timeline picks up shows there too.',
+        content: 'All events (auto-aggregated + your Milestones) appear here in one combined list, each showing its date, type, and description. Click the star on any event to pin it - pinned events move up into their own "Pinned Events" section above "All Events", so the moments that matter most stay easy to find without scrolling. This same event list also seeds the "Recent Activity" card on the animal\'s read-only Dashboard view (its top 5 most recent events) - so anything the Timeline picks up shows there too.',
       },
       {
         stepNumber: 4,
         title: 'Event Annotations',
-        content: 'Click "Add Note to Event" to attach a free-text note to any specific event on the Timeline — pick the event from the dropdown, write your note, and Save. Notes show up directly under that event (with their own delete button), letting you add context (e.g. "Vet said this was just stress-related, not a real relapse") without editing the original record.',
+        content: 'Click "Add Note to Event" to attach a free-text note to any specific event on the Timeline - pick the event from the dropdown, write your note, and Save. Notes show up directly under that event (with their own delete button), letting you add context (e.g. "Vet said this was just stress-related, not a real relapse") without editing the original record.',
       },
     ],
   },
@@ -548,29 +553,29 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Ownership History',
-        content: 'Log past keepers with "Manual Name" (just type a name) or "Select User" (search any CritterTrack user by name or CTU ID and pick them from the results). Add an Ownership Type (Breeder, Pet Owner, Sanctuary, Foster, Show Home, Research, Other), Start Date, and Country — each entry then shows in a list with its flag, dates, and type, removable with its X button.',
+        content: 'Log past keepers with "Manual Name" (just type a name) or "Select User" (search any CritterTrack user by name or CTU ID and pick them from the results). Add an Ownership Type (Breeder, Pet Owner, Sanctuary, Foster, Show Home, Research, Other), Start Date, and Country - each entry then shows in a list with its flag, dates, and type, removable with its X button.',
       },
       {
         stepNumber: 2,
         title: 'Show & Performance',
-        content: 'Add structured Show Events with Date, Show Name, Title Earned, Judge Name, Score/Placement, and Judge Comments — each becomes its own removable entry. Below that, a set of legacy free-text fields (Show Titles, Working Titles, Show Ratings & Placements, Judge Comments & Evaluations, Performance Scores & Assessments) remain for backward compatibility with older/imported data.',
+        content: 'Add structured Show Events with Date, Show Name, Title Earned, Judge Name, Score/Placement, and Judge Comments - each becomes its own removable entry. Below that, a set of legacy free-text fields (Show Titles, Working Titles, Show Ratings & Placements, Judge Comments & Evaluations, Performance Scores & Assessments) remain for backward compatibility with older/imported data.',
       },
       {
         stepNumber: 3,
         title: 'Sale & Purchase',
-        content: 'Purchase side: Purchase Date, Purchase Price + Currency, Seller Name, and Seller Contact Info (click "Select Contact" to reuse the same Assign modal from the Dashboard tab — Search User / Select Contact / Manual Entry). Sale side mirrors it with Sale Date, Sale Price + Currency, Buyer Name, and Buyer Contact Info. Below that: Breeding/Show/Export Rights and Stud Services Allowed dropdowns, plus free-text Resale Restrictions and Breeder Buyback Clause.',
+        content: 'Purchase side: Purchase Date, Purchase Price + Currency, Seller Name, and Seller Contact Info (click "Select Contact" to reuse the same Assign modal from the Dashboard tab - Search User / Select Contact / Manual Entry). Sale side mirrors it with Sale Date, Sale Price + Currency, Buyer Name, and Buyer Contact Info. Below that: Breeding/Show/Export Rights and Stud Services Allowed dropdowns, plus free-text Resale Restrictions and Breeder Buyback Clause.',
       },
       {
         stepNumber: 4,
         title: 'Legal & Documentation',
-        content: 'Free-text fields for License Number & Jurisdiction, Insurance, Legal Status, and Breeding/Export Restrictions. "Upload Document" accepts PDF, DOC, DOCX, or Pages files up to 10MB — useful for registration papers, contracts, or health certificates. Uploaded documents show as a clickable list (opens in a new tab) with a trash icon to remove any of them.',
+        content: 'Free-text fields for License Number & Jurisdiction, Insurance, Legal Status, and Breeding/Export Restrictions. "Upload Document" accepts PDF, DOC, DOCX, or Pages files up to 10MB - useful for registration papers, contracts, or health certificates. Uploaded documents show as a clickable list (opens in a new tab) with a trash icon to remove any of them.',
       },
     ],
   },
   {
     id: 'animal-tab-view-only',
     title: 'Animal Record: View-Only Extras',
-    description: 'A few things that only appear when viewing an animal (not editing it) — most fields you see while viewing are just read-only mirrors of the edit form, but these are new.',
+    description: 'A few things that only appear when viewing an animal (not editing it) - most fields you see while viewing are just read-only mirrors of the edit form, but these are new.',
     steps: [
       {
         stepNumber: 1,
@@ -580,22 +585,22 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 2,
         title: 'Relationship Insights',
-        content: 'On the read-only Dashboard view, "Relationship Insights" auto-builds this animal\'s wider family tree — Parents, Siblings, Nieces & Nephews, Aunts & Uncles, Grandparents, and Great-Grandparents — grouped and labeled automatically (with Paternal/Maternal sides split where relevant). This is computed from linked pedigree data across your whole collection, not just what\'s entered directly on this one record, so it can surface relatives you didn\'t manually connect. Click any relative\'s card to jump straight to their own record.',
+        content: 'On the read-only Dashboard view, "Relationship Insights" auto-builds this animal\'s wider family tree - Parents, Siblings, Nieces & Nephews, Aunts & Uncles, Grandparents, and Great-Grandparents - grouped and labeled automatically (with Paternal/Maternal sides split where relevant). This is computed from linked pedigree data across your whole collection, not just what\'s entered directly on this one record, so it can surface relatives you didn\'t manually connect. Click any relative\'s card to jump straight to their own record.',
       },
       {
         stepNumber: 3,
         title: 'Offspring & Litters',
-        content: 'Also on the Dashboard view, "Offspring & Litters" combines two sources into one list: real Litter Management records where this animal is sire or dam (showing Planned/Mated/Pregnant/Born status, mate, COI, and birth counts by sex), plus any "pedigree-only" offspring — animals whose Pedigree tab links back to this one as a parent but that were never entered as a formal Litter. Click any entry to expand full details (dates, notes, photos) and click any offspring thumbnail to open that animal\'s own record.',
+        content: 'Also on the Dashboard view, "Offspring & Litters" combines two sources into one list: real Litter Management records where this animal is sire or dam (showing Planned/Mated/Pregnant/Born status, mate, COI, and birth counts by sex), plus any "pedigree-only" offspring - animals whose Pedigree tab links back to this one as a parent but that were never entered as a formal Litter. Click any entry to expand full details (dates, notes, photos) and click any offspring thumbnail to open that animal\'s own record.',
       },
       {
         stepNumber: 4,
         title: 'Coefficient of Inbreeding (COI)',
-        content: 'When both parents are linked as real CritterTrack animals, the Dashboard view automatically calculates and displays this animal\'s actual Coefficient of Inbreeding as a percentage, plus how many common ancestors it was calculated from. To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead — currently supported for Fancy Mouse and Fancy Rat.',
+        content: 'When both parents are linked as real CritterTrack animals, the Dashboard view automatically calculates and displays this animal\'s actual Coefficient of Inbreeding as a percentage, plus how many common ancestors it was calculated from. To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead - currently supported for Fancy Mouse and Fancy Rat.',
       },
       {
         stepNumber: 5,
         title: 'Pedigree Certificates',
-        content: 'On the read-only Pedigree tab, "Open Horizontal Certificate" and "Open Vertical Certificate" generate a formatted, printable/shareable pedigree chart spanning several generations, built from your real linked ancestors and laid out differently from the simple ancestor list shown underneath. A generation slider (1–4) controls how many ancestor rows are shown, and a "Customise" button opens a panel with six controls: Top-right title, Bottom-left text, Font colour, Border colour, Background colour, and Background image. The three colour pickers each pair a swatch with a text box, so you can click to choose or type a hex code directly. For the background image, pick any image from your device — it is automatically downscaled before being stored, so a large photo won\'t bloat your browser storage — and a "Remove" link clears it again. These preferences are saved in your browser and reused for every certificate you open afterward, so you only set them up once. The "Breeder" and "Current Owner" shown on the certificate are looked up automatically: Breeder comes from the animal\'s linked breeder account if one is set, falling back to the free-text "Manual Breeder Name" if not; "Current Owner" only appears at all when the animal\'s current owner differs from that original breeder (e.g. after a transfer or sale) — if the two are the same person, only "Breeder" is shown. Use "Download PDF" once images have finished loading to save or share the finished certificate.',
+        content: 'On the read-only Pedigree tab, "Open Horizontal Certificate" and "Open Vertical Certificate" generate a formatted, printable/shareable pedigree chart spanning several generations, built from your real linked ancestors and laid out differently from the simple ancestor list shown underneath. A generation slider (1–4) controls how many ancestor rows are shown, and a "Customise" button opens a panel with six controls: Top-right title, Bottom-left text, Font colour, Border colour, Background colour, and Background image. The three colour pickers each pair a swatch with a text box, so you can click to choose or type a hex code directly. For the background image, pick any image from your device - it is automatically downscaled before being stored, so a large photo won\'t bloat your browser storage - and a "Remove" link clears it again. These preferences are saved in your browser and reused for every certificate you open afterward, so you only set them up once. The "Breeder" and "Current Owner" shown on the certificate are looked up automatically: Breeder comes from the animal\'s linked breeder account if one is set, falling back to the free-text "Manual Breeder Name" if not; "Current Owner" only appears at all when the animal\'s current owner differs from that original breeder (e.g. after a transfer or sale) - if the two are the same person, only "Breeder" is shown. Use "Download PDF" once images have finished loading to save or share the finished certificate.',
       },
     ],
   },
@@ -607,33 +612,33 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Why hide anything?',
-        content: 'The animal form is long, and most breeders only care about a handful of sections for any given species. The "Customize" tab is always the last tab in the form and lets you strip that form down to just what you actually fill in — everything you switch off disappears from the tab bar entirely, so the form is shorter and faster to get through.',
+        content: 'The animal form is long, and most breeders only care about a handful of sections for any given species. The "Customize" tab is always the last tab in the form and lets you strip that form down to just what you actually fill in - everything you switch off disappears from the tab bar entirely, so the form is shorter and faster to get through.',
       },
       {
         stepNumber: 2,
         title: 'It applies per species, and syncs',
-        content: 'Choices are saved against the species you\'re currently working with (shown in the heading, "Customizing sections for: <species>"), so hiding something on your Fancy Mouse animals leaves your snake form untouched. Preferences are saved to your account automatically — a "Saved" indicator confirms it — so they follow you between the web site and the Android app, and you never need to click a save button.',
+        content: 'Choices are saved against the species you\'re currently working with (shown in the heading, "Customizing sections for: <species>"), so hiding something on your Fancy Mouse animals leaves your snake form untouched. Preferences are saved to your account automatically - a "Saved" indicator confirms it - so they follow you between the web site and the Android app, and you never need to click a save button.',
       },
       {
         stepNumber: 3,
         title: 'Hiding whole tabs',
-        content: 'Each hideable tab has a "Show <Tab> tab" checkbox — Identification, Appearance, Health, Routine Care, Behavior, Breeding, Timeline, and Records can all be switched off. Dashboard, Pedigree, and Gallery can never be hidden, since they carry the animal\'s core identity, ancestry, and photos.',
+        content: 'Each hideable tab has a "Show <Tab> tab" checkbox - Identification, Appearance, Health, Routine Care, Behavior, Breeding, Timeline, and Records can all be switched off. Dashboard, Pedigree, and Gallery can never be hidden, since they carry the animal\'s core identity, ancestry, and photos.',
       },
       {
         stepNumber: 4,
         title: 'Hiding individual sections',
-        content: 'With a tab still visible, its sections appear indented underneath as their own checkboxes, so you can be more surgical — keep "Identification Numbers" and "Origin" but drop "Tags" and "Classification", for example. Hiding a whole tab also hides its sections, so you don\'t need to untick them one by one.',
+        content: 'With a tab still visible, its sections appear indented underneath as their own checkboxes, so you can be more surgical - keep "Identification Numbers" and "Origin" but drop "Tags" and "Classification", for example. Hiding a whole tab also hides its sections, so you don\'t need to untick them one by one.',
       },
       {
         stepNumber: 5,
         title: 'This only changes the form, not your data',
-        content: 'Customizing is purely cosmetic for data entry — it does not delete anything, and it does not change what shows on the read-only view other people (or you) see when viewing an animal. Untick anything here at any time to bring it straight back. The Customize tab itself never hides, so there\'s always a way back in.',
+        content: 'Customizing is purely cosmetic for data entry - it does not delete anything, and it does not change what shows on the read-only view other people (or you) see when viewing an animal. Untick anything here at any time to bring it straight back. The Customize tab itself never hides, so there\'s always a way back in.',
       },
     ],
   },
 ];
 
-// "The Animal List: A Tab-by-Tab Tour" section — Collections, Enclosures, Archive, and the shared pin-tab tip.
+// "The Animal List: A Tab-by-Tab Tour" section - Collections, Enclosures, Archive, and the shared pin-tab tip.
 const ANIMAL_LIST_TOUR_LESSONS = [
   {
     id: 'animal-list-overview',
@@ -647,18 +652,18 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Owned vs. All — applies to every tab',
-        content: 'The Owned/All toggle under Total Animals isn\'t just for this list — it filters Collections, Enclosures, Reproduction, Health, and Feeding & Care too, so unowned animals stay out of your way everywhere until you switch it to "All."',
+        title: 'Owned vs. All - applies to every tab',
+        content: 'The Owned/All toggle under Total Animals isn\'t just for this list - it filters Collections, Enclosures, Reproduction, Health, and Feeding & Care too, so unowned animals stay out of your way everywhere until you switch it to "All."',
       },
       {
         stepNumber: 3,
         title: 'Bulk ownership and visibility',
-        content: 'The Owned and Public stat cards each have "Set All" buttons beneath them — Set All Owned/Unowned and Set All Public/Private — for flipping every animal\'s status at once instead of one at a time.',
+        content: 'The Owned and Public stat cards each have "Set All" buttons beneath them - Set All Owned/Unowned and Set All Public/Private - for flipping every animal\'s status at once instead of one at a time.',
       },
       {
         stepNumber: 4,
         title: 'Sold/Archived and Needs Attention',
-        content: 'The Sold/Archived card\'s button opens the Archive screen (covered in its own lesson). Needs Attention rolls up anything due across Feeding & Care, Health, Reproduction, and Enclosures — clicking an item in its breakdown jumps straight to that animal or tab.',
+        content: 'The Sold/Archived card\'s button opens the Archive screen (covered in its own lesson). Needs Attention rolls up anything due across Feeding & Care, Health, Reproduction, and Enclosures - clicking an item in its breakdown jumps straight to that animal or tab.',
       },
       {
         stepNumber: 5,
@@ -668,12 +673,12 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 6,
         title: 'Search and filters',
-        content: 'The filter bar covers Search (by name), Category, Species, Status, Gender, and — if you\'ve set up breeding lines — a Breeding Line filter too. A pink "Filtered" badge appears next to the page title whenever any filter is active, so you don\'t forget one is on.',
+        content: 'The filter bar covers Search (by name), Category, Species, Status, Gender, and - if you\'ve set up breeding lines - a Breeding Line filter too. A pink "Filtered" badge appears next to the page title whenever any filter is active, so you don\'t forget one is on.',
       },
       {
         stepNumber: 7,
         title: 'Sorting',
-        content: 'Two sort buttons — A-Z and Age — sit at the right of the filter bar. Click one to sort by it, click again to flip between ascending and descending.',
+        content: 'Two sort buttons - A-Z and Age - sit at the right of the filter bar. Click one to sort by it, click again to flip between ascending and descending.',
       },
       {
         stepNumber: 8,
@@ -688,7 +693,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 10,
         title: 'Bulk delete and archive',
-        content: 'Also on each species group header: Delete Multiple and Archive Multiple buttons. Clicking either switches that group into a selection mode — check the animals you want, then confirm with "Delete Selected" or "Archive Selected," or back out with Cancel.',
+        content: 'Also on each species group header: Delete Multiple and Archive Multiple buttons. Clicking either switches that group into a selection mode - check the animals you want, then confirm with "Delete Selected" or "Archive Selected," or back out with Cancel.',
       },
       {
         stepNumber: 11,
@@ -698,7 +703,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 12,
         title: 'Pin your favorite tab',
-        content: 'Tip: hover any tab in the row above the dashboard (My Animals, Collections, Enclosures, Reproduction, Health, Feeding & Care) and click its pin icon to set that tab as your default view — it\'ll open automatically next time you visit.',
+        content: 'Tip: hover any tab in the row above the dashboard (My Animals, Collections, Enclosures, Reproduction, Health, Feeding & Care) and click its pin icon to set that tab as your default view - it\'ll open automatically next time you visit.',
       },
     ],
   },
@@ -710,22 +715,22 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'Creating a collection',
-        content: 'Switch to the Collections view and click "Manage Collections" to open the manager. Type a name in the "New collection name…" box and click Create. Click the small icon button next to the name box (or next to an existing collection\'s name) to open a picker with preset colors and a curated set of icons — your choice shows up in the collection\'s section header and in the "Add to collection" menu, making it easier to tell collections apart at a glance.',
+        content: 'Switch to the Collections view and click "Manage Collections" to open the manager. Type a name in the "New collection name…" box and click Create. Click the small icon button next to the name box (or next to an existing collection\'s name) to open a picker with preset colors and a curated set of icons - your choice shows up in the collection\'s section header and in the "Add to collection" menu, making it easier to tell collections apart at a glance.',
       },
       {
         stepNumber: 2,
         title: 'Adding animals to a collection',
-        content: 'Uncategorized animals show a small Plus button on their card (or row, in table view). Click it and pick a collection from the "Add to collection:" list. Each animal can only be in one collection at a time — once assigned, it moves out of Uncategorized and that Plus button disappears.',
+        content: 'Uncategorized animals show a small Plus button on their card (or row, in table view). Click it and pick a collection from the "Add to collection:" list. Each animal can only be in one collection at a time - once assigned, it moves out of Uncategorized and that Plus button disappears.',
       },
       {
         stepNumber: 3,
         title: 'Removing an animal from a collection',
-        content: 'Inside a collection, each animal has an X button — click it to remove that animal from that collection. The animal itself stays in your account and reappears under Uncategorized, ready to be added to a different collection.',
+        content: 'Inside a collection, each animal has an X button - click it to remove that animal from that collection. The animal itself stays in your account and reappears under Uncategorized, ready to be added to a different collection.',
       },
       {
         stepNumber: 4,
         title: 'Renaming and deleting collections',
-        content: 'In the collection manager, use Rename to edit a collection\'s name in place, or Delete to remove the collection entirely. Deleting a collection unassigns every animal that was in it (they fall back to Uncategorized) — it does not delete the animal records themselves.',
+        content: 'In the collection manager, use Rename to edit a collection\'s name in place, or Delete to remove the collection entirely. Deleting a collection unassigns every animal that was in it (they fall back to Uncategorized) - it does not delete the animal records themselves.',
       },
       {
         stepNumber: 5,
@@ -742,37 +747,37 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'Card view vs. Section view',
-        content: 'The Enclosures tab has its own Card/Section toggle in the top-left. Card view shows a photo-forward grid of every enclosure; Section view lists each enclosure as a collapsible row with its occupants underneath — pin whichever you use most as your default with the pin icon next to the toggle.',
+        content: 'The Enclosures tab has its own Card/Section toggle in the top-left. Card view shows a photo-forward grid of every enclosure; Section view lists each enclosure as a collapsible row with its occupants underneath - pin whichever you use most as your default with the pin icon next to the toggle.',
       },
       {
         stepNumber: 2,
         title: 'Adding an enclosure',
-        content: 'Click "Add Enclosure" to open the form. Only Name is required — everything else (Type, Purpose, Building/Room, Dimensions, Capacity, Temp/Humidity ranges, Lighting schedule, Bedding, Enrichment, Notes, Tags, and Suitable Species) is optional and fills in as much detail as you want to track.',
+        content: 'Click "Add Enclosure" to open the form. Only Name is required - everything else (Type, Purpose, Building/Room, Dimensions, Capacity, Temp/Humidity ranges, Lighting schedule, Bedding, Enrichment, Notes, Tags, and Suitable Species) is optional and fills in as much detail as you want to track.',
       },
       {
         stepNumber: 3,
         title: 'Buildings, rooms, and Purpose',
-        content: 'Building and Room dropdowns are populated from whatever locations you\'ve set up — click "Manage Locations" in the filter bar to add or edit them. Purpose (General, Nursery/Breeding, Medical, Quarantine, For Sale, Other) helps enclosures surface in the right places, like the Reproduction and Health tabs\' dedicated enclosure panels.',
+        content: 'Building and Room dropdowns are populated from whatever locations you\'ve set up - click "Manage Locations" in the filter bar to add or edit them. Purpose (General, Nursery/Breeding, Medical, Quarantine, For Sale, Other) helps enclosures surface in the right places, like the Reproduction and Health tabs\' dedicated enclosure panels.',
       },
       {
         stepNumber: 4,
         title: 'Cleaning tasks',
-        content: 'Inside an enclosure\'s edit form, add recurring Tasks with a name, type (Cleaning/Maintenance/Feeding/Other), frequency, notes, and any supplies used. Overdue tasks show up as warning badges on the enclosure card and count toward the "Needs Attention" total on the dashboard.',
+        content: 'Inside an enclosure\'s edit form, add recurring Tasks with a name, type (Cleaning/Maintenance/Feeding/Other), frequency, notes, and any supplies used. Set the quantity and unit for each assigned supply. The "Show enclosure details and tasks on public animal profiles" option is on by default; when enabled, it shares environment details, notes, task names, schedules, and task notes for animals assigned to that enclosure. Overdue tasks show up as warning badges on the enclosure card and count toward the "Needs Attention" total on the dashboard.',
       },
       {
         stepNumber: 5,
         title: 'Assigning and removing animals in Card view',
-        content: 'Cards are read-only summaries — click into an enclosure to open its detail modal, then use its "Animals" tab: an "Assign Animal" button opens a searchable/filterable picker of unassigned animals to add, while each current occupant gets a "Remove"/trash icon (visible on hover) to unassign it.',
+        content: 'Cards are read-only summaries - click into an enclosure to open its detail modal, then use its "Animals" tab: an "Assign Animal" button opens a searchable/filterable picker of unassigned animals to add, while each current occupant gets a "Remove"/trash icon (visible on hover) to unassign it.',
       },
       {
         stepNumber: 6,
         title: 'Assigning and removing animals in Section view',
-        content: 'Everything happens inline on the page instead: each unassigned animal has its own "Assign" button that reveals a dropdown of enclosures right on its card — pick one and it\'s assigned instantly. Occupants shown under each enclosure row have their own "Remove" button that unassigns them immediately, no confirmation needed. Either way (Section or Card view), removing an animal only unassigns it — it never affects the animal\'s own record.',
+        content: 'Everything happens inline on the page instead: each unassigned animal has its own "Assign" button that reveals a dropdown of enclosures right on its card - pick one and it\'s assigned instantly. Occupants shown under each enclosure row have their own "Remove" button that unassigns them immediately, no confirmation needed. Either way (Section or Card view), removing an animal only unassigns it - it never affects the animal\'s own record.',
       },
       {
         stepNumber: 7,
         title: 'Filtering and deleting enclosures',
-        content: 'Use the Search box plus the Status (Occupied/Empty), Building, Room, and Suitable Species filters to narrow the enclosure list. Deleting an enclosure (trash icon) unassigns every animal inside it back to Unassigned — it does not delete or archive the animals themselves.',
+        content: 'Use the Search box plus the Status (Occupied/Empty), Building, Room, and Suitable Species filters to narrow the enclosure list. Deleting an enclosure (trash icon) unassigns every animal inside it back to Unassigned - it does not delete or archive the animals themselves.',
       },
     ],
   },
@@ -784,7 +789,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'The four status sections',
-        content: 'The Reproduction tab groups animals into Planned Matings, Currently In Mating, Pregnant, and Nursing. Each row shows the relevant dates (mating, due/born, weaning) and a status pill, plus a quick action button that advances that animal to the next stage — e.g. "Mated today" moves a planned pairing into Mating, "Assign Pregnant" moves it to Pregnant, "Born today" moves it to Nursing, and "Mark Weaned" closes out the cycle.',
+        content: 'The Reproduction tab groups animals into Planned Matings, Currently In Mating, Pregnant, and Nursing. Each row shows the relevant dates (mating, due/born, weaning) and a status pill, plus a quick action button that advances that animal to the next stage. "Mated today" moves a planned pairing into Mating, "Assign Pregnant" moves it to Pregnant, "Born today" moves it to Nursing, and "Mark Weaned" closes out the cycle and clears the active weaning alert.',
       },
       {
         stepNumber: 2,
@@ -794,7 +799,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 3,
         title: 'This tab vs. Litter Management',
-        content: 'The Reproduction tab only tracks each parent animal\'s current status (planned/mating/pregnant/nursing) — it doesn\'t record offspring. Actual litters, birth counts, and individual offspring are created and managed in the separate Litter Management feature; recording a birth or weaning there automatically syncs the parent\'s status here.',
+        content: 'The Reproduction tab only tracks each parent animal\'s current status (planned/mating/pregnant/nursing) - it doesn\'t record offspring. Actual litters, birth counts, and individual offspring are created and managed in the separate Litter Management feature; recording a birth or weaning there automatically syncs the parent\'s status here.',
       },
       {
         stepNumber: 4,
@@ -804,7 +809,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 5,
         title: 'Breeding/Nursery enclosures',
-        content: 'A dedicated Enclosures panel at the top lists any enclosure marked with the "Nursery / Breeding" purpose — use its Add button to create one. By default, animals housed there are excluded from the four status lists below since they\'re already grouped by enclosure — check "Also show Breeding/Nursery enclosure animals in the lists below" if you\'d rather see them in both places.',
+        content: 'A dedicated Enclosures panel at the top lists any enclosure marked with the "Nursery / Breeding" purpose - use its Add button to create one. By default, animals housed there are excluded from the four status lists below since they\'re already grouped by enclosure. Check "Also show Breeding/Nursery enclosure animals in the lists below" if you\'d rather see them in both places.',
       },
       {
         stepNumber: 6,
@@ -821,27 +826,27 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'Quarantine and Treatment lists',
-        content: 'The Health tab splits animals into a Quarantine list and an In Treatment list, each row showing the relevant dates/reason and a status pill. "Release" clears an animal from Quarantine, and "End Full Treatment" discharges it from active treatment by finishing every active medication at once — both without affecting the animal\'s own record.',
+        content: 'The Health tab splits animals into a Quarantine list and an In Treatment list, each row showing the relevant dates/reason and a status pill. "Release" clears an animal from Quarantine, and "End Full Treatment" discharges it from active treatment by finishing every active medication at once - both without affecting the animal\'s own record.',
       },
       {
         stepNumber: 2,
         title: 'Assigning Quarantine or Treatment',
-        content: 'Click "Assign Quarantine/Treatment" to open the bulk assign modal. Choose Quarantine (Status: Quarantine/Isolation, Type/Reason, Notes, Start/End dates) or Treatment (a medication\'s Name, Dose, Reason, Start/Stop dates, Dose Interval, and Notes — an active medication is what actually marks an animal "In Treatment"). Search and check off as many animals as you like to apply the same assignment to all of them at once.',
+        content: 'Click "Assign Quarantine/Treatment" to open the bulk assign modal. Choose Quarantine (Status: Quarantine/Isolation, Type/Reason, Notes, Start/End dates) or Treatment (a medication\'s Name, Dose, Reason, Start/Stop dates, Dose Interval, and Notes - an active medication is what actually marks an animal "In Treatment"). Search and check off as many animals as you like to apply the same assignment to all of them at once.',
       },
       {
         stepNumber: 3,
         title: 'Managing medication doses',
-        content: 'Each active medication on an animal in Treatment gets its own dose actions: confirm a dose was given, prolong the medication, or finish it early — these are also how a medication stops counting toward "dose due" alerts.',
+        content: 'Each active medication on an animal in Treatment gets its own dose actions: confirm a dose was given, prolong the medication, or finish it early - these are also how a medication stops counting toward "dose due" alerts.',
       },
       {
         stepNumber: 4,
         title: 'The overall health status pill',
-        content: 'Healthy / Monitoring / Concern / Critical is calculated automatically from active quarantine (weighted by type — e.g. a contagious disease counts far more than a routine new-arrival hold), active treatment, medication count, medical conditions, and allergies. You can\'t set this pill directly from the Health tab — it can only be manually overridden from the animal\'s own edit form (Health tab → Health Status Override).',
+        content: 'Healthy / Monitoring / Concern / Critical is calculated automatically from active quarantine (weighted by type - e.g. a contagious disease counts far more than a routine new-arrival hold), active treatment, medication count, medical conditions, and allergies. You can\'t set this pill directly from the Health tab - it can only be manually overridden from the animal\'s own edit form (Health tab → Health Status Override).',
       },
       {
         stepNumber: 5,
         title: 'Medical/Quarantine enclosures',
-        content: 'A dedicated Enclosures panel lists any enclosure marked with the "Medical" or "Quarantine" purpose — use its Add button to create one. Animals housed there are automatically excluded from the Quarantine/Treatment lists below, since they\'re already grouped by enclosure.',
+        content: 'A dedicated Enclosures panel lists any enclosure marked with the "Medical" or "Quarantine" purpose - use its Add button to create one. Animals housed there are automatically excluded from the Quarantine/Treatment lists below, since they\'re already grouped by enclosure.',
       },
       {
         stepNumber: 6,
@@ -863,22 +868,22 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 2,
         title: 'Marking a feeding',
-        content: 'Click "Fed" to open the Record Feeding modal: optionally pick a Food/Supply item, toggle "Deduct from stock" and enter a quantity to draw it down from that supply\'s inventory automatically, and add any notes. "Skip" (only shown once a feeding is overdue) just logs a skipped feeding without opening the modal.',
+        content: 'Click "Fed" to open the Record Feeding modal. If the animal has a matching food supply assigned in its Routine Care diet, the modal selects it and fills in the assigned amount and a compatible unit. Otherwise, choose a food supply manually. "Deduct from stock" starts unchecked. Turn it on to review or change the quantity and unit (for example, g, kg, ml, or l) and subtract that amount from inventory when you save. Add notes if needed. "Skip" (only shown once a feeding is overdue) logs a skipped feeding without opening the modal.',
       },
       {
         stepNumber: 3,
         title: 'Grooming, Special Care, and Training',
-        content: 'These aren\'t single generic schedules — each specific type (Grooming, Brushing, Bathing, Nail/Claw/Hoof Care, Dental Care, Daily Exercise, Crate/Litter/Leash Training, and more) is tracked completely separately per animal, only appearing once you\'ve set a frequency for it. "Done" logs it as completed today; "Skip" (shown only when overdue) logs it as skipped instead.',
+        content: 'These aren\'t single generic schedules - each specific type (Grooming, Brushing, Bathing, Nail/Claw/Hoof Care, Dental Care, Daily Exercise, Crate/Litter/Leash Training, and more) is tracked completely separately per animal, only appearing once you\'ve set a frequency for it. "Done" logs it as completed today; "Skip" (shown only when overdue) logs it as skipped instead.',
       },
       {
         stepNumber: 4,
         title: 'Custom Animal Care tasks',
-        content: 'For anything without a dedicated schedule type — a weekly weigh-in, a monthly nail trim, whatever you define — Custom Animal Care tasks work the same way, with their own name, frequency, and Done/Skip actions.',
+        content: 'For anything without a dedicated schedule type - a weekly weigh-in, a monthly nail trim, whatever you define - Custom Animal Care tasks work the same way, with their own name, frequency, and Done/Skip actions.',
       },
       {
         stepNumber: 5,
         title: 'Where schedules get set up',
-        content: 'This tab only tracks and marks progress — it doesn\'t create new schedules. Feeding, Grooming, and Special Care schedules are set up from the animal\'s own edit form on the Routine Care tab; Training schedules are set up on the Behavior tab.',
+        content: 'This tab only tracks and marks progress - it doesn\'t create new schedules. Feeding, Grooming, and Special Care schedules are set up from the animal\'s own edit form on the Routine Care tab; Training schedules are set up on the Behavior tab.',
       },
       {
         stepNumber: 6,
@@ -895,33 +900,33 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'Opening the Archive screen',
-        content: 'The Sold/Archived stat card shows the total count (transferred + archived). Use the "Archive" button just below it to open the Archive screen. It has two sections: Sold/Transferred (animals you no longer own, kept view-only for history/pedigree) and Archived Animals (yours, just hidden from your main lists) — plus a search box that searches both by name, prefix/suffix, or ID.',
+        content: 'The Sold/Archived stat card shows the total count (transferred + archived). Use the "Archive" button just below it to open the Archive screen. It has two sections: Sold/Transferred (animals you no longer own, kept view-only for history/pedigree) and Archived Animals (yours, just hidden from your main lists) - plus a search box that searches both by name, prefix/suffix, or ID.',
       },
       {
         stepNumber: 2,
         title: 'Unarchiving and filtering by recipient',
-        content: 'Each archived animal has an "Unarchive" button to bring it back into your active lists — it never went anywhere, just hidden. If your sold/transferred animals have gone to more than one different recipient over time, a "Filter by recipient" dropdown appears above the Sold/Transferred list to narrow it down to just one; clicking a recipient\'s name/avatar opens their public profile.',
+        content: 'Each archived animal has an "Unarchive" button to bring it back into your active lists - it never went anywhere, just hidden. If your sold/transferred animals have gone to more than one different recipient over time, a "Filter by recipient" dropdown appears above the Sold/Transferred list to narrow it down to just one; clicking a recipient\'s name/avatar opens their public profile.',
       },
       {
         stepNumber: 3,
         title: 'Finding duplicate animals',
-        content: 'The "Find Duplicates" button (magnifying glass, top-right) scans your animals for likely accidental duplicates — flagged by an exact or similar name match, matching birthdate + species, or matching parents — and groups each match with the reason(s) it was flagged.',
+        content: 'The "Find Duplicates" button (magnifying glass, top-right) scans your animals for likely accidental duplicates - flagged by an exact or similar name match, matching birthdate + species, or matching parents - and groups each match with the reason(s) it was flagged.',
       },
       {
         stepNumber: 4,
         title: 'Merge vs. Dismiss',
-        content: '"Merge" keeps one animal and permanently deletes the other, re-pointing all its litters, offspring links, logs, and transactions onto the one you kept — this can\'t be undone, so double-check which one you\'re keeping. "Dismiss" instead just marks the pair as "not a duplicate" so it stops showing up here, without changing either animal.',
+        content: '"Merge" keeps one animal and permanently deletes the other, re-pointing all its litters, offspring links, logs, and transactions onto the one you kept - this can\'t be undone, so double-check which one you\'re keeping. "Dismiss" instead just marks the pair as "not a duplicate" so it stops showing up here, without changing either animal.',
       },
       {
         stepNumber: 5,
         title: 'The Alerts dropdown',
-        content: 'The "Alerts On/Off" button (bell icon) in the dashboard row opens a checklist of categories — Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays — controlling which of these show up in the notification ticker at the very top of every page, not just this one.',
+        content: 'The "Alerts On/Off" button (bell icon) in the dashboard row opens a checklist of categories - Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays - controlling which of these show up in the notification ticker at the very top of every page, not just this one.',
       },
     ],
   },
 ];
 
-// "Profile & Settings: A Tab-by-Tab Tour" section — the 8 tabs under the avatar → Profile → Profile Settings page.
+// "Profile & Settings: A Tab-by-Tab Tour" section - the 8 tabs under the avatar → Profile → Profile Settings page.
 const SETTINGS_TAB_LESSONS = [
   {
     id: 'profile-view',
@@ -936,22 +941,22 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 2,
         title: 'The tabs across the top',
-        content: 'Animals is always there (grouped by species, with search/category/species/gender/status filters and A-Z/Age sorting). Info & Adoption, Pairings, and For Sale/Stud only appear if that person has relevant content to show. Stats can be hidden via the Profile visibility checklist — see the next step for what it shows. Ratings is always shown.',
+        content: 'Animals is always there (grouped by species, with search/category/species/gender/status filters and A-Z/Age sorting). Info & Adoption, Pairings, and For Sale/Stud only appear if that person has relevant content to show. Stats can be hidden via the Profile visibility checklist - see the next step for what it shows. Ratings is always shown.',
       },
       {
         stepNumber: 3,
         title: 'The Pairings tab',
-        content: 'When a breeder has pairings, they\'re grouped into up to four sections, each with its own icon and count, and each only shown if it has entries: Mated Pairings, Planned Pairings, Pregnant Pairings, and Past Pairings (born litters). Every card shows the breeding pair\'s nickname (if set) and Sire/Dam mini-cards with photo, name, variety, and ID, plus whichever dates apply — Planned Mating/Mated, Due, or Born with an auto-calculated age. Past Pairings cards also show the litter\'s Male/Female/Unknown split and total born, and a Year filter dropdown appears once litters span more than one year.',
+        content: 'When a breeder has pairings, they\'re grouped into up to four sections, each with its own icon and count, and each only shown if it has entries: Mated Pairings, Planned Pairings, Pregnant Pairings, and Past Pairings (born litters). Every card shows the breeding pair\'s nickname (if set) and Sire/Dam mini-cards with photo, name, variety, and ID, plus whichever dates apply - Planned Mating/Mated, Due, or Born with an auto-calculated age. Past Pairings cards also show the litter\'s Male/Female/Unknown split and total born, and a Year filter dropdown appears once litters span more than one year.',
       },
       {
         stepNumber: 4,
         title: 'The For Sale / Stud tab',
-        content: 'Split into two sections (each shown only if it has entries): For Sale and Available for Stud — an animal can appear in both if it\'s listed as both. Each card shows a photo, gender icon, name, species, and calculated age, plus a price badge (their set sale price, or "Negotiable") or a stud fee badge (their set fee, or "Negotiable"). Clicking any card opens that animal\'s full public record. These are the exact same listings that show up app-wide in the Marketplace — this tab is just that one breeder\'s slice of it.',
+        content: 'Split into two sections (each shown only if it has entries): For Sale and Available for Stud - an animal can appear in both if it\'s listed as both. Each card shows a photo, gender icon, name, species, and calculated age, plus a price badge (their set sale price, or "Negotiable") or a stud fee badge (their set fee, or "Negotiable"). Clicking any card opens that animal\'s full public record. These are the exact same listings that show up app-wide in the Marketplace - this tab is just that one breeder\'s slice of it.',
       },
       {
         stepNumber: 5,
         title: 'The Stats tab',
-        content: 'When shown, Stats is a live snapshot of everything else on that profile — nothing is entered manually. Summary cards cover Total Animals, Breeder Status, Pet Status, For Sale/Stud, Total Litters, Mated Pairings, Pregnant Pairings, Planned Pairings, and Total Offspring. Below that, breakdown bar-charts compare Animals by Species, Pairings by Species, Offspring by Species, and Pairings/Offspring by Year — each chart only shows up once there\'s more than one species or year to compare, so a single-species breeder won\'t see a species breakdown at all.',
+        content: 'When shown, Stats is a live snapshot of everything else on that profile - nothing is entered manually. Summary cards cover Total Animals, Breeder Status, Pet Status, For Sale/Stud, Total Litters, Mated Pairings, Pregnant Pairings, Planned Pairings, and Total Offspring. Below that, breakdown bar-charts compare Animals by Species, Pairings by Species, Offspring by Species, and Pairings/Offspring by Year - each chart only shows up once there\'s more than one species or year to compare, so a single-species breeder won\'t see a species breakdown at all.',
       },
       {
         stepNumber: 6,
@@ -983,12 +988,12 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 4,
         title: 'Messaging preferences',
-        content: 'A single "Allow other breeders to message me" checkbox. Turning it off only blocks messages from other users — it doesn\'t affect moderator/system notifications.',
+        content: 'A single "Allow other breeders to message me" checkbox. Turning it off only blocks messages from other users - it doesn\'t affect moderator/system notifications.',
       },
       {
         stepNumber: 5,
         title: 'Push notifications',
-        content: 'The "Enable push notifications on this device" button turns on real device alerts for messages, requests, and daily care/feeding/health reminders (requires a supported browser — on iPhone/iPad you must Add to Home Screen first). Once enabled, a per-category checklist appears so you can fine-tune exactly what triggers a push.',
+        content: 'The "Enable push notifications on this device" button turns on real device alerts for messages, requests, and daily care/feeding/health reminders (requires a supported browser - on iPhone/iPad you must Add to Home Screen first). Once enabled, a per-category checklist appears so you can fine-tune exactly what triggers a push.',
       },
       {
         stepNumber: 6,
@@ -1005,12 +1010,12 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Blank fields stay hidden',
-        content: 'Everything on this tab is optional — any field you leave blank simply doesn\'t appear on your public profile\'s Info & Adoption tab at all.',
+        content: 'Everything on this tab is optional - any field you leave blank simply doesn\'t appear on your public profile\'s Info & Adoption tab at all.',
       },
       {
         stepNumber: 2,
         title: 'The built-in fields',
-        content: 'About My Program/Breeding Goals, Adoption/Rehoming Rules, Enclosure Care Requirements, Routine Care, Health Guarantee, Waitlist and Booking Info, Pricing/Fee Notes, and Contact Preferences — each up to 2000 characters, with the same Bold/Italic formatting buttons as your Bio.',
+        content: 'About My Program/Breeding Goals, Adoption/Rehoming Rules, Enclosure Care Requirements, Routine Care, Health Guarantee, Waitlist and Booking Info, Pricing/Fee Notes, and Contact Preferences - each up to 2000 characters, with the same Bold/Italic formatting buttons as your Bio.',
       },
       {
         stepNumber: 3,
@@ -1032,24 +1037,24 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 2,
         title: 'What actually makes you searchable',
-        content: 'Only species marked Active or Retired Breeder show up in Breeder Directory searches — and you still need Display Personal Name or Display Breeder Name checked on the Profile tab, or you won\'t appear in results at all even with a species marked.',
+        content: 'Only species marked Active or Retired Breeder show up in Breeder Directory searches - and you still need Display Personal Name or Display Breeder Name checked on the Profile tab, or you won\'t appear in results at all even with a species marked.',
       },
       {
         stepNumber: 3,
         title: 'Marked species stick around',
-        content: 'Once a species is marked Active or Retired, it stays in this list (and in Directory results) even if you no longer own any animals of that species — set it back to Owner to remove it.',
+        content: 'Once a species is marked Active or Retired, it stays in this list (and in Directory results) even if you no longer own any animals of that species - set it back to Owner to remove it.',
       },
     ],
   },
   {
     id: 'settings-ratings',
     title: 'Settings: Ratings',
-    description: 'The ratings and reviews other users have left you — read-only.',
+    description: 'The ratings and reviews other users have left you - read-only.',
     steps: [
       {
         stepNumber: 1,
         title: 'What shows here',
-        content: 'An overall average score, a 1–5 star distribution breakdown, and the full list of individual reviews left by other users after transactions with you — reviewer name, star rating, comment, and date. Nothing here is editable; it\'s purely a summary of what others have said about you.',
+        content: 'An overall average score, a 1–5 star distribution breakdown, and the full list of individual reviews left by other users after transactions with you - reviewer name, star rating, comment, and date. Nothing here is editable; it\'s purely a summary of what others have said about you.',
       },
     ],
   },
@@ -1061,17 +1066,17 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Defining a line',
-        content: 'Up to 10 personal breeding lines, each with a name (up to 30 characters) and a color picked from a preset palette. These are private — only visible to you, never on public profiles.',
+        content: 'Up to 10 personal breeding lines, each with a name (up to 30 characters) and a color picked from a preset palette. These are private - only visible to you, never on public profiles.',
       },
       {
         stepNumber: 2,
         title: 'Assigning lines to animals',
-        content: 'Lines are assigned per-animal from that animal\'s own Identification tab, not from this Settings page — this page only defines and manages the lines themselves.',
+        content: 'Lines are assigned per-animal from that animal\'s own Identification tab, not from this Settings page - this page only defines and manages the lines themselves.',
       },
       {
         stepNumber: 3,
         title: 'Hiding vs. deleting a line',
-        content: 'The eye icon toggles a line off — hidden everywhere without losing which animals are assigned to it — while the trash icon permanently deletes it and unassigns it from every animal that had it.',
+        content: 'The eye icon toggles a line off - hidden everywhere without losing which animals are assigned to it - while the trash icon permanently deletes it and unassigns it from every animal that had it.',
       },
       {
         stepNumber: 4,
@@ -1088,7 +1093,7 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Where these values come from',
-        content: 'Every value you type into a dropdown-style field (like Color, Markings, Coat, or Variety) on the Animal form is remembered per species, and suggested again the next time you fill that field in for the same species. So this tab is a record of what you\'ve already used — not a place to pre-load new options. A value only shows up here after you\'ve typed it into an animal form at least once.',
+        content: 'Every value you type into a dropdown-style field (like Color, Markings, Coat, or Variety) on the Animal form is remembered per species, and suggested again the next time you fill that field in for the same species. So this tab is a record of what you\'ve already used - not a place to pre-load new options. A value only shows up here after you\'ve typed it into an animal form at least once.',
       },
       {
         stepNumber: 2,
@@ -1098,12 +1103,12 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 3,
         title: 'Renaming a typo',
-        content: 'Renaming a value fixes it everywhere at once — including on animals you\'ve already saved with the old spelling. This is the fastest way to clean up a value you misspelled when you first typed it in.',
+        content: 'Renaming a value fixes it everywhere at once - including on animals you\'ve already saved with the old spelling. This is the fastest way to clean up a value you misspelled when you first typed it in.',
       },
       {
         stepNumber: 4,
         title: 'Removing a value',
-        content: 'Remove a value you no longer want suggested and it stops appearing in that field\'s dropdown going forward. This only affects the suggestions — it does not clear the value off animals already using it.',
+        content: 'Remove a value you no longer want suggested and it stops appearing in that field\'s dropdown going forward. This only affects the suggestions - it does not clear the value off animals already using it.',
       },
     ],
   },
@@ -1115,12 +1120,12 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Exporting your data',
-        content: 'Choose which sections to include (Animals, Litters, Enclosures, Supplies, Budget), pick a format — JSON (single file) or CSV (zip bundle) — and optionally include archived or sold animals, or embed images as base64 (JSON only).',
+        content: 'Choose which sections to include (Animals, Litters, Enclosures, Supplies, Budget), pick a format - JSON (single file) or CSV (zip bundle) - and optionally include archived or sold animals, or embed images as base64 (JSON only).',
       },
       {
         stepNumber: 2,
         title: 'Importing a CritterTrack backup',
-        content: 'Upload a previously exported .json or .zip file and click "Preview Import" first — it shows a per-section breakdown of new vs. conflicting records so nothing gets written until you review and confirm.',
+        content: 'Upload a previously exported .json or .zip file and click "Preview Import" first - it shows a per-section breakdown of new vs. conflicting records so nothing gets written until you review and confirm.',
       },
       {
         stepNumber: 3,
@@ -1137,7 +1142,7 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Changing your email',
-        content: 'A dedicated "Change Email Address" form — you may need to log back in with the new address afterward.',
+        content: 'A dedicated "Change Email Address" form - you may need to log back in with the new address afterward.',
       },
       {
         stepNumber: 2,
@@ -1147,7 +1152,7 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 3,
         title: 'The Danger Zone',
-        content: 'A collapsed "Danger Zone" section holds the "Delete Account" button — deleting is permanent, wipes all your animals/litters/profile data, and asks for a final confirmation before it\'s carried out.',
+        content: 'A collapsed "Danger Zone" section holds the "Delete Account" button - deleting is permanent, wipes all your animals/litters/profile data, and asks for a final confirmation before it\'s carried out.',
       },
     ],
   },
@@ -1163,7 +1168,7 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 1,
         title: 'What this page tracks',
-        content: 'Every pairing you record — from a planned mating all the way through birth and weaning — lives in one list here. Litters are always sorted with the most active statuses first (Pregnant, then Mated, then Planned, then Born), and newest date first within each status.',
+        content: 'Every pairing you record - from a planned mating all the way through birth and weaning - lives in one list here. Litters are always sorted with the most active statuses first (Pregnant, then Mated, then Planned, then Born), and newest date first within each status.',
       },
       {
         stepNumber: 2,
@@ -1173,7 +1178,7 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 3,
         title: 'Searching, filtering, and sorting',
-        content: 'Search by CTL-ID, litter nickname, or sire/dam name or ID. The status pills (All/Pregnant/Mated/Planned/Born) narrow the list to one stage at a time, and the Species and Year dropdowns filter further — Year is based on birth date (or mating/pairing date if unborn).',
+        content: 'Search by CTL-ID, litter nickname, or sire/dam name or ID. The status pills (All/Pregnant/Mated/Planned/Born) narrow the list to one stage at a time, and the Species and Year dropdowns filter further - Year is based on birth date (or mating/pairing date if unborn).',
       },
       {
         stepNumber: 4,
@@ -1190,12 +1195,12 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 1,
         title: 'Starting a mating record',
-        content: 'The "+ Mating" button opens a quick-add form for a future or just-happened pairing. Species is required and, once set, locks in place — you can\'t change a litter\'s species after starting it.',
+        content: 'The "+ Mating" button opens a quick-add form for a future or just-happened pairing. Species is required and, once set, locks in place - you can\'t change a litter\'s species after starting it.',
       },
       {
         stepNumber: 2,
         title: 'Picking sire and dam',
-        content: 'Sire and Dam each open a search modal that can look through your own animals, the global database, or both (toggle at the top). Sire search is filtered to Male/Intersex/Mixed/Unknown, Dam to Female/Intersex/Mixed/Unknown, and both must match the litter\'s species — a dam who died before the litter\'s birth date is blocked from being selected.',
+        content: 'Sire and Dam each open a search modal that can look through your own animals, the global database, or both (toggle at the top). Sire search is filtered to Male/Intersex/Mixed/Unknown, Dam to Female/Intersex/Mixed/Unknown, and both must match the litter\'s species - a dam who died before the litter\'s birth date is blocked from being selected.',
       },
       {
         stepNumber: 3,
@@ -1227,7 +1232,7 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 2,
         title: 'One-click transitions',
-        content: 'Instead of opening the full edit form, small pill buttons right on the card header let you advance a pairing instantly: "Mated Today", "Assign Pregnant", "Born Today", and "Wean Today" — each one stamps today\'s date and updates the dam\'s state (e.g. marking her pregnant or nursing) in a single click.',
+        content: 'Instead of opening the full edit form, small pill buttons right on the card header let you advance a pairing instantly: "Mated Today", "Assign Pregnant", "Born Today", and "Wean Today" - each one stamps today\'s date and updates the dam\'s state (e.g. marking her pregnant or nursing) in a single click.',
       },
       {
         stepNumber: 3,
@@ -1254,17 +1259,17 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 3,
         title: 'Breeding outcome',
-        content: 'A "Breeding Outcome" dropdown in the Breeding Information section tracks whether the pairing was Successful, Unsuccessful, or Unknown — separate from the litter\'s status badge, so you can flag a mating as unsuccessful without deleting the record.',
+        content: 'A "Breeding Outcome" dropdown in the Breeding Information section tracks whether the pairing was Successful, Unsuccessful, or Unknown - separate from the litter\'s status badge, so you can flag a mating as unsuccessful without deleting the record.',
       },
       {
         stepNumber: 4,
         title: 'Recording a lost pregnancy',
-        content: 'If a dam was mated but never produced a litter, check "Pregnancy confirmed but no litter produced" (only shown once a Mating Date is set and no Birth Date exists yet). This reveals a Reason dropdown — Cannibalized, All Stillborn, Reabsorbed, or Unknown — plus an optional Notes field for extra detail.',
+        content: 'If a dam was mated but never produced a litter, check "Pregnancy confirmed but no litter produced" (only shown once a Mating Date is set and no Birth Date exists yet). This reveals a Reason dropdown - Cannibalized, All Stillborn, Reabsorbed, or Unknown - plus an optional Notes field for extra detail.',
       },
       {
         stepNumber: 5,
         title: 'Gender counts and total born',
-        content: 'Male, Female, and Unknown fields track the gender breakdown. Total Born is read-only and auto-calculates as the largest of: your manual entry, the M+F+U sum, or however many offspring are actually linked — so it can never drop below what\'s already linked.',
+        content: 'Male, Female, and Unknown fields track the gender breakdown. Total Born is read-only and auto-calculates as the largest of: your manual entry, the M+F+U sum, or however many offspring are actually linked - so it can never drop below what\'s already linked.',
       },
       {
         stepNumber: 6,
@@ -1274,7 +1279,7 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 7,
         title: 'Notes and photos',
-        content: 'Notes is a free-text field for anything worth remembering about the litter. Up to 5 photos can be attached (PNG/JPEG, 500 KB max each) — hover a thumbnail to delete it, and in the expanded card view you can click any photo for a fullscreen lightbox with a download button.',
+        content: 'Notes is a free-text field for anything worth remembering about the litter. Up to 5 photos can be attached (PNG/JPEG, 500 KB max each) - hover a thumbnail to delete it, and in the expanded card view you can click any photo for a fullscreen lightbox with a download button.',
       },
     ],
   },
@@ -1286,17 +1291,17 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 1,
         title: 'Linking existing animals',
-        content: 'If animals matching the litter\'s sire, dam, and birth date already exist in your herd, they show up as a checklist — tick any to link them to this litter. If an animal\'s birthdate doesn\'t match the litter\'s yet, you\'ll be asked to confirm before it\'s linked.',
+        content: 'If animals matching the litter\'s sire, dam, and birth date already exist in your herd, they show up as a checklist - tick any to link them to this litter. If an animal\'s birthdate doesn\'t match the litter\'s yet, you\'ll be asked to confirm before it\'s linked.',
       },
       {
         stepNumber: 2,
         title: 'Creating offspring in bulk',
-        content: 'Once sire, dam, and birth date are all set, buttons like "+ Add 3 remaining males" appear based on your gender counts minus whatever\'s already linked. Clicking one creates placeholder animals (named M1, M2, F1, F2, U1, etc.) with species, parents, and birthdate pre-filled — fully editable afterward.',
+        content: 'Once sire, dam, and birth date are all set, buttons like "+ Add 3 remaining males" appear based on your gender counts minus whatever\'s already linked. Clicking one creates placeholder animals (named M1, M2, F1, F2, U1, etc.) with species, parents, and birthdate pre-filled - fully editable afterward.',
       },
       {
         stepNumber: 3,
         title: 'Adding one at a time',
-        content: 'The expanded card also has an inline "Add Offspring" form for creating a single animal on the spot — Name and Gender are required, with Color, Coat, and Remarks optional.',
+        content: 'The expanded card also has an inline "Add Offspring" form for creating a single animal on the spot - Name and Gender are required, with Color, Coat, and Remarks optional.',
       },
       {
         stepNumber: 4,
@@ -1313,12 +1318,12 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 1,
         title: 'Parents and COI',
-        content: 'Sire and dam appear as clickable mini-cards (photo, name, species, ID) — clicking either opens that animal\'s full record, unless they\'ve been transferred away. The inbreeding coefficient badge sits between them, showing a loading skeleton until the calculation finishes.',
+        content: 'Sire and dam appear as clickable mini-cards (photo, name, species, ID) - clicking either opens that animal\'s full record, unless they\'ve been transferred away. The inbreeding coefficient badge sits between them, showing a loading skeleton until the calculation finishes.',
       },
       {
         stepNumber: 2,
         title: 'Breeding and birth info',
-        content: 'A dedicated block lists every date and detail you\'ve recorded — mating date, expected due date, breeding method/condition, outcome (green for Successful, red for Unsuccessful), birth method, birth date with calculated age, and weaning date.',
+        content: 'A dedicated block lists every date and detail you\'ve recorded - mating date, expected due date, breeding method/condition, outcome (green for Successful, red for Unsuccessful), birth method, birth date with calculated age, and weaning date.',
       },
       {
         stepNumber: 3,
@@ -1328,13 +1333,13 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 4,
         title: 'Pedigree and editing',
-        content: 'Horizontal and Vertical Pedigree buttons (shown once both parents are set) open that pairing\'s family tree. The Edit button reopens the full litter form — or the Edit/Convert chooser if the pairing is still only Planned.',
+        content: 'Horizontal and Vertical Pedigree buttons (shown once both parents are set) open that pairing\'s family tree. The Edit button reopens the full litter form - or the Edit/Convert chooser if the pairing is still only Planned.',
       },
     ],
   },
 ];
 
-// "More Pages & Tools" section — Contacts, Marketplace, Calendar, Community, the Tools
+// "More Pages & Tools" section - Contacts, Marketplace, Calendar, Community, the Tools
 // calculators, Finance, Messages/Notifications, Breeder Directory, and support pages.
 const MORE_PAGES_LESSONS = [
   {
@@ -1345,22 +1350,22 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Switching to Lite',
-        content: 'Click the feather icon in the header (next to the other top-right icons) to switch between Full and Lite. You\'ll get a confirmation prompt either way. Lite is tied to your account, not your device, so it follows you between the website and the Android app — switch it on one and it\'s on in the other. You can switch back whenever you like; nothing is lost either way.',
+        content: 'Click the feather icon in the header (next to the other top-right icons) to switch between Full and Lite. You\'ll get a confirmation prompt either way. Lite is tied to your account, not your device, so it follows you between the website and the Android app - switch it on one and it\'s on in the other. You can switch back whenever you like; nothing is lost either way.',
       },
       {
         stepNumber: 2,
         title: 'What Lite hides',
-        content: 'To keep things uncluttered, Lite drops the Contacts, Marketplace, Calendar, and Community pages from the navigation. Everything else — your animals, pedigree, litter records, health and vet history, and photos — is still there. If you need Contacts or Marketplace, switch back to Full mode.',
+        content: 'To keep things uncluttered, Lite drops the Contacts, Marketplace, Calendar, and Community pages from the navigation. Everything else - your animals, pedigree, litter records, health and vet history, and photos - is still there. If you need Contacts or Marketplace, switch back to Full mode.',
       },
       {
         stepNumber: 3,
         title: 'The trimmed animal view',
-        content: 'Animal records open with only four tabs in Lite: Dashboard, Records, Gallery, and Pedigree. In Full mode there are eleven, so this is the most noticeable difference. The sections themselves work exactly as they do in Full — you\'re just not shown the tabs you don\'t need.',
+        content: 'Animal records open with only four tabs in Lite: Dashboard, Records, Gallery, and Pedigree. In Full mode there are eleven, so this is the most noticeable difference. The sections themselves work exactly as they do in Full - you\'re just not shown the tabs you don\'t need.',
       },
       {
         stepNumber: 4,
         title: 'The trimmed animal form',
-        content: 'The edit form matches, with the same four tabs — and note that Lite relabels Health to Records, because the vet visits, medications, vaccinations, deworming, medical conditions, and allergies that live there are what most people actually need day to day. Anything you can\'t see in Lite is still saved on the animal; you can always switch to Full to reach it.',
+        content: 'The edit form matches, with the same four tabs - and note that Lite relabels Health to Records, because the vet visits, medications, vaccinations, deworming, medical conditions, and allergies that live there are what most people actually need day to day. Anything you can\'t see in Lite is still saved on the animal; you can always switch to Full to reach it.',
       },
       {
         stepNumber: 5,
@@ -1372,7 +1377,7 @@ const MORE_PAGES_LESSONS = [
   {
     id: 'install-the-app',
     title: 'Installing the Android App',
-    description: 'Getting CritterTrack on your phone — from the Play Store, or from a direct APK file.',
+    description: 'Getting CritterTrack on your phone - from the Play Store, or from a direct APK file.',
     steps: [
       {
         stepNumber: 1,
@@ -1382,7 +1387,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'From a direct APK file',
-        content: 'If you\'d rather not use the Play Store, an APK file can be downloaded using the button below and installed directly. It\'s the same app with the same features and the same account — it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Note that installing outside the Play Store means updates are entirely manual: you\'ll need to download and install each new version yourself, and you\'ll want to keep an eye on which version you\'re on.',
+        content: 'If you\'d rather not use the Play Store, download the signed APK directly from this guide and install it on your device. It\'s the same app with the same features and the same account; it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Updates for a sideloaded app are manual, so return here to download and install a newer APK when one is published.',
         link: {
           label: 'Download the Android APK',
           url: ANDROID_APK_URL,
@@ -1392,12 +1397,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Allowing installs from your browser',
-        content: 'Android blocks app installs from outside the Play Store by default, so your browser will ask you to allow it. When the download starts, tap the notification or the prompt to open Settings, and turn on "Allow from this source" for the browser you\'re using (Chrome is usually the one that asks). Turn the permission back off afterwards if you prefer — it only affects future installs, not the app you already have.',
+        content: 'Android blocks app installs from outside the Play Store by default, so your browser will ask you to allow it. When the download starts, tap the notification or the prompt to open Settings, and turn on "Allow from this source" for the browser you\'re using (Chrome is usually the one that asks). Turn the permission back off afterwards if you prefer - it only affects future installs, not the app you already have.',
       },
       {
         stepNumber: 4,
         title: 'Before you install an update',
-        content: 'Android requires the new version to have a higher version number than what\'s already installed, so you can\'t install an older build over a newer one. You also can\'t install the regular app over an existing Play Store install of the same app unless it\'s signed with the same key — if you switch between Play Store and APK versions, uninstall the old one first. Your data lives in your account, not on the phone, so uninstalling never loses your animals; just sign back in afterwards.',
+        content: 'Android requires the new version to have a higher version number than what\'s already installed, so you can\'t install an older build over a newer one. You also can\'t install the regular app over an existing Play Store install of the same app unless it\'s signed with the same key - if you switch between Play Store and APK versions, uninstall the old one first. Your data lives in your account, not on the phone, so uninstalling never loses your animals; just sign back in afterwards.',
       },
     ],
   },
@@ -1409,7 +1414,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'What Contacts tracks',
-        content: 'Each contact stores a Personal Name and/or kennel/Breeder Name, prefix/suffix, and full address, plus a Keeper/Breeder role — kept separate from your own animal collection, for people you buy from, sell to, or breed with.',
+        content: 'Each contact stores a Personal Name and/or kennel/Breeder Name, prefix/suffix, and full address, plus a Keeper/Breeder role - kept separate from your own animal collection, for people you buy from, sell to, or breed with.',
       },
       {
         stepNumber: 2,
@@ -1419,7 +1424,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Reading a contact\'s card',
-        content: 'Each row shows their linked CritterTrack ID (if any), country, and how many animals you\'ve recorded as owned by them or bred by them, at a glance — no need to open their profile just to check.',
+        content: 'Each row shows their linked CritterTrack ID (if any), country, and how many animals you\'ve recorded as owned by them or bred by them, at a glance - no need to open their profile just to check.',
       },
     ],
   },
@@ -1431,12 +1436,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Filling in the details',
-        content: 'Personal Name, kennel/Breeder Name, Prefix/Suffix, and full address are all optional — fill in whatever you actually know about them, then save.',
+        content: 'Personal Name, kennel/Breeder Name, Prefix/Suffix, and full address are all optional - fill in whatever you actually know about them, then save.',
       },
       {
         stepNumber: 2,
         title: 'Linking a CritterTrack user',
-        content: '"Search" next to Linked CritterTrack User lets you look up and attach an actual CritterTrack profile (their CTU ID) to this contact — this is optional, but once linked, any of your animals with that CTU ID recorded as breeder or owner automatically show up under this contact\'s Owned/Bred Animals tabs, instead of relying only on manual per-animal assignment.',
+        content: '"Search" next to Linked CritterTrack User lets you look up and attach an actual CritterTrack profile (their CTU ID) to this contact - this is optional, but once linked, any of your animals with that CTU ID recorded as breeder or owner automatically show up under this contact\'s Owned/Bred Animals tabs, instead of relying only on manual per-animal assignment.',
       },
     ],
   },
@@ -1448,7 +1453,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Overview, Owned Animals, Bred Animals',
-        content: 'Overview shows this contact\'s saved details, including their linked CritterTrack ID if one was attached. Owned Animals lists your animals linked to them as buyer/owner; Bred Animals lists ones linked to them as breeder — each tab\'s count badge shows how many, matched either through their linked CTU ID or manual per-animal assignment.',
+        content: 'Overview shows this contact\'s saved details, including their linked CritterTrack ID if one was attached. Owned Animals lists your animals linked to them as buyer/owner; Bred Animals lists ones linked to them as breeder - each tab\'s count badge shows how many, matched either through their linked CTU ID or manual per-animal assignment.',
       },
       {
         stepNumber: 2,
@@ -1465,7 +1470,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Updating the record',
-        content: 'The same fields as Add New Contact, pre-filled with their current details, including their linked CritterTrack user if one was set — change anything (or link/unlink a user) and save.',
+        content: 'The same fields as Add New Contact, pre-filled with their current details, including their linked CritterTrack user if one was set - change anything (or link/unlink a user) and save.',
       },
     ],
   },
@@ -1477,12 +1482,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Listing type tabs',
-        content: 'All Listings, For Sale, and For Stud are separate tabs — an animal can appear under both Sale and Stud if it\'s listed as both.',
+        content: 'All Listings, For Sale, and For Stud are separate tabs - an animal can appear under both Sale and Stud if it\'s listed as both.',
       },
       {
         stepNumber: 2,
         title: 'Filtering and taking action',
-        content: 'Narrow the list by species or location, then click any animal to view its full details or message the seller directly from there. This is the exact same pool of listings shown on each breeder\'s own public profile "For Sale / Stud" tab — Marketplace is just the combined, app-wide view of all of them.',
+        content: 'Narrow the list by species or location, then click any animal to view its full details or message the seller directly from there. This is the exact same pool of listings shown on each breeder\'s own public profile "For Sale / Stud" tab - Marketplace is just the combined, app-wide view of all of them.',
       },
     ],
   },
@@ -1511,34 +1516,34 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Recent Activity',
-        content: 'Up to 5 currently-active or newly-joined breeders (marked NEW) show at the top — click any of them to jump straight to their public profile.',
+        content: 'Up to 5 currently-active or newly-joined breeders (marked NEW) show at the top - click any of them to jump straight to their public profile.',
       },
       {
         stepNumber: 2,
         title: 'News & Announcements, Breeders, and Favorites',
-        content: 'Below that sit three panels: News & Announcements (community announcements and polls), an embedded Breeders search (collapsible on mobile), and Favorites — your favorited animals and favorited breeders together in one place.',
+        content: 'Below that sit three panels: News & Announcements (community announcements and polls), an embedded Breeders search (collapsible on mobile), and Favorites - your favorited animals and favorited breeders together in one place.',
       },
     ],
   },
   {
     id: 'offspring-calculator',
     title: 'Offspring Calculator',
-    description: 'Predicting possible offspring outcomes for a pairing — hypothetical or using your own animals.',
+    description: 'Predicting possible offspring outcomes for a pairing - hypothetical or using your own animals.',
     steps: [
       {
         stepNumber: 1,
         title: 'Picking a species and setting traits',
-        content: 'Choose a species (Fancy Mouse is fully supported today; others are listed but not yet calculable). For each locus dropdown under Sire/Father and Dam/Mother, pick a genotype combination — the box below each parent updates live with their calculated Phenotype, Genotype, and any Carried/Hidden traits.',
+        content: 'Choose a species (Fancy Mouse is fully supported today; others are listed but not yet calculable). For each locus dropdown under Sire/Father and Dam/Mother, pick a genotype combination - the box below each parent updates live with their calculated Phenotype, Genotype, and any Carried/Hidden traits.',
       },
       {
         stepNumber: 2,
         title: 'Selecting your own animals',
-        content: 'If you\'re logged in and own animals of that species, a "Select Animal" button appears next to Sire/Father and Dam/Mother — pick one of your actual animals to pull in its own known genetic traits instead of entering them by hand.',
+        content: 'If you\'re logged in and own animals of that species, a "Select Animal" button appears next to Sire/Father and Dam/Mother - pick one of your actual animals to pull in its own known genetic traits instead of entering them by hand.',
       },
       {
         stepNumber: 3,
         title: 'Calculating offspring',
-        content: '"Calculate Offspring" (enabled once both parents have at least one trait set) lists every possible offspring phenotype with its probability percentage — expand any phenotype to see the individual genotypes that make it up.',
+        content: '"Calculate Offspring" (enabled once both parents have at least one trait set) lists every possible offspring phenotype with its probability percentage - expand any phenotype to see the individual genotypes that make it up.',
       },
       {
         stepNumber: 4,
@@ -1548,7 +1553,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Viewing genetics examples',
-        content: 'For Fancy Mouse, "View Examples" opens a separate reference view of common named varieties and their genotypes, grouped into tabs — handy for looking up a variety\'s genetic makeup without running your own calculation.',
+        content: 'For Fancy Mouse, "View Examples" opens a separate reference view of common named varieties and their genotypes, grouped into tabs - handy for looking up a variety\'s genetic makeup without running your own calculation.',
       },
     ],
   },
@@ -1560,7 +1565,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Testing a hypothetical pairing',
-        content: 'Filter by species, then choose a sire and dam to calculate the predicted Coefficient of Inbreeding for their potential offspring, based on shared ancestors. This is separate from the actual COI shown automatically on an already-linked animal\'s own Dashboard — use this calculator to test a pairing before it happens.',
+        content: 'Filter by species, then choose a sire and dam to calculate the predicted Coefficient of Inbreeding for their potential offspring, based on shared ancestors. This is separate from the actual COI shown automatically on an already-linked animal\'s own Dashboard - use this calculator to test a pairing before it happens.',
       },
     ],
   },
@@ -1572,7 +1577,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Adding traits',
-        content: 'Pick a species, then switch to "Visual Traits" mode — a dropdown appears for each trait group, letting you build your desired outcome by picking one option per group (e.g. a Base Color, then optionally a dilute). Some traits automatically select their required dependencies for you.',
+        content: 'Pick a species, then switch to "Visual Traits" mode - a dropdown appears for each trait group, letting you build your desired outcome by picking one option per group (e.g. a Base Color, then optionally a dilute). Some traits automatically select their required dependencies for you.',
       },
       {
         stepNumber: 2,
@@ -1582,7 +1587,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Running the search',
-        content: '"Find Potential Pairings" searches your own animals with recorded genetic codes and lists every sire/dam pair that could produce the target outcome. Results are grouped into collapsible sections — High (>50%), Medium (10–50%), and Low (<10%) probability — each showing a count of how many pairings fall in that range.',
+        content: '"Find Potential Pairings" searches your own animals with recorded genetic codes and lists every sire/dam pair that could produce the target outcome. Results are grouped into collapsible sections - High (>50%), Medium (10–50%), and Low (<10%) probability - each showing a count of how many pairings fall in that range.',
       },
       {
         stepNumber: 4,
@@ -1592,7 +1597,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Reading an expanded outcome card',
-        content: 'Expanding a card reveals the Sire Genotype and Dam Genotype in full — every locus each parent carries, in bold wherever that locus is one of the ones responsible for the target outcome, so you can see exactly which genes make that pairing likely to work.',
+        content: 'Expanding a card reveals the Sire Genotype and Dam Genotype in full - every locus each parent carries, in bold wherever that locus is one of the ones responsible for the target outcome, so you can see exactly which genes make that pairing likely to work.',
       },
     ],
   },
@@ -1609,12 +1614,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Direct vs. Full mode',
-        content: '"Direct Lines" shows the focus animal\'s direct ancestors and offspring, plus its siblings, aunts, and uncles. Clicking any animal node in the tree opens that animal\'s own record — handy for jumping straight to a relative instead of searching for it separately.',
+        content: '"Direct Lines" shows the focus animal\'s direct ancestors and offspring, plus its siblings, aunts, and uncles. Clicking any animal node in the tree opens that animal\'s own record - handy for jumping straight to a relative instead of searching for it separately.',
       },
       {
         stepNumber: 3,
         title: 'What the Full graph shows',
-        content: 'Switching to "Full Graph" expands the tree to every related animal of the same species it can trace a connection to — not just the direct line, but siblings\' other litters, cousins, and further branches of the family. It can take a moment to load on a large pedigree since it\'s tracing many more connections at once.',
+        content: 'Switching to "Full Graph" expands the tree to every related animal of the same species it can trace a connection to - not just the direct line, but siblings\' other litters, cousins, and further branches of the family. It can take a moment to load on a large pedigree since it\'s tracing many more connections at once.',
       },
     ],
   },
@@ -1626,22 +1631,22 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Budget Tracker overview',
-        content: 'The currency selector at the top changes the symbol shown across the whole page — it doesn\'t convert any values, just how they\'re displayed. "Add Transaction" is where every sale, purchase, expense, or income entry starts.',
+        content: 'The currency selector at the top changes the symbol shown across the whole page - it doesn\'t convert any values, just how they\'re displayed. "Add Transaction" is where every sale, purchase, expense, or income entry starts.',
       },
       {
         stepNumber: 2,
         title: 'Choosing a transaction type',
-        content: '"Add Transaction" first asks what kind you\'re logging: Animal Sale, Animal Purchase, Expense, or Income. These are manual log entries only — they don\'t transfer ownership. To actually transfer an animal to another user, use that animal\'s own "Transfer" button instead.',
+        content: '"Add Transaction" first asks what kind you\'re logging: Animal Sale, Animal Purchase, Expense, or Income. These are manual log entries only - they don\'t transfer ownership. To actually transfer an animal to another user, use that animal\'s own "Transfer" button instead.',
       },
       {
         stepNumber: 3,
         title: 'Logging an Animal Sale',
-        content: 'Fields: Date, optional Price, an optional link to one of your animals (filter by species, then search by name/ID), a Buyer name, and optional Notes. If you link one of your own animals, saving asks whether to also mark it Rehomed and archive it — logging the sale alone doesn\'t change the animal\'s own status or move it out of your main list automatically.',
+        content: 'Fields: Date, optional Price, an optional link to one of your animals (filter by species, then search by name/ID), a Buyer name, and optional Notes. If you link one of your own animals, saving asks whether to also mark it Rehomed and archive it - logging the sale alone doesn\'t change the animal\'s own status or move it out of your main list automatically.',
       },
       {
         stepNumber: 4,
         title: 'Logging an Animal Purchase',
-        content: 'Same fields as a Sale — Date, optional Price, an optional link to one of your animals, and Notes — but with a Seller name instead of a Buyer, and no follow-up prompt afterward.',
+        content: 'Same fields as a Sale - Date, optional Price, an optional link to one of your animals, and Notes - but with a Seller name instead of a Buyer, and no follow-up prompt afterward.',
       },
       {
         stepNumber: 5,
@@ -1651,7 +1656,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 6,
         title: 'Reading your totals',
-        content: 'The summary cards above the list show Total Sales, Total Purchases, Net Profit/Loss (green if positive, orange if a loss), and Average Sale (total sales ÷ number of animals sold) — all recalculated instantly as your search/type/year filters below change.',
+        content: 'The summary cards above the list show Total Sales, Total Purchases, Net Profit/Loss (green if positive, orange if a loss), and Average Sale (total sales ÷ number of animals sold) - all recalculated instantly as your search/type/year filters below change.',
       },
       {
         stepNumber: 7,
@@ -1678,7 +1683,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Adding a supply item',
-        content: '"Add Item" asks for a Name, Category (Food, Bedding, Medication, or Other), Current Stock + Unit (e.g. bags, kg), Cost per unit, and a reorder threshold. For the Food category specifically, you can check "This is a feeder animal" to add Feeder Type (e.g. Mice, Crickets) and Size (e.g. Pinky, Adult) fields — useful for tracking feeder colonies alongside regular supplies. You can also set an optional Reorder Schedule (a repeat frequency in days/weeks/months) for items ordered on a timer rather than by stock count.',
+        content: '"Add Item" asks for a Name, Category (Food, Bedding, Medication, or Other), Current Stock + Unit (e.g. bags, kg), Cost per unit, and a reorder threshold. For the Food category specifically, you can check "This is a feeder animal" to add Feeder Type (e.g. Mice, Crickets) and Size (e.g. Pinky, Adult) fields, useful for tracking feeder colonies alongside regular supplies. You can also set an optional Reorder Schedule (a repeat frequency in days/weeks/months) for items ordered on a timer rather than by stock count.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Stock amount and feeding portion are separate',
+        content: 'Current Stock is the amount you have on hand. To record an animal\'s usual portion, open that animal\'s edit form and add the food under Routine Care > Nutrition, with its own quantity and unit. When you record a feeding, that assigned supply and portion are prefilled when they match the inventory item. Stock is only reduced if you turn on "Deduct from stock" in the feeding modal.',
       },
     ],
   },
@@ -1712,7 +1722,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Acting on a notification',
-        content: 'Transfer and view-only requests get full Accept/Decline buttons. Breeder, parent (sire/dam), and link requests only show Reject/Acknowledge instead — that\'s because the assignment is applied automatically as soon as the request is sent, so there\'s nothing to "accept". Rejecting one of these is what actually undoes it, clearing the breeder or sire/dam link back off the animal; Acknowledge just clears it from your pending list and leaves the assignment as-is.',
+        content: 'Transfer and view-only requests get full Accept/Decline buttons. Breeder, parent (sire/dam), and link requests only show Reject/Acknowledge instead - that\'s because the assignment is applied automatically as soon as the request is sent, so there\'s nothing to "accept". Rejecting one of these is what actually undoes it, clearing the breeder or sire/dam link back off the animal; Acknowledge just clears it from your pending list and leaves the assignment as-is.',
       },
     ],
   },
@@ -1724,7 +1734,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'What the ticker banner is',
-        content: 'A scrolling banner can appear just below the header on any page — showing unread messages, unread notifications, moderator warnings/notices, and any overdue care or breeding alerts you\'ve opted into. It stays hidden entirely when there\'s nothing to report.',
+        content: 'A scrolling banner can appear just below the header on any page - showing unread messages, unread notifications, moderator warnings/notices, and any overdue care or breeding alerts you\'ve opted into. It stays hidden entirely when there\'s nothing to report.',
       },
       {
         stepNumber: 2,
@@ -1734,7 +1744,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Choosing which care alerts appear',
-        content: 'The optional categories — Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays — are turned on or off from the "Alerts" button on the My Animals dashboard. That same setting controls both the dashboard\'s own alert list and this banner.',
+        content: 'The optional categories - Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays - are turned on or off from the "Alerts" button on the My Animals dashboard. That same setting controls both the dashboard\'s own alert list and this banner.',
       },
     ],
   },
@@ -1746,7 +1756,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Reaching the developer directly',
-        content: 'Pick a category, then describe a bug, suggest a feature, or share general feedback — this goes straight to the developer, not to other users.',
+        content: 'Pick a category, then describe a bug, suggest a feature, or share general feedback - this goes straight to the developer, not to other users.',
       },
       {
         stepNumber: 2,

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Download } from 'lucide-react';
 import { ANDROID_PLAY_STORE_URL } from '../utils/appDownloads';
 import { openExternalLink } from '../utils/externalLink';
 
@@ -7,10 +6,14 @@ const GooglePlayButton = ({ className = '' }) => (
     <button
         type="button"
         onClick={() => openExternalLink(ANDROID_PLAY_STORE_URL)}
-        className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#16823b] px-4 py-3 font-semibold text-white transition hover:bg-[#116c31] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${className}`}
+        aria-label="Get it on Google Play"
+        className={`mx-auto block aspect-[239/71] w-full max-w-[320px] overflow-hidden rounded-xl transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${className}`}
     >
-        <Download size={18} />
-        Get the Android app on Google Play
+        <img
+            src="/GetItOnGooglePlay_Badge_Web_color_English.png"
+            alt="Get it on Google Play"
+            className="block h-full w-full"
+        />
     </button>
 );
 
