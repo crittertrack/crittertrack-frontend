@@ -1,4 +1,3 @@
-// Tutorial lessons content is being reworked — rebuilt one lesson at a time.
 import ANDROID_APK_URL from '../utils/appDownloads';
 
 const GETTING_STARTED_LESSONS = [
@@ -20,7 +19,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Tools menu',
-        content: 'The Tools dropdown holds: Tutorials (this page), Offspring Calculator, COI Calculator, Target Outcome Calculator, and Family Tree Explorer.',
+        content: 'The Tools dropdown holds the Offspring Calculator, COI Calculator, Target Outcome Calculator, and Family Tree Explorer. Open the Help Center from your profile menu.',
       },
       {
         stepNumber: 4,
@@ -35,12 +34,12 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Your profile avatar',
-        content: 'Click your avatar (top-right corner) to open a menu with Profile, Report an Issue and Logout.',
+        content: 'Click your avatar (top-right corner) to open a menu with Profile, Help Center, Report an Issue and Logout.',
       },
       {
         stepNumber: 7,
         title: 'Info buttons',
-        content: 'Look for a small ⓘ icon near a page\'s title — click it for a quick contextual hint about that page, including a link to a related tutorial like this one when available.',
+        content: 'Look for a small ⓘ icon near a page\'s title for a quick contextual hint. When a related guide is available, follow its link to open that article in the Help Center.',
       },
     ],
   },
@@ -120,13 +119,11 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Withdrawing a pending transfer',
         content: 'While a transfer is pending, that same header button becomes a "Withdraw" action (shown in red) so you can cancel it before the recipient responds.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 5,
         title: 'Returning an animal to its original breeder',
         content: 'If you\'re ever on the receiving end of a transfer, a "Return to original breeder" button (amber) appears in that animal\'s header, letting you hand it straight back whenever you want.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 6,
@@ -149,7 +146,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 1,
         title: 'Getting to Settings',
         content: 'Click your avatar (top-right) → Profile to view your own public profile, then click the "Profile Settings" button (gear icon) to open Settings.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 2,
@@ -292,7 +288,6 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 5,
         title: 'Tracking growth over time',
         content: 'A "Current Measurements" summary always shows the most recent values. Once you\'ve logged 2+ weight entries, a Weight Growth Curve chart appears automatically — hover any point to see its exact date/weight/notes. You can switch Weight and Length units anytime (g/kg/lb/oz, cm/m/in/ft), and delete any past entry from the Measurements list with the trash icon.',
-        screenshotCount: 2,
       },
     ],
   },
@@ -325,7 +320,6 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 5,
         title: 'Preventive Care',
         content: 'Log Vaccinations, Deworming, and Parasite Control treatments, each with a date and notes. For recurring prevention (e.g. monthly flea/tick treatment), use "Prevention Schedule" to set a treatment name, start date, and repeat interval — this creates a recurring reminder rather than a one-time record.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 6,
@@ -336,7 +330,6 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 7,
         title: 'Procedures, Labs & Vet Visits',
         content: 'Medical Procedures and Lab Results are both simple dated entries with a name/test and notes or result. Veterinary Care holds your Primary Veterinarian\'s name plus a running log of Veterinary Visits (date, reason, notes) — useful for a quick history without digging through the Timeline tab.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 8,
@@ -354,13 +347,11 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 1,
         title: 'Nutrition',
         content: 'Set a Feeding Schedule with "Feed Every (hours)" — type a value or click a quick preset chip (6h, 8h, 12h, 24h, 48h, 72h, 1wk); Last Fed is read-only here and only updates when you log a "Fed" action in the Feeding & Care tab. This schedule is what drives that animal\'s entry in the Feeding & Care management view, showing you exactly when it\'s next due to be fed. For Diet and Supplements, choose "Manual Entry" to type a name (and dosage, for supplements) yourself, or "From Supplies" to search and add items straight from your own tracked Supplies inventory — either way you can add multiple and remove any with its trash icon. Round it out with free-text Portion Size, Feeding Method, Feeding Location, Water Access, and Feeding Pace & Behavior Notes.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 2,
         title: 'Enclosure Assignment',
         content: 'Click "Search & Assign Enclosure" to open the enclosure picker. Once assigned, the enclosure\'s card shows its photo, occupancy (current/capacity), dimensions, purpose, type, temperature/humidity ranges, lighting, bedding, and enrichment at a glance — click the unlink icon to unassign without deleting the enclosure itself.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 3,
@@ -371,19 +362,16 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 4,
         title: 'Environment Needs',
         content: 'Free-text fields for anything about the animal\'s surroundings that isn\'t tied to the enclosure record itself: Lighting Type & Schedule, Noise Level Tolerance & Sound Preferences/Triggers, and Enrichment Needs & Schedule/Frequency.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 5,
         title: 'Grooming & Coat Care',
         content: 'Covers General Grooming Needs & Shedding Level, Brushing & Bathing Frequency (plus Coat/Feather/Scale Care Notes), and Specialized Care like Nail/Claw/Hoof, Beak/Hoof/Scale, Skin & Ear, and Dental care requirements. Most of these have their own optional recurring schedule ("Every N days") — set the frequency here, then mark each one done from the Feeding & Care management view, which is also where its "last done" date will show up.',
-        screenshotCount: 3,
       },
       {
         stepNumber: 6,
         title: 'Special Requirements & Preferences',
         content: 'Dietary Requirements & Restrictions and Dietary Preferences cover food-specific notes (allergies, favorite treats, refusals). Special Care Needs and Special Observations (each with their own optional recurring schedule) are for anything else worth tracking on a schedule — medication timing quirks, molting isolation, heat lamp requirements. Additional Special Requirements is a catch-all free-text box for anything that doesn\'t fit elsewhere.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 7,
@@ -416,25 +404,21 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 4,
         title: 'Known Issues & Safety Concerns',
         content: 'Five focused notes fields: Behavioral Issues (e.g. resource guarding, separation anxiety), Bite History, Reactivity & Triggers (thresholds and management strategies), Escape & Flight Risk (a Risk Level dropdown from No Risk to Critical, plus Escape Methods & Flight Triggers notes), and Stereotypic & Stress Behaviors (repetitive behaviors like pacing or feather plucking, plus general stress indicators).',
-        screenshotCount: 2,
       },
       {
         stepNumber: 5,
         title: 'Training Schedules',
         content: 'Optional recurring schedules ("Every N days") for Daily Exercise, Crate/Litter/Leash/Free-Flight Training, Working Role Training, Behavioral Issue Training, Reactivity Training, and Flight Risk Training. Set the frequency here, then mark sessions done from the Feeding & Care management view, where these all cluster together and show their "last done" date.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 6,
         title: 'Temperament Assessment (1-5 Scale)',
         content: 'Five slider-based ratings for a quick numeric snapshot: Aggression Level (with Triggers & Types notes), Fear/Anxiety Level (with Specific Fears & Coping Mechanisms notes), Boldness/Exploratory Level, Sociability Level, and Independence Level. Each slider runs 1-5 with the meaning of each end labeled underneath.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 7,
         title: 'Specialized Behavioral Traits',
         content: 'Deeper traits for animals where they matter: Prey Drive & Hunting Behavior (level dropdown plus notes), Feeding Behavior (Food Aggression Level, Eating Speed, and Food Preferences/Pickiness notes), Bonding & Attachment Style (Attachment Type dropdown plus Bonding Behavior notes, species-conditional), and Sensory Sensitivities (Noise/Touch/Light sensitivity dropdowns plus general notes).',
-        screenshotCount: 2,
       },
     ],
   },
@@ -472,7 +456,6 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 6,
         title: 'Reproductive Health & Delivery',
         content: 'Reproductive Health & Procedures covers Artificial Reproduction Method (AI, Embryo Transfer, In Vitro), Last Reproductive Intervention Date, a "Dependent Care Required" checkbox for species that need parental care, and a free-text Reproductive Health Notes box for clearances/restrictions. Delivery & Breeding Health tracks Last Delivery Date, Delivery Method, Reproductive Complications, and (species-conditional) Reproductive Clearances.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 7,
@@ -495,7 +478,6 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 2,
         title: 'Linking a CritterTrack ancestor',
         content: 'Click a slot and search to open the search modal — it can match one of your own animals or any other public animal on the site, and automatically filters to the correct gender for that slot (e.g. only males for a Sire slot). Once linked, the slot shows that animal\'s photo, name, variety, and CTC ID; click "Unlink" to remove the connection without deleting anything.',
-        screenshotCount: 3,
       },
       {
         stepNumber: 3,
@@ -572,19 +554,16 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 2,
         title: 'Show & Performance',
         content: 'Add structured Show Events with Date, Show Name, Title Earned, Judge Name, Score/Placement, and Judge Comments — each becomes its own removable entry. Below that, a set of legacy free-text fields (Show Titles, Working Titles, Show Ratings & Placements, Judge Comments & Evaluations, Performance Scores & Assessments) remain for backward compatibility with older/imported data.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 3,
         title: 'Sale & Purchase',
         content: 'Purchase side: Purchase Date, Purchase Price + Currency, Seller Name, and Seller Contact Info (click "Select Contact" to reuse the same Assign modal from the Dashboard tab — Search User / Select Contact / Manual Entry). Sale side mirrors it with Sale Date, Sale Price + Currency, Buyer Name, and Buyer Contact Info. Below that: Breeding/Show/Export Rights and Stud Services Allowed dropdowns, plus free-text Resale Restrictions and Breeder Buyback Clause.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 4,
         title: 'Legal & Documentation',
         content: 'Free-text fields for License Number & Jurisdiction, Insurance, Legal Status, and Breeding/Export Restrictions. "Upload Document" accepts PDF, DOC, DOCX, or Pages files up to 10MB — useful for registration papers, contracts, or health certificates. Uploaded documents show as a clickable list (opens in a new tab) with a trash icon to remove any of them.',
-        screenshotCount: 2,
       },
     ],
   },
@@ -617,7 +596,6 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 5,
         title: 'Pedigree Certificates',
         content: 'On the read-only Pedigree tab, "Open Horizontal Certificate" and "Open Vertical Certificate" generate a formatted, printable/shareable pedigree chart spanning several generations, built from your real linked ancestors and laid out differently from the simple ancestor list shown underneath. A generation slider (1–4) controls how many ancestor rows are shown, and a "Customise" button opens a panel with six controls: Top-right title, Bottom-left text, Font colour, Border colour, Background colour, and Background image. The three colour pickers each pair a swatch with a text box, so you can click to choose or type a hex code directly. For the background image, pick any image from your device — it is automatically downscaled before being stored, so a large photo won\'t bloat your browser storage — and a "Remove" link clears it again. These preferences are saved in your browser and reused for every certificate you open afterward, so you only set them up once. The "Breeder" and "Current Owner" shown on the certificate are looked up automatically: Breeder comes from the animal\'s linked breeder account if one is set, falling back to the free-text "Manual Breeder Name" if not; "Current Owner" only appears at all when the animal\'s current owner differs from that original breeder (e.g. after a transfer or sale) — if the two are the same person, only "Breeder" is shown. Use "Download PDF" once images have finished loading to save or share the finished certificate.',
-        screenshotCount: 3,
       },
     ],
   },
@@ -733,7 +711,6 @@ const ANIMAL_LIST_TOUR_LESSONS = [
         stepNumber: 1,
         title: 'Creating a collection',
         content: 'Switch to the Collections view and click "Manage Collections" to open the manager. Type a name in the "New collection name…" box and click Create. Click the small icon button next to the name box (or next to an existing collection\'s name) to open a picker with preset colors and a curated set of icons — your choice shows up in the collection\'s section header and in the "Add to collection" menu, making it easier to tell collections apart at a glance.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 2,
@@ -887,7 +864,6 @@ const ANIMAL_LIST_TOUR_LESSONS = [
         stepNumber: 2,
         title: 'Marking a feeding',
         content: 'Click "Fed" to open the Record Feeding modal: optionally pick a Food/Supply item, toggle "Deduct from stock" and enter a quantity to draw it down from that supply\'s inventory automatically, and add any notes. "Skip" (only shown once a feeding is overdue) just logs a skipped feeding without opening the modal.',
-        screenshotCount: 2,
       },
       {
         stepNumber: 3,
@@ -940,7 +916,6 @@ const ANIMAL_LIST_TOUR_LESSONS = [
         stepNumber: 5,
         title: 'The Alerts dropdown',
         content: 'The "Alerts On/Off" button (bell icon) in the dashboard row opens a checklist of categories — Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays — controlling which of these show up in the notification ticker at the very top of every page, not just this one.',
-        screenshotCount: 2,
       },
     ],
   },
@@ -1300,7 +1275,6 @@ const LITTER_MANAGEMENT_LESSONS = [
         stepNumber: 7,
         title: 'Notes and photos',
         content: 'Notes is a free-text field for anything worth remembering about the litter. Up to 5 photos can be attached (PNG/JPEG, 500 KB max each) — hover a thumbnail to delete it, and in the expanded card view you can click any photo for a fullscreen lightbox with a download button.',
-        screenshotCount: 2,
       },
     ],
   },
@@ -1403,12 +1377,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'From the Play Store (recommended)',
-        content: 'Sign in to crittertrack.net on your phone\'s browser, tap the Android app option on the login screen, and follow the Play Store link. Play Store installs and updates the app for you automatically, so this is the easiest route and the one that keeps you on the newest version. If the app is in closed testing, you need to join the tester list first and wait up to 24 hours for Google to add your Google account email.',
+        content: 'Sign in to crittertrack.net on your phone\'s browser and tap "Get the Android app on Google Play" on the login screen. Play Store installs and updates the app for you automatically, so this is the easiest route and keeps you on the newest version.',
       },
       {
         stepNumber: 2,
         title: 'From a direct APK file',
-        content: 'If you\'d rather not use the Play Store, an APK file can be downloaded using the button below and installed directly. It\'s the same app with the same features and the same account — it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you\'d rather sideload than join a testing track. Note that installing outside the Play Store means updates are entirely manual: you\'ll need to download and install each new version yourself, and you\'ll want to keep an eye on which version you\'re on.',
+        content: 'If you\'d rather not use the Play Store, an APK file can be downloaded using the button below and installed directly. It\'s the same app with the same features and the same account — it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Note that installing outside the Play Store means updates are entirely manual: you\'ll need to download and install each new version yourself, and you\'ll want to keep an eye on which version you\'re on.',
         link: {
           label: 'Download the Android APK',
           url: ANDROID_APK_URL,
@@ -1587,7 +1561,6 @@ const MORE_PAGES_LESSONS = [
         stepNumber: 1,
         title: 'Testing a hypothetical pairing',
         content: 'Filter by species, then choose a sire and dam to calculate the predicted Coefficient of Inbreeding for their potential offspring, based on shared ancestors. This is separate from the actual COI shown automatically on an already-linked animal\'s own Dashboard — use this calculator to test a pairing before it happens.',
-        screenshotCount: 2,
       },
     ],
   },

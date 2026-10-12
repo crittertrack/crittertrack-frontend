@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, X, GraduationCap } from 'lucide-react';
+import { Info, X, BookOpen } from 'lucide-react';
 
 // Small page-header "info" button — click to reveal a short contextual hint popover,
 // click outside (or the X) to close it. Reused across page headers app-wide.
@@ -8,8 +8,8 @@ import { Info, X, GraduationCap } from 'lucide-react';
 // sit near the start of a header row — right-aligning it would push it off-screen.
 // variant="light" is for use on colored/gradient headers (e.g. white text) where the
 // default muted-gray trigger icon wouldn't have enough contrast.
-// lessonId (optional) links to a matching lesson id in tutorialLessonsNew.js — shows a
-// "View related tutorial" action that jumps straight to it on the Tutorials page.
+// lessonId (optional) links to a matching legacy lesson id — shows a related Help Center
+// action that resolves to its canonical article.
 const InfoButton = ({ children, title, align = 'left', variant = 'default', className = '', lessonId }) => {
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
@@ -28,7 +28,7 @@ const InfoButton = ({ children, title, align = 'left', variant = 'default', clas
 
     const goToLesson = () => {
         setOpen(false);
-        navigate(`/tutorials?lesson=${encodeURIComponent(lessonId)}`);
+        navigate(`/help?lesson=${encodeURIComponent(lessonId)}`);
     };
 
     return (
@@ -64,8 +64,8 @@ const InfoButton = ({ children, title, align = 'left', variant = 'default', clas
                             onClick={goToLesson}
                             className="mt-2.5 pt-2 border-t border-gray-100 dark:border-dark-border w-full flex items-center gap-1.5 text-xs font-semibold text-primary-dark dark:text-dark-primary hover:underline"
                         >
-                            <GraduationCap size={14} />
-                            View related tutorial
+                            <BookOpen size={14} />
+                            View related help article
                         </button>
                     )}
                 </div>

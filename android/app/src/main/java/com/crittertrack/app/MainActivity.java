@@ -2,8 +2,17 @@ package com.crittertrack.app;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
+import androidx.core.graphics.Insets;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -17,7 +26,32 @@ public class MainActivity extends BridgeActivity {
         // swapped, so any WebView layout gap would keep showing a slice of the splash
         // image underneath. Swap to the plain no-actionbar theme now that splash is set up.
         setTheme(R.style.AppTheme_NoActionBar);
+        Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.setBackgroundDrawableResource(R.color.colorPrimary);
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
         super.onCreate(savedInstanceState);
+        WindowInsetsControllerCompat insetsController =
+                WindowCompat.getInsetsController(window, window.getDecorView());
+        insetsController.setAppearanceLightStatusBars(true);
+        insetsController.setAppearanceLightNavigationBars(true);
+
+        View content = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
+            Insets safeInsets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()
+                            | WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(safeInsets.left, safeInsets.top,
+                    safeInsets.right, safeInsets.bottom);
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(content);
+
         // The theme's windowActionBar/windowNoTitle items alone weren't suppressing it —
         // uiautomator confirmed a live android:id/action_bar_container (the raw PLATFORM
         // action bar, not AppCompat's) showing the app title text overlapping the WebView.

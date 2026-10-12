@@ -2093,7 +2093,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
                             <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                                 {editingLitter ? 'Edit Litter' : 'Create New Litter'}
-                                {/* No lessonId — this is an open, unsaved form, so no "View related tutorial" nav-away link. */}
+                                {/* No lessonId: this is an open, unsaved form, so there's no nav-away help link. */}
                                 <InfoButton title="Recording Birth Details">
                                     <p>Birth Date, Litter Size (by sex), and Notes here create a real Litter record — this is what counts toward pedigrees, offspring links, and COI, unlike a manual pedigree-only note.</p>
                                 </InfoButton>
@@ -3152,7 +3152,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                             <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                                 <Heart size={18} className="text-indigo-500" />
                                 {editingMatingId ? 'Edit Planned Mating' : 'Record Planned Mating'}
-                                {/* No lessonId — this is an open, unsaved form, so no "View related tutorial" nav-away link. */}
+                                {/* No lessonId: this is an open, unsaved form, so there's no nav-away help link. */}
                                 <InfoButton title="Recording a Planned Mating">
                                     <p>Pick a Sire and Dam to start tracking a pairing — status (Mated, Pregnant, Born) is updated later by editing this same entry as things progress.</p>
                                 </InfoButton>

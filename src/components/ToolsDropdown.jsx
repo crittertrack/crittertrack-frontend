@@ -1,13 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Calculator, Dna, BookOpen, Target, TreeDeciduous } from 'lucide-react';
+import { Calculator, Dna, Target, TreeDeciduous } from 'lucide-react';
 
 const toolLinks = [
-  {
-    href: '/tutorials',
-    label: 'Tutorials',
-    icon: <BookOpen size={16} className="mr-2" />,
-  },
   {
     href: '/calculator',
     label: 'Offspring Calculator',

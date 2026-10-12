@@ -3922,8 +3922,8 @@ const AnimalFormModalV2 = ({
                             {formTitle}
                             {ANIMAL_FORM_TAB_INFO[activeTab] && (
                                 // No lessonId here on purpose — this is an open, unsaved edit form, and the
-                                // tutorial's "View related tutorial" link would navigate away via react-router
-                                // and abandon in-progress edits. The read-only view modals link to the lesson instead.
+                                // Help Center link would navigate away via react-router and abandon in-progress edits.
+                                // The read-only view modals can link to the related article instead.
                                 <InfoButton title={ANIMAL_FORM_TAB_INFO[activeTab].title} className="ml-2">
                                     <p>{ANIMAL_FORM_TAB_INFO[activeTab].body}</p>
                                 </InfoButton>

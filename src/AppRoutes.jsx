@@ -18,7 +18,7 @@ const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').t
 const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesManager })));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 
-const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
+const HelpCenterPage = lazy(() => import('./components/tools/HelpCenterPage'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
 const LiteNotificationsPage = lazy(() => import('./components/Notifications/LiteNotificationsPage'));
@@ -617,8 +617,9 @@ export function AppRoutes({
         )
       } />
 
-      {/* Tutorials Page */}
-      <Route path="/tutorials" element={<TutorialsPage />} />
+      {/* Help Center; keep the old path available for existing bookmarks and contextual links. */}
+      <Route path="/help" element={<HelpCenterPage />} />
+      <Route path="/tutorials" element={<HelpCenterPage />} />
 
       {/* Family Tree Page */}
       <Route path="/pedigree" element={

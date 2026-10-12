@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare, Loader2, GraduationCap } from 'lucide-react';
+import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare, Loader2, BookOpen } from 'lucide-react';
 
 const WelcomeGuideModal = ({ onClose }) => {
     const [isClosing, setIsClosing] = useState(false);
@@ -23,16 +23,16 @@ const WelcomeGuideModal = ({ onClose }) => {
         } catch (error) {
             console.error('Error closing welcome modal:', error);
         }
-        navigate(lessonId ? `/tutorials?lesson=${encodeURIComponent(lessonId)}` : '/tutorials');
+        navigate(lessonId ? `/help?lesson=${encodeURIComponent(lessonId)}` : '/help');
     };
 
-    const TutorialLink = ({ lessonId, children }) => (
+    const HelpArticleLink = ({ lessonId, children }) => (
         <button
             type="button"
             onClick={() => goToLesson(lessonId)}
             className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-accent dark:text-dark-accent hover:underline"
         >
-            <GraduationCap size={13} />
+            <BookOpen size={13} />
             {children}
         </button>
     );
@@ -51,7 +51,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                     {/* Intro */}
                     <div className="bg-blue-50 dark:bg-dark-info-blue/20 border-l-4 border-blue-500 dark:border-dark-info-blue p-2.5 sm:p-3 rounded">
                         <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary">
-                            A few essentials worth knowing right away — each links to a full tutorial lesson if you want more detail.
+                            A few essentials worth knowing right away — each links to the related Help Center article.
                         </p>
                     </div>
 
@@ -68,7 +68,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                     Your <strong>Personal Name</strong> is public by default; your <strong>Breeder Name</strong> is hidden until you turn it on. Both can be shown, hidden, or fully anonymized in Settings → Profile.
                                 </p>
-                                <TutorialLink lessonId="settings-profile">Settings: Profile</TutorialLink>
+                                <HelpArticleLink lessonId="settings-profile">Settings: Profile</HelpArticleLink>
                             </div>
                         </div>
 
@@ -83,7 +83,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                     Set your <strong>Country</strong> in Settings so buyers can filter the Marketplace and Breeder Directory by location.
                                 </p>
-                                <TutorialLink lessonId="settings-profile">Settings: Profile</TutorialLink>
+                                <HelpArticleLink lessonId="settings-profile">Settings: Profile</HelpArticleLink>
                             </div>
                         </div>
 
@@ -98,7 +98,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                     The <strong>Community</strong> page shows recently active/new breeders, news, and your favorited animals & breeders in one place.
                                 </p>
-                                <TutorialLink lessonId="community-overview">Tour the Community page</TutorialLink>
+                                <HelpArticleLink lessonId="community-overview">Community guide</HelpArticleLink>
                             </div>
                         </div>
 
@@ -113,7 +113,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                     In Settings → Directory, mark yourself Active/Retired Breeder per species you own to appear in the public <strong>Breeders</strong> registry.
                                 </p>
-                                <TutorialLink lessonId="settings-directory">Settings: Directory</TutorialLink>
+                                <HelpArticleLink lessonId="settings-directory">Settings: Directory</HelpArticleLink>
                             </div>
                         </div>
                     </div>
@@ -127,25 +127,25 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-0.5 sm:mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                                    Step-by-step tutorials are available anytime — open the <strong>Tools</strong> menu (wrench icon) in the top nav and select <strong>Tutorials</strong>.
+                                    Help articles are available anytime — open the profile menu and select <strong>Help Center</strong>.
                                 </p>
-                                <TutorialLink>Browse all tutorial lessons</TutorialLink>
+                                <HelpArticleLink>Browse all help articles</HelpArticleLink>
                             </div>
                         </div>
                     </div>
 
-                    {/* Beta Testing Message */}
+                    {/* Feedback and Support */}
                     <div className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-dark-accent-purple-bg dark:to-dark-accent-purple-bg border border-purple-300 dark:border-dark-accent-purple/40 rounded-lg p-2.5 sm:p-3">
                         <div className="flex gap-2 sm:gap-3 items-start">
                             <div className="flex-shrink-0">
                                 <MessageSquare className="text-purple-600 dark:text-dark-accent-purple" size={18} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-0.5 sm:mb-1">🚀 Beta Testing & Your Feedback</h3>
+                                <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-0.5 sm:mb-1">Feedback and Support</h3>
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                                    CritterTrack is in <strong>beta</strong>. Click your <strong>profile image circle</strong> and select <strong>Report an Issue</strong> to report bugs or suggest improvements.
+                                    Click your <strong>profile image</strong> and select <strong>Report an Issue</strong> to report a problem or suggest an improvement.
                                 </p>
-                                <TutorialLink lessonId="report-an-issue">How to report an issue</TutorialLink>
+                                <HelpArticleLink lessonId="report-an-issue">How to report an issue</HelpArticleLink>
                             </div>
                         </div>
                     </div>

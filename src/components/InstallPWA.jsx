@@ -8,7 +8,7 @@ const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent
 // The browser only ever fires 'beforeinstallprompt' ONCE per page load (Windows/Android
 // Chrome/Edge — iOS Safari never fires it at all, see isIOSSafari below). Whichever listener
 // happens to be attached at that moment gets it. InstallPWA is mounted in multiple places
-// (the login screen's AuthView, and AndroidBetaBanner once logged in) at different times, so
+// (for example, the login screen and an authenticated-page banner) at different times, so
 // capturing the event into per-component React state meant only whichever instance existed
 // at that single moment could ever use it — e.g. the login screen captured it, then unmounted
 // on login, and the banner's later instance had nothing to trigger, so its button/link just
@@ -23,8 +23,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   promptListeners.forEach((listener) => listener(e));
 });
 
-// compact=true renders just a small text link (e.g. for use inline in banners like
-// AndroidBetaBanner) instead of the full button+info-toggle UI shown on the login screen —
+// compact=true renders just a small text link instead of the full button+info-toggle UI —
 // both share the exact same install/guide logic below, just different trigger markup.
 const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web)', compactClassName = '' }) => {
   const [installPrompt, setInstallPrompt] = useState(capturedInstallPrompt);

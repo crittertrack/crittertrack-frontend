@@ -16,14 +16,12 @@ import { getActionLabel, getActionColor } from './utils/activityUtils';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import MaintenanceMode from './MaintenanceMode';
-import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
 import BetaSurveyModal from './components/BetaSurveyModal';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import AuthView from './components/Auth/AuthView';
 import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationBar from './components/Notifications/NotificationBar';
-import AndroidBetaBanner from './components/AndroidBetaBanner';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -1861,7 +1859,7 @@ const App = () => {
                             <span>Community</span>
                         </button>
                         <div className="relative" ref={toolsMenuDesktopRef}>
-                            <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-1" />
                                 <span>Tools</span>
                             </button>
@@ -1940,10 +1938,14 @@ const App = () => {
                                 }
                             </button>
                             {showProfileMenu && (
-                                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
+                                <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
                                     <button onClick={() => { if (userProfile?.id_public) { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); } }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
+                                    </button>
+                                    <button onClick={() => { navigate('/help'); setShowProfileMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <BookOpen size={15} /> Help Center
                                     </button>
                                     {true && (
                                         <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
@@ -2044,10 +2046,14 @@ const App = () => {
                                     }
                                 </button>
                                 {showProfileMenu && (
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
+                                    <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
                                         <button onClick={() => { if (userProfile?.id_public) { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); } }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
+                                        </button>
+                                        <button onClick={() => { navigate('/help'); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <BookOpen size={15} /> Help Center
                                         </button>
                                         {true && (
                                             <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
@@ -2112,7 +2118,7 @@ const App = () => {
                             <span>Community</span>
                         </button>
                         <div className="relative" ref={toolsMenuMobileRef}>
-                            <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-0.5" />
                                 <span>Tools</span>
                             </button>
@@ -2134,8 +2140,6 @@ const App = () => {
                     )}
                 </div>
             </header>
-
-            <AndroidBetaBanner userProfile={userProfile} setUserProfile={setUserProfile} />
 
             {/* Unified alerts/notifications banner — unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}
