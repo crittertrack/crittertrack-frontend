@@ -113,8 +113,10 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
     <>
       <div className="mx-auto w-full max-w-[320px]">
         <button
+          type="button"
           onClick={handleInstallClick}
           disabled={!installPrompt && !isIOSSafari}
+          aria-label="Add CritterTrack to your home screen"
           className={`flex aspect-[239/71] w-full items-center justify-center gap-2 rounded-xl border-2 px-4 text-center font-semibold transition duration-150 ${
             installPrompt || isIOSSafari
               ? 'bg-purple-100 hover:bg-purple-200 text-purple-800 border-purple-300 cursor-pointer'
@@ -122,7 +124,10 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
           }`}
         >
           <Download size={20} className="flex-shrink-0" />
-          Install CritterTrack (Web)
+          <span className="flex min-w-0 flex-col items-start leading-tight">
+            <span className="text-sm font-bold">Add to Home</span>
+            <span className="mt-1 text-[10px] font-normal">Create an icon that opens like an app</span>
+          </span>
         </button>
         <div className="mt-1 flex justify-end">
           <button
