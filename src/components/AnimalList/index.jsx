@@ -38,7 +38,8 @@ import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLine
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
-import { getAssignedDietSupplyQuantity, getDietSupplyLabels } from '../../utils/feedingDisplay';
+import { getAssignedDietSupply, getDietSupplyLabels } from '../../utils/feedingDisplay';
+import { convertFeedingQuantity, getCanonicalFeedingUnit, getCompatibleFeedingUnits } from '../../utils/feedingUnits';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
@@ -845,7 +846,8 @@ const AnimalList = ({
         }
     }, [routerLocation.state, routerLocation.pathname, routerNavigate]);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
-    const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
+    const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', qtyUnit: '', notes: '', updateStock: false });
+    const [feedingSubmitting, setFeedingSubmitting] = useState(false);
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
@@ -4476,19 +4478,43 @@ useEffect(() => {
 
         const handleMarkFed = (e, animal) => {
             e.stopPropagation();
-            // Open the feeding modal; form resets each time
-            setFeedingForm({ supplyId: '', qty: '1', notes: '', updateStock: true });
+            const assignedSupply = supplies.find(supply =>
+                supply.category === 'Food' && getAssignedDietSupply(animal.dietSupplies, supply)
+            );
+            const assignment = assignedSupply ? getAssignedDietSupply(animal.dietSupplies, assignedSupply) : null;
+            const inventoryUnit = getCanonicalFeedingUnit(assignedSupply?.unit);
+            const assignedUnit = getCanonicalFeedingUnit(assignment?.unit || assignedSupply?.unit);
+            const assignedQuantity = Number(assignment?.quantity);
+            const canUseAssignedQuantity = Number.isFinite(assignedQuantity) && assignedQuantity > 0 &&
+                convertFeedingQuantity(1, assignedUnit, inventoryUnit || assignedUnit) != null;
+            setFeedingForm({
+                supplyId: assignedSupply?._id || '',
+                qty: canUseAssignedQuantity && Number.isFinite(assignedQuantity) && assignedQuantity > 0 ? String(assignedQuantity) : '1',
+                qtyUnit: canUseAssignedQuantity || !inventoryUnit ? assignedUnit : inventoryUnit,
+                notes: '',
+                updateStock: false,
+            });
             setFeedingModal({ animal });
         };
 
         const handleFeedingSubmit = async () => {
             if (!feedingModal) return;
             const { animal } = feedingModal;
+            const selectedSupply = supplies.find(supply => supply._id === feedingForm.supplyId);
+            const enteredQuantity = Number(feedingForm.qty);
+            const inventoryUnit = selectedSupply?.unit || feedingForm.qtyUnit;
+            const qtyUsed = feedingForm.updateStock
+                ? convertFeedingQuantity(enteredQuantity, feedingForm.qtyUnit, inventoryUnit)
+                : 0;
+            if (feedingForm.supplyId && feedingForm.updateStock && (!selectedSupply || !feedingForm.qtyUnit || !Number.isFinite(enteredQuantity) || enteredQuantity <= 0 || qtyUsed == null)) {
+                showModalMessage('Invalid feeding quantity', 'Choose a positive quantity and a unit compatible with the selected supply before deducting stock.');
+                return;
+            }
             const now = new Date().toISOString();
             const prevLastFedDate = animal.lastFedDate;
             const supplyIdUsed = (feedingForm.supplyId && feedingForm.updateStock) ? feedingForm.supplyId : null;
-            const qtyUsed = supplyIdUsed ? (Number(feedingForm.qty) || 1) : 0;
-            setFeedingModal(null);
+            const previousSupplyUnit = selectedSupply?.unit || '';
+            setFeedingSubmitting(true);
             // Optimistic: update lastFedDate immediately
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: now } }));
@@ -4496,13 +4522,19 @@ useEffect(() => {
                 const body = {};
                 if (feedingForm.supplyId) {
                     body.supplyId = feedingForm.supplyId;
-                    if (feedingForm.updateStock) body.quantity = Number(feedingForm.qty) || 1;
+                    if (feedingForm.updateStock) {
+                        body.quantity = enteredQuantity;
+                        body.quantityUnit = feedingForm.qtyUnit;
+                    }
                 }
                 if (feedingForm.notes.trim()) body.notes = feedingForm.notes.trim();
                 const res = await apiClient.post(`/animals/${animal.id_public}/feeding`, body);
+                setFeedingModal(null);
                 // Update supply stock in state
-                if (res.data.supply) setSupplies(prev => prev.map(s => s._id === res.data.supply._id ? res.data.supply : s));
-                const supplyItem = feedingForm.supplyId ? supplies.find(s => s._id === feedingForm.supplyId) : null;
+                if (res.data.supply) {
+                    setSupplies(prev => prev.map(s => s._id === res.data.supply._id ? res.data.supply : s));
+                    window.dispatchEvent(new CustomEvent('supply-updated', { detail: res.data.supply }));
+                }
                 const postFeedStock = res.data.supply?.currentStock;
                 setTaskUndoStack(prev => ({ ...prev, [`feed_${animal.id_public}`]: async () => {
                     setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: prevLastFedDate } : a));
@@ -4511,14 +4543,19 @@ useEffect(() => {
                         .catch(err => console.error('Revert feeding date failed:', err));
                     if (supplyIdUsed && qtyUsed > 0 && postFeedStock != null) {
                         try {
-                            const res2 = await apiClient.patch(`/supplies/${supplyIdUsed}`, { currentStock: postFeedStock + qtyUsed });
+                            const res2 = await apiClient.patch(`/supplies/${supplyIdUsed}`, { currentStock: postFeedStock + qtyUsed, unit: previousSupplyUnit });
                             setSupplies(p => p.map(s => s._id === supplyIdUsed ? res2.data : s));
+                            window.dispatchEvent(new CustomEvent('supply-updated', { detail: res2.data }));
                         } catch (err) { console.error('Revert feeding stock failed:', err); }
                     }
                 } }));
             } catch (err) {
                 console.error('Feeding failed:', err);
                 setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: animal.lastFedDate } }));
+                showModalMessage('Feeding failed', err.response?.data?.message || 'Could not record feeding. Please try again.');
+            } finally {
+                setFeedingSubmitting(false);
             }
         };
 
@@ -5280,11 +5317,17 @@ useEffect(() => {
                                     value={feedingForm.supplyId}
                                     onChange={e => {
                                         const selectedSupply = supplies.find(supply => supply._id === e.target.value);
-                                        const assignedQuantity = getAssignedDietSupplyQuantity(feedingModal.animal.dietSupplies, selectedSupply);
+                                        const assignment = getAssignedDietSupply(feedingModal.animal.dietSupplies, selectedSupply);
+                                        const supplyUnit = getCanonicalFeedingUnit(selectedSupply?.unit);
+                                        const assignedUnit = getCanonicalFeedingUnit(assignment?.unit || selectedSupply?.unit);
+                                        const assignedQuantity = Number(assignment?.quantity);
+                                        const canUseAssignedQuantity = Number.isFinite(assignedQuantity) && assignedQuantity > 0 &&
+                                            convertFeedingQuantity(1, assignedUnit, supplyUnit || assignedUnit) != null;
                                         setFeedingForm(f => ({
                                             ...f,
                                             supplyId: e.target.value,
-                                            qty: assignedQuantity != null ? String(assignedQuantity) : '1',
+                                            qty: canUseAssignedQuantity ? String(assignedQuantity) : '1',
+                                            qtyUnit: canUseAssignedQuantity || !supplyUnit ? assignedUnit : supplyUnit,
                                         }));
                                     }}
                                     className="w-full border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
@@ -5304,7 +5347,15 @@ useEffect(() => {
                             {/* Quantity + stock deduction ? only shown when a supply is selected */}
                             {feedingForm.supplyId && (() => {
                                 const s = supplies.find(x => x._id === feedingForm.supplyId);
-                                const stockAfter = Math.round((s.currentStock - Number(feedingForm.qty || 0)) * 100) / 100;
+                                const stockUnit = getCanonicalFeedingUnit(s?.unit);
+                                const quantityInStockUnits = convertFeedingQuantity(feedingForm.qty, feedingForm.qtyUnit, stockUnit || feedingForm.qtyUnit);
+                                const stockAfter = quantityInStockUnits == null
+                                    ? null
+                                    : Math.max(0, Math.round((s.currentStock - quantityInStockUnits) * 1000000) / 1000000);
+                                const unitOptions = getCompatibleFeedingUnits(s?.unit);
+                                const assignedSupply = getAssignedDietSupply(feedingModal.animal.dietSupplies, s);
+                                const hasUnitMismatch = Boolean(assignedSupply?.unit) &&
+                                    convertFeedingQuantity(1, assignedSupply.unit, stockUnit || assignedSupply.unit) == null;
                                 return (
                                     <div className="space-y-2">
                                         {/* Deduct from stock toggle */}
@@ -5321,14 +5372,27 @@ useEffect(() => {
                                         {/* Quantity input ? only when deducting */}
                                         {feedingForm.updateStock && (
                                             <div className="space-y-1">
-                                                <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Quantity{s?.unit ? ` (${s.unit})` : ''}</label>
-                                                <input
-                                                    type="number" min="0.1" step="0.1"
-                                                    value={feedingForm.qty}
-                                                    onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
-                                                    className="w-full border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                                                />
-                                                {s && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Stock after: {s.currentStock} ? <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600 dark:text-dark-text-secondary'}>{stockAfter} {s.unit}</span></p>}
+                                                <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Quantity</label>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="number" min="0.000001" step="any"
+                                                        value={feedingForm.qty}
+                                                        onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
+                                                        className="min-w-0 flex-1 border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                                    />
+                                                    <select
+                                                        aria-label="Feeding quantity unit"
+                                                        value={feedingForm.qtyUnit}
+                                                        onChange={e => setFeedingForm(f => ({ ...f, qtyUnit: e.target.value }))}
+                                                        className="w-28 border border-gray-300 dark:border-dark-border rounded-lg px-2 py-2 text-sm bg-white dark:bg-dark-card-bg"
+                                                    >
+                                                        {!feedingForm.qtyUnit && <option value="">Unit</option>}
+                                                        {unitOptions.map(unit => <option key={unit} value={unit}>{unit}</option>)}
+                                                    </select>
+                                                </div>
+                                                {!s?.unit && <p className="text-xs text-amber-600 dark:text-amber-400">Inventory has no unit set. The selected unit will be used for this stock amount.</p>}
+                                                {hasUnitMismatch && <p className="text-xs text-amber-600 dark:text-amber-400">The assigned diet unit differs from this supply's inventory unit. Update either unit to a compatible measure.</p>}
+                                                {s && stockAfter != null && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Stock after: {s.currentStock} {s.unit} − {quantityInStockUnits} {s.unit || feedingForm.qtyUnit} = <span className={quantityInStockUnits > s.currentStock ? 'text-amber-600 font-medium' : 'text-gray-600 dark:text-dark-text-secondary'}>{stockAfter} {s.unit || feedingForm.qtyUnit}</span></p>}
                                             </div>
                                         )}
                                     </div>
@@ -5350,9 +5414,10 @@ useEffect(() => {
                             <div className="flex gap-2 pt-1">
                                 <button
                                     onClick={handleFeedingSubmit}
+                                    disabled={feedingSubmitting}
                                     className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition"
                                 >
-                                    Record Feeding
+                                    {feedingSubmitting ? 'Recording…' : 'Record Feeding'}
                                 </button>
                                 <button
                                     onClick={() => setFeedingModal(null)}

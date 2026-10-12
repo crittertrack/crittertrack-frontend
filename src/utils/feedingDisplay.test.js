@@ -1,4 +1,4 @@
-import { getAssignedDietSupplyQuantity, getDietSupplyLabels } from './feedingDisplay';
+import { getAssignedDietSupply, getAssignedDietSupplyQuantity, getDietSupplyLabels } from './feedingDisplay';
 
 test('formats assigned diet supplies with quantities', () => {
   expect(getDietSupplyLabels([
@@ -24,4 +24,11 @@ test('prefills feeding quantity from the assigned supply by id or name', () => {
     '[{"name":"Fresh greens","quantity":40}]',
     { _id: 'supply-2', name: 'Fresh greens' },
   )).toBe(40);
+});
+
+test('returns the assigned supply including its quantity unit', () => {
+  expect(getAssignedDietSupply(
+    [{ supplyId: 'supply-1', name: 'Pellets', quantity: 100, unit: 'g' }],
+    { _id: 'supply-1', name: 'Pellets' },
+  )).toEqual({ supplyId: 'supply-1', name: 'Pellets', quantity: 100, unit: 'g' });
 });

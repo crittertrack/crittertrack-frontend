@@ -10,17 +10,21 @@ const parseDietSupplies = (dietSupplies) => {
     return Array.isArray(supplies) ? supplies : null;
 };
 
-export const getAssignedDietSupplyQuantity = (dietSupplies, inventorySupply) => {
+export const getAssignedDietSupply = (dietSupplies, inventorySupply) => {
     const supplies = parseDietSupplies(dietSupplies);
     if (!supplies || !inventorySupply) return undefined;
-    const assigned = supplies.find((supply) => {
+    return supplies.find((supply) => {
         if (!supply || typeof supply !== 'object') return false;
-        if (supply.id && inventorySupply._id && String(supply.id) === String(inventorySupply._id)) return true;
+        const supplyId = supply.id || supply.supplyId;
+        if (supplyId && inventorySupply._id && String(supplyId) === String(inventorySupply._id)) return true;
         return typeof supply.name === 'string' &&
             typeof inventorySupply.name === 'string' &&
             supply.name.toLowerCase() === inventorySupply.name.toLowerCase();
     });
-    return assigned?.quantity;
+};
+
+export const getAssignedDietSupplyQuantity = (dietSupplies, inventorySupply) => {
+    return getAssignedDietSupply(dietSupplies, inventorySupply)?.quantity;
 };
 
 export const getDietSupplyLabels = (dietSupplies) => {

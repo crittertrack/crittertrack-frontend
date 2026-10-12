@@ -61,6 +61,18 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
+    useEffect(() => {
+        const handleSupplyUpdated = (event) => {
+            const updatedSupply = event.detail;
+            if (!updatedSupply?._id) return;
+            setSupplies(previous => previous.map(supply =>
+                supply._id === updatedSupply._id ? { ...supply, ...updatedSupply } : supply
+            ));
+        };
+        window.addEventListener('supply-updated', handleSupplyUpdated);
+        return () => window.removeEventListener('supply-updated', handleSupplyUpdated);
+    }, []);
+
     const CATEGORIES = ['Food', 'Bedding', 'Medication', 'Other'];
     const CATEGORY_COLORS = {
         Food: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
