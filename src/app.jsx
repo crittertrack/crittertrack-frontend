@@ -221,6 +221,7 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
 const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const isWebBrowser = Capacitor.getPlatform() === 'web';
     const [adminAccountMode, setAdminAccountMode] = useState(() => {
         try {
             return JSON.parse(sessionStorage.getItem('adminAccountSession') || 'null');
@@ -1308,13 +1309,13 @@ const App = () => {
         const canAutoOpen = authToken && userProfile &&
             userProfile.betaSurveyFollowupStatus === 'pending' &&
             hasSeenWelcomeGuide && !showWelcomeGuide && !adminAccountMode &&
-            !Capacitor.isNativePlatform();
+            isWebBrowser;
 
         if (canAutoOpen && !hasAutoOpenedFollowupRef.current) {
             hasAutoOpenedFollowupRef.current = true;
             setShowBetaSurvey(true);
         }
-    }, [authToken, userProfile, hasSeenWelcomeGuide, showWelcomeGuide, adminAccountMode]);
+    }, [authToken, userProfile, hasSeenWelcomeGuide, showWelcomeGuide, adminAccountMode, isWebBrowser]);
 
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
@@ -1976,7 +1977,7 @@ const App = () => {
             )}
 
             {/* Beta Feedback Survey Modal */}
-            {showBetaSurvey && !showWelcomeGuide && !Capacitor.isNativePlatform() && (
+            {showBetaSurvey && !showWelcomeGuide && isWebBrowser && (
                 <BetaSurveyModal
                     onClose={handleCloseBetaSurvey}
                 />
@@ -2034,7 +2035,7 @@ const App = () => {
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
                     betaSurveyStatus={userProfile?.betaSurveyFollowupStatus}
-                    onReopenBetaSurvey={!Capacitor.isNativePlatform() ? () => setShowBetaSurvey(true) : undefined}
+                    onReopenBetaSurvey={isWebBrowser ? () => setShowBetaSurvey(true) : undefined}
                 />
             </div>
 
