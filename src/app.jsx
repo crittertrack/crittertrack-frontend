@@ -1722,60 +1722,59 @@ const App = () => {
                         </div>
                         <div className="rounded-xl bg-white p-6 shadow-lg dark:bg-dark-card-bg">
                             <h3 className="mb-4 text-xl font-bold text-gray-800 dark:text-dark-text">What's Included</h3>
-                        
-                        <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Cat size={18} className="text-primary-dark dark:text-dark-primary" />
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                        <Cat size={18} className="text-primary-dark dark:text-dark-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Animal Management</h4>
+                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Track your animals with detailed records, photos, and genetic codes</p>
                                     </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Animal Management</h4>
-                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Track your animals with detailed records, photos, and genetic codes</p>
+                                
+                                <div className="flex items-start gap-3">
+                                    <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                        <BookOpen size={18} className="text-primary-dark dark:text-dark-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Litter Tracking</h4>
+                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Manage breeding pairs, track litters, and monitor offspring</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start gap-3">
+                                    <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                        <Calculator size={18} className="text-primary-dark dark:text-dark-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Genetics Calculator</h4>
+                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Predict offspring outcomes and calculate inbreeding coefficients</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start gap-3">
+                                    <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                        <DollarSign size={18} className="text-primary-dark dark:text-dark-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Budget Tracking</h4>
+                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Monitor expenses and income for your breeding program</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start gap-3">
+                                    <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                        <Search size={18} className="text-primary-dark dark:text-dark-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Public Profiles</h4>
+                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Share your animals and connect with other breeders</p>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
-                                    <BookOpen size={18} className="text-primary-dark dark:text-dark-primary" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Litter Tracking</h4>
-                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Manage breeding pairs, track litters, and monitor offspring</p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Calculator size={18} className="text-primary-dark dark:text-dark-primary" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Genetics Calculator</h4>
-                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Predict offspring outcomes and calculate inbreeding coefficients</p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
-                                    <DollarSign size={18} className="text-primary-dark dark:text-dark-primary" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Budget Tracking</h4>
-                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Monitor expenses and income for your breeding program</p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Search size={18} className="text-primary-dark dark:text-dark-primary" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Public Profiles</h4>
-                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Share your animals and connect with other breeders</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
+                </div>
                 </div>
                 
                 {showTermsModal && <TermsOfService onClose={() => setShowTermsModal(false)} />}
