@@ -1793,7 +1793,7 @@ const App = () => {
             )}
 
             {/* Beta Feedback Survey Modal */}
-            {showBetaSurvey && !showWelcomeGuide && (
+            {showBetaSurvey && !showWelcomeGuide && !Capacitor.isNativePlatform() && (
                 <BetaSurveyModal
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
@@ -1853,7 +1853,7 @@ const App = () => {
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
                     betaSurveyStatus={userProfile?.betaSurveyStatus}
-                    onReopenBetaSurvey={() => setShowBetaSurvey(true)}
+                    onReopenBetaSurvey={!Capacitor.isNativePlatform() ? () => setShowBetaSurvey(true) : undefined}
                 />
             </div>
 

@@ -5,13 +5,6 @@ const config: CapacitorConfig = {
   appName: 'CritterTrack',
   webDir: 'build',
   plugins: {
-    // Prevent the WebView from rendering under the status bar (default edge-to-edge
-    // behavior on newer Android versions clips/overlaps the app header otherwise).
-    StatusBar: {
-      overlaysWebView: false,
-      backgroundColor: '#9ED4E0',
-      style: 'DARK',
-    },
     // Resize the webview body (not the whole native window) when the keyboard opens, so
     // fixed-position footers/action bars move above the keyboard instead of being covered.
     Keyboard: {

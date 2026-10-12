@@ -29,7 +29,6 @@ public class MainActivity extends BridgeActivity {
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
         window.setBackgroundDrawableResource(R.color.colorPrimary);
-        window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(Color.TRANSPARENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setStatusBarContrastEnforced(false);
