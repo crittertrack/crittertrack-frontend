@@ -261,8 +261,8 @@ const UserManagementPanel = ({ onStartAccountMode }) => {
 
     const handleStartAccountMode = async () => {
         const reason = accountSessionReason.trim();
-        if (reason.length < 10 || reason.length > 1000) {
-            setAccountSessionError('Provide a reason between 10 and 1000 characters.');
+        if (reason.length < 1 || reason.length > 1000) {
+            setAccountSessionError('Provide a reason between 1 and 1000 characters.');
             return;
         }
         if (!onStartAccountMode) {
@@ -601,7 +601,7 @@ const UserManagementPanel = ({ onStartAccountMode }) => {
                             disabled={startingAccountSession}
                             placeholder="Describe the support issue or account check."
                         />
-                        <p className="text-xs text-gray-600">{accountSessionReason.trim().length}/1000 characters (minimum 10)</p>
+                        <p className="text-xs text-gray-600">{accountSessionReason.trim().length}/1000 characters (minimum 1)</p>
                         {accountSessionError && <p className="error-message">{accountSessionError}</p>}
                         <div className="flex justify-end gap-2">
                             <button className="rounded-md border px-4 py-2 text-sm" type="button" onClick={() => setAccountSessionUser(null)} disabled={startingAccountSession}>Cancel</button>
