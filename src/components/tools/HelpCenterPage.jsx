@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, BookOpen, Bug, CalendarDays, Dna, HeartPulse,
-  HeartHandshake, PawPrint, Search, Settings, Sparkles, Sprout
+  ArrowLeft, ArrowRight, BookOpen, Bug, CalendarDays, ChevronRight,
+  Dna, HeartPulse, HeartHandshake, Lightbulb, Link2, PawPrint, Search, Settings,
+  Sparkles, Sprout, ThumbsDown, ThumbsUp
 } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
 
@@ -141,169 +142,77 @@ const getReadTime = (lesson) => {
   return Math.max(1, Math.ceil(words / 180));
 };
 
-const ARTICLE_GROUPS = [
-  {
-    id: 'getting-around',
-    title: 'Getting around CritterTrack',
-    description: 'Learn the main navigation, account menu and the differences between Full and Lite mode.',
-    topicId: 'getting-started',
-    keywords: ['navigation', 'menu', 'lite', 'full mode', 'mobile'],
-    lessonIds: ['getting-started-layout-tour', 'lite-mode'],
-  },
-  {
-    id: 'animal-records',
-    title: 'Create and manage animal records',
-    description: 'Add an animal, edit its record, and understand the identification, pedigree, gallery and record sections.',
-    topicId: 'animals',
-    keywords: ['add animal', 'edit animal', 'species', 'identification', 'pedigree', 'gallery', 'archive', 'duplicates', 'ownership'],
-    lessonIds: [
-      'getting-started-animals',
-      'animal-tab-dashboard',
-      'animal-tab-identification',
-      'animal-tab-pedigree',
-      'animal-tab-gallery',
-      'animal-tab-timeline',
-      'animal-tab-records',
-      'animal-tab-view-only',
-      'animal-tab-customize',
-      'getting-started-transfers',
-      'getting-started-list-basics',
-      'animal-list-overview',
-      'animal-collections',
-      'archive-overview',
-    ],
-  },
-  {
-    id: 'genetics-guide',
-    title: 'Genetics and appearance',
-    description: 'Record appearance and genetic traits, then explore inheritance and possible breeding outcomes.',
-    topicId: 'genetics',
-    keywords: ['traits', 'genetic code', 'inheritance', 'offspring', 'COI', 'inbreeding', 'target outcome', 'family tree'],
-    lessonIds: [
-      'animal-tab-appearance',
-      'offspring-calculator',
-      'coi-calculator',
-      'target-outcome-calculator',
-      'family-tree-explorer',
-    ],
-  },
-  {
-    id: 'daily-care',
-    title: 'Health, feeding and enclosure care',
-    description: 'Keep health and treatment records, assign care tasks and supplies, and record feeding with the right quantity.',
-    topicId: 'care',
-    keywords: ['health', 'treatment', 'medication', 'quarantine', 'feeding', 'supplies', 'quantity', 'units', 'enclosure', 'care tasks'],
-    lessonIds: [
-      'animal-tab-health',
-      'animal-tab-care',
-      'health-tracking',
-      'feeding-care',
-      'enclosures-overview',
-    ],
-  },
-  {
-    id: 'breeding-lifecycle',
-    title: 'Breeding, litters and weaning',
-    description: 'Follow the breeding lifecycle from mating and pregnancy through birth, offspring and weaning.',
-    topicId: 'breeding',
-    keywords: ['mating', 'pregnancy', 'birth', 'litter', 'offspring', 'weaned', 'reproduction'],
-    lessonIds: [
-      'animal-tab-breeding',
-      'reproduction-tracking',
-      'litter-management',
-      'litter-planned-mating',
-      'litter-status-transitions',
-      'litter-birth-details',
-      'litter-offspring-management',
-      'litter-expanded-view',
-    ],
-  },
-  {
-    id: 'profile-and-settings',
-    title: 'Profile, privacy and account settings',
-    description: 'Set up your public profile and manage visibility, directory preferences, data and account options.',
-    topicId: 'profile',
-    keywords: ['profile', 'privacy', 'directory', 'ratings', 'breeding lines', 'dropdown lists', 'import', 'export', 'account'],
-    lessonIds: [
-      'getting-started-account-settings',
-      'profile-view',
-      'settings-profile',
-      'settings-info-adoption',
-      'settings-directory',
-      'settings-ratings',
-      'settings-breeding-lines',
-      'settings-appearance-options',
-      'settings-data-portability',
-      'settings-account',
-    ],
-  },
-  {
-    id: 'contacts',
-    title: 'Manage contacts',
-    description: 'Add a contact, keep their details current, and review animals associated with them.',
-    topicId: 'community',
-    keywords: ['contacts', 'breeder', 'keeper', 'owned animals', 'bred animals'],
-    lessonIds: ['contacts-overview', 'contacts-add', 'contacts-detail', 'contacts-edit'],
-  },
-  {
-    id: 'notifications',
-    title: 'Notifications and reminders',
-    description: 'Understand the notification center, alert ticker and reminders linked to current animal or litter records.',
-    topicId: 'planning',
-    keywords: ['notification', 'alert', 'reminder', 'ticker', 'unread'],
-    lessonIds: ['notifications-overview', 'alert-ticker-overview'],
-  },
-];
+const HOW_TO_ADD_ANIMAL = {
+  id: 'how-to-add-an-animal',
+  title: 'How to add an animal',
+  description: 'Add a new animal to your collection, including identification, appearance, genetics and care details.',
+  topicId: 'animals',
+  prerequisites: [
+    'Know which species to select. You can add a custom species if it is not listed.',
+    'Have the animal’s name ready. Identification numbers and other details can be added now or later.',
+  ],
+  steps: [
+    {
+      title: 'Open Animal Management',
+      content: 'Go to My Animals and select “Add Animal.” On desktop, use the Add Animal button above the list; on mobile, use the + action beside the page title.',
+    },
+    {
+      title: 'Choose the species and enter the details',
+      content: 'Search or filter the species list, then select the animal’s species. In the new animal form, enter a name. You can add identification, appearance, genetics, measurements and other information now, or save those details for later.',
+    },
+    {
+      title: 'Save the animal',
+      content: 'Select Save at the bottom of the form. The new record is added to My Animals, where you can open it to view or edit its details.',
+    },
+  ],
+  tips: [
+    'Choose the species carefully: the species is locked after the animal is created.',
+    'You do not need to complete every form section before saving. Add more information by editing the record later.',
+    'Public visibility and the Owned/Unowned label are separate settings; review each one when you are ready.',
+  ],
+  nextSteps: [
+    { articleId: 'animal-tab-pedigree', label: 'Add parents and link a pedigree' },
+    { articleId: 'animal-tab-health', label: 'Record health information' },
+    { articleId: 'animal-tab-timeline', label: 'Explore the animal’s timeline' },
+  ],
+  relatedArticleIds: [
+    'animal-tab-identification',
+    'animal-tab-pedigree',
+    'animal-list-overview',
+    'animal-collections',
+  ],
+};
 
 const LESSONS = TUTORIAL_LESSONS.sections.flatMap(section =>
   section.lessons.map(lesson => ({ ...lesson, sourceSectionId: section.id }))
 );
-const LESSONS_BY_ID = new Map(LESSONS.map(lesson => [lesson.id, lesson]));
-const GROUPED_LESSON_IDS = new Set(ARTICLE_GROUPS.flatMap(group => group.lessonIds));
-const LEGACY_LESSON_TO_ARTICLE = new Map();
+const LEGACY_LESSON_TO_ARTICLE = new Map(LESSONS.map(lesson => [
+  lesson.id,
+  lesson.id === 'getting-started-animals' ? HOW_TO_ADD_ANIMAL.id : lesson.id,
+]));
 
 const ARTICLES = [
-  ...ARTICLE_GROUPS.map(group => {
-    const lessons = group.lessonIds.map(id => LESSONS_BY_ID.get(id)).filter(Boolean);
-    const topicTitle = TOPICS.find(topic => topic.id === group.topicId)?.title || 'Planning & Tools';
-    const words = [
-      group.description,
-      ...lessons.flatMap(lesson => [lesson.description, ...lesson.steps.map(step => step.content)]),
-    ].join(' ').trim().split(/\s+/).filter(Boolean).length;
-
-    lessons.forEach(lesson => LEGACY_LESSON_TO_ARTICLE.set(lesson.id, group.id));
-    return {
-      id: group.id,
-      title: group.title,
-      description: group.description,
-      topicId: group.topicId,
-      topicTitle,
-      keywords: group.keywords,
-      readTime: Math.max(1, Math.ceil(words / 180)),
-      steps: lessons.flatMap(lesson => [
-        { title: lesson.title, content: lesson.description, isSection: true },
-        ...lesson.steps,
-      ]),
-    };
-  }),
-  ...LESSONS.filter(lesson => !GROUPED_LESSON_IDS.has(lesson.id)).map(lesson => {
+  HOW_TO_ADD_ANIMAL,
+  ...LESSONS.filter(lesson => lesson.id !== 'getting-started-animals').map(lesson => {
     const topicId = getTopicId(lesson, lesson.sourceSectionId);
-    LEGACY_LESSON_TO_ARTICLE.set(lesson.id, lesson.id);
     return {
       ...lesson,
       topicId,
       topicTitle: TOPICS.find(topic => topic.id === topicId)?.title || 'Planning & Tools',
-      keywords: [],
       readTime: getReadTime(lesson),
     };
   }),
-];
+].map(article => ({
+  ...article,
+  topicTitle: TOPICS.find(topic => topic.id === article.topicId)?.title || 'Planning & Tools',
+  readTime: article.readTime || getReadTime(article),
+}));
 
 const POPULAR_ARTICLE_IDS = [
-  'animal-records',
-  'breeding-lifecycle',
-  'genetics-guide',
-  'daily-care',
+  'how-to-add-an-animal',
+  'litter-planned-mating',
+  'offspring-calculator',
+  'health-tracking',
 ];
 
 const HelpCenterPage = () => {
@@ -313,11 +222,16 @@ const HelpCenterPage = () => {
   const [selectedArticleId, setSelectedArticleId] = useState(
     LEGACY_LESSON_TO_ARTICLE.get(searchParams.get('lesson') || searchParams.get('article'))
   );
+  const [helpfulVote, setHelpfulVote] = useState(null);
 
   useEffect(() => {
     const articleId = searchParams.get('lesson') || searchParams.get('article');
     setSelectedArticleId(LEGACY_LESSON_TO_ARTICLE.get(articleId) || articleId);
   }, [searchParams]);
+
+  useEffect(() => {
+    setHelpfulVote(null);
+  }, [selectedArticleId]);
 
   const selectedArticle = ARTICLES.find(article => article.id === selectedArticleId);
   const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -328,15 +242,21 @@ const HelpCenterPage = () => {
       article.title,
       article.description,
       article.topicTitle,
-      ...(article.keywords || []),
       ...article.steps.flatMap(step => [step.title, step.content]),
     ].join(' ').toLocaleLowerCase();
     return searchableText.includes(normalizedQuery);
   }), [activeTopicId, normalizedQuery]);
 
   const openArticle = (article) => {
+    if (!article) return;
     setSelectedArticleId(article.id);
     setSearchParams({ lesson: article.id });
+  };
+
+  const openTopic = (topicId) => {
+    setActiveTopicId(topicId);
+    setSelectedArticleId(null);
+    setSearchParams({});
   };
 
   const returnToBrowse = () => {
@@ -393,57 +313,16 @@ const HelpCenterPage = () => {
       </section>
 
       {selectedArticle ? (
-        <article className="px-5 py-6 sm:px-8 sm:py-8">
-          <button
-            type="button"
-            onClick={returnToBrowse}
-            className="mb-5 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-primary-dark transition hover:bg-primary/10 dark:text-dark-primary dark:hover:bg-dark-surface-hover"
-          >
-            <ArrowLeft size={16} />
-            Back to Help Center
-          </button>
-          <div className="mx-auto max-w-3xl">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-primary-dark dark:text-dark-primary">
-              {selectedArticle.topicTitle} · {selectedArticle.readTime} min read
-            </p>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text sm:text-3xl">
-              {selectedArticle.title}
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-gray-600 dark:text-dark-text-secondary">
-              {selectedArticle.description}
-            </p>
-            <div className="mt-7 space-y-4">
-              {selectedArticle.steps.map((step, index) => (
-                <section
-                  key={`${selectedArticle.id}-${index}`}
-                  className={step.isSection
-                    ? 'border-b border-gray-200 pb-2 pt-5 first:pt-0 dark:border-dark-border'
-                    : 'rounded-xl border border-gray-200 bg-gray-50/80 p-4 sm:p-5 dark:border-dark-border dark:bg-dark-surface'}
-                >
-                  <h3 className={step.isSection
-                    ? 'text-lg font-bold text-gray-900 dark:text-dark-text'
-                    : 'font-semibold text-gray-900 dark:text-dark-text'}>
-                    {step.title}
-                  </h3>
-                  <p className={`${step.isSection ? 'text-xs' : 'mt-2 text-sm'} whitespace-pre-line leading-relaxed text-gray-700 dark:text-dark-text-secondary`}>
-                    {step.content}
-                  </p>
-                  {step.link?.url && (
-                    <a
-                      href={step.link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-dark hover:underline dark:text-dark-primary"
-                    >
-                      {step.link.label}
-                      <ArrowRight size={14} />
-                    </a>
-                  )}
-                </section>
-              ))}
-            </div>
-          </div>
-        </article>
+        <ArticleDetail
+          article={selectedArticle}
+          articles={ARTICLES}
+          topics={TOPICS}
+          helpfulVote={helpfulVote}
+          onVote={setHelpfulVote}
+          onBack={returnToBrowse}
+          onSelectArticle={openArticle}
+          onSelectTopic={openTopic}
+        />
       ) : normalizedQuery || activeTopicId ? (
         <section className="px-5 py-6 sm:px-8 sm:py-8">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -510,6 +389,9 @@ const HelpCenterPage = () => {
                   </span>
                   <span className="block font-bold">{title}</span>
                   <span className="mt-1.5 block text-xs leading-relaxed opacity-80">{description}</span>
+                  <span className="mt-2 block text-[11px] font-semibold opacity-70">
+                    {ARTICLES.filter(article => article.topicId === id).length} guides
+                  </span>
                   <ArrowRight size={16} className="mt-3 transition-transform group-hover:translate-x-1" />
                 </button>
               ))}
@@ -552,6 +434,270 @@ const HelpCenterPage = () => {
         </Link>
       </footer>
     </main>
+  );
+};
+
+const ArticleDetail = ({ article, articles, topics, helpfulVote, onVote, onBack, onSelectArticle, onSelectTopic }) => {
+  const topic = topics.find(item => item.id === article.topicId);
+  const relatedArticles = (article.relatedArticleIds || articles
+    .filter(item => item.topicId === article.topicId && item.id !== article.id)
+    .slice(0, 4).map(item => item.id))
+    .map(id => articles.find(item => item.id === id))
+    .filter(Boolean);
+  const topicArticles = articles.filter(item => item.topicId === article.topicId);
+  const sectionLinks = [
+    ...(article.prerequisites?.length ? [{ id: 'before-you-start', label: 'Before you start' }] : []),
+    { id: 'step-by-step-guide', label: 'Step-by-step guide' },
+    ...article.steps.map((step, index) => ({
+      id: `article-step-${index + 1}`,
+      label: step.title,
+    })),
+    ...(article.tips?.length ? [{ id: 'helpful-tips', label: 'Helpful tips' }] : []),
+    ...(article.nextSteps?.length ? [{ id: 'next-steps', label: 'Next steps' }] : []),
+  ];
+
+  return (
+    <div className="grid min-w-0 grid-cols-1 lg:grid-cols-[210px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_220px]">
+      <aside className="hidden border-r border-gray-100 bg-gray-50/70 p-4 dark:border-dark-border dark:bg-dark-surface lg:block">
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-4 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs font-semibold text-gray-600 transition hover:bg-white hover:text-primary-dark dark:text-dark-text-secondary dark:hover:bg-dark-card-bg dark:hover:text-dark-primary"
+        >
+          <ArrowLeft size={15} />
+          Back to Help Center
+        </button>
+        <div className="mb-2 flex items-center gap-2 px-2 text-sm font-bold text-gray-900 dark:text-dark-text">
+          {topic && <topic.Icon size={17} className="text-primary-dark dark:text-dark-primary" />}
+          {topic?.title || article.topicTitle}
+        </div>
+        <nav aria-label={`${topic?.title || 'Help'} articles`} className="space-y-1">
+          {topicArticles.map(item => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => onSelectArticle(item)}
+              aria-current={item.id === article.id ? 'page' : undefined}
+              className={`w-full rounded-lg px-3 py-2 text-left text-xs leading-relaxed transition ${
+                item.id === article.id
+                  ? 'bg-primary/15 font-semibold text-primary-dark dark:bg-dark-primary/15 dark:text-dark-primary'
+                  : 'text-gray-600 hover:bg-white hover:text-gray-900 dark:text-dark-text-secondary dark:hover:bg-dark-card-bg dark:hover:text-dark-text'
+              }`}
+            >
+              {item.title}
+            </button>
+          ))}
+        </nav>
+        <div className="my-4 border-t border-gray-200 dark:border-dark-border" />
+        <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-dark-text-muted">
+          Related topics
+        </p>
+        <nav aria-label="Related topics" className="space-y-1">
+          {topics.filter(item => item.id !== topic?.id).slice(0, 4).map(item => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => onSelectTopic(item.id)}
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-gray-600 transition hover:bg-white hover:text-primary-dark dark:text-dark-text-secondary dark:hover:bg-dark-card-bg dark:hover:text-dark-primary"
+            >
+              <item.Icon size={15} />
+              {item.title}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <article className="min-w-0 px-5 py-6 sm:px-7 sm:py-8">
+        <div className="mb-5 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500 dark:text-dark-text-muted">
+          <button type="button" onClick={onBack} className="hover:text-primary-dark dark:hover:text-dark-primary">Help Center</button>
+          <ChevronRight size={13} />
+          <span>{topic?.title || article.topicTitle}</span>
+          <ChevronRight size={13} />
+          <span className="font-semibold text-primary-dark dark:text-dark-primary">{article.title}</span>
+        </div>
+
+        <div className="mb-6 flex items-start gap-3">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary-dark dark:bg-dark-primary/15 dark:text-dark-primary">
+            {topic ? <topic.Icon size={25} /> : <BookOpen size={25} />}
+          </div>
+          <div className="min-w-0">
+            <p className="mb-1 text-[11px] font-semibold text-gray-500 dark:text-dark-text-muted">
+              {article.readTime} min read
+              <span className="mx-2">·</span>
+              <span className="rounded-full bg-primary/10 px-2 py-1 text-primary-dark dark:bg-dark-primary/10 dark:text-dark-primary">
+                {topic?.title || article.topicTitle}
+              </span>
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-dark-text sm:text-3xl">
+              {article.title}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-dark-text-secondary">
+              {article.description}
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-5 lg:hidden">
+          <label htmlFor="help-topic-article-select" className="mb-1 block text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">
+            More in {topic?.title || article.topicTitle}
+          </label>
+          <select
+            id="help-topic-article-select"
+            value={article.id}
+            onChange={event => {
+              const nextArticle = articles.find(item => item.id === event.target.value);
+              if (nextArticle) onSelectArticle(nextArticle);
+            }}
+            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
+          >
+            {topicArticles.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}
+          </select>
+        </div>
+
+        {article.prerequisites?.length > 0 && (
+          <section id="before-you-start" className="mb-6 scroll-mt-5 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-dark-text">
+              <Lightbulb size={17} className="text-emerald-700 dark:text-emerald-300" />
+              Before you start
+            </h3>
+            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-gray-700 dark:text-dark-text-secondary">
+              {article.prerequisites.map(item => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section id="step-by-step-guide" className="scroll-mt-5">
+          <h3 className="mb-1 text-lg font-bold text-gray-900 dark:text-dark-text">Step-by-step guide</h3>
+          <ol className="divide-y divide-gray-100 dark:divide-dark-border">
+            {article.steps.map((step, index) => (
+              <li id={`article-step-${index + 1}`} key={`${article.id}-${index}`} className="flex scroll-mt-5 gap-3 py-4">
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-xs font-bold text-white shadow-sm">
+                  {index + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-dark-text">{step.title}</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-dark-text-secondary">{step.content}</p>
+                  {step.link?.url && (
+                    <a
+                      href={step.link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-dark hover:underline dark:text-dark-primary"
+                    >
+                      {step.link.label}<ArrowRight size={13} />
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {article.tips?.length > 0 && (
+          <section id="helpful-tips" className="mt-3 scroll-mt-5 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-dark-text">
+              <BookOpen size={16} className="text-emerald-700 dark:text-emerald-300" />
+              Helpful tips
+            </h3>
+            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-gray-700 dark:text-dark-text-secondary">
+              {article.tips.map(item => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {article.nextSteps?.length > 0 && (
+          <section id="next-steps" className="mt-4 scroll-mt-5 rounded-xl border border-indigo-100 bg-indigo-50/70 p-4 dark:border-indigo-900/60 dark:bg-indigo-950/20">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-dark-text">
+              <Link2 size={16} className="text-indigo-700 dark:text-indigo-300" />
+              Next steps
+            </h3>
+            <p className="mt-1 text-xs text-gray-600 dark:text-dark-text-secondary">After you finish this guide, you may want to:</p>
+            <ul className="mt-2 space-y-1.5">
+              {article.nextSteps.map(item => {
+                const nextArticle = articles.find(candidate => candidate.id === item.articleId);
+                return nextArticle ? (
+                  <li key={item.articleId}>
+                    <button
+                      type="button"
+                      onClick={() => onSelectArticle(nextArticle)}
+                      className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
+                    >
+                      <ArrowRight size={13} />{item.label}
+                    </button>
+                  </li>
+                ) : null;
+              })}
+            </ul>
+          </section>
+        )}
+
+        <section className="mt-6 border-t border-gray-100 pt-4 dark:border-dark-border">
+          <p className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Was this article helpful?</p>
+          {helpfulVote && (
+            <p className="mt-2 text-[11px] text-gray-500 dark:text-dark-text-muted">
+              Your response is selected for this visit.
+            </p>
+          )}
+          <div className="mt-2 flex gap-2">
+            <button type="button" aria-pressed={helpfulVote === 'yes'} onClick={() => onVote('yes')} className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${helpfulVote === 'yes' ? 'border-emerald-400 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-gray-200 text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 dark:border-dark-border dark:text-dark-text-secondary dark:hover:bg-emerald-950/20'}`}>
+              <ThumbsUp size={14} /> Yes
+            </button>
+            <button type="button" aria-pressed={helpfulVote === 'no'} onClick={() => onVote('no')} className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${helpfulVote === 'no' ? 'border-emerald-400 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-gray-200 text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 dark:border-dark-border dark:text-dark-text-secondary dark:hover:bg-emerald-950/20'}`}>
+              <ThumbsDown size={14} /> No
+            </button>
+          </div>
+        </section>
+      </article>
+
+      <aside className="hidden border-l border-gray-100 p-4 dark:border-dark-border xl:block">
+        <div className="sticky top-4 space-y-4">
+          <section className="rounded-xl border border-gray-200 p-3 dark:border-dark-border">
+            <h3 className="text-xs font-bold text-gray-900 dark:text-dark-text">In this article</h3>
+            <nav className="mt-2 space-y-1" aria-label="In this article">
+              {sectionLinks.map((item, index) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-gray-700 hover:bg-primary/10 hover:text-primary-dark dark:text-dark-text-secondary dark:hover:bg-dark-primary/10 dark:hover:text-dark-primary"
+                >
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-300">{index + 1}.</span>{item.label}
+                </a>
+              ))}
+            </nav>
+          </section>
+
+          {relatedArticles.length > 0 && (
+            <section className="rounded-xl border border-gray-200 p-3 dark:border-dark-border">
+              <h3 className="flex items-center gap-2 text-xs font-bold text-gray-900 dark:text-dark-text">
+                <BookOpen size={15} /> Related articles
+              </h3>
+              <div className="mt-2 space-y-1">
+                {relatedArticles.map(item => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => onSelectArticle(item)}
+                    className="flex w-full items-center gap-2 rounded-lg px-1.5 py-2 text-left text-[11px] text-gray-700 hover:bg-gray-50 dark:text-dark-text-secondary dark:hover:bg-dark-surface"
+                  >
+                    <BookOpen size={13} className="flex-shrink-0 text-primary-dark dark:text-dark-primary" />
+                    <span className="min-w-0 flex-1">{item.title}</span>
+                    <ChevronRight size={13} />
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/20">
+            <h3 className="text-xs font-bold text-gray-900 dark:text-dark-text">Still need help?</h3>
+            <p className="mt-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">Our support team is here for you.</p>
+            <Link to="/report" className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 dark:text-emerald-200 dark:hover:bg-emerald-900/40">
+              Contact support <ArrowRight size={13} />
+            </Link>
+          </section>
+        </div>
+      </aside>
+    </div>
   );
 };
 

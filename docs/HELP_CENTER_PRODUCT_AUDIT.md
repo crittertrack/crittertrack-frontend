@@ -144,8 +144,15 @@ Existing navigation/access patterns:
 - Search, topic cards, popular guides and article detail are available without screenshots.
 - Popular guides and search/category listings refer to the same article records; no separate
   FAQ copy is maintained.
-- Article prose is still sourced from `tutorialLessonsNew.js` and remains scheduled for
-  content consolidation and accuracy review.
+- Selecting a topic or searching shows individual guide cards; opening one shows that guide's
+  own focused task guide rather than a topic-sized mega-article.
+- Article pages follow a consistent task-guide format: prerequisites, numbered steps, optional
+  helpful tips and next steps, a section/step contents list, related articles, support contact,
+  and a helpfulness selection. Sections are only shown when content exists.
+- “How to add an animal” is the first purpose-written article using that format. Its former
+  lesson ID routes to the new guide. Other existing lessons remain individual text articles
+  until each is deliberately rewritten; recommendations and related links point to existing
+  canonical articles rather than copying answers.
 
 ## Coverage assessment
 
