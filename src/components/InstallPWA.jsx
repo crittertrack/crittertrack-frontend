@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Info, Share, X } from 'lucide-react';
+import { Download, Share, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -29,7 +29,6 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
   const [installPrompt, setInstallPrompt] = useState(capturedInstallPrompt);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -129,23 +128,7 @@ const InstallPWA = ({ compact = false, compactLabel = 'Install CritterTrack (Web
             <span className="mt-1 text-[10px] font-normal">Create an icon that opens like an app</span>
           </span>
         </button>
-        <div className="mt-1 flex justify-end">
-          <button
-            type="button"
-            onClick={() => setShowInfo(prev => !prev)}
-            className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-gray-500 transition hover:text-gray-700 dark:text-dark-text-muted dark:hover:text-dark-text"
-            aria-expanded={showInfo}
-          >
-            <Info size={15} />
-            What does this do?
-          </button>
-        </div>
       </div>
-      {showInfo && (
-        <p className="text-xs text-gray-400 text-center mt-1.5">
-          Adds CritterTrack to your home screen or desktop so it opens like a regular app instead of a browser tab. Once you're using it, your data stays available offline and any changes you make will sync automatically when you're back online.
-        </p>
-      )}
 
       {iosGuideModal}
     </>
