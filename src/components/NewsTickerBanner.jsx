@@ -127,7 +127,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
               className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
             >
               <ClipboardList size={14} className="inline-block mr-1.5 text-orange-300 flex-shrink-0" />
-              Take the Beta Survey
+              Take the follow-up survey
             </button>
             <span className="mx-4">|</span>
           </span>
@@ -139,7 +139,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
               className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
             >
               <ClipboardList size={14} className="inline-block mr-1.5 text-orange-300 flex-shrink-0" />
-              Finish the Beta Survey
+              Finish the follow-up survey
             </button>
             <span className="mx-4">|</span>
           </span>
@@ -151,7 +151,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
               className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
             >
               <ClipboardList size={14} className="inline-block mr-1.5 text-orange-300 flex-shrink-0" />
-              Changed your mind? Click here for the beta survey!
+              Changed your mind? Take the follow-up survey!
             </button>
             <span className="mx-4">|</span>
           </span>

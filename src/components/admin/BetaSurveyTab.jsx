@@ -100,6 +100,7 @@ const ChoiceBreakdownBar = ({ label, items }) => {
 
 const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
     const [view, setView] = useState('global'); // 'global' | 'per-user'
+    const [surveyType, setSurveyType] = useState('followup'); // 'followup' | 'previous'
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [stats, setStats] = useState(null);
@@ -115,7 +116,10 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`${API_BASE_URL}/beta-survey/admin/stats`, { headers });
+            const endpoint = surveyType === 'followup'
+                ? 'followup/stats'
+                : 'stats';
+            const res = await fetch(`${API_BASE_URL}/beta-survey/admin/${endpoint}`, { headers });
             if (!res.ok) throw new Error(`Failed to fetch stats (${res.status})`);
             setStats(await res.json());
         } catch (err) {
@@ -124,13 +128,16 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
         } finally {
             setLoading(false);
         }
-    }, [API_BASE_URL, authToken]);
+    }, [API_BASE_URL, authToken, surveyType]);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`${API_BASE_URL}/beta-survey/admin/users`, { headers });
+            const endpoint = surveyType === 'followup'
+                ? 'followup/users'
+                : 'users';
+            const res = await fetch(`${API_BASE_URL}/beta-survey/admin/${endpoint}`, { headers });
             if (!res.ok) throw new Error(`Failed to fetch users (${res.status})`);
             setUsers(await res.json());
         } catch (err) {
@@ -139,7 +146,7 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
         } finally {
             setLoading(false);
         }
-    }, [API_BASE_URL, authToken]);
+    }, [API_BASE_URL, authToken, surveyType]);
 
     useEffect(() => {
         if (!authToken) return;
@@ -150,10 +157,14 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
     const openUserResponse = async (user) => {
         setSelectedUser(user);
         setSelectedResponse(null);
-        if (user.betaSurveyStatus !== 'completed') return;
+        const statusField = surveyType === 'followup' ? 'betaSurveyFollowupStatus' : 'betaSurveyStatus';
+        if (user[statusField] !== 'completed') return;
         setResponseLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/beta-survey/admin/response/${user.id_public}`, { headers });
+            const endpoint = surveyType === 'followup'
+                ? `followup/response/${user.id_public}`
+                : `response/${user.id_public}`;
+            const res = await fetch(`${API_BASE_URL}/beta-survey/admin/${endpoint}`, { headers });
             if (!res.ok) throw new Error('Failed to fetch response');
             setSelectedResponse(await res.json());
         } catch (err) {
@@ -171,6 +182,14 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
             u.breederName?.toLowerCase().includes(term);
     });
 
+    const changeSurveyType = (type) => {
+        setSurveyType(type);
+        setStats(null);
+        setUsers([]);
+        setSelectedUser(null);
+        setSelectedResponse(null);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
@@ -178,10 +197,28 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                     <ClipboardList size={28} className="text-accent dark:text-dark-accent" />
                     <div>
                         <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Beta Feedback Survey</h2>
-                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary">Review beta wrap-up survey results</p>
+                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary">                        Review {surveyType === 'followup' ? 'follow-up' : 'previous'} beta survey results</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <div className="flex rounded-lg bg-gray-100 p-1 dark:bg-dark-surface">
+                        <button
+                            onClick={() => changeSurveyType('followup')}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                                surveyType === 'followup' ? 'bg-white text-accent shadow dark:bg-dark-card-bg dark:text-dark-accent' : 'text-gray-500 dark:text-dark-text-secondary'
+                            }`}
+                        >
+                            Follow-up
+                        </button>
+                        <button
+                            onClick={() => changeSurveyType('previous')}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                                surveyType === 'previous' ? 'bg-white text-accent shadow dark:bg-dark-card-bg dark:text-dark-accent' : 'text-gray-500 dark:text-dark-text-secondary'
+                            }`}
+                        >
+                            Previous survey
+                        </button>
+                    </div>
                     <div className="flex bg-gray-100 dark:bg-dark-surface rounded-lg p-1">
                         <button
                             onClick={() => setView('global')}
@@ -224,7 +261,7 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                 </div>
             )}
 
-            {!loading && view === 'global' && stats && (
+            {!loading && view === 'global' && surveyType === 'previous' && stats && (
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <StatCard label="Pending" value={stats.funnel.pending} color="yellow" />
@@ -288,6 +325,41 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                 </div>
             )}
 
+            {!loading && view === 'global' && surveyType === 'followup' && stats && (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <StatCard label="Pending" value={stats.funnel.pending} color="yellow" />
+                        <StatCard label="Skipped" value={stats.funnel.skipped} color="blue" />
+                        <StatCard label="Dismissed" value={stats.funnel.dismissed} />
+                        <StatCard label="Completed" value={stats.funnel.completed} color="green" />
+                        <StatCard label="Responses" value={stats.totalResponses} />
+                    </div>
+                    <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-6">
+                        <h4 className="font-bold text-gray-800 dark:text-dark-text mb-4">
+                            Follow-up answers ({stats.responses.length})
+                        </h4>
+                        <div className="space-y-3 max-h-[36rem] overflow-y-auto">
+                            {stats.responses.length === 0 && (
+                                <p className="text-sm text-gray-400 dark:text-dark-text-muted">No follow-up answers yet.</p>
+                            )}
+                            {stats.responses.map(response => (
+                                <article key={response._id} className="rounded-lg border border-gray-100 p-3 dark:border-dark-border">
+                                    <div className="mb-2 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary">
+                                        {response.id_public} · {new Date(response.createdAt).toLocaleDateString()}
+                                    </div>
+                                    <p className="text-sm text-gray-800 dark:text-dark-text"><strong>Hardest area:</strong> {response.difficultArea}</p>
+                                    {response.difficultyType && <p className="text-sm text-gray-800 dark:text-dark-text"><strong>Difficulty:</strong> {response.difficultyType}</p>}
+                                    {response.expectedVsActual && <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-dark-text"><strong>Expected vs. actual:</strong> {response.expectedVsActual}</p>}
+                                    {response.helpfulSupport && <p className="mt-1 text-sm text-gray-700 dark:text-dark-text"><strong>Helpful support:</strong> {response.helpfulSupport}</p>}
+                                    {response.additionalDetail && <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-dark-text"><strong>Additional detail:</strong> {response.additionalDetail}</p>}
+                                    {response.stillHappening && <p className="mt-1 text-sm text-gray-700 dark:text-dark-text"><strong>Still happening:</strong> {response.stillHappening}</p>}
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {!loading && view === 'per-user' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-4">
@@ -323,7 +395,7 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                                                 <div className="text-xs text-gray-400 dark:text-dark-text-muted">{u.id_public}</div>
                                             </td>
                                             <td className="py-2 px-2 text-center">
-                                                <StatusBadge status={u.betaSurveyStatus} />
+                                                <StatusBadge status={surveyType === 'followup' ? u.betaSurveyFollowupStatus : u.betaSurveyStatus} />
                                             </td>
                                         </tr>
                                     ))}
@@ -351,13 +423,25 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                                     </button>
                                 </div>
                                 {responseLoading && <Loader2 size={20} className="animate-spin text-gray-400" />}
-                                {!responseLoading && selectedUser.betaSurveyStatus !== 'completed' && (
+                                {!responseLoading && (surveyType === 'followup' ? selectedUser.betaSurveyFollowupStatus : selectedUser.betaSurveyStatus) !== 'completed' && (
                                     <p className="text-sm text-gray-400 dark:text-dark-text-muted">
-                                        This user hasn't completed the survey (status: {selectedUser.betaSurveyStatus}).
+                                        This user hasn't completed the {surveyType === 'followup' ? 'follow-up' : 'previous'} survey
+                                        (status: {surveyType === 'followup' ? selectedUser.betaSurveyFollowupStatus : selectedUser.betaSurveyStatus}).
                                     </p>
                                 )}
                                 {!responseLoading && selectedResponse && (
                                     <div className="space-y-3 max-h-[28rem] overflow-y-auto">
+                                        {surveyType === 'followup' ? (
+                                            <>
+                                                <p className="text-sm text-gray-800 dark:text-dark-text"><strong>Hardest area:</strong> {selectedResponse.difficultArea}</p>
+                                                {selectedResponse.difficultyType && <p className="text-sm text-gray-800 dark:text-dark-text"><strong>Difficulty:</strong> {selectedResponse.difficultyType}</p>}
+                                                {selectedResponse.expectedVsActual && <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-dark-text"><strong>Expected vs. actual:</strong> {selectedResponse.expectedVsActual}</p>}
+                                                {selectedResponse.helpfulSupport && <p className="text-sm text-gray-700 dark:text-dark-text"><strong>Helpful support:</strong> {selectedResponse.helpfulSupport}</p>}
+                                                {selectedResponse.additionalDetail && <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-dark-text"><strong>Additional detail:</strong> {selectedResponse.additionalDetail}</p>}
+                                                {selectedResponse.stillHappening && <p className="text-sm text-gray-700 dark:text-dark-text"><strong>Still happening:</strong> {selectedResponse.stillHappening}</p>}
+                                            </>
+                                        ) : (
+                                            <>
                                         {[...STAR_QUESTIONS, ...CHOICE_QUESTIONS].map(q => (
                                             <React.Fragment key={q}>
                                                 {selectedResponse[q] != null && !(Array.isArray(selectedResponse[q]) && selectedResponse[q].length === 0) && (
@@ -388,6 +472,8 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                                         )}
                                         {selectedResponse.q15_anythingElse && (
                                             <div className="text-sm"><span className="text-gray-500 dark:text-dark-text-secondary block mb-1">Anything else:</span> {selectedResponse.q15_anythingElse}</div>
+                                        )}
+                                            </>
                                         )}
                                     </div>
                                 )}

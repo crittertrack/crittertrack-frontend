@@ -1477,8 +1477,9 @@ const App = () => {
         }
     };
 
-    const handleCloseBetaSurvey = () => {
+    const handleCloseBetaSurvey = async () => {
         setShowBetaSurvey(false);
+        if (authToken) await fetchUserProfile(authToken);
     };
 
     const handleLoginSuccess = (token, keepSignedIn = false) => {
@@ -1968,8 +1969,6 @@ const App = () => {
             {/* Beta Feedback Survey Modal */}
             {showBetaSurvey && !showWelcomeGuide && !Capacitor.isNativePlatform() && (
                 <BetaSurveyModal
-                    API_BASE_URL={API_BASE_URL}
-                    authToken={authToken}
                     onClose={handleCloseBetaSurvey}
                 />
             )}
@@ -2025,7 +2024,7 @@ const App = () => {
                 <NewsTickerBanner
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
-                    betaSurveyStatus={userProfile?.betaSurveyStatus}
+                    betaSurveyStatus={userProfile?.betaSurveyFollowupStatus}
                     onReopenBetaSurvey={!Capacitor.isNativePlatform() ? () => setShowBetaSurvey(true) : undefined}
                 />
             </div>

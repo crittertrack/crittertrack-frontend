@@ -37,7 +37,7 @@ data rather than empty states.
 ## Beta survey follow-up
 
 - [x] Analyse all beta survey responses.
-- [ ] Build a small final follow-up survey that addresses specific entries from the responses.
+- [x] Build a small final follow-up survey that addresses specific entries from the responses.
 
 ### Response analysis
 
@@ -84,3 +84,6 @@ Keep this to roughly 3–5 concise questions, with optional written detail:
 
 Do not ask respondents to disclose a diagnosis. Address the expressed need with clearer
 onboarding, predictable steps, and optional in-context help that benefits all new users.
+
+The previous beta survey is closed to new responses. Its submitted answers remain available
+in the admin panel for historical review; the follow-up is the only survey offered to users.
