@@ -1,7 +1,7 @@
 import React from 'react';
 import { Eye, LogOut } from 'lucide-react';
 
-const AdminAccountModeBanner = ({ session, onExit, exiting, error }) => (
+const AdminAccountModeBanner = ({ session, onExit, exiting }) => (
   <div className="sticky top-0 z-[10000] flex flex-wrap items-center justify-between gap-3 border-b-2 border-amber-800 bg-amber-500 px-4 py-3 text-sm text-black shadow-md">
     <div className="flex min-w-0 items-start gap-2">
       <Eye size={20} className="mt-0.5 shrink-0" />
@@ -10,10 +10,9 @@ const AdminAccountModeBanner = ({ session, onExit, exiting, error }) => (
           ADMIN ACCOUNT SESSION — viewing as {session.targetName} ({session.targetId})
         </p>
         <p className="text-xs">
-          Any actions are performed as this user and audited under your admin account.
-          Session expires {new Date(session.expiresAt).toLocaleTimeString()}.
+          Admin: {session.adminName}. Actions run as this user and are audited under your account.
+          {' '}Reason: {session.reason}. Expires {new Date(session.expiresAt).toLocaleTimeString()}.
         </p>
-        {error && <p className="mt-1 font-semibold text-red-950">{error}</p>}
       </div>
     </div>
     <button

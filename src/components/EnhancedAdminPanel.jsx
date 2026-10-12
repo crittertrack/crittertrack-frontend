@@ -169,7 +169,7 @@ const CollapsibleSection = ({
     );
 };
 
-const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username, skipAuthentication = false }) => {
+const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username, skipAuthentication = false, onStartAccountMode }) => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [expandedSections, setExpandedSections] = useState({
@@ -722,7 +722,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {/* User Management Panel */}
                         {activeSection === 'user-management' && (
                             <div className="p-8">
-                                <UserManagementPanel />
+                                <UserManagementPanel onStartAccountMode={onStartAccountMode} />
                             </div>
                         )}
 

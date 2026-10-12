@@ -116,6 +116,8 @@ const ViewAnimalModalV2 = ({
     // the native WebView's own origin is "https://localhost", which is not shareable).
     const shareUrl = animalShareUrl(animal.id_public);
     const [isFavorited, setIsFavorited] = useState(false);
+    const [favoritePending, setFavoritePending] = useState(false);
+    const [favoriteError, setFavoriteError] = useState('');
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [avgKinship, setAvgKinship] = useState(null);
@@ -138,6 +140,46 @@ const ViewAnimalModalV2 = ({
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     // Same aggregated event list as the Timeline tab — Recent Activity is just its top 5.
     const animalTimelineEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
+
+    useEffect(() => {
+        let active = true;
+        setIsFavorited(false);
+        setFavoriteError('');
+        if (!authToken || !(isPublic || animal?.isDisplay) || !animal?.id_public) return undefined;
+
+        apiClient.get('/favorites/animals')
+            .then(response => {
+                if (active) {
+                    setIsFavorited((response.data || []).some(favorite => favorite.id_public === animal.id_public));
+                }
+            })
+            .catch(error => {
+                console.error('Failed to check animal favorite status:', error);
+                if (active) setFavoriteError(error.response?.data?.message || 'Could not load favorite status.');
+            });
+
+        return () => { active = false; };
+    }, [animal?.id_public, animal?.isDisplay, authToken, isPublic]);
+
+    const toggleFavoriteAnimal = async () => {
+        if (!authToken || favoritePending || !(isPublic || animal?.isDisplay)) return;
+        setFavoritePending(true);
+        setFavoriteError('');
+        try {
+            if (isFavorited) {
+                await apiClient.delete(`/favorites/animals/${animal.id_public}`);
+                setIsFavorited(false);
+            } else {
+                await apiClient.post(`/favorites/animals/${animal.id_public}`, {});
+                setIsFavorited(true);
+            }
+        } catch (error) {
+            console.error('Failed to update animal favorite:', error);
+            setFavoriteError(error.response?.data?.message || 'Could not update this favorite. Please try again.');
+        } finally {
+            setFavoritePending(false);
+        }
+    };
 
     useEffect(() => {
         setMainImage(animal.imageUrl || animal.photoUrl);
@@ -496,9 +538,10 @@ useEffect(() => {
                                 </div>
                                 <div className="flex items-center gap-2 flex-wrap justify-end sm:flex-nowrap">
                                     {/* Favorite Button (if logged in) */}
-                                    {authToken && (
+                                    {authToken && (isPublic || animal?.isDisplay) && (
                                         <button 
-                                            onClick={() => setIsFavorited(!isFavorited)}
+                                            onClick={toggleFavoriteAnimal}
+                                            disabled={favoritePending}
                                             className={`px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 ${
                                                 isFavorited 
                                                     ? 'bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 text-purple-700 dark:text-purple-300'
@@ -507,8 +550,13 @@ useEffect(() => {
                                             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
                                         >
                                             <Star size={18} fill={isFavorited ? "currentColor" : "none"} />
-                                            {isFavorited ? "Favorited" : "Favorite"}
+                                            {favoritePending ? 'Saving…' : isFavorited ? "Favorited" : "Favorite"}
                                         </button>
+                                    )}
+                                    {favoriteError && (
+                                        <span role="alert" className="basis-full text-right text-xs text-red-600 dark:text-red-400">
+                                            {favoriteError}
+                                        </span>
                                     )}
                                     
                                     {/* Share Button */}

@@ -66,6 +66,7 @@ import { useGeneralTasks } from './hooks/useGeneralTasks.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import NewsTickerBanner from './components/NewsTickerBanner';
+import AdminAccountModeBanner from './components/AdminAccountModeBanner';
 import { PublicAnimalPage, PublicProfilePage, PrivacyPolicyPage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
 import FinanceDropdown from './components/FinanceDropdown';
@@ -220,6 +221,24 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
 const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [adminAccountMode, setAdminAccountMode] = useState(() => {
+        try {
+            return JSON.parse(sessionStorage.getItem('adminAccountSession') || 'null');
+        } catch {
+            return null;
+        }
+    });
+    const [endingAdminAccountMode, setEndingAdminAccountMode] = useState(false);
+    const endingAdminAccountModeRef = useRef(false);
+    const [adminAccountNotice] = useState(() => {
+        try {
+            const notice = JSON.parse(sessionStorage.getItem('adminAccountNotice') || 'null');
+            sessionStorage.removeItem('adminAccountNotice');
+            return notice;
+        } catch {
+            return null;
+        }
+    });
     
     // Phase 10: Initialize custom hooks for state management
     // Phase 10b: Modal state management
@@ -257,6 +276,16 @@ const App = () => {
     
     // Phase 10f: Moderation Mode
     const modMode = useModerationMode(authTokenTemp, API_BASE_URL, userProfileTemp, showModalMessage);
+    const {
+        setInModeratorMode: setAccountViewModeratorMode,
+        setShowAdminPanel: setAccountViewAdminPanel,
+    } = modMode;
+    useEffect(() => {
+        if (adminAccountMode) {
+            setAccountViewModeratorMode(false);
+            setAccountViewAdminPanel(false);
+        }
+    }, [adminAccountMode, setAccountViewModeratorMode, setAccountViewAdminPanel]);
     
     // Now initialize auth hook with showModalMessage callback
     const {
@@ -279,6 +308,132 @@ const App = () => {
     const userProfile = userProfileAuth;
     const setUserProfile = setUserProfileAuth;
     const fetchUserProfile = fetchUserProfileAuth;
+
+    const handleStartAdminAccountMode = useCallback(async (targetUser, reason) => {
+        const moderationProofToken = sessionStorage.getItem('moderationProofToken');
+        if (!moderationProofToken) {
+            throw new Error('Verify your moderation password again before opening an account.');
+        }
+        if (!authToken) throw new Error('Your administrator session has expired. Please sign in again.');
+
+        const response = await apiClient.post('/admin-account/start', {
+            targetUserId: targetUser._id,
+            reason,
+            moderationProofToken,
+        });
+        const adminToken = authToken;
+        const session = { ...response.data.session, reason };
+        try {
+            sessionStorage.setItem('adminAccountOriginalToken', adminToken);
+            sessionStorage.setItem('adminAccountSession', JSON.stringify(session));
+            sessionStorage.setItem('adminAccountMode', 'active');
+            sessionStorage.removeItem('moderationProofToken');
+        } catch (error) {
+            sessionStorage.removeItem('adminAccountOriginalToken');
+            sessionStorage.removeItem('adminAccountSession');
+            sessionStorage.removeItem('adminAccountMode');
+            try {
+                await apiClient.post('/admin-account/end', {}, {
+                    headers: { Authorization: `Bearer ${response.data.token}` },
+                });
+            } catch (endError) {
+                console.error('Failed to close account session after browser storage failed:', endError);
+            }
+            throw new Error(`Could not safely store the account session in this tab: ${error.message}`);
+        }
+
+        try {
+            localStorage.setItem('authToken', response.data.token);
+        } catch (error) {
+            sessionStorage.removeItem('adminAccountOriginalToken');
+            sessionStorage.removeItem('adminAccountSession');
+            sessionStorage.removeItem('adminAccountMode');
+            await apiClient.post('/admin-account/end', {}, {
+                headers: { Authorization: `Bearer ${response.data.token}` },
+            });
+            throw new Error(`Could not switch accounts because browser storage is unavailable: ${error.message}`);
+        }
+        setAdminAccountMode(session);
+        setAccountViewAdminPanel(false);
+        setAccountViewModeratorMode(false);
+        setUserProfile(null);
+        setAuthToken(response.data.token);
+        window.location.assign('/');
+    }, [authToken, setAccountViewAdminPanel, setAccountViewModeratorMode, setAuthToken, setUserProfile]);
+
+    const restoreAdminAccountMode = useCallback(async ({ endServerSession = true, expired = false } = {}) => {
+        if (endingAdminAccountModeRef.current) return;
+        endingAdminAccountModeRef.current = true;
+        setEndingAdminAccountMode(true);
+        const targetToken = localStorage.getItem('authToken');
+        let endError = null;
+        if (endServerSession && targetToken && sessionStorage.getItem('adminAccountMode') === 'active') {
+            try {
+                await apiClient.post('/admin-account/end', {}, {
+                    headers: { Authorization: `Bearer ${targetToken}` },
+                    timeout: 10000,
+                });
+            } catch (error) {
+                endError = error;
+                console.error('Failed to end admin account session on the server:', error);
+            }
+        }
+
+        const originalAdminToken = sessionStorage.getItem('adminAccountOriginalToken');
+        sessionStorage.removeItem('adminAccountOriginalToken');
+        sessionStorage.removeItem('adminAccountSession');
+        sessionStorage.removeItem('adminAccountMode');
+        setAdminAccountMode(null);
+        setUserProfile(null);
+        if (originalAdminToken) {
+            localStorage.setItem('authToken', originalAdminToken);
+            setAuthToken(originalAdminToken);
+        } else {
+            localStorage.removeItem('authToken');
+            setAuthToken(null);
+            setUserProfile(null);
+        }
+        setEndingAdminAccountMode(false);
+        endingAdminAccountModeRef.current = false;
+        if (endError) {
+            sessionStorage.setItem('adminAccountNotice', JSON.stringify({
+                title: 'Account View Ended',
+                message: 'The server could not confirm the session end. The session token was discarded and the account session expires automatically within 30 minutes.',
+            }));
+        } else if (expired) {
+            sessionStorage.setItem('adminAccountNotice', JSON.stringify({
+                title: 'Account View Expired',
+                message: 'The administrator account view has expired. You have been returned to your administrator account.',
+            }));
+        }
+        window.location.assign('/');
+    }, [setAuthToken, setUserProfile]);
+
+    useEffect(() => {
+        if (adminAccountNotice) showModalMessage(adminAccountNotice.title, adminAccountNotice.message);
+    }, [adminAccountNotice, showModalMessage]);
+
+    useEffect(() => {
+        const handleAccountSessionExpired = () => {
+            restoreAdminAccountMode({ endServerSession: false, expired: true });
+        };
+        window.addEventListener('admin-account-session-expired', handleAccountSessionExpired);
+        return () => window.removeEventListener('admin-account-session-expired', handleAccountSessionExpired);
+    }, [restoreAdminAccountMode]);
+
+    useEffect(() => {
+        if (!adminAccountMode?.expiresAt) return undefined;
+        const delay = new Date(adminAccountMode.expiresAt).getTime() - Date.now();
+        if (delay <= 0) {
+            restoreAdminAccountMode({ endServerSession: false, expired: true });
+            return undefined;
+        }
+        const timeout = window.setTimeout(
+            () => restoreAdminAccountMode({ endServerSession: false, expired: true }),
+            delay
+        );
+        return () => window.clearTimeout(timeout);
+    }, [adminAccountMode, restoreAdminAccountMode]);
 
     // Keeps local userProfile state in sync right after a Customize-tab hidden-sections save,
     // so reopening the Animal Form for the same species in this session shows the latest choice
@@ -875,6 +1030,17 @@ const App = () => {
     const consecutiveAuthErrors = useRef(0);
 
     const handleLogout = useCallback((expired = false) => {
+        const accountModeToken = localStorage.getItem('authToken');
+        if (sessionStorage.getItem('adminAccountMode') === 'active' && accountModeToken) {
+            apiClient.post('/admin-account/end', {}, {
+                headers: { Authorization: `Bearer ${accountModeToken}` },
+            }).catch(error => console.error('Failed to end admin account session during logout:', error));
+        }
+        sessionStorage.removeItem('adminAccountOriginalToken');
+        sessionStorage.removeItem('adminAccountSession');
+        sessionStorage.removeItem('adminAccountMode');
+        sessionStorage.removeItem('moderationProofToken');
+        setAdminAccountMode(null);
         setAuthToken(null);
         setUserProfile(null);
         setInModeratorMode(false);
@@ -1785,7 +1951,14 @@ const App = () => {
 
      return (
         <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
-            {/* Welcome Guide Modal - Shows once to brand new users on first login */}
+         {adminAccountMode && (
+             <AdminAccountModeBanner
+                 session={adminAccountMode}
+                 onExit={() => restoreAdminAccountMode()}
+                 exiting={endingAdminAccountMode}
+             />
+         )}
+         {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
                     onClose={handleDismissWelcomeGuide}
@@ -2314,10 +2487,13 @@ const App = () => {
                 <ModerationAuthModal
                     isOpen={showModerationAuthModal}
                     onClose={() => setShowModerationAuthModal(false)}
-                    onSuccess={() => {
+                    onSuccess={(moderationProofToken) => {
                         setInModeratorMode(true);
                         setShowModerationAuthModal(false);
                         localStorage.setItem('moderationAuthenticated', 'true');
+                        if (moderationProofToken) {
+                            sessionStorage.setItem('moderationProofToken', moderationProofToken);
+                        }
                     }}
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
@@ -2333,6 +2509,7 @@ const App = () => {
                         authToken={authToken}
                         API_BASE_URL={API_BASE_URL}
                         userRole={userProfile?.role}
+                        onStartAccountMode={handleStartAdminAccountMode}
                         userEmail={userProfile?.email}
                         userId={userProfile?.id_public}
                         username={userProfile?.personalName}

@@ -111,6 +111,14 @@ export function useAppAuth(
                 window.dispatchEvent(new CustomEvent('admin-account-session-expired'));
                 return Promise.reject(error);
             }
+            if (error?.response?.status === 401 && sessionStorage.getItem('adminAccountMode') === 'active') {
+                window.dispatchEvent(new CustomEvent('admin-account-session-expired'));
+                return Promise.reject(error);
+            }
+            const requestToken = error?.config?.headers?.Authorization?.replace(/^Bearer\s+/i, '');
+            if (requestToken && requestToken !== localStorage.getItem('authToken')) {
+                return Promise.reject(error);
+            }
             const tokenExpired = status === 401 && (
                 error?.response?.data?.expired === true ||
                 message.includes('token expired') ||
@@ -141,7 +149,10 @@ export function useAppAuth(
             if (!token) return;
 
             try {
-                const response = await apiClient.get('/users/profile');
+                const response = await apiClient.get('/users/profile', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (localStorage.getItem('authToken') !== token) return;
 
                 // Normalize profile image keys for UI compatibility and add cache-busting query
                 const user = response.data || {};
@@ -172,7 +183,7 @@ export function useAppAuth(
 
                 // Only log out if it's a 401 or 403 (token expired/invalid/forbidden), not for network errors
                 if (error.response?.status === 401 || error.response?.status === 403) {
-                    if (token) {
+                    if (token && localStorage.getItem('authToken') === token) {
                         clearAuthState(true);
                     }
                 } else if (error.code === 'ERR_NETWORK' || !error.response) {

@@ -10,19 +10,18 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
     const [favoriteAnimals, setFavoriteAnimals] = useState([]);
     const [favoriteUsers, setFavoriteUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [animalSearch, setAnimalSearch] = useState('');
-    const [breederSearch, setBreederSearch] = useState('');
+    const [favoritesSearch, setFavoritesSearch] = useState('');
+    const [error, setError] = useState('');
 
     // Fetch favorites and activity feeds
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
+                setError('');
                 const [favAnimalsRes, favUsersRes] = await Promise.all([
-                    // Fetch favorite animals
-                    apiClient.get(`/favorites/animals`).catch(() => ({ data: [] })),
-                    // Fetch favorite users
-                    apiClient.get(`/favorites/users`).catch(() => ({ data: [] })),
+                    apiClient.get(`/favorites/animals`),
+                    apiClient.get(`/favorites/users`),
                 ]);
 
                 const favAnimals = favAnimalsRes.data || [];
@@ -32,6 +31,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
 
             } catch (error) {
                 console.error('Error fetching community data:', error);
+                setError(error.response?.data?.message || 'Could not load favorites. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -56,6 +56,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
             }
         } catch (error) {
             console.error('Error toggling favorite animal:', error);
+            setError(error.response?.data?.message || 'Could not update this animal favorite. Please try again.');
         }
     };
 
@@ -90,6 +91,22 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                 <Star className="text-purple-500" />
                 Favorites
             </h2>
+            <div className="relative mb-4">
+                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
+                <input
+                    type="text"
+                    placeholder="Search favorite animals and breeders..."
+                    aria-label="Search favorite animals and breeders"
+                    value={favoritesSearch}
+                    onChange={e => setFavoritesSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:border-primary"
+                />
+            </div>
+            {error && (
+                <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+                    {error}
+                </p>
+            )}
             {/* Favorite Animals */}
             <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
@@ -99,20 +116,10 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                     <p className="text-gray-500 dark:text-dark-text-muted text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
                 ) : (
                     <>
-                        <div className="relative mb-2">
-                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
-                            <input
-                                type="text"
-                                placeholder="Search favorites..."
-                                value={animalSearch}
-                                onChange={e => setAnimalSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:border-primary"
-                            />
-                        </div>
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
                         {favoriteAnimals.filter(animal => {
-                            if (!animalSearch.trim()) return true;
-                            const q = animalSearch.toLowerCase();
+                            if (!favoritesSearch.trim()) return true;
+                            const q = favoritesSearch.toLowerCase();
                             const fullName = formatAnimalDisplayName(animal).toLowerCase();
                             return fullName.includes(q) || (animal.id_public || '').toLowerCase().includes(q) || (animal.species || '').toLowerCase().includes(q);
                         }).map(animal => {
@@ -169,20 +176,10 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                     <p className="text-gray-500 dark:text-dark-text-muted text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
                 ) : (
                     <>
-                        <div className="relative mb-2">
-                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
-                            <input
-                                type="text"
-                                placeholder="Search favorites..."
-                                value={breederSearch}
-                                onChange={e => setBreederSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:border-primary"
-                            />
-                        </div>
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
                         {favoriteUsers.filter(user => {
-                            if (!breederSearch.trim()) return true;
-                            const q = breederSearch.toLowerCase();
+                            if (!favoritesSearch.trim()) return true;
+                            const q = favoritesSearch.toLowerCase();
                             const displayName = ((user.showBreederName && user.breederName) ? user.breederName : ((user.showPersonalName ?? false) ? user.personalName : '')).toLowerCase();
                             return displayName.includes(q) || (user.id_public || '').toLowerCase().includes(q);
                         }).map(user => {

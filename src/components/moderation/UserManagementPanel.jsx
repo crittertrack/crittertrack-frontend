@@ -581,18 +581,19 @@ const UserManagementPanel = ({ onStartAccountMode }) => {
 
             {accountSessionUser && (
                 <div className="modal-overlay" onClick={() => !startingAccountSession && setAccountSessionUser(null)}>
-                    <div className="modal-content" onClick={event => event.stopPropagation()}>
-                        <h3>View account as user</h3>
-                        <p>
+                    <div className="modal-content gap-3 overflow-y-auto p-6" onClick={event => event.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-gray-900">View account as user</h3>
+                        <p className="text-sm text-gray-700">
                             You will have full access to this account for up to 30 minutes. Actions will be performed as the user and audited under your administrator account.
                         </p>
-                        <p className="font-semibold">
+                        <p className="font-semibold text-gray-900">
                             {accountSessionUser.personalName || accountSessionUser.breederName || accountSessionUser.email}
                             {' '}({accountSessionUser.id_public})
                         </p>
-                        <label htmlFor="account-session-reason">Reason for access (required)</label>
+                        <label className="font-medium text-gray-800" htmlFor="account-session-reason">Reason for access (required)</label>
                         <textarea
                             id="account-session-reason"
+                            className="w-full rounded-md border border-gray-300 p-3 text-sm"
                             value={accountSessionReason}
                             onChange={event => setAccountSessionReason(event.target.value)}
                             maxLength={1000}
@@ -602,9 +603,9 @@ const UserManagementPanel = ({ onStartAccountMode }) => {
                         />
                         <p className="text-xs text-gray-600">{accountSessionReason.trim().length}/1000 characters (minimum 10)</p>
                         {accountSessionError && <p className="error-message">{accountSessionError}</p>}
-                        <div className="modal-actions">
-                            <button type="button" onClick={() => setAccountSessionUser(null)} disabled={startingAccountSession}>Cancel</button>
-                            <button type="button" onClick={handleStartAccountMode} disabled={startingAccountSession}>
+                        <div className="flex justify-end gap-2">
+                            <button className="rounded-md border px-4 py-2 text-sm" type="button" onClick={() => setAccountSessionUser(null)} disabled={startingAccountSession}>Cancel</button>
+                            <button className="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-black disabled:opacity-60" type="button" onClick={handleStartAccountMode} disabled={startingAccountSession}>
                                 {startingAccountSession ? 'Starting…' : 'Continue as user'}
                             </button>
                         </div>

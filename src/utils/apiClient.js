@@ -17,7 +17,7 @@ const isAdminAccountMode = () => sessionStorage.getItem('adminAccountMode') === 
 
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('authToken');
-    if (token) {
+    if (token && !config.headers?.Authorization) {
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -106,6 +106,7 @@ export const flushWriteQueue = async () => {
     try {
         const queued = await getQueuedWrites();
         for (const item of queued) {
+            if (isAdminAccountMode()) break;
             try {
                 await apiClient({ method: item.method, url: item.url, data: item.data });
             } catch (err) {
@@ -137,7 +138,8 @@ window.addEventListener('api-network-status', (e) => {
 const inFlightGets = new Map();
 const rawGet = apiClient.get.bind(apiClient);
 apiClient.get = (url, config) => {
-    const token = localStorage.getItem('authToken') || 'anonymous';
+    const token = config?.headers?.Authorization?.replace(/^Bearer\s+/i, '') ||
+        localStorage.getItem('authToken') || 'anonymous';
     const key = `${token}:${url}${config?.params ? `?${JSON.stringify(config.params)}` : ''}`;
     if (inFlightGets.has(key)) return inFlightGets.get(key);
     const promise = rawGet(url, config).finally(() => inFlightGets.delete(key));
