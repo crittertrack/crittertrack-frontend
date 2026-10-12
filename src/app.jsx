@@ -1303,9 +1303,18 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
-    // Beta Feedback Survey — auto-popup disabled (been running long enough).
-    // Pending/skipped/dismissed users can still reach it via the NewsTickerBanner link,
-    // which sets showBetaSurvey via onReopenBetaSurvey.
+    const hasAutoOpenedFollowupRef = useRef(false);
+    useEffect(() => {
+        const canAutoOpen = authToken && userProfile &&
+            userProfile.betaSurveyFollowupStatus === 'pending' &&
+            hasSeenWelcomeGuide && !showWelcomeGuide && !adminAccountMode &&
+            !Capacitor.isNativePlatform();
+
+        if (canAutoOpen && !hasAutoOpenedFollowupRef.current) {
+            hasAutoOpenedFollowupRef.current = true;
+            setShowBetaSurvey(true);
+        }
+    }, [authToken, userProfile, hasSeenWelcomeGuide, showWelcomeGuide, adminAccountMode]);
 
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
