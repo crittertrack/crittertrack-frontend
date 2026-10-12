@@ -1382,12 +1382,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'From the Play Store (recommended)',
-        content: 'Sign in to crittertrack.net on your phone\'s browser and tap "Get the Android app on Google Play" on the login screen. Play Store installs and updates the app for you automatically, so this is the easiest route and keeps you on the newest version.',
+        content: 'Sign in to crittertrack.net on your phone\'s browser and tap the "Get it on Google Play" button on the login screen. Play Store installs and updates the app for you automatically, so this is the easiest route and keeps you on the newest version.',
       },
       {
         stepNumber: 2,
         title: 'From a direct APK file',
-        content: 'If you\'d rather not use the Play Store, download the signed APK directly from this guide and install it on your device. It\'s the same app with the same features and the same account; it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Updates for a sideloaded app are manual, so return here to download and install a newer APK when one is published.',
+        content: 'If you\'d rather not use the Play Store, download the signed APK directly from this guide\'s URL/file and install it on your device. Only the .apk linked directly here is safe — do not download APKs from third-party offers, mirror sites, or unofficial websites. It\'s the same app with the same features and the same account; it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Updates for a sideloaded app are manual, so return here to download and install a newer APK when one is published.',
         link: {
           label: 'Download the Android APK',
           url: ANDROID_APK_URL,
