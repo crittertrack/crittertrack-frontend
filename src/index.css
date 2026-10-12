@@ -16,6 +16,15 @@ as the default for the entire application.
 html {
 font-family: 'Inter', sans-serif;
 }
+/* Native edge-to-edge: the status-bar inset area is outside the WebView's
+   layout box, so paint the page behind it pink to match bg-page-bg instead
+   of the browser-white default (which showed as a white bar on Android). */
+html, body, #root {
+background-color: #F1D1DC;
+}
+html.dark, html.dark body, html.dark #root {
+background-color: #000000;
+}
 }
 
 /* Custom animations */

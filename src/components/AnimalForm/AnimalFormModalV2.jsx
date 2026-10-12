@@ -3093,6 +3093,11 @@ const AnimalFormModalV2 = ({
     };
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        // Android WebView/IME can reset the caret to position 0 after a controlled re-render,
+        // making text appear to type backwards. Remember the caret and restore it if it moved.
+        const el = e.target;
+        const isTextField = el.tagName === 'TEXTAREA' || type === 'text';
+        const caret = isTextField ? el.selectionStart : null;
         setFormData(prev => {
             const updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
             if (name === 'deceasedDate' && value) {
@@ -3100,6 +3105,15 @@ const AnimalFormModalV2 = ({
             }
             return updated;
         });
+        if (isTextField && caret !== null) {
+            requestAnimationFrame(() => {
+                try {
+                    if (document.activeElement === el && el.selectionStart !== caret && el.selectionStart === 0) {
+                        el.setSelectionRange(caret, caret);
+                    }
+                } catch (err) { /* ignore unsupported input types */ }
+            });
+        }
     };
 
     // "Seed to Appearance" — copies the genetics-derived phenotype breakdown (color/markings/

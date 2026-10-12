@@ -28,19 +28,28 @@ public class MainActivity extends BridgeActivity {
         setTheme(R.style.AppTheme_NoActionBar);
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
-        window.setBackgroundDrawableResource(R.color.colorPrimary);
+        window.setBackgroundDrawableResource(R.color.pageBg);
         window.setNavigationBarColor(Color.TRANSPARENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setStatusBarContrastEnforced(false);
             window.setNavigationBarContrastEnforced(false);
         }
         super.onCreate(savedInstanceState);
+        // Match the WebView background to the app's pink page background so any
+        // transient gap (top inset letterbox, keyboard resize) blends invisibly
+        // instead of flashing white or the old splash drawable.
+        try {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                getBridge().getWebView().setBackgroundColor(Color.parseColor("#F1D1DC"));
+            }
+        } catch (Exception ignored) { }
         WindowInsetsControllerCompat insetsController =
                 WindowCompat.getInsetsController(window, window.getDecorView());
         insetsController.setAppearanceLightStatusBars(true);
         insetsController.setAppearanceLightNavigationBars(true);
 
         View content = findViewById(android.R.id.content);
+        content.setBackgroundColor(Color.parseColor("#F1D1DC"));
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets safeInsets = windowInsets.getInsets(
                     WindowInsetsCompat.Type.systemBars()

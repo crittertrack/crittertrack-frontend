@@ -28,6 +28,6 @@ root.render(
 // mount so the splash's own fade-out doesn't visually overlap a not-yet-painted WebView
 // (that overlap is what caused the ghosted/double-exposed logo at launch).
 if (Capacitor.isNativePlatform()) {
-  requestAnimationFrame(() => requestAnimationFrame(() => SplashScreen.hide()));
+  requestAnimationFrame(() => requestAnimationFrame(() => { SplashScreen.hide().catch(() => {}); }));
 }
 
