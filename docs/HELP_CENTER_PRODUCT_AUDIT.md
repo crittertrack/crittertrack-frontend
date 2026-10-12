@@ -149,6 +149,9 @@ Existing navigation/access patterns:
 - Article pages follow a consistent task-guide format: prerequisites, numbered steps, optional
   helpful tips and next steps, a section/step contents list, related articles, support contact,
   and a helpfulness selection. Sections are only shown when content exists.
+- The “How can we help?” hero and search field remain at the top throughout browsing and
+  article reading. Article and results views provide visible back controls labeled for their
+  return context (search results, topic, or article library).
 - “How to add an animal” is the first purpose-written article using that format. Its former
   lesson ID routes to the new guide. Other existing lessons remain individual text articles
   until each is deliberately rewritten; recommendations and related links point to existing

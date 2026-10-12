@@ -254,6 +254,7 @@ const HelpCenterPage = () => {
   };
 
   const openTopic = (topicId) => {
+    setQuery('');
     setActiveTopicId(topicId);
     setSelectedArticleId(null);
     setSearchParams({});
@@ -275,17 +276,17 @@ const HelpCenterPage = () => {
       <section className="relative overflow-hidden border-b border-primary/20 bg-gradient-to-br from-primary/20 via-white to-emerald-50 px-5 py-8 sm:px-8 sm:py-10 dark:from-dark-primary/15 dark:via-dark-card-bg dark:to-emerald-950/20">
         <div className="pointer-events-none absolute -right-10 -top-16 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
         <div className="pointer-events-none absolute right-36 top-16 h-24 w-24 rounded-full border-[18px] border-emerald-100/50 dark:border-emerald-900/30" />
-        <div className="relative max-w-3xl">
+        <div className="relative mx-auto max-w-3xl text-center">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary-dark dark:text-dark-primary">
             CritterTrack Help Center
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-dark-text sm:text-4xl">
             How can we help?
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600 dark:text-dark-text-secondary sm:text-base">
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-gray-600 dark:text-dark-text-secondary sm:text-base">
             Find clear answers and practical guides for getting the most out of CritterTrack.
           </p>
-          <label className="mt-5 flex max-w-2xl items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30 dark:border-dark-border dark:bg-dark-surface">
+          <label className="mx-auto mt-5 flex max-w-2xl items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-md transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30 dark:border-dark-border dark:bg-dark-surface">
             <Search size={19} className="flex-shrink-0 text-gray-500 dark:text-dark-text-muted" />
             <input
               type="search"
@@ -317,6 +318,15 @@ const HelpCenterPage = () => {
           article={selectedArticle}
           articles={ARTICLES}
           topics={TOPICS}
+          backLabel={
+            normalizedQuery
+              ? 'Back to search results'
+              : activeTopicId === 'all'
+                ? 'Back to all articles'
+                : activeTopicId
+                  ? `Back to ${TOPICS.find(topic => topic.id === activeTopicId)?.title || 'topic'}`
+                  : 'Back to Help Center'
+          }
           helpfulVote={helpfulVote}
           onVote={setHelpfulVote}
           onBack={returnToBrowse}
@@ -341,9 +351,10 @@ const HelpCenterPage = () => {
             <button
               type="button"
               onClick={resetHome}
-              className="text-sm font-semibold text-primary-dark hover:underline dark:text-dark-primary"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary-dark dark:border-dark-border dark:bg-dark-surface dark:text-dark-text-secondary dark:hover:text-dark-primary"
             >
-              View all topics
+              <ArrowLeft size={15} />
+              {normalizedQuery ? 'Clear search & browse topics' : 'Back to all topics'}
             </button>
           </div>
           {visibleArticles.length ? (
@@ -437,7 +448,7 @@ const HelpCenterPage = () => {
   );
 };
 
-const ArticleDetail = ({ article, articles, topics, helpfulVote, onVote, onBack, onSelectArticle, onSelectTopic }) => {
+const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVote, onBack, onSelectArticle, onSelectTopic }) => {
   const topic = topics.find(item => item.id === article.topicId);
   const relatedArticles = (article.relatedArticleIds || articles
     .filter(item => item.topicId === article.topicId && item.id !== article.id)
@@ -462,10 +473,10 @@ const ArticleDetail = ({ article, articles, topics, helpfulVote, onVote, onBack,
         <button
           type="button"
           onClick={onBack}
-          className="mb-4 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs font-semibold text-gray-600 transition hover:bg-white hover:text-primary-dark dark:text-dark-text-secondary dark:hover:bg-dark-card-bg dark:hover:text-dark-primary"
+          className="mb-4 flex w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-xs font-semibold text-gray-700 transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary-dark dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:text-dark-primary"
         >
           <ArrowLeft size={15} />
-          Back to Help Center
+          {backLabel}
         </button>
         <div className="mb-2 flex items-center gap-2 px-2 text-sm font-bold text-gray-900 dark:text-dark-text">
           {topic && <topic.Icon size={17} className="text-primary-dark dark:text-dark-primary" />}
@@ -508,8 +519,15 @@ const ArticleDetail = ({ article, articles, topics, helpfulVote, onVote, onBack,
       </aside>
 
       <article className="min-w-0 px-5 py-6 sm:px-7 sm:py-8">
-        <div className="mb-5 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500 dark:text-dark-text-muted">
-          <button type="button" onClick={onBack} className="hover:text-primary-dark dark:hover:text-dark-primary">Help Center</button>
+        <div className="mb-5 flex flex-wrap items-center gap-2 text-[11px] text-gray-500 dark:text-dark-text-muted">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary-dark dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:text-dark-primary"
+          >
+            <ArrowLeft size={14} />
+            {backLabel}
+          </button>
           <ChevronRight size={13} />
           <span>{topic?.title || article.topicTitle}</span>
           <ChevronRight size={13} />
