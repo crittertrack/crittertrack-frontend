@@ -1828,6 +1828,10 @@ const App = () => {
                             </RouterLink>
                         )}
                     </div>
+                    {/* Most recent news article (desktop only, under Support) - title + preview, full article opens in a modal */}
+                    <div className="hidden lg:block">
+                        <LatestNewsCard />
+                    </div>
                     </div>
 
                     {/* MIDDLE: Auth Form */}
@@ -1900,8 +1904,6 @@ const App = () => {
                                 </div>
                             </div>
                     </div>
-                        {/* Most recent news article (title only - opens the full article in a modal) */}
-                        <LatestNewsCard />
                 </div>
                 </div>
                 
