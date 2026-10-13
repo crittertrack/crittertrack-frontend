@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, Star, Edit, ShoppingBag, UserPlus, Search, Loader2, Cat, Mars, Venus, VenusAndMars, Circle, User } from 'lucide-react';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
+import InfoButton from '../shared/InfoButton';
 
 const MyFeed = ({ authToken, API_BASE_URL }) => {
     const navigate = useNavigate();
@@ -90,6 +91,9 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
             <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4 flex items-center gap-2">
                 <Star className="text-purple-500" />
                 Favorites
+                <InfoButton title="Favorites" lessonId="community-favorites">
+                    <p>Your favorite animals are on the left and favorite breeders on the right. Search filters both lists, and the star removes a favorite.</p>
+                </InfoButton>
             </h2>
             <div className="relative mb-4">
                 <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />

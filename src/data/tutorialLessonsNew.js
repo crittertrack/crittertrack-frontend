@@ -9,7 +9,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 1,
         title: 'Main navigation',
-        content: 'Across the top: Animals, Litters, Contacts, Marketplace, Calendar, Community, Tools, and Finance. Each one takes you to a full page for that area of the app.',
+        content: 'Across the top: Animals, Litters, Contacts, Marketplace, Calendar, Community, Tools, and Finance. Most take you to a full page for that area of the app; Community, Tools, and Finance open a menu of pages.',
       },
       {
         stepNumber: 2,
@@ -1511,17 +1511,88 @@ const MORE_PAGES_LESSONS = [
   {
     id: 'community-overview',
     title: 'Community',
-    description: 'Recent breeder activity, news, the Breeder Directory, and your favorites, all in one place.',
+    description: 'The Community overview page, plus the Community menu for Favorites, News, and Breeders.',
     steps: [
       {
         stepNumber: 1,
-        title: 'Recent Activity',
-        content: 'Up to 5 currently-active or newly-joined breeders (marked NEW) show at the top - click any of them to jump straight to their public profile.',
+        title: 'The Community menu',
+        content: 'Click Community in the top navigation to open a menu with four pages: Overview, Favorites, News, and Breeders. News, Favorites, and Breeders each get their own full-width page.',
       },
       {
         stepNumber: 2,
-        title: 'News & Announcements, Breeders, and Favorites',
-        content: 'Below that sit three panels: News & Announcements (community announcements and polls), an embedded Breeders search (collapsible on mobile), and Favorites - your favorited animals and favorited breeders together in one place.',
+        title: 'Recent Activity',
+        content: 'Up to 5 currently-active or newly-joined breeders (marked NEW) show at the top of the Overview - click any of them to jump straight to their public profile.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Recently Viewed',
+        content: 'Animals and breeders whose public pages you open are remembered here, each with a photo or avatar and an Animal or Breeder label. The last 5 show, and View all expands the list (up to 30). This history is stored on your device only, so it is not shared between devices, and it is cleared when you log out.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Favorites card',
+        content: 'Shows one of your favorite animals and one of your favorite breeders, with a \"+N more\" note if you have others. Click either to open it, or click View favorites to see the full lists.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Recently Added Animals',
+        content: 'Newly published public animals, newest first, ranked by their CTC number (the highest CTC number comes first). Each tile shows the photo, name, species, public ID, and breeder where the breeder has chosen to show their name. View all expands the list. Only public animals appear here.',
+      },
+    ],
+  },
+  {
+    id: 'community-favorites',
+    title: 'Community: Favorites',
+    description: 'Your saved animals and breeders, side by side.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Two columns',
+        content: 'Favorite Animals are on the left and Favorite Breeders on the right. On a phone or narrow screen the two lists stack, animals first. Each list scrolls on its own if it gets long.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Searching favorites',
+        content: 'The search box at the top filters both lists at once. Animals match on name, ID, or species; breeders match on name or ID.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Adding and removing favorites',
+        content: 'Click the star on any row to remove a favorite. To add one, open an animal or breeder profile and click Favorite.',
+      },
+    ],
+  },
+  {
+    id: 'community-news',
+    title: 'Community: News',
+    description: 'Community announcements and polls on their own page.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'News & Announcements',
+        content: 'Open Community > News for announcements and polls from the CritterTrack team. Announcements you have dismissed stay hidden.',
+      },
+    ],
+  },
+  {
+    id: 'community-breeders',
+    title: 'Community: Breeders',
+    description: 'Browsing the Breeder Registry on its own page.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Finding breeders',
+        content: 'Open Community > Breeders to search the registry by name or ID, and filter by species, country, or state (state appears when the country is United States). Cards sit three across on a large screen, two on a tablet, and one on a phone.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Reading a breeder card',
+        content: 'Each card shows the breeder\'s logo or avatar, name, public ID, country, a bio (use Read more to expand it), and the species they breed with an Active or Retired badge. Click View Profile to open their full public profile.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Being listed',
+        content: 'To appear in the registry, mark at least one species as Active or Retired Breeder under Settings > Directory, and turn on Display Personal Name or Display Breeder Name on your Profile.',
       },
     ],
   },

@@ -113,6 +113,9 @@ const COMMUNITY_LESSON_IDS = new Set([
   'contacts-edit',
   'marketplace-overview',
   'community-overview',
+  'community-favorites',
+  'community-news',
+  'community-breeders',
 ]);
 const PLANNING_LESSON_IDS = new Set([
   'calendar-overview',

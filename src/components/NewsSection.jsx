@@ -3,6 +3,7 @@ import apiClient from '../utils/apiClient';
 import { Loader2, Rss, ChevronDown, ChevronUp, BarChart2, Info } from 'lucide-react';
 import { BroadcastPoll } from './Community/Banners';
 import { renderRichText } from '../utils/richText';
+import InfoButton from './shared/InfoButton';
 
 const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
     const isPoll = item.broadcastType === 'poll' || item.type === 'poll';
@@ -129,6 +130,9 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
             <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2 mb-4 flex-shrink-0">
                 <Rss className="text-orange-500" />
                 News & Announcements
+                <InfoButton title="News & Announcements" lessonId="community-news">
+                    <p>Announcements and polls from the CritterTrack team. Dismissed announcements stay hidden.</p>
+                </InfoButton>
             </h2>
             <div className="flex-grow overflow-y-auto -mr-4 pr-4">
                 {loading ? (
