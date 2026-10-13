@@ -848,8 +848,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
 
         try {
             await new Promise(r => setTimeout(r, 150));
+            // Render at a higher resolution for sharp images/text, but cap total pixels so
+            // mobile WebViews (which limit canvas area / memory) don't fail or blank out.
+            const cloneH = Math.max(clone.scrollHeight, 1);
+            const maxPixels = 40e6;
+            const captureScale = Math.max(2, Math.min(4, Math.sqrt(maxPixels / (captureW * cloneH))));
             return await html2canvas(clone, {
-                scale: 2,
+                scale: captureScale,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
@@ -883,7 +888,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             const drawH = srcCanvas.height * ratio;
             const pdf = new jsPDF({ orientation: vertical ? 'portrait' : 'landscape', unit: 'mm', format: [pageW, drawH + padMm * 2] });
             // JPEG instead of lossless PNG - the full-res PNG embed was ~47MB, making save/share crawl
-            pdf.addImage(srcCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', padMm, padMm, drawW, drawH);
+            pdf.addImage(srcCanvas.toDataURL('image/jpeg', 0.98), 'JPEG', padMm, padMm, drawW, drawH);
             await downloadBlob(pdf.output('blob'), `pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -1620,7 +1625,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                         <img
                                             src={img}
                                             alt={name}
-                                            style={{ width: 76, height: 76, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
+                                            style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
                                         />
                                     )}
                                     <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af', fontWeight: 600 }}>{label}</div>
