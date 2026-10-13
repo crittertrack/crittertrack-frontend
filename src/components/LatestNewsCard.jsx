@@ -35,36 +35,23 @@ const LatestNewsCard = () => {
     // No article (or still loading / request failed): render nothing instead of an empty card
     if (!article) return null;
 
-    // Plain-text teaser: drop heading markers, bullets, bold/italic markers and [text](url) syntax
-    const preview = String(article.message || '')
-        .replace(/\[([^\]\n]+)\]\([^)\s]+\)/g, '$1')
-        .replace(/^\s{0,3}#{1,3}\s+/gm, '')
-        .replace(/^\s*-\s+/gm, '')
-        .replace(/\*\*|\*|_/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-
     return (
         <>
             <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="flex min-h-[7.5rem] w-full items-start gap-3 rounded-xl bg-white p-4 text-left shadow-lg transition hover:bg-gray-50 dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover"
+                className="flex w-full items-center gap-3 rounded-xl bg-white p-4 text-left shadow-lg transition hover:bg-gray-50 dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover"
             >
-                <span className="mt-0.5 flex-shrink-0 rounded-full bg-orange-100 p-2 dark:bg-orange-900/30">
+                <span className="flex-shrink-0 rounded-full bg-orange-100 p-2 dark:bg-orange-900/30">
                     <Rss size={18} className="text-orange-500" />
                 </span>
                 <span className="min-w-0 flex-1">
                     <span className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-dark-text-muted">
                         Latest News{formatDate(article.createdAt) ? ` · ${formatDate(article.createdAt)}` : ''}
                     </span>
-                    <span className="mt-1 line-clamp-2 block text-sm font-bold text-gray-800 dark:text-dark-text">{article.title}</span>
-                    {preview && (
-                        <span className="mt-1 line-clamp-3 block text-xs leading-snug text-gray-600 dark:text-dark-text-secondary">{preview}</span>
-                    )}
-                    <span className="mt-2 block text-xs font-semibold text-primary-dark dark:text-dark-primary">Read full article →</span>
+                    <span className="mt-1 block text-sm font-bold text-gray-800 dark:text-dark-text">{article.title}</span>
                 </span>
-                <ChevronRight size={18} className="mt-1 flex-shrink-0 text-gray-400 dark:text-dark-text-muted" />
+                <ChevronRight size={18} className="flex-shrink-0 text-gray-400 dark:text-dark-text-muted" />
             </button>
 
             {open && (
