@@ -70,6 +70,7 @@ import AdminAccountModeBanner from './components/AdminAccountModeBanner';
 import { PublicAnimalPage, PublicProfilePage, PrivacyPolicyPage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
 import CommunityDropdown from './components/CommunityDropdown';
+import LatestNewsCard from './components/LatestNewsCard';
 import { clearRecentlyViewed } from './utils/recentlyViewed';
 import FinanceDropdown from './components/FinanceDropdown';
 import { API_BASE_URL } from './utils/apiConfig';
@@ -1787,7 +1788,20 @@ const App = () => {
                 
                 {/* 3-Column Layout: Donation | Auth Form | Features */}
                 <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                    <div className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-lg dark:bg-dark-card-bg lg:hidden">
+                    {/* LEFT: Join banner (desktop only) above the compact Support card (all sizes) */}
+                    <div className="flex flex-col gap-6">
+                    <div className="hidden items-center gap-4 rounded-xl bg-gradient-to-r from-blue-100 to-purple-100 p-5 shadow dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg lg:flex">
+                        <Users size={32} className="flex-shrink-0 text-primary-dark dark:text-dark-primary" />
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">
+                                Join {userCount} breeders & keepers!
+                            </h3>
+                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                Be part of a growing community. Register now and connect with passionate breeders and keepers worldwide!
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-lg dark:bg-dark-card-bg">
                         <div className="flex min-w-0 items-center gap-2.5">
                             <div className="flex-shrink-0 rounded-full bg-gradient-to-r from-pink-500 to-red-500 p-2">
                                 <Heart size={17} className="fill-current text-white" />
@@ -1814,68 +1828,8 @@ const App = () => {
                             </RouterLink>
                         )}
                     </div>
-
-                    {/* LEFT: Donation Section — condensed on the native Android app, which links straight to Ko-fi and drops the Mouse Magic upsell */}
-                    <div className={`hidden rounded-xl bg-white shadow-lg dark:bg-dark-card-bg lg:block ${Capacitor.isNativePlatform() ? 'p-4' : 'p-6'}`}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="bg-gradient-to-r from-pink-500 to-red-500 p-2.5 rounded-full">
-                                <Heart size={24} className="text-white fill-current" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Support CritterTrack</h3>
-                        </div>
-                        
-                        {!Capacitor.isNativePlatform() && (
-                            <>
-                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed mb-4">
-                                    CritterTrack is <strong>completely free</strong> and developed by a single independent developer 
-                                    passionate about helping breeders and keepers manage their animals.
-                                </p>
-                                
-                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-6">
-                                    Your support helps cover server costs and enables continuous improvements. Every contribution, 
-                                    no matter the size, makes a difference!
-                                </p>
-                            </>
-                        )}
-                        
-                        {Capacitor.isNativePlatform() && (
-                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-4">
-                                CritterTrack is completely free — your support helps keep it that way!
-                            </p>
-                        )}
-                        
-                        {Capacitor.isNativePlatform() ? (
-                            <button
-                                type="button"
-                                onClick={() => openExternalLink('https://ko-fi.com/crittertrack')}
-                                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
-                            >
-                                <Heart size={18} className="fill-current" />
-                                Support CritterTrack
-                            </button>
-                        ) : (
-                            <>
-                                <RouterLink
-                                    to="/donation"
-                                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
-                                >
-                                    <Heart size={18} className="fill-current" />
-                                    Learn More & Donate
-                                </RouterLink>
-                                
-                                <a
-                                    href="https://ko-fi.com/mousemagic/shop"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
-                                >
-                                    <ShoppingBag size={18} />
-                                    Buy Mouse Magic Genetics Guide
-                                </a>
-                            </>
-                        )}
                     </div>
-                    
+
                     {/* MIDDLE: Auth Form */}
                     <div>
                         <AuthView 
@@ -1892,17 +1846,6 @@ const App = () => {
                     
                     {/* RIGHT: Features Summary */}
                     <div className="hidden lg:block">
-                        <div className="mb-6 flex items-center gap-4 rounded-xl bg-gradient-to-r from-blue-100 to-purple-100 p-5 shadow dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg">
-                            <Users size={32} className="flex-shrink-0 text-primary-dark dark:text-dark-primary" />
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">
-                                    Join {userCount} breeders & keepers!
-                                </h3>
-                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
-                                    Be part of a growing community. Register now and connect with passionate breeders and keepers worldwide!
-                                </p>
-                            </div>
-                        </div>
                         <div className="rounded-xl bg-white p-6 shadow-lg dark:bg-dark-card-bg">
                             <h3 className="mb-4 text-xl font-bold text-gray-800 dark:text-dark-text">What's Included</h3>
                             <div className="space-y-3">
@@ -1957,6 +1900,8 @@ const App = () => {
                                 </div>
                             </div>
                     </div>
+                        {/* Most recent news article (title only - opens the full article in a modal) */}
+                        <LatestNewsCard />
                 </div>
                 </div>
                 

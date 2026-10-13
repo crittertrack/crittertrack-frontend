@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../utils/apiClient';
 import { Loader2, Rss, ChevronDown, ChevronUp, BarChart2, Info } from 'lucide-react';
 import { BroadcastPoll } from './Community/Banners';
-import { renderRichText } from '../utils/richText';
+import { renderRichText, SmartLink } from '../utils/richText';
 import InfoButton from './shared/InfoButton';
 
 const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
@@ -68,9 +68,11 @@ const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
                         <>
                             <div className="text-xs text-gray-700 dark:text-dark-text-secondary max-w-none">{renderRichText(item.message || item.content)}</div>
                             {item.link && (
-                                <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-2 inline-block">
-                                    Read more
-                                </a>
+                                <div className="mt-2">
+                                    <SmartLink url={item.link} className="text-xs text-blue-600 hover:underline inline-block">
+                                        Read more
+                                    </SmartLink>
+                                </div>
                             )}
                         </>
                     )}
