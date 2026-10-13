@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 // Inline pattern: [label](url), **bold**, *italic* or _italic_ (single-level only, no nesting/escaping).
-const INLINE_PATTERN = /(\[[^\]\n]+\]\([^)\s]+\)|\*\*[^*\n]+\*\*|\*[^*\n]+\*|_[^_\n]+_)/g;
+// Bold may contain links, e.g. **[Get the app](https://example.com)**.
+const INLINE_PATTERN = /(\[[^\]\n]+\]\([^)\s]+\)|\*\*(?:\[[^\]\n]+\]\([^)\s]+\)|[^*\n])+\*\*|\*[^*\n]+\*|_[^_\n]+_)/g;
 const LINK_PATTERN = /^\[([^\]\n]+)\]\(([^)\s]+)\)$/;
 
 const LINK_CLASS = 'text-blue-600 dark:text-blue-400 underline hover:no-underline break-words';
@@ -68,7 +69,7 @@ function renderInline(line, keyPrefix) {
             return <SmartLink key={key} url={link[2]}>{link[1]}</SmartLink>;
         }
         if (part.startsWith('**') && part.endsWith('**')) {
-            return <strong key={key}>{part.slice(2, -2)}</strong>;
+            return <strong key={key}>{renderInline(part.slice(2, -2), `${key}b`)}</strong>;
         }
         if (part.startsWith('*') && part.endsWith('*')) {
             return <em key={key}>{part.slice(1, -1)}</em>;
@@ -87,10 +88,38 @@ function renderInline(line, keyPrefix) {
  */
 export function renderRichText(text) {
     if (!text) return null;
-    return String(text).split('\n').map((line, lineIdx) => (
-        <React.Fragment key={lineIdx}>
-            {lineIdx > 0 && <br />}
-            {renderInline(line, lineIdx)}
-        </React.Fragment>
-    ));
+    const lines = String(text).replace(/\r\n?/g, '\n').split('\n');
+    let prevWasText = false;
+    return lines.map((line, lineIdx) => {
+        const heading = line.match(/^(#{1,3})\s+(.+)$/);
+        const bullet = line.match(/^\s*-\s+(.+)$/);
+
+        // Headings and bullets are block-level (spans with display:block so this stays valid inside <p>)
+        if (heading) {
+            prevWasText = false;
+            const cls = heading[1].length === 1
+                ? 'block text-lg font-bold mt-2 mb-1'
+                : 'block text-base font-bold mt-3 mb-1';
+            return <span key={lineIdx} className={cls}>{renderInline(heading[2], lineIdx)}</span>;
+        }
+        if (bullet) {
+            prevWasText = false;
+            return (
+                <span key={lineIdx} className="flex gap-2 pl-2 mb-1">
+                    <span aria-hidden="true">•</span>
+                    <span className="min-w-0 flex-1">{renderInline(bullet[1], lineIdx)}</span>
+                </span>
+            );
+        }
+
+        // Plain line: a <br /> separates it from a previous plain line (blank lines stay as spacing)
+        const node = (
+            <React.Fragment key={lineIdx}>
+                {prevWasText && <br />}
+                {renderInline(line, lineIdx)}
+            </React.Fragment>
+        );
+        prevWasText = true;
+        return node;
+    });
 }

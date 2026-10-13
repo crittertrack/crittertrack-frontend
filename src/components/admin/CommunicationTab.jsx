@@ -809,10 +809,10 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         placeholder="Your announcement message..."
                                         disabled={loading}
                                         rows="6"
-                                        maxLength="1000"
+                                        maxLength="20000"
                                     />
-                                    <span className="char-count">{message.length}/1000</span>
-                                    <small>Select text and click B/I, or type **bold** and *italic* directly.</small>
+                                    <span className="char-count">{message.length}/20000</span>
+                                    <small>Select text and click B/I, or type **bold** and *italic* directly. Also supported: # Heading, ## Subheading, "- " bullets, and [link text](https://example.com) or [link text](/community/news) links.</small>
                                 </div>
                             </>
                         )}
