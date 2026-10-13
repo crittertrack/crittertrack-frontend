@@ -7,6 +7,8 @@ import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import { API_BASE_URL } from './utils/apiConfig';
 import { downloadBlob } from './utils/nativeDownload';
+import { trackRecentlyViewed } from './utils/recentlyViewed';
+import { formatAnimalDisplayName } from './utils/animalDisplayName';
 
 const PrivateAnimalScreen = ({ onBack }) => {
     return (
@@ -79,7 +81,15 @@ const PublicAnimalPage = () => {
                 // First try to fetch from public animals
                 const response = await apiClient.get(`/public/global/animals?id_public=${animalId}`);
                 if (response.data?.[0]) {
-                    setAnimal(response.data[0]);
+                    const found = response.data[0];
+                    setAnimal(found);
+                    trackRecentlyViewed({
+                        type: 'animal',
+                        id: found.id_public || animalId,
+                        name: formatAnimalDisplayName(found),
+                        image: found.imageUrl || found.photoUrl || null,
+                        subtitle: found.species || '',
+                    });
                     setLoading(false);
                     return;
                 }
@@ -272,6 +282,18 @@ const PublicProfilePage = ({ onOpenMessages }) => {
             try {
                 const response = await apiClient.get(`/public/profile/${userId}`);
                 setProfile(response.data);
+                const p = response.data || {};
+                const breederLabel = (p.showBreederName && p.breederName) ? p.breederName
+                    : ((p.showPersonalName && p.personalName) ? p.personalName : null);
+                if (breederLabel) {
+                    trackRecentlyViewed({
+                        type: 'breeder',
+                        id: p.id_public || userId,
+                        name: breederLabel,
+                        image: p.profileImage || null,
+                        subtitle: p.id_public || userId,
+                    });
+                }
                 setLoading(false);
             } catch (error) {
                 console.error('Profile not found or not public:', error);

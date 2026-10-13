@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
-import { useNavigate } from 'react-router-dom';
-import { Users, Loader2, User, ScrollText, Star, ChevronDown, ChevronUp } from 'lucide-react';
-import MyFeed from './MyFeed'; // Assuming MyFeed is in the same directory
-import BreederDirectory from '../PublicProfile/BreederDirectory';
-import NewsSection from '../NewsSection';
+import { Users, Loader2 } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
+import RecentActivitySection from './RecentActivitySection';
+import RecentlyViewedSection from './RecentlyViewedSection';
+import RecentlyAddedAnimalsSection from './RecentlyAddedAnimalsSection';
+import FavoritesSummaryCard from './FavoritesSummaryCard';
 
 // Helper to check if a user has a publicly visible name
 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
 
 const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
-    const navigate = useNavigate();
     const [communityUsers, setCommunityUsers] = useState([]);
     const [recentActivityUsers, setRecentActivityUsers] = useState([]);
     const [newUsers, setNewUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    // Collapsed by default on mobile so favorites/feed are reachable without scrolling past the full breeder list
-    const [breederDirCollapsed, setBreederDirCollapsed] = useState(true);
 
     // Fetch active community users and new users
     useEffect(() => {
@@ -85,13 +82,14 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
         setRecentActivityUsers(usersForActivity);
     }, [communityUsers, newUsers]);
 
+
     return (
         <div className="w-full max-w-7xl mx-auto p-4">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-dark-text mb-4 flex items-center gap-2">
                 <Users size={32} className="text-primary" />
                 Community
                 <InfoButton title="Community" lessonId="community-overview">
-                    <p>See recently active and new breeders, browse the Breeder Directory, check your favorites, and keep up with community news.</p>
+                    <p>See who is active, jump back to what you viewed recently, discover newly published animals and open your favorites. Use the Community menu for News and the Breeders directory.</p>
                 </InfoButton>
             </h1>
 
@@ -100,81 +98,13 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     <Loader2 className="animate-spin text-primary" size={48} />
                 </div>
             ) : (
-                <div className="space-y-6">
-                    {/* MyFeed component is temporarily disabled for WIP */}
-
-                    {/* Recent Activity Section */}
-                    {recentActivityUsers.length > 0 && (
-                        <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-md p-4">
-                            <h2 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3 flex items-center gap-2">
-                                <Users size={20} className="text-primary-dark" />
-                                Recent Activity
-                            </h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                                {recentActivityUsers.map(user => {
-                                    const displayName = (user.showBreederName && user.breederName)
-                                        ? user.breederName
-                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
-                                    return (
-                                        <div
-                                            key={user.id_public}
-                                            className="relative bg-gray-50 dark:bg-dark-surface rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition cursor-pointer text-center"
-                                            onClick={() => navigate(`/user/${user.id_public}`)}
-                                        >
-                                            {user.isActive && (
-                                                <span className="absolute top-2 right-2 w-3 h-3 bg-green-400 border-2 border-white dark:border-dark-card-bg rounded-full" title="Active now" />
-                                            )}
-                                            <div className="w-14 h-14 bg-gray-200 dark:bg-dark-card-bg rounded-full overflow-hidden mx-auto mb-2">
-                                                {user.profileImage ? (
-                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
-                                                        <User size={28} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <p className="font-semibold text-sm text-gray-800 dark:text-dark-text break-words line-clamp-2 leading-tight">{displayName}</p>
-                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{user.id_public}</p>
-                                            {user.isNew && !user.isActive && (
-                                                <span className="inline-block mt-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded">NEW</span>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* News and Breeder Directory */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
-                        {/* News Section */}
-                        <div className="lg:col-span-1 bg-white dark:bg-dark-card-bg rounded-lg shadow-md overflow-hidden">
-                            <NewsSection API_BASE_URL={API_BASE_URL} authToken={authToken} />
-                        </div>
-
-                        {/* Breeder Directory Section */}
-                        <div className="lg:col-span-1 bg-white dark:bg-dark-card-bg rounded-lg shadow-md overflow-hidden">
-                            <button
-                                onClick={() => setBreederDirCollapsed(v => !v)}
-                                className="w-full flex sm:hidden items-center justify-between p-4 border-b border-gray-200 dark:border-dark-text"
-                            >
-                                <span className="font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
-                                    <Star size={18} className="text-primary" /> Breeders Directory
-                                </span>
-                                {breederDirCollapsed ? <ChevronDown size={18} className="dark:text-dark-text" /> : <ChevronUp size={18} className="dark:text-dark-text" />}
-                            </button>
-                            <div className={`${breederDirCollapsed ? 'hidden' : 'block'} sm:block`}>
-                                <BreederDirectory
-                                    authToken={authToken}
-                                    API_BASE_URL={API_BASE_URL}
-                                />
-                            </div>
-                        </div>
-                        {/* My Feed Section */}
-                        <div className="md:col-span-2 lg:col-span-1">
-                            <MyFeed authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                        </div>
+                <div className="space-y-4">
+                    <RecentActivitySection users={recentActivityUsers} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <RecentlyViewedSection />
+                        <FavoritesSummaryCard authToken={authToken} API_BASE_URL={API_BASE_URL} />
                     </div>
+                    <RecentlyAddedAnimalsSection authToken={authToken} API_BASE_URL={API_BASE_URL} />
                 </div>
             )}
         </div>

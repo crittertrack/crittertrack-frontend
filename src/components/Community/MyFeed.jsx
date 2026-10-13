@@ -116,7 +116,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                     <p className="text-gray-500 dark:text-dark-text-muted text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
                 ) : (
                     <>
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                         {favoriteAnimals.filter(animal => {
                             if (!favoritesSearch.trim()) return true;
                             const q = favoritesSearch.toLowerCase();
@@ -176,7 +176,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                     <p className="text-gray-500 dark:text-dark-text-muted text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
                 ) : (
                     <>
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                         {favoriteUsers.filter(user => {
                             if (!favoritesSearch.trim()) return true;
                             const q = favoritesSearch.toLowerCase();

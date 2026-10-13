@@ -69,6 +69,8 @@ import NewsTickerBanner from './components/NewsTickerBanner';
 import AdminAccountModeBanner from './components/AdminAccountModeBanner';
 import { PublicAnimalPage, PublicProfilePage, PrivacyPolicyPage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
+import CommunityDropdown from './components/CommunityDropdown';
+import { clearRecentlyViewed } from './utils/recentlyViewed';
 import FinanceDropdown from './components/FinanceDropdown';
 import { API_BASE_URL } from './utils/apiConfig';
 import { downloadBlob } from './utils/nativeDownload';
@@ -391,6 +393,7 @@ const App = () => {
             setAuthToken(originalAdminToken);
         } else {
             localStorage.removeItem('authToken');
+            clearRecentlyViewed();
             setAuthToken(null);
             setUserProfile(null);
         }
@@ -1016,6 +1019,9 @@ const App = () => {
     // NOTE: showAdminPanel, inModeratorMode now handled by useModerationMode hook
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showToolsMenu, setShowToolsMenu] = useState(false);
+    const [showCommunityMenu, setShowCommunityMenu] = useState(false);
+    const communityMenuDesktopRef = useRef(null);
+    const communityMenuMobileRef = useRef(null);
     const profileMenuDesktopRef = useRef(null);
     const [showFinanceMenu, setShowFinanceMenu] = useState(false);
     const financeMenuDesktopRef = useRef(null);
@@ -1047,6 +1053,7 @@ const App = () => {
         setInModeratorMode(false);
         setShowAdminPanel(false);
         localStorage.removeItem('authToken');
+        clearRecentlyViewed();
         localStorage.removeItem('moderationAuthenticated');
         localStorage.removeItem('keepSignedIn');
         localStorage.removeItem('ct_bldefs');
@@ -1408,11 +1415,12 @@ const App = () => {
 
             if (!inDesktop && !inMobile) setShowProfileMenu(false);
             if (!inToolsDesktop && !inToolsMobile) setShowToolsMenu(false);
+            if (!communityMenuDesktopRef.current?.contains(e.target) && !communityMenuMobileRef.current?.contains(e.target)) setShowCommunityMenu(false);
             if (!inFinanceDesktop && !inFinanceMobile) setShowFinanceMenu(false);
         };
-        if (showProfileMenu || showToolsMenu || showFinanceMenu) document.addEventListener('mousedown', handleClickOutside);
+        if (showProfileMenu || showToolsMenu || showFinanceMenu || showCommunityMenu) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showProfileMenu, showToolsMenu, showFinanceMenu]);
+    }, [showProfileMenu, showToolsMenu, showFinanceMenu, showCommunityMenu]);
 	
     // Fetch global species list
     useEffect(() => {
@@ -2076,10 +2084,15 @@ const App = () => {
                             <Calendar size={18} className="mb-1" />
                             <span>Calendar</span>
                         </button>
-                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Users size={18} className="mb-1" />
-                            <span>Community</span>
-                        </button>
+                        <div className="relative" ref={communityMenuDesktopRef}>
+                            <button onClick={() => setShowCommunityMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <Users size={18} className="mb-1" />
+                                <span>Community</span>
+                            </button>
+                            {showCommunityMenu && (
+                                <CommunityDropdown onLinkClick={() => setShowCommunityMenu(false)} />
+                            )}
+                        </div>
                         <div className="relative" ref={toolsMenuDesktopRef}>
                             <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-1" />
@@ -2335,10 +2348,15 @@ const App = () => {
                             <Calendar size={18} className="mb-0.5" />
                             <span>Calendar</span>
                         </button>
-                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Users size={18} className="mb-0.5" />
-                            <span>Community</span>
-                        </button>
+                        <div className="relative" ref={communityMenuMobileRef}>
+                            <button onClick={() => setShowCommunityMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <Users size={18} className="mb-0.5" />
+                                <span>Community</span>
+                            </button>
+                            {showCommunityMenu && (
+                                <CommunityDropdown onLinkClick={() => setShowCommunityMenu(false)} />
+                            )}
+                        </div>
                         <div className="relative" ref={toolsMenuMobileRef}>
                             <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary dark:bg-dark-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-0.5" />

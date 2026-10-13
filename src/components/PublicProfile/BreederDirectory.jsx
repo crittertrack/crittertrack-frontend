@@ -256,7 +256,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
 };
 
 
-const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
+const BreederDirectory = ({ authToken, API_BASE_URL, onBack, embedded = false }) => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [breeders, setBreeders] = useState([]);
@@ -374,17 +374,17 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     }, [breeders, searchQuery, selectedSpecies, selectedCountry, selectedState]);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-dark-card-bg pb-20">
-            {/* Header */}
-            <div className="bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-text p-4 sticky top-0 z-10">
+        <div className={embedded ? 'bg-gray-50 dark:bg-dark-card-bg pb-4' : 'min-h-screen bg-gray-50 dark:bg-dark-card-bg pb-20'}>
+            {/* Header (embedded in the Community > Breeders page: no back button and not sticky) */}
+            <div className={`bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-text p-4 ${embedded ? '' : 'sticky top-0 z-10'}`}>
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center gap-3 mb-3">
-                        <button
+                        {!embedded && (<button
                             onClick={() => navigate(-1)}
                             className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded transition"
                         >
                             <ArrowLeft size={20} className="dark:text-dark-text" />
-                        </button>
+                        </button>)}
                         <h1 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                             <Star size={24} className="text-primary" />
                             Breeders

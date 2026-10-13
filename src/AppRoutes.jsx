@@ -9,6 +9,9 @@ const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
 const LiteProfileSettings = lazy(() => import('./components/Profile/LiteProfileSettings'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
+const CommunityFavoritesPage = lazy(() => import('./components/Community/CommunityFavoritesPage'));
+const CommunityNewsPage = lazy(() => import('./components/Community/CommunityNewsPage'));
+const CommunityBreedersPage = lazy(() => import('./components/Community/CommunityBreedersPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
 const CalendarPage = lazy(() => import('./components/CalendarPage'));
@@ -438,6 +441,10 @@ export function AppRoutes({
           userProfile={userProfile}
         />
       } />
+
+      <Route path="/community/favorites" element={<CommunityFavoritesPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/community/news" element={<CommunityNewsPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/community/breeders" element={<CommunityBreedersPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
 
       {/* Litters */}
       <Route path="/litters" element={
