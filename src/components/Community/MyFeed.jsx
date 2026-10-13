@@ -107,8 +107,9 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                     {error}
                 </p>
             )}
-            {/* Favorite Animals */}
-            <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            {/* Favorite Animals (left) */}
+            <div>
                 <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
                     Favorite Animals ({favoriteAnimals.length})
                 </h3>
@@ -167,7 +168,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                 )}
             </div>
 
-            {/* Favorite Users */}
+            {/* Favorite Breeders (right) */}
             <div>
                 <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
                     Favorite Breeders ({favoriteUsers.length})
@@ -220,6 +221,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                         </div>
                     </>
                 )}
+            </div>
             </div>
         </div>
     );
