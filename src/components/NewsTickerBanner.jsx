@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 import { Rss, BarChart2, Info, Heart, AlertTriangle, BookOpen, ClipboardList, Users, Gem, Flame } from 'lucide-react';
 import './NewsTickerBanner.css';
 
@@ -120,7 +119,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
             <span className="mx-4">|</span>
           </span>
         )}
-        {!Capacitor.isNativePlatform() && betaSurveyStatus === 'pending' && onReopenBetaSurvey && (
+        {betaSurveyStatus === 'pending' && onReopenBetaSurvey && (
           <span className="inline-flex items-center px-4 font-semibold">
             <button
               onClick={onReopenBetaSurvey}
@@ -132,7 +131,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
             <span className="mx-4">|</span>
           </span>
         )}
-        {!Capacitor.isNativePlatform() && betaSurveyStatus === 'skipped' && onReopenBetaSurvey && (
+        {betaSurveyStatus === 'skipped' && onReopenBetaSurvey && (
           <span className="inline-flex items-center px-4 font-semibold">
             <button
               onClick={onReopenBetaSurvey}
@@ -144,7 +143,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
             <span className="mx-4">|</span>
           </span>
         )}
-        {!Capacitor.isNativePlatform() && betaSurveyStatus === 'dismissed' && onReopenBetaSurvey && (
+        {betaSurveyStatus === 'dismissed' && onReopenBetaSurvey && (
           <span className="inline-flex items-center px-4 font-semibold">
             <button
               onClick={onReopenBetaSurvey}
