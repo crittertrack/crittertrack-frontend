@@ -27,6 +27,7 @@ import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 import { decodeImageFile, releaseDecodedImage, decodeErrorMessage } from '../../utils/imageDecode';
+import { readFilesIntoMemory } from '../../utils/pickedFiles';
 
 // Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
 // (see appearanceOptionsMap / ComboBoxField below).
@@ -529,6 +530,13 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
     const MAX_FILE_SIZE = 200 * 1024; // 200KB
 
     useEffect(() => {
+        // Reset per-image state unconditionally. previewError used to be cleared inside the
+        // guard below, but a preview error swapped the <img> out for the error message, so
+        // imgRef.current was null, the guard failed forever, and every remaining image in the
+        // batch showed the same "couldn't load preview" error without ever being tried. The
+        // <img> is now always mounted (hidden on error) and keyed by index, so the ref is
+        // always attached when this effect runs.
+        setPreviewError(false);
         if (files.length > currentIndex && imgRef.current) {
             // createObjectURL avoids base64-encoding the whole file (readAsDataURL adds ~33%
             // overhead) — matters a lot for the large multi-MB photos modern phone cameras produce.
@@ -538,7 +546,6 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             setCropMode(false);
             setCropBox({ x: 0, y: 0, width: 100, height: 100 });
             setFileSizeWarning('');
-            setPreviewError(false);
             return () => URL.revokeObjectURL(objectUrl);
         }
     }, [currentIndex, files]);
@@ -826,22 +833,24 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 <div className="p-6 space-y-4">
                     {/* Preview */}
                     <div ref={previewContainerRef} className="relative bg-gray-100 dark:bg-dark-surface rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
-                        {previewError ? (
+                        {/* Keyed by index so each image gets a fresh element/ref; hidden (not
+                            unmounted) on error so one failed preview can't break the next ones. */}
+                        <img
+                            key={currentIndex}
+                            ref={imgRef}
+                            style={getRotationStyle()}
+                            className={`max-w-full max-h-full object-contain ${previewError ? 'hidden' : ''}`}
+                            alt="Preview"
+                            onLoad={updateImageBox}
+                            onError={() => setPreviewError(true)}
+                        />
+                        {previewError && (
                             <div className="text-center px-4">
                                 <AlertTriangle size={28} className="mx-auto text-amber-500 mb-2" />
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                                     Couldn't load a preview for this photo — it may be too large or an unsupported format. Try Skip or pick a different photo.
                                 </p>
                             </div>
-                        ) : (
-                            <img
-                                ref={imgRef}
-                                style={getRotationStyle()}
-                                className="max-w-full max-h-full object-contain"
-                                alt="Preview"
-                                onLoad={updateImageBox}
-                                onError={() => setPreviewError(true)}
-                            />
                         )}
                         {!previewError && cropMode && imageBox && (
                             <div
@@ -3060,9 +3069,15 @@ const AnimalFormModalV2 = ({
         }));
     }, [timelineNotes, pinnedEvents]);
 
-    const handleFileChange = (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const filesArray = Array.from(e.target.files);
+    const handleFileChange = async (e) => {
+        const input = e.target;
+        if (input.files && input.files.length > 0) {
+            // Copy the picked files into memory while the picker's permission grant is still
+            // live — see utils/pickedFiles.js. Keeping the raw handles is what made most phone
+            // photos unreadable in the editor ("Couldn't load a preview for this photo...")
+            // even though they were perfectly normal, small .jpg files.
+            const filesArray = await readFilesIntoMemory(Array.from(input.files));
+            input.value = ''; // allow re-picking the same photo later
             setImagesToEdit(filesArray);
             setImageEditorOpen(true);
         }
@@ -6600,9 +6615,12 @@ const AnimalFormModalV2 = ({
                                                             if (!file) return;
                                                             setMpSlotUploading(p => ({ ...p, [slotKey]: true }));
                                                             try {
+                                                                // Copy into memory first — phone pickers hand back one-shot content://
+                                                                // streams that can die before the upload reads them (see utils/pickedFiles.js).
+                                                                const [pickedFile] = await readFilesIntoMemory([file]);
                                                                 // Simplified image compression - using standard fetch
                                                                 const fd = new FormData();
-                                                                fd.append('file', file);
+                                                                fd.append('file', pickedFile);
                                                                 const up = await apiClient.post(`/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                                                                 setSlotField(slotKey, 'imageUrl', up.data.url);
                                                             } catch { showModalMessage('Upload failed', 'Could not upload ancestor image. Please try again.'); }
