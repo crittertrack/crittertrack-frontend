@@ -299,6 +299,9 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'Dutch',              label: 'Dutch',             code: 's/s+',           group: 'Pied' },
         { id: 'Berkshire',          label: 'Berkshire',         code: 's/s+',           group: 'Pied' },
 
+        // Belted — recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied)
+        { id: 'belted',             label: 'Belted',            code: 'bt/bt',          group: 'Belted' },
+
         // Dominant Spotting
         { id: 'variegated',         label: 'Variegated',        code: 'W/w',            group: 'Dominant Spotting' },
         { id: 'banded',             label: 'Banded',            code: 'Wsh/w',          group: 'Dominant Spotting' },
@@ -431,22 +434,26 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
     selectedTraits.forEach((id) => {
         switch (id) {
             // Base Color — Black series
+            // "black" is only the default base for a black-based dilute (and "agouti" below is only the
+            // default for an agouti-based one). Dilutes therefore set their A-locus default only if
+            // nothing has set the A locus yet, so a pattern chip such as Am. Brindle or Sable survives:
+            // Chocolate Brindle is Avy/a b/b, not a/a b/b.
             case 'black':            genotype.A  = 'a/a';     break;
             case 'tan':              genotype.A  = 'at/a';    break;
-            case 'chocolate':        genotype.A  = 'a/a';  genotype.B = 'b/b'; break;
-            case 'blue':             genotype.A  = 'a/a';  genotype.D = 'd/d'; break;
-            case 'dove':             genotype.A  = 'a/a';  genotype.P = 'p/p'; break;
-            case 'lilac':            genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; break;
-            case 'champagne':        genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
-            case 'silver':           genotype.A  = 'a/a';  genotype.D = 'd/d'; genotype.P = 'p/p'; break;
-            case 'lavender':         genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
+            case 'chocolate':        if (!genotype.A) genotype.A = 'a/a';  genotype.B = 'b/b'; break;
+            case 'blue':             if (!genotype.A) genotype.A = 'a/a';  genotype.D = 'd/d'; break;
+            case 'dove':             if (!genotype.A) genotype.A = 'a/a';  genotype.P = 'p/p'; break;
+            case 'lilac':            if (!genotype.A) genotype.A = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; break;
+            case 'champagne':        if (!genotype.A) genotype.A = 'a/a';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
+            case 'silver':           if (!genotype.A) genotype.A = 'a/a';  genotype.D = 'd/d'; genotype.P = 'p/p'; break;
+            case 'lavender':         if (!genotype.A) genotype.A = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
             // Base Color — Agouti series
             case 'agouti':           genotype.A  = 'A/A';     break;
             case 'white-bellied':    genotype.A  = 'Aw/A';    break;
-            case 'cinnamon':         genotype.A  = 'A/A';  genotype.B = 'b/b'; break;
-            case 'blue-agouti':      genotype.A  = 'A/A';  genotype.D = 'd/d'; break;
-            case 'argente':          genotype.A  = 'A/A';  genotype.P = 'p/p'; break;
-            case 'cinnamon-argente': genotype.A  = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
+            case 'cinnamon':         if (!genotype.A) genotype.A = 'A/A';  genotype.B = 'b/b'; break;
+            case 'blue-agouti':      if (!genotype.A) genotype.A = 'A/A';  genotype.D = 'd/d'; break;
+            case 'argente':          if (!genotype.A) genotype.A = 'A/A';  genotype.P = 'p/p'; break;
+            case 'cinnamon-argente': if (!genotype.A) genotype.A = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
             // Base Color — Other
             // Sable is Ay/at + umbrous (U comes from the Umbrous chip that Sable selects). Dominant Red
             // is also selected as a dependency, so it must not overwrite Ay/at with Ay/a.
@@ -488,6 +495,8 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             case 'Hereford':
             case 'Dutch':
             case 'Berkshire':        genotype.S  = 's/s+';    break;
+            // Belted is a separate recessive locus (bt/bt), not an S-locus allele
+            case 'belted':           genotype.Bt = 'bt/bt';   break;
             case 'variegated':       genotype.W  = 'W/w';     break;
             case 'banded':           genotype.W  = 'Wsh/w';   break;
             case 'Rumpwhite':        genotype.W  = 'Rw/w';    break;
@@ -796,6 +805,12 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
         if (deps) {
             for (const depGroup in deps) {
                 const depChipId = deps[depGroup];
+                // Black/Agouti here are only the *default* base for a dilute (they set A = a/a and
+                // A/A). If the user already picked a base, or a Tan/Fox chip that also sets the A
+                // locus, leave it alone so the dilute stacks on top of it: Am. Brindle + Chocolate
+                // keeps Avy/a, Sable + Chocolate keeps Ay/at, Tan + Chocolate keeps at/a.
+                const isDefaultBase = (depGroup === 'Base Color' && (depChipId === 'black' || depChipId === 'agouti'));
+                if (isDefaultBase && (nextTraits['Base Color'] || nextTraits['Tan, Fox & Shaded'])) continue;
                 if (nextTraits[depGroup] !== depChipId) {
                     nextTraits[depGroup] = depChipId;
                     queue.push(depChipId);

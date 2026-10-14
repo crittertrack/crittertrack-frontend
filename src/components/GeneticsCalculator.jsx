@@ -18,12 +18,12 @@ const GENE_LOCI = {
     description: 'Multiple alleles controlling base color with complex dominance. e.g. Black (a/a), Agouti (A/-), Tan (at/-), White-Bellied Agouti/Agouti Fox (Aw/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
       'ae/ae',
-      'a/ae', 'a/a', 'a/-',
+      'a/ae', 'a/a',
       'at/ae', 'at/a', 'at/at',
-      'A/ae', 'A/a', 'A/at', 'A/A', 'A/-',
-      'Aw/ae', 'Aw/a', 'Aw/at', 'Aw/A', 'Aw/Aw', 'Aw/-',
-      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/Aw', 'Avy/A', 'Avy/Avy', 'Avy/-',
-      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/Aw', 'Ay/A', 'Ay/Avy', 'Ay/-'
+      'A/ae', 'A/a', 'A/at', 'A/A',
+      'Aw/ae', 'Aw/a', 'Aw/at', 'Aw/A', 'Aw/Aw',
+      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/Aw', 'Avy/A', 'Avy/Avy',
+      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/Aw', 'Ay/A', 'Ay/Avy'
     ]
   },
   B: {
@@ -31,7 +31,7 @@ const GENE_LOCI = {
     description: 'Recessive. Turns black pigment brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
     combinations: [
       'b/b',
-      'B/b', 'B/B', 'B/-'
+      'B/b', 'B/B'
     ]
   },
   C: {
@@ -42,7 +42,7 @@ const GENE_LOCI = {
       'c/ch', 'ch/ch',
       'c/ce', 'ce/ch', 'ce/ce',
       'c/cch', 'ch/cch', 'ce/cch', 'cch/cch',
-      'C/c', 'C/ch', 'C/ce', 'C/cch', 'C/C', 'C/-'
+      'C/c', 'C/ch', 'C/ce', 'C/cch', 'C/C'
     ]
   },
   D: {
@@ -50,7 +50,7 @@ const GENE_LOCI = {
     description: 'Recessive. Dilutes pigment. e.g. Blue (d/d on black), Blue Agouti (d/d on agouti)',
     combinations: [
       'd/d',
-      'D/d', 'D/D', 'D/-'
+      'D/d', 'D/D'
     ]
   },
   E: {
@@ -58,7 +58,7 @@ const GENE_LOCI = {
     description: 'Recessive. Controls pigment expression. e.g. Recessive Red (e/e)',
     combinations: [
       'e/e',
-      'E/e', 'E/E', 'E/-'
+      'E/e', 'E/E'
     ]
   },
   Ln: {
@@ -66,7 +66,7 @@ const GENE_LOCI = {
     description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus.',
     combinations: [
       'ln/ln',
-      'Ln/ln', 'Ln/Ln', 'Ln/-'
+      'Ln/ln', 'Ln/Ln'
     ]
   },
   P: {
@@ -74,7 +74,7 @@ const GENE_LOCI = {
     description: 'Recessive. Dilutes pigment with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
     combinations: [
       'p/p',
-      'P/p', 'P/P', 'P/-'
+      'P/p', 'P/P'
     ]
   },
   S: {
@@ -82,7 +82,15 @@ const GENE_LOCI = {
     description: 'Recessive. White spotting patterns. e.g. Pied (s/s), Hereford (s/s+), Dutch (s/s+). The + represents polygenic modifiers that affect spotting pattern specifics.',
     combinations: [
       's/s', 's/s+',
-      'S/s', 'S/S', 'S/-', 'S/s+'
+      'S/s', 'S/S', 'S/s+'
+    ]
+  },
+  Bt: {
+    name: 'Belted',
+    description: 'Recessive. White belt of spotting across the back, often joining the belly spot to circle the body. e.g. Belted (bt/bt). Separate gene from Pied (S locus) — Adamts20, chr15. Het Bt/bt is usually solid, occasionally a belly spot.',
+    combinations: [
+      'bt/bt',
+      'Bt/bt', 'Bt/Bt'
     ]
   },
   U: {
@@ -111,7 +119,7 @@ const GENE_LOCI = {
     description: 'Dominant. White facial/body patches. e.g. Splashed (Spl/-). Tricolor = Splashed + Pied',
     combinations: [
       'spl/spl',
-      'Spl/spl', 'Spl/Spl', 'Spl/-'
+      'Spl/spl', 'Spl/Spl'
     ]
   },
   Rn: {
@@ -119,7 +127,7 @@ const GENE_LOCI = {
     description: 'Recessive. Intermingled white hairs. e.g. Roan (rn/rn - evenly intermingled white hairs), Merle (rn/rn - intermingled white hairs + solid patches of original color)',
     combinations: [
       'rn/rn',
-      'Rn/rn', 'Rn/Rn', 'Rn/-'
+      'Rn/rn', 'Rn/Rn'
     ]
   },
   Si: {
@@ -127,7 +135,7 @@ const GENE_LOCI = {
     description: 'Recessive. Silvering/ticking on coat. e.g. Pearl, Silvered. Not to be confused with the separate "Silver" phenotype (a/a d/d p/p).',
     combinations: [
       'si/si',
-      'Si/si', 'Si/Si', 'Si/-'
+      'Si/si', 'Si/Si'
     ]
   },
   Mobr: {
@@ -147,7 +155,7 @@ const GENE_LOCI = {
     description: 'Controls base coat length. Go/Go (wildtype) is shorthaired; go is the recessive longhair mutation. e.g. Shorthair (Go/-), Longhair (go/go)',
     combinations: [
       'go/go',
-      'Go/go', 'Go/Go', 'Go/-'
+      'Go/go', 'Go/Go'
     ]
   },
   Re: {
@@ -155,7 +163,7 @@ const GENE_LOCI = {
     description: 'Dominant. Curly coat. e.g. Astrex (Re/-), Texel = Astrex + Longhair (Re/- go/go)',
     combinations: [
       're/re',
-      'Re/re', 'Re/Re', 'Re/-'
+      'Re/re', 'Re/Re'
     ]
   },
   Sa: {
@@ -163,7 +171,7 @@ const GENE_LOCI = {
     description: 'High-sheen silky coat. Satin is recessive; only sa/sa shows the satin phenotype.',
     combinations: [
       'sa/sa',
-      'Sa/sa', 'Sa/Sa', 'Sa/-'
+      'Sa/sa', 'Sa/Sa'
     ]
   },
   Rst: {
@@ -171,7 +179,7 @@ const GENE_LOCI = {
     description: 'Whorls/rosettes in coat. Also called Abyssinian. Recessive; rst/rst shows rosette phenotype.',
     combinations: [
       'rst/rst',
-      'Rst/rst', 'Rst/Rst', 'Rst/-'
+      'Rst/rst', 'Rst/Rst'
     ]
   },
   Fz: {
@@ -179,7 +187,7 @@ const GENE_LOCI = {
     description: 'Recessive. Short fuzzy coat (fz/fz). Combined with other coat genes (e.g. Satin, Astrex) it creates unique textures.',
     combinations: [
       'fz/fz',
-      'Fz/fz', 'Fz/Fz', 'Fz/-'
+      'Fz/fz', 'Fz/Fz'
     ]
   },
   Nu: {
@@ -187,7 +195,7 @@ const GENE_LOCI = {
     description: 'Causes hairlessness. Dominant gene; Nu/- removes all coat expression, overriding other coat genes.',
     combinations: [
       'nu/nu',
-      'Nu/nu', 'Nu/Nu', 'Nu/-'
+      'Nu/nu', 'Nu/Nu'
     ]
   }
 };
@@ -226,6 +234,7 @@ const MOUSE_POSSIBLE_HET_LOCI = [
   { locus: 'Ln', name: 'Leaden' },
   { locus: 'P', name: 'Pink-eye' },
   { locus: 'S', name: 'Pied' },
+  { locus: 'Bt', name: 'Belted' },
   { locus: 'Spl', name: 'Splashed' },
   { locus: 'Go', name: 'Longhair' },
   { locus: 'Sa', name: 'Satin' },
@@ -487,7 +496,13 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
     if (genotype.S === 's/s' && !result.includes('Pied') && !result.includes('Tricolor')) {
       result += ' Pied';
     }
-    
+
+    // Add Belted — recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied).
+    // s/s and bt/bt can occur together, so Belted stacks instead of replacing Pied.
+    if (genotype.Bt === 'bt/bt' && !result.includes('Belted')) {
+      result += ' Belted';
+    }
+
     // Add W-locus markings
     if (genotype.W === 'W/w' && !result.includes('Variegated')) {
       result += ' Variegated';
@@ -675,7 +690,12 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
   } else if (genotype.S === 'S/s+') {
     carriers.push('Pied (with modifiers)');
   }
-  
+
+  // Bt-locus carriers (Belted)
+  if (genotype.Bt === 'Bt/bt' || genotype.Bt === 'bt/Bt') {
+    carriers.push('Belted');
+  }
+
   // P-locus carriers (Pink-eye)
   if (genotype.P === 'P/p' || genotype.P === 'p/P') carriers.push('Pink-eye');
   
@@ -1237,6 +1257,7 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
     (originalGenotype.Wsh && originalGenotype.Wsh !== '') ||
     (originalGenotype.Rw && originalGenotype.Rw !== '') ||
     (originalGenotype.S && originalGenotype.S !== '') ||
+    (originalGenotype.Bt && originalGenotype.Bt !== '') ||
     (originalGenotype.Mi && originalGenotype.Mi !== '') ||
     (originalGenotype.Rb && originalGenotype.Rb !== '')
   );
@@ -1300,6 +1321,16 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
         // carriers already contains 'Pied' from the unconditional S-locus check above
         return { phenotype: '', carriers, hidden, notes: [] };
       } else if (genotype.S === 'S/S') {
+        return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      }
+    }
+
+    // Bt locus alone
+    if (originalGenotype.Bt) {
+      if (genotype.Bt === 'Bt/bt') {
+        // carriers already contains 'Belted' from the unconditional Bt-locus check above
+        return { phenotype: '', carriers, hidden, notes: [] };
+      } else if (genotype.Bt === 'Bt/Bt') {
         return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
       }
     }
@@ -1471,6 +1502,12 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
   } else if (genotype.S === 's/s+' && !color.includes('Pied')) {
     markings.push('Pied');
     notes.push('s+ indicates polygenic modifiers affecting the spotting pattern (e.g., Hereford, Dutch).');
+  }
+
+  // Belted — recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied);
+  // stacks with Pied rather than replacing it (s/s + bt/bt is both).
+  if (genotype.Bt === 'bt/bt' && !color.includes('Belted')) {
+    markings.push('Belted');
   }
 
   // W-locus markings with all combinations
@@ -2074,6 +2111,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           if (locus === 'S' && (alleles === 'S/s' || alleles === 's/S')) {
             possibleCarriers.add('Pied');
           }
+          if (locus === 'Bt' && (alleles === 'Bt/bt' || alleles === 'bt/Bt')) {
+            possibleCarriers.add('Belted');
+          }
           if (locus === 'Rn' && (alleles === 'Rn/rn' || alleles === 'rn/Rn')) {
             possibleCarriers.add('Merle');
           }
@@ -2276,7 +2316,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
     
     // Marking add-on genes - always apply individually, never as a group
-    const markingGenes = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
+    const markingGenes = ['S', 'Bt', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
     
     // Coat/texture genes - only apply defaults if NONE are selected
     const coatGenes = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
@@ -2290,6 +2330,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       E: 'E/E',      // Extension (wild type)
       P: 'P/P',      // Black eye (wild type)
       S: 'S/S',      // Non-pied (wild type)
+      Bt: 'Bt/Bt',   // No belt (wild type)
       W: 'w/w',      // No white spotting
       Spl: 'spl/spl', // No splashed
       Rn: 'Rn/Rn',   // No merle
@@ -2414,7 +2455,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     // Mouse-only guard: incomplete color gene selection check
     if (selectedSpecies === 'Fancy Mouse') {
       const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'Ln'];
-      const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Mi', 'Rb'];
+      const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Bt', 'Mi', 'Rb'];
       const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
       const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
       if (selectedColorGenes.length === 1 && !selectedColorGenes.includes('A') && selectedMarkingGenes.length === 0) {
@@ -2766,6 +2807,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Pied': ['S'],
     'Dutch': ['S'],
     'Hereford': ['S'],
+    'Belted': ['Bt'],
     'Banded': ['W'],
     'Variegated': ['W'],
     'Rumpwhite': ['W'],
