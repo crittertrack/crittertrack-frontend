@@ -2982,6 +2982,16 @@ useEffect(() => {
                         )}
                         {/* Spacer if no toggles */}
                         {(isSelectable || hideControls) && <div></div>}
+                        {/* DNA icon (CTU2 only, ongoing check): rendered on every pass, so it
+                            appears the moment an animal gains a Genetic Code and disappears when
+                            it's cleared — no extra wiring needed. As the middle child of this
+                            justify-between row, it sits centred between the action toggles and
+                            the CTC ID. */}
+                        {userProfile?.id_public === 'CTU2' && !!(animal.geneticCode && animal.geneticCode.trim()) && (
+                            <span className="flex items-center justify-center" title="Has Genetic Code">
+                                <Dna size={14} className="text-teal-600 dark:text-teal-400" />
+                            </span>
+                        )}
                         {/* Fixed-height, right-aligned CTC ID, matching the public card's
                             px-2 pb-2 / text-xs treatment. h-5 keeps the row the same height
                             whether or not the toggles to its left are shown. */}
