@@ -7,18 +7,23 @@ import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, 
 import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
 import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabel, getBallPythonDisplayPhenotype, BALL_PYTHON_POSSIBLE_HET_LOCI } from '../data/ballPythonPhenotypeRules';
 
+// A-locus allele dominance, highest first. Aw (white-bellied agouti) sits between Avy and A:
+// dominant over A/at/a/ae, recessive to Ay and Avy.
+const A_LOCUS_DOMINANCE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
+
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
   A: {
     name: 'Agouti',
-    description: 'Multiple alleles controlling base color with complex dominance. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
+    description: 'Multiple alleles controlling base color with complex dominance. e.g. Black (a/a), Agouti (A/-), Tan (at/-), White-Bellied Agouti/Agouti Fox (Aw/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
       'ae/ae',
       'a/ae', 'a/a', 'a/-',
       'at/ae', 'at/a', 'at/at',
       'A/ae', 'A/a', 'A/at', 'A/A', 'A/-',
-      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy', 'Avy/-',
-      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/A', 'Ay/Avy', 'Ay/-'
+      'Aw/ae', 'Aw/a', 'Aw/at', 'Aw/A', 'Aw/Aw', 'Aw/-',
+      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/Aw', 'Avy/A', 'Avy/Avy', 'Avy/-',
+      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/Aw', 'Ay/A', 'Ay/Avy', 'Ay/-'
     ]
   },
   B: {
@@ -294,7 +299,7 @@ let lastMousePhenotypeBreakdown = { color: '', markings: '', coat: '', body: '' 
 export const getLastMousePhenotypeBreakdown = () => lastMousePhenotypeBreakdown;
 
 // Calculate phenotype from genotype
-const calculatePhenotype = (genotype, originalGenotype = null) => {
+const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
   lastMousePhenotypeBreakdown = { color: '', markings: '', coat: '', body: '' };
   // Parse allele combinations
   const parsed = {};
@@ -581,6 +586,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Check if this is A/at (agouti tan)
   const isAgoutiTan = genotype.A === 'A/at' || genotype.A === 'at/A';
 
+  // White-bellied agouti (Aw/Aw, or Aw paired with any of A/at/a/ae/-). Aw is fully dominant over
+  // all of those, so the phenotype is the same whatever it is paired with: agouti top, white/cream/
+  // tan belly. Without a C-locus dilute this is an unstandardized "Agouti Fox"; with c-ch/c-ch it is
+  // Chinchilla. Every dilution follows the matching agouti-tan ("Fox") name logic.
+  // (Ay/Aw and Avy/Aw are canonicalised Ay-first / Avy-first and handled by the Ay/Avy blocks.)
+  const isWhiteBellied = typeof genotype.A === 'string' && genotype.A.startsWith('Aw/');
+
   // Track ALL carriers EARLY (before any early returns for C-locus combinations)
   // This ensures carriers show regardless of C-locus phenotype combinations
   
@@ -593,7 +605,19 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   else if (genotype.A === 'a/ae' || genotype.A === 'ae/a') carriers.push('Extreme Black');
   else if (genotype.A === 'at/ae' || genotype.A === 'ae/at') carriers.push('Extreme Black');
   
+  // Track what Aw is paired with (Aw is fully dominant, so the partner is a hidden carrier)
+  if (genotype.A === 'Aw/A') carriers.push('Agouti');
+  else if (genotype.A === 'Aw/at') carriers.push('Tan');
+  else if (genotype.A === 'Aw/a') carriers.push('Black');
+  else if (genotype.A === 'Aw/ae') carriers.push('Extreme Black');
+
   // Track what Ay is paired with
+  if (genotype.A === 'Ay/Aw') {
+    if (!carriers.includes('White-Bellied Agouti')) carriers.push('White-Bellied Agouti');
+  }
+  else if (genotype.A === 'Avy/Aw') {
+    if (!carriers.includes('White-Bellied Agouti')) carriers.push('White-Bellied Agouti');
+  }
   if (genotype.A === 'Ay/ae' || genotype.A === 'ae/Ay') {
     if (!carriers.includes('Extreme Black')) carriers.push('Extreme Black');
   }
@@ -668,7 +692,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.Fz === 'Fz/fz' || genotype.Fz === 'fz/Fz') carriers.push('Fuzz');
 
   // Special handling for agouti tan (A/at) with C-locus combinations
-  if (isAgoutiTan && genotype.C !== 'C/C') {
+  if ((isAgoutiTan || isWhiteBellied) && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
     }
@@ -700,7 +724,19 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsAndTexture(applyDilution('Agouti Mock Chocolate Fox')), carriers, hidden, notes: [] };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsAndTexture(applyDilution('Chinchilla')), carriers, hidden, notes: [] };
+      // Chinchilla (agouti tan / white-bellied agouti + cch/cch). Chinchilla does not dilute
+      // brown (hiiret.fi), so b/b must show in the name rather than being dropped.
+      const chinBrown = genotype.B === 'b/b';
+      const chinBlue = genotype.D === 'd/d';
+      // Pink-eyed (p/p) chinchillated agouti = Argente Creme (hiiret.fi: "A/* cch/cch p/p").
+      // Only the plain B/B D/D case is sourced; brown/blue versions keep their names.
+      const chinPink = genotype.P === 'p/p' && !chinBrown && !chinBlue;
+      const chinName = chinPink
+        ? 'Argente Creme'
+        : chinBrown
+          ? (chinBlue ? 'Lilac Chinchilla' : 'Cinnamon Chinchilla')
+          : (chinBlue ? 'Blue Chinchilla' : 'Chinchilla');
+      return { phenotype: addMarkingsAndTexture(chinName), carriers, hidden, notes: [] };
     }
   }
 
@@ -738,7 +774,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsAndTexture(applyDilution('Agouti Mock Chocolate')), carriers, hidden, notes: [] };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsAndTexture(applyDilution('Silver Agouti')), carriers, hidden, notes: [] };
+      // Grey agouti (hiiret.fi): chinchilla dilutes the yellow band but NOT brown, so b/b gives a
+      // grey cinnamon and d/d a blued grey agouti.
+      const greyBrown = genotype.B === 'b/b';
+      const greyBlue = genotype.D === 'd/d';
+      // Pink-eyed (p/p) grey agouti = Argente Creme (hiiret.fi). Only the plain B/B D/D case is sourced.
+      const greyPink = genotype.P === 'p/p' && !greyBrown && !greyBlue;
+      const greyName = greyPink
+        ? 'Argente Creme'
+        : greyBrown
+          ? (greyBlue ? 'Lilac Grey Agouti' : 'Grey Cinnamon')
+          : (greyBlue ? 'Blue Grey Agouti' : 'Grey Agouti');
+      return { phenotype: addMarkingsAndTexture(greyName), carriers, hidden, notes: [] };
     }
   }
 
@@ -869,7 +916,23 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         return { phenotype: addMarkingsAndTexture('Black Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ce/ch', 'ch/ce')) {
-        return { phenotype: addMarkingsAndTexture(applyDilution(`Colorpoint Beige${suffix}`)), carriers, hidden, notes: [] };
+        // Dominant red + colorpoint: use the dominant red dilution names with a "Colorpoint" prefix
+        // (Colorpoint Dominant Red, ... Amber, ... Fawn); tan adds "Fox" through `suffix`.
+        const ayColorpointName =
+          isBrown && isDilute && isPinkEye ? 'Dominant Red Lavender'
+          : isDilute && isPinkEye ? 'Dominant Fawn Amber'
+          : isBrown && isPinkEye ? 'Dominant Fawn Chocolate'
+          : isBrown && isDilute ? 'Dominant Red Lilac'
+          : isBrown ? 'Dominant Red Chocolate'
+          : isDilute ? 'Dominant Amber'
+          : isPinkEye ? 'Dominant Fawn'
+          : 'Dominant Red';
+        return {
+          phenotype: addMarkingsAndTexture(`Colorpoint ${ayColorpointName}${suffix}`),
+          carriers,
+          hidden,
+          notes: ['Likely off-white to white.']
+        };
       }
       if (isCCombo('ce/ce')) {
         const underlyingColor = applyDilution('Beige');
@@ -879,13 +942,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         return { phenotype: addMarkingsAndTexture('Black Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('cch/c', 'c/cch')) {
-        return { phenotype: addMarkingsAndTexture(`${baseName} Stone${suffix}`), carriers, hidden, notes: [] };
+        return {
+          phenotype: addMarkingsAndTexture(`${baseName} Stone${suffix}`),
+          carriers,
+          hidden,
+          notes: ['Likely off-white to white, depending on modifiers.']
+        };
       }
       if (isCCombo('cch/ch', 'ch/cch')) {
-        return { phenotype: addMarkingsAndTexture(`${baseName} Burmese${suffix}`), carriers, hidden, notes: [] };
+        return {
+          phenotype: addMarkingsAndTexture(`${baseName} Burmese${suffix}`),
+          carriers,
+          hidden,
+          notes: ['Likely off-white to white.']
+        };
       }
       if (isCCombo('cch/ce', 'ce/cch')) {
-        return { phenotype: addMarkingsAndTexture(`${baseName} Mock Chocolate${suffix}`), carriers, hidden, notes: [] };
+        return {
+          phenotype: addMarkingsAndTexture(`${baseName} Mock Chocolate${suffix}`),
+          carriers,
+          hidden,
+          notes: ['Likely creamish to white, depending on modifiers.']
+        };
       }
       if (genotype.C === 'cch/cch') {
         return { phenotype: addMarkingsAndTexture(isTanVariant ? 'Cream Fox' : 'Cream'), carriers, hidden, notes: [] };
@@ -902,13 +980,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle dilute + pink-eye combination
     if (isDilute && isPinkEye) {
-      color = 'Dominant Fawn Amber';
+      color = isTanVariant ? 'Dominant Fawn Amber Tan' : 'Dominant Fawn Amber';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
     // Handle brown + pink-eye combination
     if (isBrown && isPinkEye) {
-      color = 'Dominant Fawn Chocolate';
+      color = isTanVariant ? 'Dominant Fawn Chocolate Tan' : 'Dominant Fawn Chocolate';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
@@ -949,7 +1027,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Recessive red (e/e) - but still process all other traits
   if (genotype.E === 'e/e') {
-    const isTanVariant = genotype.A && genotype.A.includes('at');
+    // Aw is dominant over at, so Aw/at is white-bellied agouti, not tan
+    const isTanVariant = genotype.A && genotype.A.includes('at') && !isWhiteBellied;
     const isDilute = genotype.D === 'd/d';
     const isPinkEye = genotype.P === 'p/p';
 
@@ -968,7 +1047,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Leaden (ln/ln) - but still process all other traits
   if (genotype.Ln === 'ln/ln') {
     let baseColor = 'Leaden';
-    if (genotype.A && genotype.A.includes('at')) {
+    if (genotype.A && genotype.A.includes('at') && !isWhiteBellied) {
       baseColor = 'Leaden Tan';
     }
 
@@ -1070,10 +1149,31 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle brown + dilute combination
     if (isBrown && isDilute) {
-      color = isTanVariant ? 'Lilac Brindle Tan' : isAgouti ? 'Cinnamon Argente Brindle' : 'Lilac Brindle';
+      color = isTanVariant ? 'Lilac Brindle Tan' : isAgouti ? 'Lilac Agouti Brindle' : 'Lilac Brindle';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
+    // Agouti brindle + pink-eye combined with ONE other dilution: keep the p/p in the name.
+    // (Plain brown/blue would otherwise return first and silently drop it.)
+    if (isAgouti && isPinkEye && isBrown) {
+      color = 'Cinnamon Argente Brindle';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
+    if (isAgouti && isPinkEye && isDilute) {
+      color = 'Blue Argente Brindle';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
+    // Self / tan brindle: same idea, using the self-based names (Champagne = b/b p/p,
+    // Silver = d/d p/p), matching a/a and at/a naming.
+    if (!isAgouti && isPinkEye && isBrown) {
+      color = isTanVariant ? 'Champagne Brindle Tan' : 'Champagne Brindle';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
+    if (!isAgouti && isPinkEye && isDilute) {
+      color = isTanVariant ? 'Silver Brindle Tan' : 'Silver Brindle';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
+
     // Handle brown modifier
     if (isBrown) {
       color = isTanVariant ? 'Chocolate Brindle Tan' : isAgouti ? 'Cinnamon Brindle' : 'Chocolate Brindle';
@@ -1094,7 +1194,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle pink-eyed dilution
     if (genotype.P === 'p/p') {
-      color = isTanVariant ? 'Champagne Brindle Tan' : isAgouti ? 'Cinnamon Argente Brindle' : 'Champagne Brindle';
+      color = isTanVariant ? 'Dove Brindle Tan' : isAgouti ? 'Argente Brindle' : 'Dove Brindle';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
@@ -1103,7 +1203,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Base color determination
-  const isAgoutiPattern = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A'));
+  const isAgoutiPattern = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A') || isWhiteBellied);
   const isTanPattern = isTanVariant && !isAgoutiPattern;
   const isBlackPattern = isSelfBlackVariant;
   const isExtremeBlackPattern = genotype.A === 'ae/ae';
@@ -1256,10 +1356,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (isAgoutiPattern) {
     // Only set color if not already set by C-locus special colors
     if (!color) {
-      // Check for A/at (agouti tan)
-      if (genotype.A === 'A/at') {
+      // White-bellied agouti: same naming logic as agouti tan, but "Fox" (white/cream belly)
+      if (isWhiteBellied) {
         if (genotype.P === 'p/p') {
-          color = 'Argente Tan';
+          color = isBrown ? 'Cinnamon Argente Fox' : 'Argente Fox';
+        } else {
+          color = isBrown ? 'Cinnamon Fox' : 'Agouti Fox';
+        }
+      }
+      // Check for A/at (agouti tan)
+      else if (genotype.A === 'A/at') {
+        if (genotype.P === 'p/p') {
+          color = isBrown ? 'Cinnamon Argente Tan' : 'Argente Tan';
         } else {
           color = isBrown ? 'Cinnamon Tan' : 'Agouti Tan';
         }
@@ -1300,8 +1408,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Chocolate') color = 'Lilac';
     else if (color === 'Agouti') color = 'Blue Agouti';
     else if (color === 'Agouti Tan') color = 'Blue Agouti Tan';
-    else if (color === 'Cinnamon') color = 'Cinnamon Argente';
-    else if (color === 'Cinnamon Tan') color = 'Cinnamon Argente Tan';
+    // Brown + blue agouti = Lilac Agouti (hiiret: "blue cinnamon or lilac agouti"). NOT "Cinnamon
+    // Argente" — Argente means pink-eyed (p/p), which this mouse is not.
+    else if (color === 'Cinnamon') color = 'Lilac Agouti';
+    else if (color === 'Cinnamon Tan') color = 'Lilac Agouti Tan';
+    else if (color === 'Agouti Fox') color = 'Blue Agouti Fox';
+    else if (color === 'Cinnamon Fox') color = 'Lilac Agouti Fox';
+    // Blue + pink-eyed agouti (hiiret: unnamed/unstandardized) — calculator's own name
+    else if (color === 'Argente') color = 'Blue Argente';
+    else if (color === 'Argente Tan') color = 'Blue Argente Tan';
+    else if (color === 'Argente Fox') color = 'Blue Argente Fox';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
     else if (color === 'Dove') color = 'Silver';
@@ -1326,6 +1442,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Lilac Tan') color = 'Lavender Tan';
     else if (color === 'Cinnamon Argente') color = 'Lavender Agouti';
     else if (color === 'Cinnamon Argente Tan') color = 'Lavender Agouti Tan';
+    else if (color === 'Cinnamon Argente Fox') color = 'Lavender Agouti Fox';
   }
 
   if (genotype.P === 'p/p') {
@@ -1490,6 +1607,255 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
 };
 
+// Leaden (ln/ln) is a "blue mimic": it looks like the blue dilution (d/d) on black pigment, and every
+// combination is listed under the matching Blue colour (farbmausfarben.de; AFRMA "Blue Mimic Mice").
+// So a leaden mouse is named exactly like the d/d version of the same genotype, including dominant
+// red (Ay + leaden = Dominant Amber, per farbmausfarben.de). The one exception is recessive red
+// (e/e): leaden is reported to mask recessive yellow completely, so e/e mice keep their normal name.
+// When a mouse is both Ay and e/e, the Ay rule wins (the sources only cover each case separately).
+const LEADEN_MIMIC_NOTE = 'Leaden looks like Blue; tan belly can stay richer.';
+const LEADEN_RECESSIVE_RED_NOTE = 'Leaden might mask recessive red.';
+// Ay or Avy together with recessive red (e/e), with or without U.
+const AY_AVY_RECESSIVE_RED_NOTE = 'Ay, Avy and e/e can look identical so which are present can only be determined by genotype.';
+
+// Sable / Marten Sable (hiiret.fi, AFRMA): the only true Sable is Ay/at + umbrous (U). Marten Sable is
+// the chinchillated version (Ay/at + cch/cch + U). The core flow ignores U on Ay/at mice, so the Sable
+// name is applied on top of the core result. Named dilutions are the ones hiiret/AFRMA actually name
+// (chocolate, blue, lilac/dove sable; chocolate, blue, lilac marten sable). Other dilutions keep their
+// core name and get a note instead of an invented one.
+// Every b/d/p combination of Ay/at + U is still a (diluted) Sable. Chocolate, Blue, Lilac and Dove
+// Sable (and the Marten versions of chocolate/blue/lilac) are named by hiiret/AFRMA. Champagne,
+// Silver and Lavender Sable, and Dove/Champagne/Silver/Lavender Marten Sable, are the calculator's
+// own names, built from the same self-colour pattern (Champagne = b/b p/p, Silver = d/d p/p,
+// Lavender = b/b d/d p/p).
+const SABLE_NAMES = {
+  'B/B|D/D|P/P': 'Sable',
+  'b/b|D/D|P/P': 'Chocolate Sable',
+  'B/B|d/d|P/P': 'Blue Sable',
+  'b/b|d/d|P/P': 'Lilac Sable',
+  'B/B|D/D|p/p': 'Dove Sable',
+  'b/b|D/D|p/p': 'Champagne Sable',
+  'B/B|d/d|p/p': 'Silver Sable',
+  'b/b|d/d|p/p': 'Lavender Sable',
+};
+const MARTEN_SABLE_NAMES = {
+  'B/B|D/D|P/P': 'Marten Sable',
+  'b/b|D/D|P/P': 'Chocolate Marten Sable',
+  'B/B|d/d|P/P': 'Blue Marten Sable',
+  'b/b|d/d|P/P': 'Lilac Marten Sable',
+  'B/B|D/D|p/p': 'Dove Marten Sable',
+  'b/b|D/D|p/p': 'Champagne Marten Sable',
+  'B/B|d/d|p/p': 'Silver Marten Sable',
+  'b/b|d/d|p/p': 'Lavender Marten Sable',
+};
+const SABLE_FULL_COLOR_C = ['C/C', 'C/c', 'C/ch', 'C/ce', 'C/cch'];
+// Dominant red (Ay) and brindle (Avy) umbrous mice are NOT true Sables, but in the hobby they are still
+// often called sable. They get the "Umbrous" label in the name plus this single note.
+// (Black, agouti and tan umbrous mice keep their own notes above and do not get this one.)
+const UMBROUS_HOBBY_SABLE_NOTE = 'Often called sable in the hobby.';
+// Avy (brindle) + U without Ay.
+const UMBROUS_HOBBY_BRINDLE_SABLE_NOTE = 'Often called Brindle Sable in the hobby.';
+// Any Aw genotype (with or without U) that is not cch/cch: Aw gives a variable white/cream/tan belly.
+// Applied in calculatePhenotype, and it is the only Aw note (it also covers Ay/Aw and Avy/Aw).
+const AW_BELLY_NOTE = 'Belly may appear tan, cream or fox due to Aw.';
+
+const applySableLogic = (result, genotype) => {
+  const isUmbrous = typeof genotype.U === 'string' && genotype.U.includes('U');
+  // e/e mice are left alone here: recessive red + U ("rec. Sable") is still being audited.
+  if (!result || !isUmbrous || typeof genotype.A !== 'string') return result;
+  if (genotype.E === 'e/e') {
+    // Recessive red + U: the name already says "Umbrous"; add the hobby note. White mice hide it,
+    // and e/e with Ay/Avy is left as it was.
+    const a = genotype.A.split('/');
+    const isWhite = /^(Albino|Pink Eye White|Black Eye White)/.test(String(result.phenotype));
+    if (isWhite) return result;
+    // Ay and Avy mice (including Ay/at, which becomes a Sable) fall through to the same logic as
+    // their E/E versions below.
+    if (!a.includes('Ay') && !a.includes('Avy')) {
+      // C-dilute colour paths (tan/fox, agouti) return their own name without "Umbrous": add it after
+      // the colour name, as for non-e/e mice.
+      let named = result;
+      const eeColor = lastMousePhenotypeBreakdown.color;
+      if (eeColor && !/Umbrous/.test(String(result.phenotype)) && String(result.phenotype).startsWith(eeColor)) {
+        lastMousePhenotypeBreakdown.color = `${eeColor} Umbrous`;
+        named = { ...result, phenotype: `${eeColor} Umbrous${String(result.phenotype).slice(eeColor.length)}` };
+      }
+      return { ...named, notes: [...(named.notes || []), UMBROUS_HOBBY_SABLE_NOTE] };
+    }
+  }
+
+  // A white mouse hides the umbrous/sable pattern entirely, so no sable or umbrous note applies.
+  if (/^(Albino|Pink Eye White|Black Eye White)/.test(String(result.phenotype))) return result;
+
+  const alleles = genotype.A.split('/');
+  const hasAt = alleles.includes('at');
+  const hasAy = alleles.includes('Ay');
+  const withNote = (text) => ({ ...result, notes: [...(result.notes || []), text] });
+
+  if (genotype.A === 'Ay/at') {
+    const key = `${genotype.B === 'b/b' ? 'b/b' : 'B/B'}|${genotype.D === 'd/d' ? 'd/d' : 'D/D'}|${genotype.P === 'p/p' ? 'p/p' : 'P/P'}`;
+    let sableName = null;
+    if (SABLE_FULL_COLOR_C.includes(genotype.C)) sableName = SABLE_NAMES[key];
+    else if (genotype.C === 'cch/cch') sableName = MARTEN_SABLE_NAMES[key];
+    // No sable name for this C-locus combination (Stone Fox, Burmese Fox and so on): still a Sable,
+    // so add "Sable" after the core colour name, e.g. "Dominant Red Stone Fox Sable".
+    if (!sableName) {
+      const cColor = lastMousePhenotypeBreakdown.color;
+      if (cColor && !/Sable/.test(String(result.phenotype)) && String(result.phenotype).startsWith(cColor)) {
+        lastMousePhenotypeBreakdown.color = `${cColor} Sable`;
+        return { ...result, phenotype: `${cColor} Sable${String(result.phenotype).slice(cColor.length)}` };
+      }
+      return result;
+    }
+
+    const coreColor = lastMousePhenotypeBreakdown.color;
+    if (coreColor && String(result.phenotype).startsWith(coreColor)) {
+      lastMousePhenotypeBreakdown.color = sableName;
+      return { ...result, phenotype: sableName + String(result.phenotype).slice(coreColor.length) };
+    }
+    return result;
+  }
+  // Dominant red / brindle + U (not Ay/at): state "Umbrous" in the name and mention the hobby usage.
+  if (hasAy || alleles.includes('Avy')) {
+    const coreColor = lastMousePhenotypeBreakdown.color;
+    let named = result;
+    if (coreColor && String(result.phenotype).startsWith(coreColor)) {
+      lastMousePhenotypeBreakdown.color = `${coreColor} Umbrous`;
+      named = { ...result, phenotype: `${coreColor} Umbrous${String(result.phenotype).slice(coreColor.length)}` };
+    }
+    // Ay or Avy (including Avy/at): not a true Sable, but still often called sable in the hobby.
+    // (Ay/at is handled above as a true Sable.)
+    const hobbyNote = hasAy ? UMBROUS_HOBBY_SABLE_NOTE : UMBROUS_HOBBY_BRINDLE_SABLE_NOTE;
+    return { ...named, notes: [...(named.notes || []), hobbyNote] };
+  }
+  // Everything else with U (a/a, A/A, Aw/Aw, at/a, A/at and so on): no note. The main colour flow
+  // already adds "Umbrous". The C-locus colour paths (Sepia Fox, Beige Fox, Agouti Siamese and so on)
+  // return their own name early, so add "Umbrous" after the colour name here.
+  const cColor = lastMousePhenotypeBreakdown.color;
+  if (cColor && !/Umbrous/.test(String(result.phenotype)) && String(result.phenotype).startsWith(cColor)) {
+    lastMousePhenotypeBreakdown.color = `${cColor} Umbrous`;
+    return { ...result, phenotype: `${cColor} Umbrous${String(result.phenotype).slice(cColor.length)}` };
+  }
+  return result;
+};
+
+// Recessive red (e/e) + a C-locus dilute: keep the recessive red name and add the C-dilute name,
+// e.g. "Recessive Red Chinchilla", "Recessive Red Siamese". Tan (at) + a C-dilute is always a fox, so
+// tan mice get "Fox" on the end ("Recessive Red Siamese Fox"). Ay/Avy mice are not handled here.
+// The C-dilute early-return paths otherwise drop e/e from the name.
+const C_DILUTE_NAMES = {
+  'cch/cch': 'Chinchilla', 'ch/ch': 'Siamese', 'ch/c': 'Himalayan', 'c/ch': 'Himalayan',
+  'ce/ce': 'Beige', 'ce/c': 'Bone', 'c/ce': 'Bone', 'ce/ch': 'Colorpoint Beige', 'ch/ce': 'Colorpoint Beige',
+  'cch/c': 'Stone', 'c/cch': 'Stone', 'ch/cch': 'Burmese', 'cch/ch': 'Burmese', 'ce/cch': 'Mock Chocolate', 'cch/ce': 'Mock Chocolate',
+};
+const applyRecessiveRedCDilute = (result, genotype) => {
+  if (!result || !genotype || genotype.E !== 'e/e' || typeof genotype.A !== 'string') return result;
+  const alleles = genotype.A.split('/');
+  if (alleles.includes('Ay') || alleles.includes('Avy')) return result;
+  const diluteName = C_DILUTE_NAMES[genotype.C];
+  if (!diluteName) return result;
+  // Tan + a C-dilute is always a fox. This includes Aw/at, so every mouse carrying at is a fox here.
+  const isTanFox = alleles.includes('at');
+
+  const isPink = genotype.P === 'p/p';
+  const isBlue = genotype.D === 'd/d';
+  const baseName = isPink && isBlue ? 'Recessive Fawn Amber' : isPink ? 'Recessive Fawn' : isBlue ? 'Recessive Amber' : 'Recessive Red';
+  const phenotype = String(result.phenotype);
+  const newColor = `${baseName} ${diluteName}${isTanFox ? ' Fox' : ''}`;
+
+  // Core already named it "<base>" or "<base> Tan" (for example the Himalayan carrier case): replace that part.
+  const tanPrefix = `${baseName} Tan`;
+  if (isTanFox && phenotype.startsWith(tanPrefix)) {
+    return { ...result, phenotype: newColor + phenotype.slice(tanPrefix.length) };
+  }
+  if (phenotype.startsWith(baseName)) {
+    return { ...result, phenotype: newColor + phenotype.slice(baseName.length) };
+  }
+  // A C-dilute colour path named it (for example "Sepia Fox"): replace that colour, keeping "Umbrous".
+  const coreColor = lastMousePhenotypeBreakdown.color;
+  if (coreColor && phenotype.startsWith(coreColor)) {
+    const keepUmbrous = / Umbrous$/.test(coreColor) ? ' Umbrous' : '';
+    lastMousePhenotypeBreakdown.color = newColor + keepUmbrous;
+    return { ...result, phenotype: newColor + keepUmbrous + phenotype.slice(coreColor.length) };
+  }
+  return result;
+};
+
+const calculatePhenotype = (genotype, originalGenotype = null) => {
+  // Only when the A locus was actually chosen: with no A locus the core returns its own
+  // "select A-locus" guidance and still needs to see the real ln/ln value.
+  const aLocusChosen = !originalGenotype || (originalGenotype.A && originalGenotype.A !== '');
+  let effective = genotype;
+  let leadenNote = null;
+  if (genotype && genotype.Ln === 'ln/ln' && aLocusChosen) {
+    const isDominantRed = typeof genotype.A === 'string' && genotype.A.startsWith('Ay/');
+    const isMaskedByRecessiveRed = genotype.E === 'e/e' && !isDominantRed;
+    effective = isMaskedByRecessiveRed ? { ...genotype, Ln: 'Ln/Ln' } : { ...genotype, Ln: 'Ln/Ln', D: 'd/d' };
+    leadenNote = isMaskedByRecessiveRed ? LEADEN_RECESSIVE_RED_NOTE : LEADEN_MIMIC_NOTE;
+  }
+  const baseResult = calculatePhenotypeCore(effective, originalGenotype);
+  let result = leadenNote ? { ...baseResult, notes: [...(baseResult.notes || []), leadenNote] } : baseResult;
+  // Sable / umbrous logic uses the leaden-adjusted genotype so Ay/at + leaden + U is a Blue Sable.
+  if (aLocusChosen && effective) result = applySableLogic(result, effective);
+  if (aLocusChosen && effective) result = applyRecessiveRedCDilute(result, effective);
+  // Ay or Avy together with recessive red (e/e): the two reds can look identical, with or without U.
+  // White mice (Albino, Pink Eye White, Black Eye White) hide the colour, so no note there.
+  if (aLocusChosen && effective && effective.E === 'e/e' && typeof effective.A === 'string'
+      && (effective.A.split('/').includes('Ay') || effective.A.split('/').includes('Avy'))
+      && !/^(Albino|Pink Eye White|Black Eye White)/.test(String(result && result.phenotype))) {
+    result = { ...result, notes: [...(result.notes || []), AY_AVY_RECESSIVE_RED_NOTE] };
+  }
+  // Aw/at, plain "Agouti Fox" colour only (with or without U): named White-Bellied Agouti Tan
+  // (White-Bellied Agouti Tan Umbrous with U). Dilutions and C-locus colours keep their names.
+  // The breakdown object is not filled on this path, so only the phenotype text is changed.
+  if (aLocusChosen && genotype && genotype.A === 'Aw/at' && String(result.phenotype).startsWith('Agouti Fox')) {
+    result = { ...result, phenotype: 'White-Bellied Agouti Tan' + String(result.phenotype).slice('Agouti Fox'.length) };
+  }
+  // Aw/Aw, Aw/A, Aw/a and Aw/ae (every Aw genotype except Aw/at, handled above), plain colour only,
+  // with or without U: named White-Bellied Agouti (White-Bellied Agouti Umbrous with U).
+  if (aLocusChosen && genotype && typeof genotype.A === 'string' && genotype.A.split('/').includes('Aw') && genotype.A !== 'Aw/at' && String(result.phenotype).startsWith('Agouti Fox')) {
+    result = { ...result, phenotype: 'White-Bellied Agouti' + String(result.phenotype).slice('Agouti Fox'.length) };
+  }
+  // Aw/at + e/e without a C-dilute: named Recessive Red Tan, like the other at mice. (With a C-dilute
+  // it is already a "... Fox" via applyRecessiveRedCDilute.) Only Aw/at: Aw/Aw, Aw/A and Aw/a stay
+  // "Recessive Red" because they carry no at.
+  if (aLocusChosen && genotype && genotype.A === 'Aw/at' && genotype.E === 'e/e' && /^Recessive (Red|Amber|Fawn|Fawn Amber)( Umbrous)?( |$)/.test(String(result.phenotype)) && !/ (Fox|Tan)\b/.test(String(result.phenotype))) {
+    const m = String(result.phenotype).match(/^(Recessive (?:Fawn Amber|Fawn|Amber|Red))(.*)$/);
+    if (m) result = { ...result, phenotype: `${m[1]} Tan${m[2]}` };
+  }
+  // Every Aw genotype except cch/cch gets the variable-belly note, except white mice (Albino,
+  // Pink Eye White, Black Eye White), which hide the belly entirely.
+  const isWhiteMouse = /^(Albino|Pink Eye White|Black Eye White)/.test(String(result && result.phenotype));
+  if (aLocusChosen && genotype && typeof genotype.A === 'string' && genotype.A.split('/').includes('Aw') && genotype.C !== 'cch/cch' && !isWhiteMouse) {
+    result = { ...result, notes: [...(result.notes || []), AW_BELLY_NOTE] };
+  }
+  // Tan + cch/cch (Sepia Fox and its dilutions): pink-eye (p/p) changes the name, following the self
+  // colours (Dove = p/p, Champagne = b/b p/p, Silver = d/d p/p, Lavender = b/b d/d p/p). Own names.
+  const pinkFoxPrefix = { '': 'Dove ', 'Chocolate ': 'Champagne ', 'Blue ': 'Silver ', 'Lilac ': 'Lavender ' };
+  if (aLocusChosen && effective && effective.P === 'p/p') {
+    const pm = String(result && result.phenotype).match(/^(Chocolate |Blue |Lilac )?Sepia Fox\b/);
+    if (pm) {
+      const prefix = pinkFoxPrefix[pm[1] || ''];
+      result = { ...result, phenotype: prefix + String(result.phenotype).slice((pm[1] || '').length) };
+      // Keep the "Seed to Appearance" colour in step with the new name.
+      const bdColor = lastMousePhenotypeBreakdown.color;
+      const bm = String(bdColor).match(/^(Chocolate |Blue |Lilac )?Sepia Fox\b/);
+      if (bm) lastMousePhenotypeBreakdown.color = prefix + String(bdColor).slice((bm[1] || '').length);
+    }
+  }
+  // Those fox colours are also called Black / Chocolate / Blue / Lilac Fox (hiiret.fi, AFRMA). The
+  // pink-eyed ones (Dove / Champagne / Silver / Lavender Fox) are the same pattern, not from a source.
+  const foxAliasNames = {
+    'Sepia Fox': 'Black Fox', 'Chocolate Sepia Fox': 'Chocolate Fox', 'Blue Sepia Fox': 'Blue Fox', 'Lilac Sepia Fox': 'Lilac Fox',
+    'Dove Sepia Fox': 'Dove Fox', 'Champagne Sepia Fox': 'Champagne Fox', 'Silver Sepia Fox': 'Silver Fox', 'Lavender Sepia Fox': 'Lavender Fox',
+  };
+  const foxAlias = String(result && result.phenotype).match(/^((?:Chocolate |Blue |Lilac |Dove |Champagne |Silver |Lavender )?Sepia Fox)\b/);
+  if (foxAlias && foxAliasNames[foxAlias[1]]) {
+    result = { ...result, notes: [...(result.notes || []), `Also known as ${foxAliasNames[foxAlias[1]]}.`] };
+  }
+  return result;
+};
+
 const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole = null }) => {
   // Species and genetics data states
   const [selectedSpecies, setSelectedSpecies] = useState('Fancy Mouse');
@@ -1509,8 +1875,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     const parts = codeString.replace(/,/g, ' ').trim().split(/\s+/);
     
     parts.forEach(part => {
-      // Try to match format with slash: A/A, a/a, Go/go, etc.
-      let match = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+      // Try to match format with slash: A/A, a/a, Go/go, etc. An allele may end in "+"
+      // (polygenic modifiers, e.g. s/s+ for Hereford/Dutch).
+      let match = part.match(/^([A-Za-z]+\+?)\/([A-Za-z]+\+?)$/);
       let allele1, allele2;
       
       if (match) {
@@ -1671,6 +2038,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           if (locus === 'A' && (alleles === 'Ay/A' || alleles === 'A/Ay' || alleles === 'Avy/A' || alleles === 'A/Avy')) {
             possibleCarriers.add('Agouti');
           }
+          if (locus === 'A' && (alleles === 'Ay/Aw' || alleles === 'Aw/Ay' || alleles === 'Avy/Aw' || alleles === 'Aw/Avy')) {
+            possibleCarriers.add('White-Bellied Agouti');
+          }
+          if (locus === 'A' && (alleles === 'Aw/A' || alleles === 'A/Aw')) possibleCarriers.add('Agouti');
+          if (locus === 'A' && (alleles === 'Aw/at' || alleles === 'at/Aw')) possibleCarriers.add('Tan');
+          if (locus === 'A' && (alleles === 'Aw/a' || alleles === 'a/Aw')) possibleCarriers.add('Black');
+          if (locus === 'A' && (alleles === 'Aw/ae' || alleles === 'ae/Aw')) possibleCarriers.add('Extreme Black');
           if (locus === 'B' && (alleles === 'B/b' || alleles === 'b/B')) {
             possibleCarriers.add('Chocolate');
           }
@@ -1972,6 +2346,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       for (const a1 of parent1Alleles) {
         for (const a2 of parent2Alleles) {
           const alleles = [a1, a2].sort((a, b) => {
+            // A-locus alleles are ordered by dominance (Ay > Avy > Aw > A > at > a > ae) so the
+            // combo key always matches a GENE_LOCI entry (e.g. 'Ay/Aw', never 'Aw/Ay').
+            if (locus === 'A') {
+              const ra = A_LOCUS_DOMINANCE_ORDER.indexOf(a);
+              const rb = A_LOCUS_DOMINANCE_ORDER.indexOf(b);
+              if (ra !== -1 && rb !== -1) return ra - rb;
+            }
             if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
             if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
             return a.localeCompare(b);
@@ -2251,12 +2632,23 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Cinnamon': ['A', 'B'],
     'Blue Agouti': ['A', 'D'],
     'Cinnamon Argente': ['A', 'B', 'P'],
+    'Lilac Agouti': ['A', 'B', 'D'],
+    'Lilac Agouti Tan': ['A', 'B', 'D'],
+    'Lilac Agouti Fox': ['A', 'B', 'D'],
+    'Blue Argente': ['A', 'D', 'P'],
+    'Blue Argente Tan': ['A', 'D', 'P'],
+    'Blue Argente Fox': ['A', 'D', 'P'],
     'Black Tan': ['A'],
     'Blue Tan': ['A', 'D'],
     'Chocolate Tan': ['A', 'B'],
     'Lilac Tan': ['A', 'B', 'D'],
     'Dove Tan': ['A', 'P'],
     'Agouti Tan': ['A'],
+    'Agouti Fox': ['A'],
+    'Cinnamon Fox': ['A', 'B'],
+    'Argente Fox': ['A', 'P'],
+    'Blue Agouti Fox': ['A', 'D'],
+    'Cinnamon Argente Fox': ['A', 'B', 'P'],
     'Argente Tan': ['A', 'P'],
     'Blue Agouti Tan': ['A', 'D'],
     'Champagne Tan': ['A', 'B', 'P'],
@@ -2265,6 +2657,21 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Lavender Tan': ['A', 'B', 'D', 'P'],
     'Silver Tan': ['A', 'D', 'P'],
     'Sable': ['A', 'U'],
+    'Chocolate Sable': ['A', 'B', 'U'],
+    'Blue Sable': ['A', 'D', 'U'],
+    'Lilac Sable': ['A', 'B', 'D', 'U'],
+    'Dove Sable': ['A', 'P', 'U'],
+    'Marten Sable': ['A', 'C', 'U'],
+    'Chocolate Marten Sable': ['A', 'C', 'B', 'U'],
+    'Blue Marten Sable': ['A', 'C', 'D', 'U'],
+    'Lilac Marten Sable': ['A', 'C', 'B', 'D', 'U'],
+    'Champagne Sable': ['A', 'B', 'P', 'U'],
+    'Silver Sable': ['A', 'D', 'P', 'U'],
+    'Lavender Sable': ['A', 'B', 'D', 'P', 'U'],
+    'Dove Marten Sable': ['A', 'C', 'P', 'U'],
+    'Champagne Marten Sable': ['A', 'C', 'B', 'P', 'U'],
+    'Silver Marten Sable': ['A', 'C', 'D', 'P', 'U'],
+    'Lavender Marten Sable': ['A', 'C', 'B', 'D', 'P', 'U'],
     'Albino': ['C'],
     'Bone': ['C'],
     'Blue Stone': ['C', 'D'],
@@ -2287,6 +2694,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Mock Chocolate': ['C'],
     'Blue Mock Chocolate': ['C', 'D'],
     'Chinchilla': ['C'],
+    'Cinnamon Chinchilla': ['B', 'C'],
+    'Lilac Chinchilla': ['B', 'C', 'D'],
     'Chinchilla Beige': ['C'],
     'Blue Chinchilla': ['C'],
     'Platinum': ['C'],
@@ -2294,7 +2703,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Blue Sepia': ['A', 'C', 'D'],
     'Chocolate Sepia': ['A', 'C', 'B'],
     'Cream': ['A', 'C'],
-    'Silveragouti': ['A', 'C'],
+    'Grey Agouti': ['A', 'C'],
     'Siam Fox': ['A'],
     'Blue Fox': ['A', 'D'],
     'Chocolate Fox': ['A', 'B'],
@@ -2459,7 +2868,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         { name: 'Blue Sepia', image: '/images/phenotypes/bluesepia.png', genotype: { A: 'a/a', B: 'B/B', C: 'cch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
         { name: 'Chocolate Sepia', image: '/images/phenotypes/chocsepia.png', genotype: { A: 'a/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Cream', image: '/images/phenotypes/cream.png', genotype: { A: 'Ay/-', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Silveragouti', image: '/images/phenotypes/silveragouti.png', genotype: { A: 'A/-', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Grey Agouti', image: '/images/phenotypes/silveragouti.png', genotype: { A: 'A/-', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
       ]
     },
     fox: {
@@ -2469,7 +2878,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         { name: 'Beige Fox', image: '/images/phenotypes/beigefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Bone Fox', image: '/images/phenotypes/bonefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Burmese Fox', image: '/images/phenotypes/burmesefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Chinchilla', image: '/images/phenotypes/chinchilla.png', genotype: { A: 'A/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Chinchilla', image: '/images/phenotypes/chinchilla.png', genotypes: [
+          { A: 'A/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' },
+          { A: 'Aw/Aw', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' }
+        ], note: 'Some lines are white-bellied agouti (Aw) instead of agouti tan (A/at) — Aw/Aw chinchillas breed true.' },
+        { name: 'Agouti Fox', genotype: { A: 'Aw/Aw', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, note: 'White-bellied agouti (Aw): agouti top with a white/cream/tan belly. Unstandardized; Aw/A, Aw/at, Aw/a and Aw/ae look the same.' },
         { name: 'Colorpoint Beige Fox', image: '/images/phenotypes/colorpointbeigefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Cream Fox', image: '/images/phenotypes/creamfox.png', genotype: { A: 'Ay/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Sealpoint Himalayan Fox', image: '/images/phenotypes/himalayanfox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },

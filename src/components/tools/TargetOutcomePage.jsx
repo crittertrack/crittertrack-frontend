@@ -240,6 +240,7 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         // Base Colors
         { id: 'black',              label: 'Black',             code: 'a/a',            group: 'Base Color' },
         { id: 'agouti',             label: 'Agouti',            code: 'A/-',            group: 'Base Color' },
+        { id: 'white-bellied',      label: 'White-Bellied Agouti', code: 'Aw/-',        group: 'Base Color' },
         { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color' },
         { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color' },
 
@@ -265,13 +266,13 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'colorpoint-beige',   label: 'Colorpoint Beige',  code: 'ch/ce',          group: 'Albino & Dilution' },
         { id: 'mock-choc',          label: 'Mock Chocolate',    code: 'ce/cch',         group: 'Albino & Dilution' },
         { id: 'sepia',              label: 'Sepia',             code: 'a/a cch/cch',    group: 'Albino & Dilution' },
-        { id: 'silver-agouti',      label: 'Silver Agouti',     code: 'A/- cch/cch',    group: 'Albino & Dilution' },
+        { id: 'silver-agouti',      label: 'Grey Agouti',       code: 'A/- cch/cch',    group: 'Albino & Dilution' },
         
 
         // Blue Dilutes
         { id: 'blue',               label: 'Blue',              code: 'd/d',            group: 'Blue Dilute' },
         { id: 'blue-agouti',        label: 'Blue Agouti',       code: 'A/- d/d',        group: 'Blue Dilute' },
-        { id: 'blue-brindle',       label: 'Blue Brindle',      code: 'Avy/- p/p',      group: 'Blue Dilute' },
+        { id: 'blue-brindle',       label: 'Blue Brindle',      code: 'Avy/- d/d',      group: 'Blue Dilute' },
         { id: 'Dominant Amber',     label: 'Amber (Dom.)',      code: 'Ay/- d/d',       group: 'Blue Dilute' },
         { id: 'Recessive Amber',    label: 'Amber (Rec.)',      code: 'd/d e/e',        group: 'Blue Dilute' },
 
@@ -441,13 +442,29 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             case 'lavender':         genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
             // Base Color — Agouti series
             case 'agouti':           genotype.A  = 'A/A';     break;
+            case 'white-bellied':    genotype.A  = 'Aw/A';    break;
             case 'cinnamon':         genotype.A  = 'A/A';  genotype.B = 'b/b'; break;
             case 'blue-agouti':      genotype.A  = 'A/A';  genotype.D = 'd/d'; break;
             case 'argente':          genotype.A  = 'A/A';  genotype.P = 'p/p'; break;
             case 'cinnamon-argente': genotype.A  = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
             // Base Color — Other
-            case 'dom-red':          genotype.A  = 'Ay/a';    break;
+            // Sable is Ay/at + umbrous (U comes from the Umbrous chip that Sable selects). Dominant Red
+            // is also selected as a dependency, so it must not overwrite Ay/at with Ay/a.
+            case 'sable':            genotype.A  = 'Ay/at';   break;
+            // Marten Sable = Sable (Ay/at + U) + chinchilla. Dominant Red and Umbrous come in through
+            // the page's dependency rules.
+            case 'marten sable':     genotype.A  = 'Ay/at';   genotype.C = 'cch/cch'; break;
+            case 'dom-red':          if (!String(genotype.A || '').startsWith('Ay/')) genotype.A = 'Ay/a'; break;
             case 'rec-red':          genotype.E  = 'e/e';     break;
+            // Amber (Dom.) adds the blue dilution; picking it auto-selects Dominant Red (Ay/a) through
+            // the page's dependency rules, so the two together give Ay/a d/d = Dominant Amber.
+            case 'Dominant Amber':   genotype.D  = 'd/d';     break;
+            // Amber (Rec.) works the same way: it auto-selects Recessive Red (e/e), so e/e d/d =
+            // Recessive Amber.
+            case 'Recessive Amber':  genotype.D  = 'd/d';     break;
+            // "Blue Brindle" chip: Avy + blue dilution (d/d). Avy comes from Am. Brindle (Avy/a),
+            // which this chip would auto-select, so the two together give Avy/a d/d = Blue Brindle.
+            case 'blue-brindle':     genotype.D  = 'd/d';     break;
             case 'Leaden':          genotype.Ln = 'ln/ln';   break;
             // Albino & Dilution — C locus
             case 'albino':           genotype.C  = 'c/c';     break;
@@ -466,8 +483,14 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             case 'am-brindle':       genotype.A  = 'Avy/a';   break;
             case 'xbrindle':         genotype.Mobr = 'Mobr/mobr'; break;
             case 'pied':             genotype.S  = 's/s';     break;
+            // Hereford, Dutch and Berkshire all use s/s+ (polygenic modifiers); the calculator names
+            // it Pied with a note, so the three chips build the same genotype.
+            case 'Hereford':
+            case 'Dutch':
+            case 'Berkshire':        genotype.S  = 's/s+';    break;
             case 'variegated':       genotype.W  = 'W/w';     break;
             case 'banded':           genotype.W  = 'Wsh/w';   break;
+            case 'Rumpwhite':        genotype.W  = 'Rw/w';    break;
             case 'splashed':         genotype.Spl = 'Spl/spl'; break;
             case 'merle':            genotype.Rn = 'rn/rn';   break;
             case 'pearl':            genotype.Si = 'si/si';   break;
@@ -484,6 +507,13 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             default: break;
         }
     });
+
+    // Snowtiger = brindle (Avy) + a C-locus dilute. If no Albino & Dilution chip (or Sepia / Grey
+    // Agouti, which also set C) was chosen, default to chinchilla (cch/cch), the classic snowtiger.
+    // A manually chosen C chip always wins, whatever order the chips were processed in.
+    if (selectedTraits.includes('Snowtiger') && !genotype.C) {
+        genotype.C = 'cch/cch';
+    }
 
     return { genotype, assumptions };
 };
@@ -741,7 +771,12 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
         'cinnamon-argente': { 'Base Color': 'agouti', 'Brown Dilute': 'cinnamon', 'Pink Eye Dilute': 'argente' },
         'Dominant Amber': { 'Base Color': 'dom-red' },
         'Recessive Amber': { 'Red Dilute': 'rec-red' },
+        'blue-brindle': { 'Base Color': 'am-brindle' },
+        'Snowtiger': { 'Base Color': 'am-brindle' },
         'sable': { 'Base Color': 'dom-red', 'Umbrous': 'umbrous' },
+        // Marten Sable sits in the same dropdown group as Sable, so it cannot select the Sable chip;
+        // it brings in the same two chips Sable does (Dominant Red and Umbrous) instead.
+        'marten sable': { 'Base Color': 'dom-red', 'Umbrous': 'umbrous' },
         'texel': { 'Astrex & Texel': 'astrex', 'Shorthair/Longhair': 'longhair' },
     };
 

@@ -188,7 +188,8 @@ export function parseMouseGeneticCode(codeString) {
   const parts = codeString.replace(/,/g, ' ').trim().split(/\s+/);
 
   parts.forEach(part => {
-    let match = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+    // An allele may end in "+" (polygenic modifiers, e.g. s/s+ for Hereford/Dutch).
+    let match = part.match(/^([A-Za-z]+\+?)\/([A-Za-z]+\+?)$/);
     let allele1, allele2;
 
     if (match) {
@@ -215,7 +216,21 @@ export function parseMouseGeneticCode(codeString) {
         }
       }
 
-      // If no exact match, try case-insensitive matching
+      // Next try the exact REVERSE order (e.g. 'A/Aw', 'a/A', 'ch/c'), matching the calculator's
+      // own parser. This must come before the case-insensitive fallback below, otherwise
+      // 'a/A' is lowercased to 'a/a' and silently read as a different genotype.
+      const reverseMatch = `${allele2}/${allele1}`;
+
+      for (const [locus, data] of Object.entries(GENE_LOCI)) {
+        const found = data.combinations.find(combo => combo === reverseMatch);
+
+        if (found) {
+          genotype[locus] = found;
+          return;
+        }
+      }
+
+      // If no exact match in either order, try case-insensitive matching
       const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
 
       for (const [locus, data] of Object.entries(GENE_LOCI)) {
