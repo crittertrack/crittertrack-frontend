@@ -329,6 +329,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         maleLosses: null,
         femaleLosses: null,
         unknownLosses: null,
+        extractStillbornFromTotal: false,
         extractLossesFromTotal: false,
         notes: '',
         linkedOffspringIds: [],
@@ -1563,6 +1564,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             maleLosses: litter.maleLossesCount || null,
             femaleLosses: litter.femaleLossesCount || null,
             unknownLosses: litter.unknownLossesCount || null,
+            // Extraction flags — restore so the checkboxes persist across edits and
+            // reflect how the stored M/F/U counts were derived.
+            extractStillbornFromTotal: !!litter.extractStillbornFromTotal,
+            extractLossesFromTotal: !!litter.extractLossesFromTotal,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
             weaningDate: formatDateForInput(litter.weaningDate),
             weaningConfirmed: litter.weaningConfirmed || false
