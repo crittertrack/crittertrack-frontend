@@ -25,4 +25,4 @@ const DeceasedBanner = ({ size = 'md' }) => {
 };
 
 export default DeceasedBanner;
-export { RainbowIcon, DeceasedCornerBadge };
+export {DeceasedCornerBadge };
