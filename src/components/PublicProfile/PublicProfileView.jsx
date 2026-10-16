@@ -1117,7 +1117,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     card (mt-0.5/mb-0.5, h-24 md:h-28, w-24 sm:w-28
                                                     md:w-32) so both cards lay out identically. The grey
                                                     tile is only the no-photo placeholder backdrop. */}
-                                                <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
+                                                <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28">
                                                     <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
                                                         {imgSrc ? (
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.

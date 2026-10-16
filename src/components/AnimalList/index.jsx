@@ -2880,7 +2880,7 @@ useEffect(() => {
                         slack shows up as white space above and below the image. A shorter band
                         means less of that dead area. mb-0.5 and the pill's -mt-1 close the rest
                         of the gap, and both are free - the card's total height is unchanged. */}
-                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28 overflow-hidden">
+                    <div className="flex items-center justify-center w-full px-2 mt-0.5 mb-0.5 h-24 md:h-28">
                         {/* Grey tile is only the no-photo placeholder backdrop, as on the public
                             card; it is not drawn behind an actual image. */}
                         <div className={`relative w-24 sm:w-28 md:w-32 h-24 md:h-28 rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted ${imgSrc ? '' : 'bg-gray-100 dark:bg-dark-surface'}`}>
@@ -4137,7 +4137,7 @@ useEffect(() => {
 
                 {/* Actions */}
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )}
+                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4206,8 +4206,8 @@ useEffect(() => {
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     {isQuarantine
-                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
-                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Full Treatment</button>
+                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
+                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Full Treatment</button>
                     }
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
@@ -4227,7 +4227,7 @@ useEffect(() => {
             ? dietSupplies
             : getDietSupplyLabels(fullAnimal?.dietSupplies);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(6,minmax(0,1fr))_7.5rem_15rem] items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -4240,7 +4240,7 @@ useEffect(() => {
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
 
-                <div className="sm:col-span-1 text-xs text-gray-400 dark:text-dark-text-muted">
+                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted">
                     {dietType && <div>{dietType}</div>}
                     {displayedDietSupplies.length > 0 && (
                         <div className="mt-0.5 text-gray-600 dark:text-dark-text-secondary" title={displayedDietSupplies.join(', ')}>
@@ -4249,14 +4249,14 @@ useEffect(() => {
                     )}
                 </div>
 
-                <div className="text-center sm:col-span-2">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                <div className="text-center">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-block ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkFed(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Utensils size={12} /> Fed</button>
-                    {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
-                    {taskUndoStack[`feed_${animal.id_public}`] && <button onClick={(e) => handleRevertTask(e, `feed_${animal.id_public}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                <div className="sm:text-right flex items-center gap-1 justify-end flex-wrap">
+                    <button onClick={(e) => handleMarkFed(e, animal)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Utensils size={12} /> Fed</button>
+                    {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
+                    {taskUndoStack[`feed_${animal.id_public}`] && <button onClick={(e) => handleRevertTask(e, `feed_${animal.id_public}`)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
                     <button onClick={(e) => handleDeleteFeedingSchedule(e, animal)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete feeding schedule"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
@@ -4270,7 +4270,7 @@ useEffect(() => {
         const sched = animal[fieldName] || {};
         const due = isDue(sched.lastDoneDate, sched.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(6,minmax(0,1fr))_7.5rem_15rem] items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -4286,13 +4286,13 @@ useEffect(() => {
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{label}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-block ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
-                    {taskUndoStack[`sched_${animal.id_public}_${fieldName}`] && <button onClick={(e) => handleRevertTask(e, `sched_${animal.id_public}_${fieldName}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                <div className="sm:text-right flex items-center gap-1 justify-end flex-wrap">
+                    <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
+                    {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
+                    {taskUndoStack[`sched_${animal.id_public}_${fieldName}`] && <button onClick={(e) => handleRevertTask(e, `sched_${animal.id_public}_${fieldName}`)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
                     <button onClick={(e) => handleDeleteScheduleTask(e, animal, fieldName, label)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete schedule"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
@@ -4305,7 +4305,7 @@ useEffect(() => {
     const AnimalCareTaskBar = ({ animal, taskIdx, task, onViewAnimal, onEditAnimal, handleMarkAnimalCareTaskDone, handleSkipAnimalCareTask, handleDeleteAnimalCareTask }) => {
         const due = isDue(task.lastDoneDate, task.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(6,minmax(0,1fr))_7.5rem_15rem] items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -4321,13 +4321,13 @@ useEffect(() => {
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.taskName}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-block ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
-                    {taskUndoStack[`care_${animal.id_public}_${taskIdx}`] && <button onClick={(e) => handleRevertTask(e, `care_${animal.id_public}_${taskIdx}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                <div className="sm:text-right flex items-center gap-1 justify-end flex-wrap">
+                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
+                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
+                    {taskUndoStack[`care_${animal.id_public}_${taskIdx}`] && <button onClick={(e) => handleRevertTask(e, `care_${animal.id_public}_${taskIdx}`)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
                     <button onClick={(e) => handleDeleteAnimalCareTask(e, animal, taskIdx)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
@@ -4341,7 +4341,7 @@ useEffect(() => {
         const due = isTaskDue(task);
         const freqLabel = task.frequencyDays ? `Every ${task.frequencyDays}d` : (task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—');
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(6,minmax(0,1fr))_7.5rem_15rem] items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <button
                     type="button"
                     onClick={() => onViewEnclosure(enclosure)}
@@ -4374,12 +4374,12 @@ useEffect(() => {
                 </div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-block ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkEnclosureCleaningTaskDone(e, enclosure, task._id)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
-                    {taskUndoStack[`enc_${enclosure._id}_${task._id}`] && <button onClick={(e) => handleRevertTask(e, `enc_${enclosure._id}_${task._id}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                <div className="sm:text-right flex items-center gap-1 justify-end flex-wrap">
+                    <button onClick={(e) => handleMarkEnclosureCleaningTaskDone(e, enclosure, task._id)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
+                    {taskUndoStack[`enc_${enclosure._id}_${task._id}`] && <button onClick={(e) => handleRevertTask(e, `enc_${enclosure._id}_${task._id}`)} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
                     <button onClick={(e) => handleDeleteEnclosureCleaningTask(e, enclosure, task._id)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
                 </div>
             </div>
@@ -4395,7 +4395,7 @@ useEffect(() => {
         const nextDueDate = getTaskNextDueDate(task);
         const assignedNames = (task.assignedAnimals || []).map(id => allAnimalsRaw.find(a => a.id_public === id)?.name || id);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-9 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(7,minmax(0,1fr))_7.5rem_15rem] items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onEdit(task)}>
                     <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex items-center justify-center flex-shrink-0">
                         <ClipboardList size={16} className="text-gray-400 dark:text-dark-text-muted" />
@@ -4417,10 +4417,10 @@ useEffect(() => {
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.notes || '—'}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-block ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
-                <div className="sm:text-right flex items-center gap-1 justify-end">
+                <div className="sm:text-right flex items-center gap-1 justify-end flex-wrap">
                     <button onClick={(e) => { e.stopPropagation(); onMarkDone(task); }} title="Mark Done" className="p-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={14} /></button>
                     {due && <button onClick={(e) => { e.stopPropagation(); onSkip(task); }} title="Skip" className="p-1.5 rounded-full bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={14} /></button>}
                     <button onClick={(e) => { e.stopPropagation(); onDelete(task); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
@@ -5100,14 +5100,14 @@ useEffect(() => {
                                                             <div className="text-center text-sm text-gray-400 dark:text-dark-text-muted py-4">{section.emptyText}</div>
                                                         ) : (
                                                             <>
-                                                                <div className={`hidden sm:grid ${section.key === 'general' ? 'grid-cols-9' : 'grid-cols-8'} items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted`}>
+                                                                <div className={`hidden sm:grid ${section.key === 'general' ? 'grid-cols-[repeat(7,minmax(0,1fr))_7.5rem_15rem]' : 'grid-cols-[repeat(6,minmax(0,1fr))_7.5rem_15rem]'} items-center gap-4 px-[9px] py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted`}>
                                                                     <div className="col-span-2">{section.entityLabel || 'Animal'}</div>
                                                                     <div>{section.colLabels[0]}</div>
                                                                     {section.key === 'general' && <div>Next Due</div>}
                                                                     <div>Frequency</div>
                                                                     <div className="col-span-2">{section.colLabels[1]}</div>
                                                                     <div className="text-center">Status</div>
-                                                                    <div className="text-right pr-2">Action</div>
+                                                                    <div className="text-right">Action</div>
                                                                 </div>
                                                                 {section.list.map(section.renderRow)}
                                                             </>
