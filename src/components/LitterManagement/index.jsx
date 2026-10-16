@@ -2026,11 +2026,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                         <p>Record planned matings, track pregnancies, and log litters with offspring counts and details.</p>
                     </InfoButton>
                 </h2>
-                <div className="flex gap-2 flex-wrap items-center">
+                <div className="flex gap-2 flex-wrap sm:flex-nowrap items-center">
                     {/* Auto-calculation switches — desktop: left of the refresh / + Mating / + Litter buttons
                         (on mobile they stay in the stats row below) */}
                     {autoCalcAvailable && (
-                        <div className="hidden sm:flex flex-col gap-0.5 mr-2 text-sm">
+                        <div className="hidden sm:flex flex-row items-center gap-4 mr-2 text-sm">
                             {[
                                 { key: 'autoCalcDueDate', label: 'Auto due date', on: autoCalcDueDate, hint: 'Fills the expected due date from the mating date and species.' },
                                 { key: 'autoCalcWeaningDate', label: 'Auto weaning date', on: autoCalcWeaningDate, hint: 'Fills the weaning date from the birth date and species.' },
