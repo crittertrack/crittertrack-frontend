@@ -345,7 +345,8 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       const due = animals.filter(a => {
         if (!a.birthDate || a.status === 'Deceased') return false;
         const b = new Date(a.birthDate);
-        return !isNaN(b.getTime()) && b.getMonth() === today.getMonth() && b.getDate() === today.getDate();
+        // Only from the first anniversary onward (not on the birth date itself)
+        return !isNaN(b.getTime()) && b.getFullYear() < today.getFullYear() && b.getMonth() === today.getMonth() && b.getDate() === today.getDate();
       });
       if (due.length > 0) items.push({ id: 'birthdays', icon: Cake, iconColor: 'text-fuchsia-300', text: `Birthdays: ${due.length} animal${due.length !== 1 ? 's' : ''} today ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/', { state: { animalView: 'list' } }) });
     }

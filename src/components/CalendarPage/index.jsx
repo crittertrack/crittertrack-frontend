@@ -237,6 +237,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             if (isNaN(d.getTime())) return;
             // For birthdays, show the anniversary in the current viewed year/month
             if (type === 'birthday') {
+                // A birthday is only celebrated from the first anniversary onward —
+                // never on (or before) the birth year itself.
+                if (year <= d.getFullYear()) return;
                 d = new Date(year, d.getMonth(), d.getDate());
             }
             const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
