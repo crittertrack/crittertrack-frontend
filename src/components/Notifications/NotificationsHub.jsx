@@ -176,7 +176,12 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 // don't resurface as "weaning due" forever after a weaning-date backfill.
                 const dam = l.damId_public ? animals.find(a => a.id_public === l.damId_public) : null;
                 const isLatestBirthForDam = l.damId_public && latestBirthByDam.get(l.damId_public)?._id === l._id;
-                const stillNursing = dam ? (!!dam.isNursing && isLatestBirthForDam) : (!l.weaningConfirmed && !l.pregnancyLost);
+                // Species nursing window (sent by the server) applies even when the dam isn't in
+                // the loaded list (archived/deceased), which previously let every old litter through.
+                const birth = l.birthDate ? parseLocalDate(l.birthDate) : null;
+                const ageDays = birth ? Math.floor((today - birth.setHours(0, 0, 0, 0)) / 86400000) : null;
+                const withinWindow = ageDays !== null && ageDays <= (l.nursingCutoffDays ?? 90);
+                const stillNursing = withinWindow && !l.weaningConfirmed && !l.pregnancyLost && (dam ? (!!dam.isNursing && isLatestBirthForDam) : true);
                 if (stillNursing) {
                     const wean = parseLocalDate(l.weaningDate);
                     if (wean) {

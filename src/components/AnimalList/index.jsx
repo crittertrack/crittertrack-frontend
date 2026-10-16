@@ -4118,7 +4118,7 @@ useEffect(() => {
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Mating: </span>{matingDate}</div>
 
                 {/* Due/Birth Date */}
-                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Due/Born: </span>{animal.isPregnant ? dueDate : birthDate}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Due/Born: </span>{(animal.isPregnant || animal.isInMating || animal.isPlannedMating) ? dueDate : birthDate}</div>
 
                 {/* Weaning Date */}
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Weaning: </span>{weaningDate}</div>
