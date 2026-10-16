@@ -4,7 +4,7 @@ import { History, Cat, User } from 'lucide-react';
 import SectionCard, { linkClass } from './SectionCard';
 import { getRecentlyViewed } from '../../utils/recentlyViewed';
 
-const PREVIEW = 5;
+const PREVIEW = 4;
 
 const RecentlyViewedSection = () => {
     const navigate = useNavigate();

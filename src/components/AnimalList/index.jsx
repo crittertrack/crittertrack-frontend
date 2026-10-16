@@ -428,6 +428,20 @@ const AnimalList = ({
             return next;
         });
     }, []);
+    // When true, animals housed in a Medical/Quarantine enclosure still appear in the
+    // Quarantine / In Treatment lists below (in addition to the enclosure card) instead of being hidden there.
+    const [showHealthEnclosureAnimalsInLists, setShowHealthEnclosureAnimalsInLists] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_showHealthEnclosureAnimalsInLists') === 'true';
+        } catch { return false; }
+    });
+    const toggleShowHealthEnclosureAnimalsInLists = useCallback(() => {
+        setShowHealthEnclosureAnimalsInLists(prev => {
+            const next = !prev;
+            try { localStorage.setItem('animalList_showHealthEnclosureAnimalsInLists', String(next)); } catch {}
+            return next;
+        });
+    }, []);
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [bulkArchiveMode, setBulkArchiveMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
@@ -2171,8 +2185,8 @@ useEffect(() => {
     // Must exclude view-only animals (e.g. transferred away, kept only for pedigree/history access) —
     // otherwise a transferred animal with stale isQuarantine/isInTreatment flags keeps showing up here
     // for the previous owner even though it's no longer theirs to manage.
-    const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !a.isViewOnly && !inHealthEnclosure(a));
-    const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !a.isViewOnly && !inHealthEnclosure(a));
+    const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !a.isViewOnly && (!inHealthEnclosure(a) || showHealthEnclosureAnimalsInLists));
+    const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !a.isViewOnly && (!inHealthEnclosure(a) || showHealthEnclosureAnimalsInLists));
     const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
     const activeMedicationsCount = treatmentList.reduce((sum, a) => sum + parseArrayField(a.medications).filter(m => !m.status || m.status === 'active').length, 0);
     // Entries needing action now: a medication dose is due, or a quarantine end date has been reached.
@@ -4226,7 +4240,7 @@ useEffect(() => {
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
 
-                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted">
+                <div className="sm:col-span-1 text-xs text-gray-400 dark:text-dark-text-muted">
                     {dietType && <div>{dietType}</div>}
                     {displayedDietSupplies.length > 0 && (
                         <div className="mt-0.5 text-gray-600 dark:text-dark-text-secondary" title={displayedDietSupplies.join(', ')}>
@@ -4235,7 +4249,7 @@ useEffect(() => {
                     )}
                 </div>
 
-                <div className="text-center">
+                <div className="text-center sm:col-span-2">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
@@ -5236,6 +5250,15 @@ useEffect(() => {
                                     }
                                 </div>
                             </div>
+                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit mt-2">
+                                <input
+                                    type="checkbox"
+                                    checked={showHealthEnclosureAnimalsInLists}
+                                    onChange={toggleShowHealthEnclosureAnimalsInLists}
+                                    className="rounded border-gray-300 dark:border-dark-text-muted text-orange-600 focus:ring-orange-500"
+                                />
+                                Also show Quarantine/Treatment enclosure animals in the lists below
+                            </label>
                             {(() => {
                                 const healthSections = [
                                     { key: 'quarantine', title: 'Quarantine', list: quarantineList, icon: <AlertTriangle size={16} className="text-orange-700 dark:text-orange-300" />, headerClass: 'bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-900/40', emptyText: 'No animals in quarantine.' },
