@@ -3356,7 +3356,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : isBornUnknown ? `Born · ${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups` : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            {/* Planned/Mated/Pregnant already show as a badge next to the litter ID, so only show pup counts here */}
+                                            {!isPlannedOnly && !isMated && !isPregnant && (
+                                                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary ml-2 flex-shrink-0 whitespace-nowrap">{isBornUnknown ? `Born · ${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups` : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            )}
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600 dark:text-dark-text-secondary">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
