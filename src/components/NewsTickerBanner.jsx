@@ -91,7 +91,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
             className="hover:underline flex items-center"
           >
             <Heart size={14} className="inline-block mr-1.5 text-pink-400 fill-current" />
-            Support CritterTrack on Ko-fi!
+            Support CritterTrack on Ko-fi! Your support can bring us to iOS!
           </a>
           <span className="mx-4">|</span>
         </span>

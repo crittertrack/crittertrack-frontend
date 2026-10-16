@@ -1311,17 +1311,8 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
-    const hasAutoOpenedFollowupRef = useRef(false);
-    useEffect(() => {
-        const canAutoOpen = authToken && userProfile &&
-            userProfile.betaSurveyFollowupStatus === 'pending' &&
-            hasSeenWelcomeGuide && !showWelcomeGuide && !adminAccountMode;
-
-        if (canAutoOpen && !hasAutoOpenedFollowupRef.current) {
-            hasAutoOpenedFollowupRef.current = true;
-            setShowBetaSurvey(true);
-        }
-    }, [authToken, userProfile, hasSeenWelcomeGuide, showWelcomeGuide, adminAccountMode]);
+    // The beta follow-up survey no longer auto-opens on login. It can still be opened manually
+    // via onReopenBetaSurvey (see the notification/banner that passes betaSurveyStatus).
 
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
