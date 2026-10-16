@@ -312,7 +312,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [freshProfile, setFreshProfile] = useState(profile);
     const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
     const [publicLitters, setPublicLitters] = useState([]);
-    const [litterYearFilter, setLitterYearFilter] = useState(''); // filter litters by birth year
+    const [litterYearFilter, setLitterYearFilter] = useState(''); // filter pairings by year
+    const [litterStatusFilter, setLitterStatusFilter] = useState(''); // '' | planned | mated | pregnant | born
+    // The owner's custom species order — the same list "My Animals" uses (PublicProfile.speciesOrder).
+    const [speciesOrder, setSpeciesOrder] = useState(Array.isArray(profile?.speciesOrder) ? profile.speciesOrder : []);
     const [ratingData, setRatingData] = useState({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
     const [myRating, setMyRating] = useState(null);         // own existing rating object or null
     const [ratingForm, setRatingForm] = useState({ score: 0, comment: '' });
@@ -502,6 +505,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         fetchProfile();
     }, [profile?.id_public, profile, API_BASE_URL]);
     
+    // Keep the order in sync once the fresh profile arrives (it carries the saved speciesOrder).
+    useEffect(() => {
+        if (Array.isArray(freshProfile?.speciesOrder)) setSpeciesOrder(freshProfile.speciesOrder);
+    }, [freshProfile]);
+
     const handleShare = () => {
         const url = userShareUrl(freshProfile?.id_public || profile.id_public);
         navigator.clipboard.writeText(url).then(() => {
@@ -648,6 +656,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     }, {});
 
     const sortedSpecies = Object.keys(groupedAnimals).sort((a, b) => {
+        // The breeder's own order wins (same rules as My Animals): listed species first in that
+        // order, then any unlisted ones alphabetically.
+        if (speciesOrder.length > 0) {
+            const ai = speciesOrder.indexOf(a);
+            const bi = speciesOrder.indexOf(b);
+            if (ai !== -1 && bi !== -1) return ai - bi;
+            if (ai !== -1) return -1;
+            if (bi !== -1) return 1;
+            return a.localeCompare(b);
+        }
         const order = ['Mouse', 'Rat', 'Hamster'];
         const aIndex = order.indexOf(a);
         const bIndex = order.indexOf(b);
@@ -661,6 +679,30 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         // Otherwise, alphabetical sort
         return a.localeCompare(b);
     });
+
+    // Owner-only: move a species up/down. Only the species shown here are swapped; species this
+    // profile doesn't display keep their place in the saved list (it's shared with My Animals).
+    const moveSpecies = (species, direction) => {
+        const idx = sortedSpecies.indexOf(species);
+        const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+        if (idx === -1 || swapIdx < 0 || swapIdx >= sortedSpecies.length) return;
+
+        const newShown = [...sortedSpecies];
+        [newShown[idx], newShown[swapIdx]] = [newShown[swapIdx], newShown[idx]];
+
+        const shownSet = new Set(sortedSpecies);
+        const full = [...speciesOrder, ...sortedSpecies.filter(s => !speciesOrder.includes(s))];
+        let next = 0;
+        const newOrder = full.map(s => (shownSet.has(s) ? newShown[next++] : s));
+
+        const previous = speciesOrder;
+        setSpeciesOrder(newOrder);
+        apiClient.post('/users/species-order', { speciesOrder: newOrder })
+            .catch(err => {
+                console.error('[SPECIES ORDER] Error saving:', err);
+                setSpeciesOrder(previous); // roll back
+            });
+    };
 
     const handleBackClick = () => {
         if (showReturnConfirmation) return;
@@ -1006,6 +1048,30 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {sortedSpecies.map(species => (
                         <div key={species} className="bg-gray-50 dark:bg-dark-surface p-4 rounded-lg">
                             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center">
+                                {isOwnProfile && authToken && sortedSpecies.length > 1 && (
+                                    <span className="flex items-center border border-gray-300 dark:border-dark-text-muted rounded-lg overflow-hidden mr-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => moveSpecies(species, 'up')}
+                                            disabled={sortedSpecies.indexOf(species) === 0}
+                                            className="p-1 hover:bg-gray-200 dark:hover:bg-dark-surface-hover transition disabled:opacity-30 disabled:cursor-not-allowed border-r border-gray-300 dark:border-dark-text-muted"
+                                            title="Move up"
+                                            aria-label={`Move ${getSpeciesDisplayName(species)} up`}
+                                        >
+                                            <ChevronUp className="w-4 h-4 text-gray-600 dark:text-dark-text-secondary" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => moveSpecies(species, 'down')}
+                                            disabled={sortedSpecies.indexOf(species) === sortedSpecies.length - 1}
+                                            className="p-1 hover:bg-gray-200 dark:hover:bg-dark-surface-hover transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                            title="Move down"
+                                            aria-label={`Move ${getSpeciesDisplayName(species)} down`}
+                                        >
+                                            <ChevronDown className="w-4 h-4 text-gray-600 dark:text-dark-text-secondary" />
+                                        </button>
+                                    </span>
+                                )}
                                 <Cat size={20} className="mr-2" /> {getSpeciesDisplayName(species)}
                             </h4>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -1272,24 +1338,32 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
                 // isPlanned flips to false as soon as a litter is marked mated (not only once born),
                 // so state must be derived from birthDate/pregnancyDate/matingDate, not isPlanned alone.
-                const plannedOnly = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate);
-                const mated = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate);
-                const pregnant = publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate);
-                let born = publicLitters.filter(l => !!l.birthDate);
+                // A pairing's year = the year of its most relevant date (born, else pregnant, else
+                // mated, else expected due). Taken from the ISO string so timezones can't shift it.
+                const litterYear = (l) => {
+                    const d = l.birthDate || l.pregnancyDate || l.matingDate || l.expectedDueDate;
+                    const y = d ? String(d).substring(0, 4) : '';
+                    return /^\d{4}$/.test(y) ? y : null;
+                };
+                const inYear = (l) => !litterYearFilter || litterYear(l) === litterYearFilter;
+                const showStatus = (key) => !litterStatusFilter || litterStatusFilter === key;
+                const plannedOnly = showStatus('planned') ? publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate && inYear(l)) : [];
+                const mated = showStatus('mated') ? publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate && inYear(l)) : [];
+                const pregnant = showStatus('pregnant') ? publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate && inYear(l)) : [];
+                let born = showStatus('born') ? publicLitters.filter(l => !!l.birthDate && inYear(l)) : [];
+                const hasAnyMatch = plannedOnly.length + mated.length + pregnant.length + born.length > 0;
                 
-                // Extract unique years from born litters
-                const bornYears = [...new Set(born
-                    .filter(l => l.birthDate)
-                    .map(l => new Date(l.birthDate).getFullYear())
-                )].sort((a, b) => b - a); // newest first
+                // Years and statuses that actually exist, so the filter menus only offer real options
+                const allYears = [...new Set(publicLitters.map(litterYear).filter(Boolean))].sort((a, b) => b - a); // newest first
+                const statusOptions = [
+                    { key: 'planned', label: 'Planned', count: publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate).length },
+                    { key: 'mated', label: 'Mated', count: publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate).length },
+                    { key: 'pregnant', label: 'Pregnant', count: publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate).length },
+                    { key: 'born', label: 'Born', count: publicLitters.filter(l => !!l.birthDate).length },
+                ].filter(o => o.count > 0);
                 
                 // Filter born litters by selected year
-                if (litterYearFilter) {
-                    born = born.filter(l => {
-                        if (!l.birthDate) return false;
-                        return new Date(l.birthDate).getFullYear().toString() === litterYearFilter;
-                    });
-                }
+                // (status + year filtering is applied above, to every section)
                 // Sort by birthDate newest first
                 born = born.sort((a, b) => {
                     if (!a.birthDate && !b.birthDate) return 0;
@@ -1381,6 +1455,48 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 );
                 return (
                     <div className="space-y-8">
+                        {(statusOptions.length > 1 || allYears.length > 1) && (
+                            <div className="flex flex-wrap items-center gap-2">
+                                {statusOptions.length > 1 && (
+                                    <select
+                                        value={litterStatusFilter}
+                                        onChange={(e) => setLitterStatusFilter(e.target.value)}
+                                        aria-label="Filter pairings by status"
+                                        className="px-3 py-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                                    >
+                                        <option value="">All Statuses</option>
+                                        {statusOptions.map(o => (
+                                            <option key={o.key} value={o.key}>{o.label} ({o.count})</option>
+                                        ))}
+                                    </select>
+                                )}
+                                {allYears.length > 1 && (
+                                    <select
+                                        value={litterYearFilter}
+                                        onChange={(e) => setLitterYearFilter(e.target.value)}
+                                        aria-label="Filter pairings by year"
+                                        className="px-3 py-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                                    >
+                                        <option value="">All Years</option>
+                                        {allYears.map(year => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </select>
+                                )}
+                                {(litterStatusFilter || litterYearFilter) && (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setLitterStatusFilter(''); setLitterYearFilter(''); }}
+                                        className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text underline"
+                                    >
+                                        Clear filters
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                        {!hasAnyMatch && (
+                            <p className="text-center text-sm text-gray-500 dark:text-dark-text-muted py-8">No pairings match these filters.</p>
+                        )}
                         {mated.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
@@ -1417,18 +1533,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-2">
                                         <Sparkles size={16} className="text-violet-500" /> Past Pairings <span className="text-sm font-normal text-gray-400 dark:text-dark-text-muted">({born.length})</span>
                                     </h3>
-                                    {bornYears.length > 1 && (
-                                        <select
-                                            value={litterYearFilter}
-                                            onChange={(e) => setLitterYearFilter(e.target.value)}
-                                            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
-                                        >
-                                            <option value="">All Years</option>
-                                            {bornYears.map(year => (
-                                                <option key={year} value={year}>{year}</option>
-                                            ))}
-                                        </select>
-                                    )}
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {born.map(l => <LitterPublicCard key={l._id} l={l} />)}

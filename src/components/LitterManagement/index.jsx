@@ -312,7 +312,7 @@ const ParentSearchModal = ({
 
 // Litter Management Component
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {} }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1444,6 +1444,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    // ── Auto-calculation switches (due date / weaning date) ──────────────────────────────
+    // Only offered to accounts the auto-calc is enabled for (backend flags autoCalcAvailable).
+    // Default ON; saved per-user in uiPreferences and enforced server-side on litter saves.
+    const autoCalcAvailable = !!userProfile?.autoCalcAvailable;
+    const autoCalcDueDate = userProfile?.uiPreferences?.autoCalcDueDate !== false;
+    const autoCalcWeaningDate = userProfile?.uiPreferences?.autoCalcWeaningDate !== false;
+
+    const setAutoCalcPref = async (key, value) => {
+        const apply = (v) => setUserProfile && setUserProfile(prev => prev ? ({
+            ...prev,
+            uiPreferences: { ...prev.uiPreferences, [key]: v }
+        }) : prev);
+        const previous = userProfile?.uiPreferences?.[key] !== false;
+        apply(value); // optimistic
+        try {
+            await apiClient.patch('/users/preferences', { [key]: value });
+        } catch (err) {
+            apply(previous); // roll back
+            if (showModalMessage) showModalMessage('Error', 'Could not save that setting. Please try again.');
+        }
+    };
+
     const handleRecalculateOffspringCounts = async () => {
         if (!window.confirm('This will recalculate offspring counts and gender tallies for all litters based on linked animals. Continue?')) {
             return;
@@ -2067,6 +2089,29 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-blue-600 dark:text-blue-400">{litterStats.males}</span> Males</span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> Females</span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> Unknown</span>
+                {autoCalcAvailable && (
+                    <>
+                        {[
+                            { key: 'autoCalcDueDate', label: 'Auto due date', on: autoCalcDueDate, hint: 'Fills the expected due date from the mating date and species.' },
+                            { key: 'autoCalcWeaningDate', label: 'Auto weaning date', on: autoCalcWeaningDate, hint: 'Fills the weaning date from the birth date and species.' },
+                        ].map(({ key, label, on, hint }) => (
+                            <label
+                                key={key}
+                                className="flex items-center gap-1.5 cursor-pointer select-none border-l border-gray-200 dark:border-dark-text-muted pl-4"
+                                title={`${hint} ${on ? 'On' : 'Off'} — dates you type yourself are never overwritten.`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    role="switch"
+                                    checked={on}
+                                    onChange={(e) => setAutoCalcPref(key, e.target.checked)}
+                                    className="accent-primary h-3.5 w-3.5"
+                                />
+                                <span className={`font-semibold ${on ? 'text-gray-700 dark:text-dark-text-secondary' : 'text-gray-400 dark:text-dark-text-muted'}`}>{label}</span>
+                            </label>
+                        ))}
+                    </>
+                )}
                 <InfoButton title="The Expanded Litter Card" lessonId="litter-expanded-view">
                     <p>Click any litter card to expand it — status transition buttons (Mated today, Assign Pregnant, Born today, Mark Weaned) and offspring management both live inside the expanded view.</p>
                 </InfoButton>

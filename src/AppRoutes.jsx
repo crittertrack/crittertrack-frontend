@@ -453,6 +453,7 @@ export function AppRoutes({
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
+          setUserProfile={setUserProfile}
           showModalMessage={showModalMessage}
           onViewAnimal={handleViewAnimal}
           handleViewAnimal={handleViewAnimal}
