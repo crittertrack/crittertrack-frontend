@@ -470,6 +470,12 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
 
     const favCount = sortedSpecies.filter(s => favorites.includes(s.name)).length;
 
+    // Totals per category across ALL species (ignores the search/category filters), skipping empty categories
+    const categoryCounts = categories
+        .filter(cat => cat !== 'All')
+        .map(cat => [cat, speciesOptions.filter(s => s.category === cat).length])
+        .filter(([, count]) => count > 0);
+
     const getCategoryIcon = (category) => {
         switch (category) {
             case 'Mammal': return <Cat size={14} />;
@@ -499,11 +505,12 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </button>
             </div>
             
-            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-700/60 rounded-lg">
-                <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                    <span className="italic">Theraphosidae sp.</span> Some default species are intentionally broad. Add your exact species when possible. Missing fields can be requested via species customization.
-                </p>
-            </div>
+            <p className="mb-4 text-sm text-gray-600 dark:text-dark-text-secondary" data-tutorial-target="species-count-summary">
+                <span className="font-semibold text-gray-800 dark:text-dark-text">{speciesOptions.length} species</span> and growing
+                {categoryCounts.length > 0 && (
+                    <span> – {categoryCounts.map(([cat, count]) => `${count} ${cat}`).join(' · ')}</span>
+                )}
+            </p>
             
             <div className="mb-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3" data-tutorial-target="species-search-section">
                 <input
