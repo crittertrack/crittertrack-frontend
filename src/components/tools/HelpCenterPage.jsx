@@ -6,6 +6,7 @@ import {
   Sparkles, Sprout, ThumbsDown, ThumbsUp
 } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
+import SpeciesValuesSuggestion from './SpeciesValuesSuggestion';
 
 const TOPICS = [
   {
@@ -339,7 +340,7 @@ const POPULAR_ARTICLE_IDS = [
   'support-crittertrack',
 ];
 
-const HelpCenterPage = () => {
+const HelpCenterPage = ({ speciesOptions = [], showModalMessage }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [activeTopicId, setActiveTopicId] = useState(null);
@@ -457,6 +458,8 @@ const HelpCenterPage = () => {
           onBack={returnToBrowse}
           onSelectArticle={openArticle}
           onSelectTopic={openTopic}
+          speciesOptions={speciesOptions}
+          showModalMessage={showModalMessage}
         />
       ) : normalizedQuery || activeTopicId ? (
         <section className="px-5 py-6 sm:px-8 sm:py-8">
@@ -573,7 +576,7 @@ const HelpCenterPage = () => {
   );
 };
 
-const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVote, onBack, onSelectArticle, onSelectTopic }) => {
+const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVote, onBack, onSelectArticle, onSelectTopic, speciesOptions = [], showModalMessage }) => {
   const topic = topics.find(item => item.id === article.topicId);
   const relatedArticles = (article.relatedArticleIds || articles
     .filter(item => item.topicId === article.topicId && item.id !== article.id)
@@ -736,6 +739,11 @@ const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVo
             ))}
           </ol>
         </section>
+
+        {/* Auto-calculation article only: let a user send us values for a species that has none yet */}
+        {article.id === 'litter-auto-calculations' && (
+          <SpeciesValuesSuggestion speciesOptions={speciesOptions} showModalMessage={showModalMessage} />
+        )}
 
         {article.tips?.length > 0 && (
           <section id="helpful-tips" className="mt-3 scroll-mt-5 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20">

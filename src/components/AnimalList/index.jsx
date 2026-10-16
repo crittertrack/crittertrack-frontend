@@ -22,14 +22,11 @@ import {
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
-import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import { isHealthEnclosurePurpose } from '../../utils/enclosurePurpose';
 import { computeIsInTreatment, HEALTH_STATUS_TEXT_COLORS, remapLegacyHealthStatus } from '../../utils/medicalStatus';
-import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from './LocationManagerModal';
 import AssignHealthStatusModal from './AssignHealthStatusModal';
-import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
@@ -46,6 +43,9 @@ import InfoButton from '../shared/InfoButton';
 import GeneralTaskModal from '../GeneralTaskModal';
 import QuickAddAnimalModal from '../QuickAddAnimalModal';
 import { API_BASE_URL } from '../../utils/apiConfig';
+
+// The Reproduction tab's + Add opens the shared entry form (formOnly mode of Litter Management).
+const LitterEntryForm = React.lazy(() => import('../LitterManagement'));
 
 const FAMILY_TREE_MIN_WIDTH = 900;
 
@@ -682,26 +682,17 @@ const AnimalList = ({
         });
     };
 
-    // Mating form state
-    const [showAddMatingForm, setShowAddMatingForm] = useState(false);
+    // "+ Add" on the Reproduction tab opens the shared entry form (components/LitterManagement, formOnly)
+    const [showAddEntryForm, setShowAddEntryForm] = useState(false);
     const [showQuickAdd, setShowQuickAdd] = useState(false); // Lite mode's Add Animal flow (see QuickAddAnimalModal)
-    const [editingMatingId, setEditingMatingId] = useState(null);
-    const [matingData, setMatingData] = useState({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
 
     // Assign Quarantine/Treatment modal state
     const [showAssignHealthStatusModal, setShowAssignHealthStatusModal] = useState(false);
     const [assigningHealthStatus, setAssigningHealthStatus] = useState(false);
-    const [selectedMatingSire, setSelectedMatingSire] = useState(null);
 
     // Standalone (not animal/enclosure-linked) custom task modal state
     const [showGeneralTaskModal, setShowGeneralTaskModal] = useState(false);
     const [editingGeneralTask, setEditingGeneralTask] = useState(null);
-    const [selectedMatingDam, setSelectedMatingDam] = useState(null);
-    const [showMatingBreedingDetails, setShowMatingBreedingDetails] = useState(false);
-    const [matingCOI, setMatingCOI] = useState(null);
-    const [matingCalcCOI, setMatingCalcCOI] = useState(false);
-    const [showMatingSpeciesPicker, setShowMatingSpeciesPicker] = useState(false);
-    const [modalTarget, setModalTarget] = useState(null);
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
     const [listSelectedIds, setListSelectedIds] = useState(new Set());
@@ -5821,196 +5812,6 @@ useEffect(() => {
         );
     };
 
-    const LoadingSpinner = () => (
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
-          <span className="text-gray-600 dark:text-dark-text-secondary">Loading...</span>
-        </div>
-    );
-
-    const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, requiredGender, birthDate, species }) => {
-        const [searchTerm, setSearchTerm] = useState('');
-        const [hasSearched, setHasSearched] = useState(false);
-        const [localAnimals, setLocalAnimals] = useState([]);
-        const [globalAnimals, setGlobalAnimals] = useState([]);
-        const [loadingLocal, setLoadingLocal] = useState(false);
-        const [loadingGlobal, setLoadingGlobal] = useState(false);
-        const [scope, setScope] = useState('both');
-        const SearchResultItem = ({ animal, isGlobal }) => {
-            const imgSrc = animal.imageUrl || animal.photoUrl || null;
-            return (
-                <div className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onSelect(animal)}>
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"><AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} /></div>
-                    <div className="flex-grow">
-                        <p className="font-semibold text-gray-800 dark:text-dark-text">{formatAnimalDisplayName(animal)}</p>
-                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
-                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}</p>
-                        {getSpeciesLatinName(animal.species) && ( <p className="text-xs italic text-gray-500 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</p> )}
-                    </div>
-                    {isGlobal && <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>}
-                </div>
-            );
-        };
-        const handleSearch = async () => {
-            setHasSearched(true);
-            const trimmedSearchTerm = searchTerm.trim();
-            if (!trimmedSearchTerm || trimmedSearchTerm.length < 1) { setLocalAnimals([]); setGlobalAnimals([]); showModalMessage('Search Info', 'Please enter a name or ID to search.'); return; }
-            const idMatch = trimmedSearchTerm.match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
-            const isIdSearch = !!idMatch;
-            const idValue = isIdSearch ? `CTC${idMatch[1]}` : null;
-            const genderQuery = requiredGender ? (Array.isArray(requiredGender) ? `&gender=${requiredGender.map(g => encodeURIComponent(g)).join('&gender=')}` : `&gender=${requiredGender}`) : '';
-            const birthdateQuery = birthDate ? `&birthdateBefore=${birthDate}` : '';
-            const speciesQuery = species ? `&species=${encodeURIComponent(species)}` : '';
-            setLoadingLocal(scope === 'local' || scope === 'both');
-            setLoadingGlobal(scope === 'global' || scope === 'both');
-            if (scope === 'local' || scope === 'both') {
-                try {
-                    const localUrl = isIdSearch ? `/animals?id_public=${encodeURIComponent(idValue)}` : `/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
-                    const localResponse = await apiClient.get(localUrl);
-                    const filteredLocal = localResponse.data.filter(a => {
-                        if (a.id_public === currentId) return false;
-                        if (birthDate && a.deceasedDate && (a.gender === 'Female' || a.gender === 'Intersex')) { const offspringBirth = new Date(birthDate); const parentDeceased = new Date(a.deceasedDate); if (parentDeceased < offspringBirth) return false; }
-                        return true;
-                    });
-                    setLocalAnimals(filteredLocal);
-                } catch (error) { console.error('Local Search Error:', error); showModalMessage('Search Error', 'Failed to search your animals.'); setLocalAnimals([]); } finally { setLoadingLocal(false); }
-            } else { setLocalAnimals([]); setLoadingLocal(false); }
-            if (scope === 'global' || scope === 'both') {
-                try {
-                    const globalUrl = isIdSearch ? `/public/global/animals?id_public=${encodeURIComponent(idValue)}` : `/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
-                    const globalResponse = await apiClient.get(globalUrl);
-                    const filteredGlobal = globalResponse.data.filter(a => {
-                        if (a.id_public === currentId) return false;
-                        if (birthDate && a.deceasedDate && (a.gender === 'Female' || a.gender === 'Intersex')) { const offspringBirth = new Date(birthDate); const parentDeceased = new Date(a.deceasedDate); if (parentDeceased < offspringBirth) return false; }
-                        return true;
-                    });
-                    setGlobalAnimals(filteredGlobal);
-                } catch (error) { console.error('Global Search Error:', error); setGlobalAnimals([]); } finally { setLoadingGlobal(false); }
-            } else { setGlobalAnimals([]); setLoadingGlobal(false); }
-        };
-        return (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
-                    <div className="flex justify-between items-center border-b pb-3 mb-4"><h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">{title} Selector</h3><button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={24} /></button></div>
-                    <div className="mb-3">
-                        <div className="flex items-center space-x-2 mb-2"><span className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Search Scope:</span>{['local','global','both'].map(s => ( <button key={s} type="button" onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>{s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}</button>))}</div>
-                        <div className="flex space-x-2"><input type="text" placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }} className="flex-grow p-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-primary focus:border-primary transition" /><button onClick={handleSearch} disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50">{ (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }</button></div>
-                    </div>
-                    <div className="flex-grow overflow-y-auto space-y-4">
-                        {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm"><h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>{localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}</div>)}
-                        {loadingGlobal ? <LoadingSpinner message="Searching global animals..." /> : globalAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm"><h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b pb-1">Global Display Animals ({globalAnimals.length})</h4>{globalAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={true} />)}</div>)}
-                        {hasSearched && searchTerm.trim().length >= 1 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && ( <p className="text-center text-gray-500 dark:text-dark-text-muted py-4">No animals found matching your search term or filters.</p>)}
-                    </div>
-                    <div className="mt-4 pt-4 border-t"><button onClick={() => onSelect(null)} className="w-full text-sm text-gray-500 dark:text-dark-text-muted hover:text-red-500 transition">Clear {title} ID</button></div>
-                </div>
-            </div>
-        );
-    };
-
-    const handleSelectOtherParentForLitter = (animal) => {
-        if (modalTarget === 'sire-mating') {
-            setMatingData(prev => ({...prev, sireId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
-            setSelectedMatingSire(animal || null);
-            setMatingCOI(null);
-        } else if (modalTarget === 'dam-mating') {
-            setMatingData(prev => ({...prev, damId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
-            setSelectedMatingDam(animal || null);
-            setMatingCOI(null);
-        }
-        setModalTarget(null);
-    };
-
-    useEffect(() => {
-        if (!matingData.sireId_public || !matingData.damId_public) { setMatingCOI(null); return; }
-        const sireId = matingData.sireId_public;
-        const damId = matingData.damId_public;
-        const cacheKey = `${sireId}:${damId}`;
-        if (coiCacheRef.current[cacheKey] != null) { setMatingCOI(coiCacheRef.current[cacheKey]); return; }
-        setMatingCalcCOI(true);
-        setMatingCOI(null);
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        apiClient.get(`/animals/inbreeding/pairing`, {
-            params: { sireId, damId, generations: 20 },
-            signal: controller.signal,
-        }).then(res => {
-            const val = res.data.inbreedingCoefficient ?? 0;
-            coiCacheRef.current[cacheKey] = val;
-            setMatingCOI(val);
-        }).catch(() => {}).finally(() => { clearTimeout(timeout); setMatingCalcCOI(false); });
-    }, [matingData.sireId_public, matingData.damId_public, authToken]);
-
-    const resetMatingForm = () => {
-        setMatingData({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
-        setSelectedMatingSire(null);
-        setSelectedMatingDam(null);
-        setShowMatingBreedingDetails(false);
-        setShowMatingSpeciesPicker(false);
-        setMatingCOI(null);
-        setMatingCalcCOI(false);
-        setEditingMatingId(null);
-    };
-
-    const handleSubmitMating = async (e) => {
-        e.preventDefault();
-        if (!matingData.sireId_public || !matingData.damId_public) {
-            showModalMessage('Error', 'Please select both a Sire and a Dam');
-            return;
-        }
-        try {
-            const sire = allAnimalsRaw.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire;
-            const dam = allAnimalsRaw.find(a => a.id_public === matingData.damId_public) || selectedMatingDam;
-            if (!sire || !dam) {
-                showModalMessage('Error', 'Selected parents not found. Please re-select sire and dam.');
-                return;
-            }
-            const payload = {
-                sireId_public: matingData.sireId_public,
-                damId_public: matingData.damId_public,
-                species: matingData.species || sire.species,
-                matingDate: matingData.matingDate || null,
-                expectedDueDate: matingData.expectedDueDate || null,
-                breedingMethod: matingData.breedingMethod || 'Natural',
-                breedingConditionAtTime: matingData.breedingConditionAtTime || null,
-                notes: matingData.notes || '',
-                isPlanned: true,
-                numberBorn: 0,
-            };
-            let resp;
-            try {
-                resp = await apiClient.post(`/litters`, payload);
-            } catch (createError) {
-                const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
-                if (!duplicate) throw createError;
-                const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
-                if (resolution.action === 'adopted') {
-                    showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
-                    setShowAddMatingForm(false);
-                    resetMatingForm();
-                    await fetchLitters();
-                    return;
-                }
-                if (resolution.action === 'create-anyway') {
-                    resp = await apiClient.post(`/litters`, { ...payload, confirmDuplicate: true });
-                } else {
-                    return;
-                }
-            }
-            const litterBackendId = resp.data.litterId_backend;
-            if (matingCOI != null) {
-                apiClient.put(`/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI })
-                    .catch(() => {});
-            }
-            showModalMessage('Success', 'Planned mating recorded!');
-            setShowAddMatingForm(false);
-            resetMatingForm();
-            await fetchLitters();
-        } catch (error) {
-            console.error('Error recording planned mating:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to record mating');
-        }
-    };
-
     const renderDashboard = () => {
         const categoryIcons = {
             'Mammal': <Cat size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
@@ -6510,8 +6311,8 @@ useEffect(() => {
                         )}
                         {/* Add Enclosure button */}
                         {animalView === 'reproduction' ? (
-                            <button onClick={() => setShowAddMatingForm(true)} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
-                                <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Mating</span>
+                            <button onClick={() => setShowAddEntryForm(true)} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
+                                <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add</span>
                             </button>
                         ) : animalView === 'health' ? (
                             <button onClick={() => setShowAssignHealthStatusModal(true)} className="flex bg-orange-600 dark:bg-orange-800 hover:bg-orange-700 dark:hover:bg-orange-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Assign Quarantine or Treatment">
@@ -7169,87 +6970,22 @@ useEffect(() => {
                     onCreated={async () => { setShowQuickAdd(false); await handleRefresh(); }}
                 />
             )}
-            {showAddMatingForm && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-lg">
-                        <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
-                            <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2"><Heart size={18} className="text-indigo-500" />Record Planned Mating</h3>
-                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={22} /></button>
-                        </div>
-                        <form onSubmit={handleSubmitMating} className="p-4 space-y-4 overflow-y-auto max-h-[75vh]">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Species <span className="text-red-500">*</span></label>
-                                <button type="button" onClick={() => setShowMatingSpeciesPicker(true)} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent">
-                                    {matingData.species ? <span className="font-medium text-gray-800 dark:text-dark-text">{matingData.species}</span> : <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>}
-                                </button>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Sire (Father) <span className="text-red-500">*</span></label>
-                                <button type="button" onClick={() => setModalTarget('sire-mating')} disabled={!matingData.species} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed">
-                                    {matingData.sireId_public ? (<div className="flex items-center justify-between"><div><div className="font-medium">{(allAnimalsRaw.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire)?.name || 'Unknown'}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.sireId_public}</div></div></div>) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Sire...' : 'Select species first'}</span>}
-                                </button>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
-                                <button type="button" onClick={() => setModalTarget('dam-mating')} disabled={!matingData.species} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed">
-                                    {matingData.damId_public ? (<div className="flex items-center justify-between"><div><div className="font-medium">{(allAnimalsRaw.find(a => a.id_public === matingData.damId_public) || selectedMatingDam)?.name || 'Unknown'}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.damId_public}</div></div></div>) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Dam...' : 'Select species first'}</span>}
-                                </button>
-                            </div>
-                            {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary'}`}>
-                                    {matingCalcCOI ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-dark-text-muted border-t-gray-600 dark:border-t-dark-text animate-spin" /> Calculating COI...</> : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%{matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}</>}
-                                </div>
-                            )}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Mating Date</label>
-                                <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Expected Due Date</label>
-                                <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
-                            </div>
-                            <button type="button" onClick={() => setShowMatingBreedingDetails(p => !p)} className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">
-                                {showMatingBreedingDetails ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                                {showMatingBreedingDetails ? 'Hide breeding details' : '+ Breeding details (optional)'}
-                            </button>
-                            {showMatingBreedingDetails && (
-                                <div className="space-y-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 rounded-lg">
-                                    <div><label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Method</label><select value={matingData.breedingMethod} onChange={(e) => setMatingData({...matingData, breedingMethod: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"><option value="Natural">Natural</option><option value="AI">Artificial Insemination</option><option value="Assisted">Assisted</option><option value="Unknown">Unknown</option></select></div>
-                                    <div><label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Condition</label><select value={matingData.breedingConditionAtTime} onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"><option value="">Select Condition...</option><option value="Good">Good</option><option value="Okay">Okay</option><option value="Poor">Poor</option></select></div>
-                                </div>
-                            )}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Notes</label>
-                                <textarea value={matingData.notes} onChange={(e) => setMatingData({...matingData, notes: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-indigo-400 text-sm" rows="2" placeholder="Any notes about this mating..." />
-                            </div>
-                            <div className="flex gap-3 justify-end border-t dark:border-dark-text-muted pt-3">
-                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover font-semibold text-sm">Cancel</button>
-                                <button type="submit" className="bg-indigo-600 dark:bg-dark-accent-purple hover:bg-indigo-700 dark:hover:bg-dark-accent-purple/80 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-            {showMatingSpeciesPicker && (
-                <SpeciesPickerModal
-                    speciesOptions={speciesOptions}
-                    onSelect={(speciesName) => {
-                        setMatingData(prev => ({...prev, species: speciesName, sireId_public: '', damId_public: ''}));
-                        setSelectedMatingSire(null);
-                        setSelectedMatingDam(null);
-                        setMatingCOI(null);
-                        setShowMatingSpeciesPicker(false);
-                    }}
-                    onClose={() => setShowMatingSpeciesPicker(false)}
-                    X={X}
-                    Search={Search}
-                />
-            )}
-            {modalTarget === 'sire-mating' && (
-                <ParentSearchModal title="Select Sire" onSelect={handleSelectOtherParentForLitter} onClose={() => setModalTarget(null)} authToken={authToken} showModalMessage={showModalMessage} API_BASE_URL={API_BASE_URL} X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner} requiredGender={['Male', 'Intersex', 'Mixed', 'Unknown']} species={matingData.species || undefined} />
-            )}
-            {modalTarget === 'dam-mating' && (
-                <ParentSearchModal title="Select Dam" onSelect={handleSelectOtherParentForLitter} onClose={() => setModalTarget(null)} authToken={authToken} showModalMessage={showModalMessage} API_BASE_URL={API_BASE_URL} X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner} requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']} species={matingData.species || undefined} />
+            {showAddEntryForm && (
+                <React.Suspense fallback={null}>
+                    <LitterEntryForm
+                        formOnly
+                        authToken={authToken}
+                        API_BASE_URL={API_BASE_URL}
+                        userProfile={userProfile}
+                        showModalMessage={showModalMessage}
+                        onViewAnimal={onViewAnimal}
+                        speciesOptions={speciesOptions}
+                        breedingLineDefs={breedingLineDefs}
+                        animalBreedingLines={animalBreedingLines}
+                        onFormClosed={() => setShowAddEntryForm(false)}
+                        onEntrySaved={() => { fetchLitters(); handleRefresh(); }}
+                    />
+                </React.Suspense>
             )}
             </div>
         </>

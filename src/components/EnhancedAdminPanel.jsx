@@ -13,6 +13,7 @@ import AnimalManagementPanel from './admin/AnimalManagementPanel';
 import FeedbackTab from './admin/FeedbackTab';
 import BetaSurveyTab from './admin/BetaSurveyTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
+import SpeciesSuggestionsTab from './admin/SpeciesSuggestionsTab';
 import ResourcesManagementTab from './admin/ResourcesManagementTab';
 import BackupManagementTab from './admin/BackupManagementTab';
 import AnalyticsTab from './admin/AnalyticsTab';
@@ -629,6 +630,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
                                     { id: 'resources-management', label: 'Resources Management', icon: BookOpen, requiredRole: 'admin' },
                                     { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
+                                { id: 'species-suggestions', label: 'Species Value Suggestions', icon: PawPrint },
                                     { id: 'beta-survey', label: 'Beta Survey', icon: ClipboardList },
                                     { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                                 ]}
@@ -743,6 +745,13 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
+                            </div>
+                        )}
+
+                        {/* Species gestation / weaning value suggestions (from the Help Center) */}
+                        {activeSection === 'species-suggestions' && (
+                            <div className="p-8">
+                                <SpeciesSuggestionsTab />
                             </div>
                         )}
 

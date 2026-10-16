@@ -353,7 +353,7 @@ const EMPTY_LITTER_FORM = {
     weaningConfirmed: false
 };
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {} }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {}, formOnly = false, onFormClosed, onEntrySaved }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -432,6 +432,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
     useEffect(() => {
         const loadData = async () => {
+            if (formOnly) { // embedded form: there is no list to load, only the animals the pickers use
+                fetchMyAnimals().catch(err => console.error('Error loading animals:', err));
+                setLoading(false);
+                return;
+            }
             setLoading(true);
             try {
                 // Check if we have cached litters
@@ -560,6 +565,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
     };
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
+        if (formOnly) return; // embedded form: the host refreshes its own list (see onEntrySaved)
         try {
             // Cancel any previous fetchLitters request to prevent race conditions on mobile
             if (fetchLittersAbortControllerRef.current) {
@@ -957,6 +963,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
                 if (resolution.action === 'adopted') {
                     showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
+                    if (onEntrySaved) onEntrySaved();
                     setShowAddForm(false);
                     setEditingLitter(null);
                     fetchLitters();
@@ -1076,6 +1083,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             }
             
             showModalMessage('Success', successMsg);
+            if (onEntrySaved) onEntrySaved();
             setShowAddForm(false);
             setPendingLitterImages(prev => { prev.forEach(item => URL.revokeObjectURL(item.previewUrl)); return []; });
             setSelectedSireAnimal(null);
@@ -1385,6 +1393,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         setShowAddForm(true);
     };
 
+    // Embedded mode (Reproduction tab "+ Add"): render only the entry form, open it straight away,
+    // and tell the host when it closes.
+    useEffect(() => { if (formOnly) openNewEntryForm(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const embeddedWasOpenRef = useRef(false);
+    useEffect(() => {
+        if (!formOnly) return;
+        if (showAddForm) { embeddedWasOpenRef.current = true; }
+        else if (embeddedWasOpenRef.current) { embeddedWasOpenRef.current = false; if (onFormClosed) onFormClosed(); }
+    }, [formOnly, showAddForm]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const handleRecalculateOffspringCounts = async () => {
         if (!window.confirm('This will recalculate offspring counts and gender tallies for all litters based on linked animals. Continue?')) {
             return;
@@ -1603,6 +1621,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
             const offspringSpecies = sire?.species || dam?.species || formData.species || '';
 
+            // Dam must be alive at the litter's birth date (sires are exempt). The server enforces this too.
+            if (formData.birthDate && !formData.birthDateUnknown && dam?.deceasedDate) {
+                const damDied = new Date(dam.deceasedDate).toISOString().slice(0, 10);
+                if (damDied < new Date(formData.birthDate).toISOString().slice(0, 10)) {
+                    showModalMessage('Error', `Dam (${dam.name}) was deceased before the litter birth date`);
+                    return;
+                }
+            }
 
             // Create offspring animals if requested
             const offspringPromises = [];
@@ -1709,6 +1735,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             }
 
             showModalMessage('Success', 'Litter updated successfully!');
+            if (onEntrySaved) onEntrySaved();
             setShowAddForm(false);
             setEditingLitter(null);
             setLitterImages([]);
@@ -1929,7 +1956,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
     }, { litters: 0, males: 0, females: 0, unknown: 0 });
 
     return (
-        <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted p-3 sm:p-6 rounded-xl shadow-lg">
+        <div className={formOnly ? '' : 'w-full max-w-7xl bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted p-3 sm:p-6 rounded-xl shadow-lg'}>
+            {!formOnly && (<>
         <div className="flex flex-row justify-between items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-lg sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-1 sm:gap-2">
                     <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 mr-1 sm:mr-3 text-primary-dark" /><span className="sm:hidden">Litter</span><span className="hidden sm:inline">Litter Management</span>
@@ -2045,6 +2073,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                     ))}
                 </div>
             )}
+
+            </>)}
 
             {/* Create/Edit Litter Modal */}
             {showAddForm && (
@@ -3189,6 +3219,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             )}
 
             {/* Litter List */}
+            {!formOnly && (
             <div className="space-y-4">
                 {/* Search Bar */}
                 {litters.length > 0 && (
@@ -4069,6 +4100,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                     })
                 )}
             </div>
+            )}
 
             {/* Link Animals Modal */}
             {linkingAnimals && (

@@ -626,8 +626,8 @@ export function AppRoutes({
       } />
 
       {/* Help Center; keep the old path available for existing bookmarks and contextual links. */}
-      <Route path="/help" element={<HelpCenterPage />} />
-      <Route path="/tutorials" element={<HelpCenterPage />} />
+      <Route path="/help" element={<HelpCenterPage speciesOptions={speciesOptions} showModalMessage={showModalMessage} />} />
+      <Route path="/tutorials" element={<HelpCenterPage speciesOptions={speciesOptions} showModalMessage={showModalMessage} />} />
 
       {/* Family Tree Page */}
       <Route path="/pedigree" element={

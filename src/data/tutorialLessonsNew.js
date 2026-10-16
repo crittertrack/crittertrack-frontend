@@ -1353,7 +1353,7 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 1,
         title: 'What it does',
-        content: 'Two optional helpers fill in dates for you, so the birth-due and weaning reminders work without typing anything. Auto due date sets the Expected Due Date to the mating date plus the species\' gestation. Auto weaning date sets the Weaning Date to the birth date plus the species\' weaning age. Each has its own checkbox at the top of Litter Management, and both are on by default. If you don\'t see the checkboxes, the feature isn\'t switched on for your account yet.',
+        content: 'Two optional helpers fill in dates for you, so the birth-due and weaning reminders work without typing anything. Auto due date sets the Expected Due Date to the mating date plus the species\' gestation. Auto weaning date sets the Weaning Date to the birth date plus the species\' weaning age. Each has its own checkbox at the top of Litter Management, and both are on by default.',
       },
       {
         stepNumber: 2,
