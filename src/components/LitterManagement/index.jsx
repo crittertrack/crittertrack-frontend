@@ -2026,7 +2026,32 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                         <p>Record planned matings, track pregnancies, and log litters with offspring counts and details.</p>
                     </InfoButton>
                 </h2>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center">
+                    {/* Auto-calculation switches — desktop: left of the refresh / + Mating / + Litter buttons
+                        (on mobile they stay in the stats row below) */}
+                    {autoCalcAvailable && (
+                        <div className="hidden sm:flex flex-col gap-0.5 mr-2 text-sm">
+                            {[
+                                { key: 'autoCalcDueDate', label: 'Auto due date', on: autoCalcDueDate, hint: 'Fills the expected due date from the mating date and species.' },
+                                { key: 'autoCalcWeaningDate', label: 'Auto weaning date', on: autoCalcWeaningDate, hint: 'Fills the weaning date from the birth date and species.' },
+                            ].map(({ key, label, on, hint }) => (
+                                <label
+                                    key={key}
+                                    className="flex items-center gap-1.5 cursor-pointer select-none whitespace-nowrap"
+                                    title={`${hint} ${on ? 'On' : 'Off'} — dates you type yourself are never overwritten.`}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        role="switch"
+                                        checked={on}
+                                        onChange={(e) => setAutoCalcPref(key, e.target.checked)}
+                                        className="accent-primary h-3.5 w-3.5"
+                                    />
+                                    <span className={`font-semibold ${on ? 'text-gray-700 dark:text-dark-text-secondary' : 'text-gray-400 dark:text-dark-text-muted'}`}>{label}</span>
+                                </label>
+                            ))}
+                        </div>
+                    )}
                     <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
@@ -2090,7 +2115,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> Females</span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> Unknown</span>
                 {autoCalcAvailable && (
-                    <>
+                    <div className="contents sm:hidden"> {/* mobile only — desktop uses the header copy beside the buttons */}
                         {[
                             { key: 'autoCalcDueDate', label: 'Auto due date', on: autoCalcDueDate, hint: 'Fills the expected due date from the mating date and species.' },
                             { key: 'autoCalcWeaningDate', label: 'Auto weaning date', on: autoCalcWeaningDate, hint: 'Fills the weaning date from the birth date and species.' },
@@ -2110,7 +2135,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                 <span className={`font-semibold ${on ? 'text-gray-700 dark:text-dark-text-secondary' : 'text-gray-400 dark:text-dark-text-muted'}`}>{label}</span>
                             </label>
                         ))}
-                    </>
+                    </div>
                 )}
                 <InfoButton title="The Expanded Litter Card" lessonId="litter-expanded-view">
                     <p>Click any litter card to expand it — status transition buttons (Mated today, Assign Pregnant, Born today, Mark Weaned) and offspring management both live inside the expanded view.</p>
