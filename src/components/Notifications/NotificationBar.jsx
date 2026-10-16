@@ -280,7 +280,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       });
 
       litters.forEach(l => {
-        if (l.matingDate && !l.pregnancyDate && !l.birthDate) {
+        if (l.matingDate && !l.pregnancyDate && !l.birthDate && !l.birthDateUnknown) {
           const d = parseLocalDate(l.matingDate);
           if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) === 0) {
             mated++;
@@ -288,7 +288,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
             matedAnimals.push(parentNames.length ? parentNames.join(' × ') : litterName(l));
           }
         }
-        if (l.expectedDueDate && !l.birthDate && !l.pregnancyLost && !l.isPlanned) {
+        if (l.expectedDueDate && !l.birthDate && !l.birthDateUnknown && !l.pregnancyLost && !l.isPlanned) {
           const d = parseLocalDate(l.expectedDueDate);
           if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) {
             dueAnimals.push(animalNameForId(l.damId_public) || litterName(l));

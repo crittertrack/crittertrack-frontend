@@ -98,6 +98,7 @@ const BREEDING_LESSON_IDS = new Set([
   'litter-birth-details',
   'litter-offspring-management',
   'litter-expanded-view',
+  'litter-auto-calculations',
 ]);
 const CARE_LESSON_IDS = new Set([
   'animal-tab-health',
@@ -718,7 +719,7 @@ const ArticleDetail = ({ article, articles, topics, backLabel, helpfulVote, onVo
                 </span>
                 <div className="min-w-0 flex-1">
                   <h4 className="text-sm font-bold text-gray-900 dark:text-dark-text">{step.title}</h4>
-                  <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-dark-text-secondary">{step.content}</p>
+                  <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-gray-600 dark:text-dark-text-secondary">{step.content}</p>
                   {step.link?.url && (
                     <a
                       href={step.link.url}

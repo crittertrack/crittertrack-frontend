@@ -4,13 +4,14 @@ import { decodeErrorMessage } from '../../utils/imageDecode';
 import { compressImageToMaxSize as compressImageToMaxSizeShared } from '../../utils/imageCompression';
 import {
     Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
-    ChevronDown, ChevronUp, ClipboardList,
+    ChevronDown, ChevronUp, 
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
     Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, Info,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
+import { deriveLitterFormStatus, litterStatusPatch, LITTER_STATUS_LABELS } from '../../utils/litterStatus';
 import { compareBreedingLines } from '../../utils/breedingLineColor';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
@@ -312,41 +313,54 @@ const ParentSearchModal = ({
 
 // Litter Management Component
 
+// Defaults for the single Add/Edit entry form (also used to reset it each time "+ Add" opens).
+const EMPTY_LITTER_FORM = {
+    breedingPairCodeName: '',
+    sireId_public: '',
+    damId_public: '',
+    species: '',
+    birthDate: '',
+    birthDateUnknown: false,
+    maleCount: null,
+    femaleCount: null,
+    unknownCount: null,
+    maleLosses: null,
+    femaleLosses: null,
+    unknownLosses: null,
+    maleStillborn: null,
+    femaleStillborn: null,
+    unknownStillborn: null,
+    extractStillbornFromTotal: false,
+    extractLossesFromTotal: false,
+    notes: '',
+    linkedOffspringIds: [],
+    breedingMethod: 'Unknown',
+    breedingConditionAtTime: '',
+    matingDate: '',
+    outcome: 'Unknown',
+    birthMethod: '',
+    birthComplications: '',
+    birthOutcome: '',
+    pregnancyLost: false,
+    pregnancyLostReason: null,
+    pregnancyLostNotes: null,
+    litterSizeBorn: null,
+    litterSizeWeaned: null,
+    stillbornCount: null,
+    lossesCount: null,
+    expectedDueDate: '',
+    weaningDate: '',
+    weaningConfirmed: false
+};
+
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
-    const [formData, setFormData] = useState({
-        breedingPairCodeName: '',
-        sireId_public: '',
-        damId_public: '',
-        species: '',
-        birthDate: '',
-        maleCount: null,
-        femaleCount: null,
-        unknownCount: null,
-        maleLosses: null,
-        femaleLosses: null,
-        unknownLosses: null,
-        extractStillbornFromTotal: false,
-        extractLossesFromTotal: false,
-        notes: '',
-        linkedOffspringIds: [],
-        // Enhanced breeding record fields
-        breedingMethod: 'Unknown',
-        breedingConditionAtTime: '',
-        matingDate: '',
-        outcome: 'Unknown',
-        birthMethod: '',
-        litterSizeBorn: null,
-        litterSizeWeaned: null,
-        stillbornCount: null,
-        lossesCount: null,
-        expectedDueDate: '',
-        weaningDate: '',
-        weaningConfirmed: false
-    });
+    const [showMatingExtra, setShowMatingExtra] = useState(false);  // collapsible "Mating information"
+    const [showBirthExtra, setShowBirthExtra] = useState(false);    // collapsible "Birth information"
+    const [formData, setFormData] = useState({ ...EMPTY_LITTER_FORM });
     const [createOffspringCounts, setCreateOffspringCounts] = useState({
         males: 0,
         females: 0,
@@ -415,17 +429,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
 
-    // Mating quick-add form state
-    const [showAddMatingForm, setShowAddMatingForm] = useState(false);
-    const [editingMatingId, setEditingMatingId] = useState(null); // null = create, set = edit
-    const [matingEditChoice, setMatingEditChoice] = useState(null); // litter object awaiting edit/convert choice
-    const [matingData, setMatingData] = useState({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
-    const [selectedMatingSire, setSelectedMatingSire] = useState(null);
-    const [selectedMatingDam, setSelectedMatingDam] = useState(null);
-    const [showMatingBreedingDetails, setShowMatingBreedingDetails] = useState(false);
-    const [matingCOI, setMatingCOI] = useState(null);
-    const [matingCalcCOI, setMatingCalcCOI] = useState(false);
-    const [showMatingSpeciesPicker, setShowMatingSpeciesPicker] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -719,134 +722,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             setFormData(prev => ({...prev, otherParent1Id_public: animal?.id_public || ''}));
         } else if (modalTarget === 'other-parent2-litter') {
             setFormData(prev => ({...prev, otherParent2Id_public: animal?.id_public || ''}));
-        } else if (modalTarget === 'sire-mating') {
-            setMatingData(prev => ({...prev, sireId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
-            setSelectedMatingSire(animal || null);
-            setMatingCOI(null);
-        } else if (modalTarget === 'dam-mating') {
-            setMatingData(prev => ({...prev, damId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
-            setSelectedMatingDam(animal || null);
-            setMatingCOI(null);
         }
         setModalTarget(null);
-    };
-
-    // Auto-calculate COI for mating form when both parents are selected
-    useEffect(() => {
-        if (!matingData.sireId_public || !matingData.damId_public) { setMatingCOI(null); return; }
-        const sireId = matingData.sireId_public;
-        const damId = matingData.damId_public;
-        const cacheKey = `${sireId}:${damId}`;
-        if (coiCacheRef.current[cacheKey] != null) { setMatingCOI(coiCacheRef.current[cacheKey]); return; }
-        setMatingCalcCOI(true);
-        setMatingCOI(null);
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        apiClient.get(`/animals/inbreeding/pairing`, {
-            params: { sireId, damId, generations: 20 },
-            signal: controller.signal,
-        }).then(res => {
-            const val = res.data.inbreedingCoefficient ?? 0;
-            coiCacheRef.current[cacheKey] = val;
-            setMatingCOI(val);
-        }).catch(() => {}).finally(() => { clearTimeout(timeout); setMatingCalcCOI(false); });
-    }, [matingData.sireId_public, matingData.damId_public]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const resetMatingForm = () => {
-        setMatingData({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
-        setSelectedMatingSire(null);
-        setSelectedMatingDam(null);
-        setShowMatingBreedingDetails(false);
-        setShowMatingSpeciesPicker(false);
-        setMatingCOI(null);
-        setMatingCalcCOI(false);
-        setEditingMatingId(null);
-    };
-
-    const handleEditMating = (litter) => {
-        const fmt = (d) => !d ? '' : (typeof d === 'string' && d.match(/^\d{4}-\d{2}-\d{2}/) ? d.split('T')[0] : new Date(d).toISOString().split('T')[0]);
-        setEditingMatingId(litter._id);
-        setMatingData({
-            sireId_public: litter.sireId_public || '',
-            damId_public: litter.damId_public || '',
-            matingDate: fmt(litter.matingDate || litter.pairingDate),
-            expectedDueDate: fmt(litter.expectedDueDate),
-            breedingMethod: litter.breedingMethod || 'Natural',
-            breedingConditionAtTime: litter.breedingConditionAtTime || '',
-            species: litter.sire?.species || litter.dam?.species || '',
-            notes: litter.notes || '',
-        });
-        setSelectedMatingSire(litter.sire || null);
-        setSelectedMatingDam(litter.dam || null);
-        if (litter.inbreedingCoefficient != null) setMatingCOI(litter.inbreedingCoefficient);
-        setMatingEditChoice(null);
-        setShowAddMatingForm(true);
-    };
-
-    const handleSubmitMating = async (e) => {
-        e.preventDefault();
-        if (!matingData.sireId_public || !matingData.damId_public) {
-            showModalMessage('Error', 'Please select both a Sire and a Dam');
-            return;
-        }
-        try {
-            const sire = myAnimals.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire;
-            const dam = myAnimals.find(a => a.id_public === matingData.damId_public) || selectedMatingDam;
-            if (!sire || !dam) {
-                showModalMessage('Error', 'Selected parents not found. Please re-select sire and dam.');
-                return;
-            }
-            const payload = {
-                sireId_public: matingData.sireId_public,
-                damId_public: matingData.damId_public,
-                species: matingData.species || sire.species,
-                matingDate: matingData.matingDate || null,
-                expectedDueDate: matingData.expectedDueDate || null,
-                breedingMethod: matingData.breedingMethod || 'Natural',
-                breedingConditionAtTime: matingData.breedingConditionAtTime || null,
-                notes: matingData.notes || '',
-                isPlanned: true,
-                numberBorn: 0,
-            };
-            let litterBackendId;
-            if (editingMatingId) {
-                await apiClient.put(`/litters/${editingMatingId}`, payload);
-                litterBackendId = editingMatingId;
-            } else {
-                try {
-                    const resp = await apiClient.post(`/litters`, payload);
-                    litterBackendId = resp.data.litterId_backend;
-                } catch (createError) {
-                    const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
-                    if (!duplicate) throw createError;
-                    const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
-                    if (resolution.action === 'adopted') {
-                        showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
-                        setShowAddMatingForm(false);
-                        resetMatingForm();
-                        await fetchLitters();
-                        return;
-                    }
-                    if (resolution.action === 'create-anyway') {
-                        const retryResp = await apiClient.post(`/litters`, { ...payload, confirmDuplicate: true });
-                        litterBackendId = retryResp.data.litterId_backend;
-                    } else {
-                        return;
-                    }
-                }
-            }
-            if (matingCOI != null) {
-                apiClient.put(`/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI })
-                    .catch(() => {});
-            }
-            showModalMessage('Success', editingMatingId ? 'Planned mating updated!' : 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
-            setShowAddMatingForm(false);
-            resetMatingForm();
-            await fetchLitters();
-        } catch (error) {
-            console.error('Error recording planned mating:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to record mating');
-        }
     };
 
     const handleMarkAsMated = async (litter) => {
@@ -1033,6 +910,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
                 birthDate: formData.birthDate || null,
+                birthDateUnknown: !!formData.birthDateUnknown,
+                // Status follows the dates (planned / mated / born) — see utils/litterStatus.js
+                ...litterStatusPatch(formData, null),
                 notes: formData.notes || '',
                 offspringIds_public: formData.linkedOffspringIds || [],
                 ...createCounts,
@@ -1058,7 +938,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 // Gender-specific losses
                 maleLossesCount: formData.maleLosses || null,
                 femaleLossesCount: formData.femaleLosses || null,
-                unknownLossesCount: formData.unknownLosses || null
+                unknownLossesCount: formData.unknownLosses || null,
+                birthComplications: formData.birthComplications || null,
+                birthOutcome: formData.birthOutcome || null,
+                ...(formData.pregnancyLost ? {
+                    pregnancyLost: true,
+                    pregnancyLostReason: formData.pregnancyLostReason || 'Unknown',
+                    pregnancyLostNotes: formData.pregnancyLostNotes || null
+                } : {})
             };
 
             let litterResponse;
@@ -1085,6 +972,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             const litterId = litterResponse.data.litterId_backend;
 
             // Litter was created with a birth date already recorded — dam transitions to nursing
+            // Only a real birth date starts nursing — "born, birth date unknown" never does.
             if (formData.birthDate) {
                 syncDamPostBirth(formData.damId_public);
             }
@@ -1192,30 +1080,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             setPendingLitterImages(prev => { prev.forEach(item => URL.revokeObjectURL(item.previewUrl)); return []; });
             setSelectedSireAnimal(null);
             setSelectedDamAnimal(null);
-            setFormData({
-                breedingPairCodeName: '',
-                sireId_public: '',
-                damId_public: '',
-                species: '',
-                birthDate: '',
-                maleCount: null,
-                femaleCount: null,
-                unknownCount: null,
-                notes: '',
-                linkedOffspringIds: [],
-                // Enhanced breeding record fields
-                breedingMethod: 'Unknown',
-                breedingConditionAtTime: '',
-                matingDate: '',
-                expectedDueDate: '',
-                outcome: 'Unknown',
-                birthMethod: '',
-                litterSizeBorn: null,
-                litterSizeWeaned: null,
-                stillbornCount: null,
-                lossesCount: null,
-                weaningDate: ''
-            });
+            setFormData({ ...EMPTY_LITTER_FORM });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
             // setSireSearch('');
             // setDamSearch('');
@@ -1466,6 +1331,60 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         }
     };
 
+    // Info popover shown beside the auto-calc checkboxes (desktop header + mobile stats row).
+    // Links to the Help Center article, which lists the day counts for every species.
+    const autoCalcInfo = (
+        <InfoButton title="Auto-calculated dates" lessonId="litter-auto-calculations">
+            <p><span className="font-semibold">Auto due date</span> fills the expected due date from the mating date plus the species' gestation.</p>
+            <p><span className="font-semibold">Auto weaning date</span> fills the weaning date from the birth date plus the species' weaning age.</p>
+            <p>Dates you type yourself are never overwritten, and each option can be turned off on its own. Species without a known value get no automatic date.</p>
+        </InfoButton>
+    );
+
+    // An entry counts as born once it has a birth date OR is marked "born, birth date unknown".
+    // "Born, birth date unknown" is a plain born entry with no birth date: it is Born, but has no age,
+    // nursing or weaning of its own (the server never stores a date for it).
+    const formIsBorn = !!(formData.birthDate || formData.birthDateUnknown);
+    const editingOriginal = editingLitter ? (litters.find((l) => l._id === editingLitter) || null) : null;
+
+    // Predicted COI for the pairing, shown in the form as soon as both parents are picked
+    // (cached per sire/dam for the session, so re-picking the same pair is instant).
+    useEffect(() => {
+        if (!showAddForm || !formData.sireId_public || !formData.damId_public) { setPredictedCOI(null); setCalculatingCOI(false); return undefined; }
+        const cacheKey = `${formData.sireId_public}:${formData.damId_public}`;
+        if (coiCacheRef.current[cacheKey] != null) { setPredictedCOI(coiCacheRef.current[cacheKey]); setCalculatingCOI(false); return undefined; }
+        setCalculatingCOI(true);
+        setPredictedCOI(null);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        apiClient.get(`/animals/inbreeding/pairing`, {
+            params: { sireId: formData.sireId_public, damId: formData.damId_public, generations: 20 },
+            signal: controller.signal,
+        }).then(res => {
+            const val = res.data.inbreedingCoefficient ?? 0;
+            coiCacheRef.current[cacheKey] = val;
+            setPredictedCOI(val);
+        }).catch(() => {}).finally(() => { clearTimeout(timeout); setCalculatingCOI(false); });
+        return () => { clearTimeout(timeout); controller.abort(); };
+    }, [showAddForm, formData.sireId_public, formData.damId_public]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // "+ Add": always opens a fresh, empty entry (never leftovers from a previously edited litter).
+    const openNewEntryForm = () => {
+        setEditingLitter(null);
+        setFormData({ ...EMPTY_LITTER_FORM });
+        setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
+        setSelectedSireAnimal(null);
+        setSelectedDamAnimal(null);
+        setShowSpeciesPicker(false);
+        setPredictedCOI(null);
+        setLitterImages([]);
+        pendingLitterImages.forEach(item => URL.revokeObjectURL(item.previewUrl));
+        setPendingLitterImages([]);
+        setShowMatingExtra(false);
+        setShowBirthExtra(false);
+        setShowAddForm(true);
+    };
+
     const handleRecalculateOffspringCounts = async () => {
         if (!window.confirm('This will recalculate offspring counts and gender tallies for all litters based on linked animals. Continue?')) {
             return;
@@ -1561,7 +1480,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             breedingPairCodeName: litter.breedingPairCodeName || '',
             sireId_public: litter.sireId_public,
             damId_public: litter.damId_public,
-            birthDate: formatDateForInput(litter.birthDate),
+            birthDate: litter.birthDateUnknown ? '' : formatDateForInput(litter.birthDate),
+            birthDateUnknown: !!litter.birthDateUnknown,
             maleCount: litter.maleCount || null,
             femaleCount: litter.femaleCount || null,
             unknownCount: litter.unknownCount || null,
@@ -1592,8 +1512,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             extractLossesFromTotal: !!litter.extractLossesFromTotal,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
             weaningDate: formatDateForInput(litter.weaningDate),
-            weaningConfirmed: litter.weaningConfirmed || false
+            weaningConfirmed: litter.weaningConfirmed || false,
+            birthComplications: litter.birthComplications || '',
+            birthOutcome: litter.birthOutcome || '',
+            pregnancyLost: !!litter.pregnancyLost,
+            pregnancyLostReason: litter.pregnancyLostReason || null,
+            pregnancyLostNotes: litter.pregnancyLostNotes || null
         });
+        setShowMatingExtra(!!(litter.breedingConditionAtTime || (litter.breedingMethod && litter.breedingMethod !== 'Unknown') || (litter.outcome && litter.outcome !== 'Unknown') || litter.pregnancyLost));
+        setShowBirthExtra(!!(litter.birthMethod || litter.birthComplications || litter.birthOutcome));
         setShowAddForm(true);
         setExpandedLitter(null);
     };
@@ -1720,7 +1647,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 breedingPairCodeName: formData.breedingPairCodeName,
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
-                birthDate: formData.birthDate,
+                birthDate: formData.birthDate || null,
+                birthDateUnknown: !!formData.birthDateUnknown,
+                // Status follows the dates; only sent when a date edit actually changes it
+                ...litterStatusPatch(formData, originalLitter),
                 notes: formData.notes,
                 offspringIds_public: allOffspringIds,
                 ...updateCounts,
@@ -1748,7 +1678,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 // Gender-specific losses
                 maleLossesCount: formData.maleLosses || null,
                 femaleLossesCount: formData.femaleLosses || null,
-                unknownLossesCount: formData.unknownLosses || null
+                unknownLossesCount: formData.unknownLosses || null,
+                birthComplications: formData.birthComplications || null,
+                birthOutcome: formData.birthOutcome || null,
+                pregnancyLost: !!formData.pregnancyLost,
+                pregnancyLostReason: formData.pregnancyLost ? (formData.pregnancyLostReason || 'Unknown') : null,
+                pregnancyLostNotes: formData.pregnancyLost ? (formData.pregnancyLostNotes || null) : null
             });
 
             // First-time birth recorded on this litter — dam transitions Pregnant -> Nursing
@@ -1779,31 +1714,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             setLitterImages([]);
             setSelectedSireAnimal(null);
             setSelectedDamAnimal(null);
-            setFormData({
-                breedingPairCodeName: '',
-                sireId_public: '',
-                damId_public: '',
-                species: '',
-                otherParent1Id_public: '',
-                otherParent1Role: '',
-                birthDate: '',
-                maleCount: null,
-                femaleCount: null,
-                notes: '',
-                linkedOffspringIds: [],
-                // Enhanced breeding record fields
-                breedingMethod: 'Unknown',
-                breedingConditionAtTime: '',
-                matingDate: '',
-                expectedDueDate: '',
-                outcome: 'Unknown',
-                birthMethod: '',
-                litterSizeBorn: null,
-                litterSizeWeaned: null,
-                stillbornCount: null,
-                lossesCount: null,
-                weaningDate: ''
-            });
+            setFormData({ ...EMPTY_LITTER_FORM });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
             // setSireSearch('');
             // setDamSearch('');
@@ -1936,7 +1847,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
         // Status filter
         if (litterStatusFilter !== 'all') {
-            const hasBirth = !!litter.birthDate;
+            const hasBirth = !!(litter.birthDate || litter.birthDateUnknown);
             const hasPregnancy = !!litter.pregnancyDate;
             const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth;
             const isPregnant = hasPregnancy && !hasBirth;
@@ -1986,8 +1897,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         return false;
     }).sort((a, b) => {
         // Sort order: Planned → Mated → Pregnant → Born (newest first)
-        const aHasBirth = !!a.birthDate;
-        const bHasBirth = !!b.birthDate;
+        const aHasBirth = !!(a.birthDate || a.birthDateUnknown);
+        const bHasBirth = !!(b.birthDate || b.birthDateUnknown);
         const aHasPregnancy = !!a.pregnancyDate;
         const bHasPregnancy = !!b.pregnancyDate;
         const aIsPlannedOnly = a.isPlanned && !aHasPregnancy && !aHasBirth;
@@ -2019,14 +1930,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
     return (
         <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted p-3 sm:p-6 rounded-xl shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management
+        <div className="flex flex-row justify-between items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <h2 className="text-lg sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-1 sm:gap-2">
+                    <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 mr-1 sm:mr-3 text-primary-dark" /><span className="sm:hidden">Litter</span><span className="hidden sm:inline">Litter Management</span>
                     <InfoButton title="Litter Management" lessonId="litter-management">
                         <p>Record planned matings, track pregnancies, and log litters with offspring counts and details.</p>
                     </InfoButton>
                 </h2>
-                <div className="flex gap-2 flex-wrap sm:flex-nowrap items-center">
+                <div className="flex gap-2 flex-nowrap items-center shrink-0">
                     {/* Auto-calculation switches — desktop: left of the refresh / + Mating / + Litter buttons
                         (on mobile they stay in the stats row below) */}
                     {autoCalcAvailable && (
@@ -2050,79 +1961,55 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                     <span className={`font-semibold ${on ? 'text-gray-700 dark:text-dark-text-secondary' : 'text-gray-400 dark:text-dark-text-muted'}`}>{label}</span>
                                 </label>
                             ))}
+                            {autoCalcInfo}
                         </div>
                     )}
                     <button
                         onClick={handleRecalculateOffspringCounts}
-                        className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg hidden sm:flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
-                    {/* + Mating / + Litter — grouped so they never split across rows */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted shadow-sm">
-                        {/* Mating button */}
-                        <button
-                            onClick={() => {
-                                if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 }); }
-                                setShowAddMatingForm(!showAddMatingForm);
-                                if (showAddMatingForm) resetMatingForm();
-                            }}
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 dark:border-dark-text-muted whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
-                            title="Record a planned mating"
-                        >
-                            {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
-                            <span>Mating</span>
-                        </button>
-                        {/* Litter button */}
-                        <button
-                            onClick={() => {
-                                if (showAddForm) {
-                                    setEditingLitter(null);
-                                    setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
-                                    setPredictedCOI(null);
-                                    setFormData({
-                                        breedingPairCodeName: '',
-                                        sireId_public: '',
-                                        damId_public: '',
-                                        otherParent1Id_public: '',
-                                        otherParent1Role: '',
-                                        otherParent2Id_public: '',
-                                        otherParent2Role: '',
-                                        birthDate: '',
-                                        maleCount: '',
-                                        femaleCount: '',
-                                        notes: '',
-                                        linkedOffspringIds: []
-                                    });
-                                }
-                                if (!showAddForm) setShowAddMatingForm(false);
-                                setShowAddForm(!showAddForm);
-                            }}
-                            data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
-                        >
-                            {showAddForm ? <X size={14} /> : <Plus size={14} />}
-                            <span>Litter</span>
-                        </button>
-                    </div>
+                    {/* Single + Add button — one form covers planned, mated and born entries */}
+                    <button
+                        onClick={() => {
+                            if (showAddForm) { setShowAddForm(false); setEditingLitter(null); }
+                            else { openNewEntryForm(); }
+                        }}
+                        data-tutorial-target="new-litter-btn"
+                        className={`flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-sm transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
+                        title="Add a planned mating, a mating, or a litter"
+                    >
+                        {showAddForm ? <X size={14} /> : <Plus size={14} />}
+                        <span>Add</span>
+                    </button>
                 </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted mb-4 sm:mb-6 pl-0.5">
+                {/* Mobile only: refresh sits at the start of row 2, before the stats (desktop has it in the header) */}
+                <button
+                    onClick={handleRecalculateOffspringCounts}
+                    className="sm:hidden bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black p-1.5 rounded-lg flex items-center mr-1"
+                    title="Recalculate offspring counts for all litters"
+                    aria-label="Recalculate offspring counts for all litters"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
                 <span><span className="font-semibold text-gray-700 dark:text-dark-text-secondary">{litterStats.litters}</span><span className="hidden sm:inline"> Litters</span></span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-blue-600 dark:text-blue-400">{litterStats.males}</span> <span className="sm:hidden" title="Males">M</span><span className="hidden sm:inline">Males</span></span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> <span className="sm:hidden" title="Females">F</span><span className="hidden sm:inline">Females</span></span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> <span className="sm:hidden" title="Unknown">U</span><span className="hidden sm:inline">Unknown</span></span>
                 {autoCalcAvailable && (
-                    <div className="contents sm:hidden"> {/* mobile only — desktop uses the header copy beside the buttons */}
+                    <div className="sm:hidden basis-full flex flex-wrap items-center gap-x-4 gap-y-1 mt-1"> {/* mobile only — desktop uses the header copy beside the buttons */}
                         {[
                             { key: 'autoCalcDueDate', label: 'Auto due date', on: autoCalcDueDate, hint: 'Fills the expected due date from the mating date and species.' },
                             { key: 'autoCalcWeaningDate', label: 'Auto weaning date', on: autoCalcWeaningDate, hint: 'Fills the weaning date from the birth date and species.' },
                         ].map(({ key, label, on, hint }) => (
                             <label
                                 key={key}
-                                className="flex items-center gap-1.5 cursor-pointer select-none border-l border-gray-200 dark:border-dark-text-muted pl-4"
+                                className="flex items-center gap-1.5 cursor-pointer select-none"
                                 title={`${hint} ${on ? 'On' : 'Off'} — dates you type yourself are never overwritten.`}
                             >
                                 <input
@@ -2135,11 +2022,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                 <span className={`font-semibold ${on ? 'text-gray-700 dark:text-dark-text-secondary' : 'text-gray-400 dark:text-dark-text-muted'}`}>{label}</span>
                             </label>
                         ))}
+                        {autoCalcInfo}
                     </div>
                 )}
-                <InfoButton title="The Expanded Litter Card" lessonId="litter-expanded-view">
-                    <p>Click any litter card to expand it — status transition buttons (Mated today, Assign Pregnant, Born today, Mark Weaned) and offspring management both live inside the expanded view.</p>
-                </InfoButton>
             </div>
 
             {loading && litters.length === 0 && (
@@ -2167,10 +2052,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                     <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
                         <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
                             <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
-                                {editingLitter ? 'Edit Litter' : 'Create New Litter'}
+                                {editingLitter ? 'Edit Entry' : 'Add Entry'}
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                                    {LITTER_STATUS_LABELS[deriveLitterFormStatus(formData, editingOriginal)]}
+                                </span>
                                 {/* No lessonId: this is an open, unsaved form, so there's no nav-away help link. */}
-                                <InfoButton title="Recording Birth Details">
-                                    <p>Birth Date, Litter Size (by sex), and Notes here create a real Litter record — this is what counts toward pedigrees, offspring links, and COI, unlike a manual pedigree-only note.</p>
+                                <InfoButton title="Adding an entry">
+                                    <p>One form for the whole cycle. The status (Planned, Mated or Born) follows the dates you enter, so you can start with just a sire, dam and a planned mating date, and come back to add the birth details later.</p>
                                 </InfoButton>
                             </h3>
                             <button 
@@ -2190,420 +2078,228 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
                         <div className="flex-grow overflow-y-auto p-4">
                             <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} id="litter-form" className="space-y-4">
-                                {/* Litter Photos ? always visible, including while converting a still-Planned litter */}
-                                <div className="mb-2 p-4 border border-amber-200 dark:border-amber-800/40 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                                        <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
-                                            <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
-                                            <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
-                                        </h4>
-                                        {/* Photos can only be stored against a litter that is no longer
-                                            Planned. Say so up front rather than letting the user pick a
-                                            photo and then fail server-side. */}
-                                        {editingLitter && litters.find((l) => l._id === editingLitter)?.isPlanned && (
-                                            <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
-                                                This litter is still marked as Planned, so photos can't be added yet. Record the birth and save first.
-                                            </p>
-                                        )}
-
-                                        {/* Thumbnail grid */}
-                                        {editingLitter ? (
-                                            litterImages.length > 0 && (
-                                                <div className="flex flex-wrap gap-2 mb-3">
-                                                    {litterImages.map((img, idx) => (
-                                                        <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted group">
-                                                            <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                                                            {img.r2Key === '__uploading__' ? (
-                                                                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                                                                    <Hourglass size={12} className="inline-block align-middle text-white" />
-                                                                </div>
-                                                            ) : (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleLitterImageDelete(img.r2Key)}
-                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                title="Remove photo"
-                                                            ><X size={14} /></button>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )
-                                        ) : (
-                                            pendingLitterImages.length > 0 && (
-                                                <div className="flex flex-wrap gap-2 mb-3">
-                                                    {pendingLitterImages.map((item, idx) => (
-                                                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted group">
-                                                            <img src={item.previewUrl} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    URL.revokeObjectURL(item.previewUrl);
-                                                                    setPendingLitterImages(prev => prev.filter((_, i) => i !== idx));
-                                                                }}
-                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                title="Remove photo"
-                                            ><X size={14} /></button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )
-                                        )}
-
-                                        {/* Upload button */}
-                                        {(editingLitter ? litterImages.length : pendingLitterImages.length) < 5 && (
-                                            <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="hidden"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
-                                                        if (editingLitter) {
-                                                            handleLitterImageUpload(file);
-                                                        } else {
-                                                            if (pendingLitterImages.length >= 5) return;
-                                                            const previewUrl = URL.createObjectURL(file);
-                                                            setPendingLitterImages(prev => [...prev, { file, previewUrl }]);
-                                                        }
-                                                        e.target.value = '';
-                                                    }}
-                                                />
-                                                {litterImageUploading ? <><Loader2 size={14} className="inline-block align-middle animate-spin mr-1" />Uploading?</> : '+ Add Photo'}
-                                            </label>
-                                        )}
-                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
-                                    </div>
-
                                 {/* Auto-assigned CTL-ID (read-only) */}
-                                {editingLitter && editingLitter.litter_id_public && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                            System Litter ID (CTL-ID)
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={editingLitter.litter_id_public}
-                                            disabled
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary font-mono"
-                                        />
-                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Auto-assigned for system linkage</p>
-                                    </div>
-                                )}
-                                
+                                                                {editingOriginal && editingOriginal.litter_id_public && (
+                                                                    <div>
+                                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                            System Litter ID (CTL-ID)
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={editingOriginal.litter_id_public}
+                                                                            disabled
+                                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary font-mono"
+                                                                        />
+                                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Auto-assigned for system linkage</p>
+                                                                    </div>
+                                                                )}
+
                                 {/* Litter Name - Full Width */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                        Litter Name/ID
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.breedingPairCodeName}
-                                        onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
-                                    />
-                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Your custom name for this breeding pair</p>
-                                </div>
+                                                                <div>
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                        Litter Name/ID
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={formData.breedingPairCodeName}
+                                                                        onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
+                                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                                        placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
+                                                                    />
+                                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Your custom name for this breeding pair</p>
+                                                                </div>
 
                                 {/* Species Selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                        Species {!editingLitter && <span className="text-red-500">*</span>}
-                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked · cannot change on edit)</span>}
-                                    </label>
-                                    <button
-                                        type="button"
-                                        onClick={() => !editingLitter && setShowSpeciesPicker(true)}
-                                        disabled={!!editingLitter}
-                                        className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-left transition focus:ring-2 focus:ring-primary focus:border-transparent ${
-                                            editingLitter
-                                                ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted cursor-not-allowed opacity-75'
-                                                : 'bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
-                                        }`}
-                                    >
-                                        {formData.species ? (
-                                            <span className="font-medium text-gray-800 dark:text-dark-text">{formData.species}</span>
-                                        ) : (
-                                            <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>
-                                        )}
-                                    </button>
-                                    {!editingLitter && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Choose species to filter the sire &amp; dam search</p>}
-                                </div>
+                                                                <div>
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                        Species {!editingLitter && <span className="text-red-500">*</span>}
+                                                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked · cannot change on edit)</span>}
+                                                                    </label>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => !editingLitter && setShowSpeciesPicker(true)}
+                                                                        disabled={!!editingLitter}
+                                                                        className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-left transition focus:ring-2 focus:ring-primary focus:border-transparent ${
+                                                                            editingLitter
+                                                                                ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted cursor-not-allowed opacity-75'
+                                                                                : 'bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
+                                                                        }`}
+                                                                    >
+                                                                        {formData.species ? (
+                                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{formData.species}</span>
+                                                                        ) : (
+                                                                            <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>
+                                                                        )}
+                                                                    </button>
+                                                                    {!editingLitter && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Choose species to filter the sire &amp; dam search</p>}
+                                                                </div>
 
-                                {/* Sire & Dam Selection */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Sire Selection */}
-                                    <div data-tutorial-target="sire-dam-section">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                            Sire (Father) {!editingLitter && <span className="text-red-500">*</span>}
-                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked)</span>}
-                                        </label>
-                                        <button
-                                            type="button"
-                                            onClick={() => !editingLitter && setModalTarget('sire-litter')}
-                                            disabled={!!editingLitter || !formData.species}
-                                            className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
-                                        >
-                                            {formData.sireId_public ? (
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <div className="font-medium">
-                                                            {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || selectedSireAnimal?.name || 'Unknown'}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
-                                                            {formData.sireId_public}
-                                                        </div>
-                                                    </div>
-                                                    {!myAnimals.find(a => a.id_public === formData.sireId_public) && selectedSireAnimal && (
-                                                        <span className="text-xs text-black bg-primary dark:bg-dark-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="text-gray-400 dark:text-dark-text-muted">{formData.species ? 'Select Sire...' : 'Select species first'}</div>
-                                            )}
-                                        </button>
-                                    </div>
+                                                                {/* Sire & Dam Selection */}
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                    {/* Sire Selection */}
+                                                                    <div data-tutorial-target="sire-dam-section">
+                                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                            Sire (Father) {!editingLitter && <span className="text-red-500">*</span>}
+                                                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked)</span>}
+                                                                        </label>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => !editingLitter && setModalTarget('sire-litter')}
+                                                                            disabled={!!editingLitter || !formData.species}
+                                                                            className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                                                                        >
+                                                                            {formData.sireId_public ? (
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <div>
+                                                                                        <div className="font-medium">
+                                                                                            {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || selectedSireAnimal?.name || 'Unknown'}
+                                                                                        </div>
+                                                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                                                                            {formData.sireId_public}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {!myAnimals.find(a => a.id_public === formData.sireId_public) && selectedSireAnimal && (
+                                                                                        <span className="text-xs text-black bg-primary dark:bg-dark-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="text-gray-400 dark:text-dark-text-muted">{formData.species ? 'Select Sire...' : 'Select species first'}</div>
+                                                                            )}
+                                                                        </button>
+                                                                    </div>
 
-                                    {/* Dam Selection */}
-                                    <div data-tutorial-target="sire-dam-section">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                            Dam (Mother) {!editingLitter && <span className="text-red-500">*</span>}
-                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked)</span>}
-                                        </label>
-                                        <button
-                                            type="button"
-                                            onClick={() => !editingLitter && setModalTarget('dam-litter')}
-                                            disabled={!!editingLitter || !formData.species}
-                                            className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
-                                        >
-                                            {formData.damId_public ? (
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <div className="font-medium">
-                                                            {myAnimals.find(a => a.id_public === formData.damId_public)?.name || selectedDamAnimal?.name || 'Unknown'}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
-                                                            {formData.damId_public}
-                                                        </div>
-                                                    </div>
-                                                    {!myAnimals.find(a => a.id_public === formData.damId_public) && selectedDamAnimal && (
-                                                        <span className="text-xs text-black bg-primary dark:bg-dark-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="text-gray-400 dark:text-dark-text-muted">{formData.species ? 'Select Dam...' : 'Select species first'}</div>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
+                                                                    {/* Dam Selection */}
+                                                                    <div data-tutorial-target="sire-dam-section">
+                                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                            Dam (Mother) {!editingLitter && <span className="text-red-500">*</span>}
+                                                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked)</span>}
+                                                                        </label>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => !editingLitter && setModalTarget('dam-litter')}
+                                                                            disabled={!!editingLitter || !formData.species}
+                                                                            className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                                                                        >
+                                                                            {formData.damId_public ? (
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <div>
+                                                                                        <div className="font-medium">
+                                                                                            {myAnimals.find(a => a.id_public === formData.damId_public)?.name || selectedDamAnimal?.name || 'Unknown'}
+                                                                                        </div>
+                                                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                                                                            {formData.damId_public}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {!myAnimals.find(a => a.id_public === formData.damId_public) && selectedDamAnimal && (
+                                                                                        <span className="text-xs text-black bg-primary dark:bg-dark-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="text-gray-400 dark:text-dark-text-muted">{formData.species ? 'Select Dam...' : 'Select species first'}</div>
+                                                                            )}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
 
-                                {/* Common breeding-line warning / different-lines info */}
-                                {(() => {
-                                    const { common, sireOnly, damOnly } = compareBreedingLines(formData.sireId_public, formData.damId_public, animalBreedingLines, breedingLineDefs);
-                                    if (common.length > 0) {
-                                        return (
-                                            <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
-                                                <Info size={14} className="flex-shrink-0 mt-0.5" />
-                                                <span>
-                                                    Sire and dam share {common.length} assigned breeding line{common.length !== 1 ? 's' : ''}: <span className="font-semibold">{common.map(l => l.name).join(', ')}</span>.
-                                                </span>
-                                            </div>
-                                        );
-                                    }
-                                    if (sireOnly.length > 0 && damOnly.length > 0) {
-                                        return (
-                                            <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
-                                                <Info size={14} className="flex-shrink-0 mt-0.5" />
-                                                <span>
-                                                    Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
-                                                </span>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                })()}
+                                                                {/* Common breeding-line warning / different-lines info */}
+                                                                {(() => {
+                                                                    const { common, sireOnly, damOnly } = compareBreedingLines(formData.sireId_public, formData.damId_public, animalBreedingLines, breedingLineDefs);
+                                                                    if (common.length > 0) {
+                                                                        return (
+                                                                            <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                                                                                <Info size={14} className="flex-shrink-0 mt-0.5" />
+                                                                                <span>
+                                                                                    Sire and dam share {common.length} assigned breeding line{common.length !== 1 ? 's' : ''}: <span className="font-semibold">{common.map(l => l.name).join(', ')}</span>.
+                                                                                </span>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    if (sireOnly.length > 0 && damOnly.length > 0) {
+                                                                        return (
+                                                                            <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                                                                                <Info size={14} className="flex-shrink-0 mt-0.5" />
+                                                                                <span>
+                                                                                    Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
+                                                                                </span>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    return null;
+                                                                })()}
 
-                                {/* Breeding Information */}
-                                <div className="mb-6 p-4 border border-purple-200 dark:border-purple-800/40 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                                    <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-4 flex items-center">
-                                        <Dna size={18} className="inline-block align-middle text-purple-600 mr-2 flex-shrink-0" />Breeding Information
+                                {/* Predicted inbreeding coefficient for this pairing */}
+                                {formData.sireId_public && formData.damId_public && (calculatingCOI || predictedCOI != null) && (
+                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary -mt-2">
+                                        <span className="font-medium">Predicted COI:</span>{' '}
+                                        {calculatingCOI
+                                            ? <span className="inline-flex items-center gap-1 text-gray-400"><Loader2 size={12} className="animate-spin" />Calculating…</span>
+                                            : <span className="font-semibold">{Number(predictedCOI).toFixed(2)}%</span>}
+                                    </p>
+                                )}
+
+                                {/* Dates — planned/actual mating, due, birth, weaning. Status follows these dates. */}
+                                <div className="p-4 border border-indigo-200 dark:border-indigo-800/40 rounded-lg bg-indigo-50 dark:bg-indigo-900/20" data-tutorial-target="litter-dates-counts">
+                                    <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-1 flex items-center">
+                                        <Calendar size={18} className="inline-block align-middle text-indigo-600 mr-2 flex-shrink-0" />Dates
                                     </h4>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        {/* Breeding Method */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Breeding Method
-                                            </label>
-                                            <select
-                                                value={formData.breedingMethod || 'Unknown'}
-                                                onChange={(e) => setFormData({...formData, breedingMethod: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            >
-                                                <option value="Natural">Natural</option>
-                                                <option value="AI">Artificial Insemination</option>
-                                                <option value="Assisted">Assisted</option>
-                                                <option value="Unknown">Unknown</option>
-                                            </select>
-                                        </div>
-
-                                        {/* Breeding Condition */}
+                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-4">
+                                        Status follows the dates: none, or a mating date in the future = <span className="font-semibold">Planned</span>; a mating date up to today = <span className="font-semibold">Mated</span>; a birth date (or "Born") = <span className="font-semibold">Born</span>.
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Mating date */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Breeding Condition
-                                            </label>
-                                            <select
-                                                value={formData.breedingConditionAtTime || ''}
-                                                onChange={(e) => setFormData({...formData, breedingConditionAtTime: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            >
-                                                <option value="">Select Condition...</option>
-                                                <option value="Good">Good</option>
-                                                <option value="Okay">Okay</option>
-                                                <option value="Poor">Poor</option>
-                                            </select>
-                                        </div>
-
-                                        {/* Outcome Status */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Breeding Outcome
-                                            </label>
-                                            <select
-                                                value={formData.outcome || 'Unknown'}
-                                                onChange={(e) => setFormData({...formData, outcome: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            >
-                                                <option value="Successful">Successful</option>
-                                                <option value="Unsuccessful">Unsuccessful</option>
-                                                <option value="Unknown">Unknown</option>
-                                            </select>
-                                        </div>
-
-                                        {/* Pregnancy Lost Checkbox - only show for mated litters without birth date */}
-                                        {formData.matingDate && !formData.birthDate && (
-                                            <div className="col-span-full">
-                                                <label className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.pregnancyLost || false}
-                                                        onChange={(e) => setFormData({
-                                                            ...formData,
-                                                            pregnancyLost: e.target.checked,
-                                                            pregnancyLostReason: e.target.checked ? (formData.pregnancyLostReason || 'Unknown') : null,
-                                                            pregnancyLostNotes: e.target.checked ? formData.pregnancyLostNotes : null
-                                                        })}
-                                                        className="form-checkbox h-5 w-5 text-amber-600 rounded focus:ring-amber-500"
-                                                    />
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-                                                        Pregnancy confirmed but no litter produced
-                                                    </span>
-                                                </label>
-                                                
-                                                {formData.pregnancyLost && (
-                                                    <div className="mt-3 space-y-3 pl-7">
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                                Reason
-                                                            </label>
-                                                            <select
-                                                                value={formData.pregnancyLostReason || 'Unknown'}
-                                                                onChange={(e) => setFormData({...formData, pregnancyLostReason: e.target.value})}
-                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                                            >
-                                                                <option value="Cannibalized">Cannibalized (mom ate litter)</option>
-                                                                <option value="All Stillborn">All Stillborn</option>
-                                                                <option value="Reabsorbed">Reabsorbed</option>
-                                                                <option value="Unknown">Unknown</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                                Notes (optional)
-                                                            </label>
-                                                            <textarea
-                                                                value={formData.pregnancyLostNotes || ''}
-                                                                onChange={(e) => setFormData({...formData, pregnancyLostNotes: e.target.value})}
-                                                                placeholder="Additional details about the pregnancy loss..."
-                                                                rows={2}
-                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {/* Mating Date */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Mating Date
+                                                Mating Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(planned or actual)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.matingDate || ''}
                                                 onChange={(e) => setFormData({...formData, matingDate: e.target.value})}
-                                                maxDate={new Date()}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Use + Mating to schedule a future mating</p>
                                         </div>
 
-                                        {/* Expected Due Date */}
+                                        {/* Expected due date */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Expected Due Date
+                                                Expected Due Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional — shows on calendar)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.expectedDueDate || ''}
                                                 onChange={(e) => setFormData({...formData, expectedDueDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Optional — shows on calendar</p>
+                                            {autoCalcAvailable && autoCalcDueDate && (
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Filled in automatically from the mating date if left blank.</p>
+                                            )}
                                         </div>
 
-                                        {/* Birth Method */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Birth Method
-                                            </label>
-                                            <select
-                                                value={formData.birthMethod || ''}
-                                                onChange={(e) => setFormData({...formData, birthMethod: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            >
-                                                <option value="">Select Method...</option>
-                                                <option value="Natural">Natural</option>
-                                                <option value="C-Section">C-Section</option>
-                                                <option value="Assisted">Assisted</option>
-                                                <option value="Induced">Induced</option>
-                                                <option value="Unknown">Unknown</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Birth Date & Offspring Counts */}
-                                <div className="mb-6 p-4 border border-blue-200 dark:border-blue-800/40 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                                    <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-4 flex items-center">
-                                        <Baby size={18} className="inline-block align-middle text-blue-600 mr-2 flex-shrink-0" />Birth & Offspring Details
-                                    </h4>
-
-                                    {/* Row 1: Dates */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
+                                        {/* Birth date + "born, date unknown" */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Birth Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional)</span>
                                             </label>
                                             <DatePicker
-                                                value={formData.birthDate}
-                                                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                                                value={formData.birthDate || ''}
+                                                onChange={(e) => setFormData({...formData, birthDate: e.target.value, birthDateUnknown: e.target.value ? false : formData.birthDateUnknown})}
                                                 maxDate={new Date()}
+                                                disabled={!!formData.birthDateUnknown}
                                                 className="px-3 py-2"
                                             />
+                                            <label className="flex items-center gap-2 mt-2 text-xs text-gray-600 dark:text-dark-text-secondary cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!formData.birthDateUnknown}
+                                                    onChange={(e) => setFormData({...formData, birthDateUnknown: e.target.checked, birthDate: e.target.checked ? '' : formData.birthDate})}
+                                                    className="w-4 h-4"
+                                                />
+                                                Born, but I don't know the birth date
+                                            </label>
+                                            {formData.birthDateUnknown && (
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Saved as born today — nursing and reminders count from the day you save.</p>
+                                            )}
                                         </div>
+
+                                        {/* Weaning date + confirm weaning */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Weaning Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional — shows on calendar)</span>
@@ -2613,581 +2309,854 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                 onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <label className="flex items-center gap-2 mt-2 text-xs text-gray-600 dark:text-dark-text-secondary">
+                                            {autoCalcAvailable && autoCalcWeaningDate && !formData.birthDateUnknown && (
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Filled in automatically from the birth date if left blank.</p>
+                                            )}
+                                            <label className="flex items-center gap-2 mt-2 text-xs text-gray-600 dark:text-dark-text-secondary cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     checked={!!formData.weaningConfirmed}
                                                     onChange={(e) => setFormData({...formData, weaningConfirmed: e.target.checked})}
                                                     className="w-4 h-4"
                                                 />
-                                                Confirm weaning (ends nursing status — use this to record early/late weaning with a custom date instead of "Wean Today")
+                                                Confirm weaning (ends nursing status)
                                             </label>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Row 2: Total Born (auto) + sex breakdown */}
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                                        {/* Total Born - read-only, summed from M+F+U */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Total Born
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
-                                                readOnly
-                                                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
-                                                placeholder="0"
-                                            />
-                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
+                                {/* Notes */}
+                                                                <div>
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                        Notes
+                                                                    </label>
+                                                                    <textarea
+                                                                        value={formData.notes}
+                                                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                                        rows="3"
+                                                                        placeholder="Additional notes about this litter..."
+                                                                    />
+                                                                </div>
+
+                                {/* Extended mating information (collapsible) */}
+                                <div className="border border-purple-200 dark:border-purple-800/40 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowMatingExtra(p => !p)}
+                                        aria-expanded={showMatingExtra}
+                                        className="w-full flex items-center justify-between px-4 py-3 text-left"
+                                    >
+                                        <span className="flex items-center text-md font-semibold text-gray-700 dark:text-dark-text-secondary">
+                                            <Dna size={18} className="inline-block align-middle text-purple-600 mr-2 flex-shrink-0" />Mating information
+                                            <span className="ml-2 text-xs font-normal text-gray-400 dark:text-dark-text-muted">(optional)</span>
+                                        </span>
+                                        {showMatingExtra ? <ChevronUp size={18} className="text-gray-500" /> : <ChevronDown size={18} className="text-gray-500" />}
+                                    </button>
+                                    {showMatingExtra && (
+                                        <div className="px-4 pb-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {/* Method */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Method</label>
+                                                    <select
+                                                        value={formData.breedingMethod || 'Unknown'}
+                                                        onChange={(e) => setFormData({...formData, breedingMethod: e.target.value})}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    >
+                                                        <option value="Natural">Natural</option>
+                                                        <option value="AI">Artificial Insemination</option>
+                                                        <option value="Assisted">Assisted</option>
+                                                        <option value="Unknown">Unknown</option>
+                                                    </select>
+                                                </div>
+
+                                                {/* Condition */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Condition</label>
+                                                    <select
+                                                        value={formData.breedingConditionAtTime || ''}
+                                                        onChange={(e) => setFormData({...formData, breedingConditionAtTime: e.target.value})}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    >
+                                                        <option value="">Select Condition...</option>
+                                                        <option value="Good">Good</option>
+                                                        <option value="Okay">Okay</option>
+                                                        <option value="Poor">Poor</option>
+                                                    </select>
+                                                </div>
+
+                                                {/* Outcome */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Mating Outcome</label>
+                                                    <select
+                                                        value={formData.outcome || 'Unknown'}
+                                                        onChange={(e) => setFormData({...formData, outcome: e.target.value})}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    >
+                                                        <option value="Successful">Successful</option>
+                                                        <option value="Unsuccessful">Unsuccessful</option>
+                                                        <option value="Unknown">Unknown</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            {/* Pregnancy lost — only for mated entries that have no birth yet */}
+                                                                {formData.matingDate && !formData.birthDate && !formData.birthDateUnknown && (
+                                                                    <div className="mt-4">
+                                                                        <label className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={formData.pregnancyLost || false}
+                                                                                onChange={(e) => setFormData({
+                                                                                    ...formData,
+                                                                                    pregnancyLost: e.target.checked,
+                                                                                    pregnancyLostReason: e.target.checked ? (formData.pregnancyLostReason || 'Unknown') : null,
+                                                                                    pregnancyLostNotes: e.target.checked ? formData.pregnancyLostNotes : null
+                                                                                })}
+                                                                                className="form-checkbox h-5 w-5 text-amber-600 rounded focus:ring-amber-500"
+                                                                            />
+                                                                            <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+                                                                                Pregnancy confirmed but no litter produced
+                                                                            </span>
+                                                                        </label>
+
+                                                                        {formData.pregnancyLost && (
+                                                                            <div className="mt-3 space-y-3 pl-7">
+                                                                                <div>
+                                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Reason</label>
+                                                                                    <select
+                                                                                        value={formData.pregnancyLostReason || 'Unknown'}
+                                                                                        onChange={(e) => setFormData({...formData, pregnancyLostReason: e.target.value})}
+                                                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                                                                    >
+                                                                                        <option value="Cannibalized">Cannibalized (mom ate litter)</option>
+                                                                                        <option value="All Stillborn">All Stillborn</option>
+                                                                                        <option value="Reabsorbed">Reabsorbed</option>
+                                                                                        <option value="Unknown">Unknown</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Notes (optional)</label>
+                                                                                    <textarea
+                                                                                        value={formData.pregnancyLostNotes || ''}
+                                                                                        onChange={(e) => setFormData({...formData, pregnancyLostNotes: e.target.value})}
+                                                                                        placeholder="Additional details about the pregnancy loss..."
+                                                                                        rows={2}
+                                                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
                                         </div>
+                                    )}
+                                </div>
 
-                                        {/* Male Count */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Males</label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
-                                                onChange={(e) => {
-                                                    const v = e.target.value ? parseInt(e.target.value) : null;
-                                                    const f = formData.femaleCount || 0;
-                                                    const u = formData.unknownCount || 0;
-                                                    setFormData({...formData, maleCount: v, litterSizeBorn: (v || 0) + f + u || null});
-                                                }}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
-                                            />
-                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
+                                {/* Extended birth information (collapsible) */}
+                                <div className="border border-blue-200 dark:border-blue-800/40 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowBirthExtra(p => !p)}
+                                        aria-expanded={showBirthExtra}
+                                        className="w-full flex items-center justify-between px-4 py-3 text-left"
+                                    >
+                                        <span className="flex items-center text-md font-semibold text-gray-700 dark:text-dark-text-secondary">
+                                            <Baby size={18} className="inline-block align-middle text-blue-600 mr-2 flex-shrink-0" />Birth information
+                                            <span className="ml-2 text-xs font-normal text-gray-400 dark:text-dark-text-muted">(optional)</span>
+                                        </span>
+                                        {showBirthExtra ? <ChevronUp size={18} className="text-gray-500" /> : <ChevronDown size={18} className="text-gray-500" />}
+                                    </button>
+                                    {showBirthExtra && (
+                                        <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {/* Birth method */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Birth Method</label>
+                                                <select
+                                                    value={formData.birthMethod || ''}
+                                                    onChange={(e) => setFormData({...formData, birthMethod: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                >
+                                                    <option value="">Select Method...</option>
+                                                    <option value="Natural">Natural</option>
+                                                    <option value="C-Section">C-Section</option>
+                                                    <option value="Assisted">Assisted</option>
+                                                    <option value="Induced">Induced</option>
+                                                    <option value="Unknown">Unknown</option>
+                                                </select>
+                                            </div>
+
+                                            {/* Complications */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Complications</label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.birthComplications || ''}
+                                                    onChange={(e) => setFormData({...formData, birthComplications: e.target.value})}
+                                                    placeholder="e.g., difficult labour, vet assist"
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                />
+                                            </div>
+
+                                            {/* Birth outcome */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Birth Outcome</label>
+                                                <select
+                                                    value={formData.birthOutcome || ''}
+                                                    onChange={(e) => setFormData({...formData, birthOutcome: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                >
+                                                    <option value="">Select Outcome...</option>
+                                                    <option value="Healthy litter">Healthy litter</option>
+                                                    <option value="Some losses">Some losses</option>
+                                                    <option value="Dam complications">Dam complications</option>
+                                                    <option value="All lost">All lost</option>
+                                                    <option value="Unknown">Unknown</option>
+                                                </select>
+                                            </div>
                                         </div>
+                                    )}
+                                </div>
 
-                                        {/* Female Count */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Females</label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
-                                                onChange={(e) => {
-                                                    const v = e.target.value ? parseInt(e.target.value) : null;
-                                                    const m = formData.maleCount || 0;
-                                                    const u = formData.unknownCount || 0;
-                                                    setFormData({...formData, femaleCount: v, litterSizeBorn: m + (v || 0) + u || null});
-                                                }}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
-                                            />
-                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
-                                        </div>
-
-                                        {/* Unknown/Intersex Count */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown / Intersex</label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.unknownCount === 'number' ? formData.unknownCount : (formData.unknownCount || '')}
-                                                onChange={(e) => {
-                                                    const v = e.target.value ? parseInt(e.target.value) : null;
-                                                    const m = formData.maleCount || 0;
-                                                    const f = formData.femaleCount || 0;
-                                                    setFormData({...formData, unknownCount: v, litterSizeBorn: m + f + (v || 0) || null});
-                                                }}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length || 0}
-                                            />
-                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lu} unknown linked</p>) : null; })()}
-                                        </div>
-                                    </div>
-
-                                    {/* Row 3: Outcomes */}
-                                    <div className="space-y-4">
-                                        {/* Stillborn - matching Total Born layout */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                                                Stillborn (Born dead)
-                                            </label>
-                                            
-                                            {/* Checkbox to extract from total counts */}
-                                            <div className="mb-3">
-                                                <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.extractStillbornFromTotal || false}
-                                                        onChange={(e) => {
-                                                            const checked = e.target.checked;
-                                                            setFormData(prev => {
-                                                                if (checked) {
-                                                                    // Extract stillborn from gender counts
-                                                                    const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleStillborn || 0));
-                                                                    const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleStillborn || 0));
-                                                                    const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownStillborn || 0));
-                                                                    return {
-                                                                        ...prev,
-                                                                        extractStillbornFromTotal: true,
-                                                                        maleCount: newMale || null,
-                                                                        femaleCount: newFemale || null,
-                                                                        unknownCount: newUnknown || null,
-                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
-                                                                    };
-                                                                } else {
-                                                                    // Add stillborn back to gender counts
-                                                                    const newMale = (prev.maleCount || 0) + (prev.maleStillborn || 0);
-                                                                    const newFemale = (prev.femaleCount || 0) + (prev.femaleStillborn || 0);
-                                                                    const newUnknown = (prev.unknownCount || 0) + (prev.unknownStillborn || 0);
-                                                                    return {
-                                                                        ...prev,
-                                                                        extractStillbornFromTotal: false,
-                                                                        maleCount: newMale || null,
-                                                                        femaleCount: newFemale || null,
-                                                                        unknownCount: newUnknown || null,
-                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
-                                                                    };
-                                                                }
-                                                            });
-                                                        }}
-className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
-                                                    />
-                                                    <span>Extract stillborn from total counts (reduce M/F/U counts by stillborn amounts)</span>
+                                <div className="p-4 border border-blue-200 dark:border-blue-800/40 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                                    <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-4 flex items-center">
+                                        <Baby size={18} className="inline-block align-middle text-blue-600 mr-2 flex-shrink-0" />Offspring
+                                    </h4>
+                                        {/* Row 2: Total Born (auto) + sex breakdown */}
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                            {/* Total Born - read-only, summed from M+F+U */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                    Total Born
                                                 </label>
-                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1 ml-6">
-                                                    When enabled, stillborn will be subtracted from the gender counts above, showing only live-born offspring.
-                                                </p>
+                                                <input
+                                                    type="number"
+                                                    value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
+                                                    readOnly
+                                                    className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
+                                                    placeholder="0"
+                                                />
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
                                             </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                {/* Total Stillborn - read-only, summed from M+F+U */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                        Total Stillborn
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
-                                                        readOnly
-                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
-                                                        placeholder="0"
-                                                    />
-                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
-                                                </div>
-
-                                                {/* Male Stillborn */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Male Stillborn</label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.maleStillborn === 'number' ? formData.maleStillborn : (formData.maleStillborn || '')}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value ? parseInt(e.target.value) : null;
-                                                            const f = formData.femaleStillborn || 0;
-                                                            const u = formData.unknownStillborn || 0;
-                                                            setFormData({...formData, maleStillborn: v, stillbornCount: (v || 0) + f + u || null});
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                {/* Female Stillborn */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Female Stillborn</label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.femaleStillborn === 'number' ? formData.femaleStillborn : (formData.femaleStillborn || '')}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value ? parseInt(e.target.value) : null;
-                                                            const m = formData.maleStillborn || 0;
-                                                            const u = formData.unknownStillborn || 0;
-                                                            setFormData({...formData, femaleStillborn: v, stillbornCount: m + (v || 0) + u || null});
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                {/* Unknown Stillborn */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown Stillborn</label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.unknownStillborn === 'number' ? formData.unknownStillborn : (formData.unknownStillborn || '')}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value ? parseInt(e.target.value) : null;
-                                                            const m = formData.maleStillborn || 0;
-                                                            const f = formData.femaleStillborn || 0;
-                                                            setFormData({...formData, unknownStillborn: v, stillbornCount: m + f + (v || 0) || null});
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
-                                                </div>
+    
+                                            {/* Male Count */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Males</label>
+                                                <input
+                                                    type="number"
+                                                    value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
+                                                    onChange={(e) => {
+                                                        const v = e.target.value ? parseInt(e.target.value) : null;
+                                                        const f = formData.femaleCount || 0;
+                                                        const u = formData.unknownCount || 0;
+                                                        setFormData({...formData, maleCount: v, litterSizeBorn: (v || 0) + f + u || null});
+                                                    }}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    placeholder="0"
+                                                    min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
+                                                />
+                                                {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            </div>
+    
+                                            {/* Female Count */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Females</label>
+                                                <input
+                                                    type="number"
+                                                    value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
+                                                    onChange={(e) => {
+                                                        const v = e.target.value ? parseInt(e.target.value) : null;
+                                                        const m = formData.maleCount || 0;
+                                                        const u = formData.unknownCount || 0;
+                                                        setFormData({...formData, femaleCount: v, litterSizeBorn: m + (v || 0) + u || null});
+                                                    }}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    placeholder="0"
+                                                    min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
+                                                />
+                                                {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            </div>
+    
+                                            {/* Unknown/Intersex Count */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown / Intersex</label>
+                                                <input
+                                                    type="number"
+                                                    value={typeof formData.unknownCount === 'number' ? formData.unknownCount : (formData.unknownCount || '')}
+                                                    onChange={(e) => {
+                                                        const v = e.target.value ? parseInt(e.target.value) : null;
+                                                        const m = formData.maleCount || 0;
+                                                        const f = formData.femaleCount || 0;
+                                                        setFormData({...formData, unknownCount: v, litterSizeBorn: m + f + (v || 0) || null});
+                                                    }}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    placeholder="0"
+                                                    min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length || 0}
+                                                />
+                                                {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lu} unknown linked</p>) : null; })()}
                                             </div>
                                         </div>
-
-                                        {/* Losses - matching Total Born layout */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                                                Losses (Died after birth)
-                                            </label>
-                                            
-                                            {/* Checkbox to extract from total counts */}
-                                            <div className="mb-3">
-                                                <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.extractLossesFromTotal || false}
-                                                        onChange={(e) => {
-                                                            const checked = e.target.checked;
-                                                            setFormData(prev => {
-                                                                if (checked) {
-                                                                    // Extract losses from gender counts
-                                                                    const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleLosses || 0));
-                                                                    const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleLosses || 0));
-                                                                    const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownLosses || 0));
-                                                                    return {
-                                                                        ...prev,
-                                                                        extractLossesFromTotal: true,
-                                                                        maleCount: newMale || null,
-                                                                        femaleCount: newFemale || null,
-                                                                        unknownCount: newUnknown || null,
-                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
-                                                                    };
-                                                                } else {
-                                                                    // Add losses back to gender counts
-                                                                    const newMale = (prev.maleCount || 0) + (prev.maleLosses || 0);
-                                                                    const newFemale = (prev.femaleCount || 0) + (prev.femaleLosses || 0);
-                                                                    const newUnknown = (prev.unknownCount || 0) + (prev.unknownLosses || 0);
-                                                                    return {
-                                                                        ...prev,
-                                                                        extractLossesFromTotal: false,
-                                                                        maleCount: newMale || null,
-                                                                        femaleCount: newFemale || null,
-                                                                        unknownCount: newUnknown || null,
-                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
-                                                                    };
-                                                                }
-                                                            });
-                                                        }}
-                                                        className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
-                                                    />
-                                                    <span>Extract losses from total counts (reduce M/F/U counts by loss amounts)</span>
+    
+                                        {/* Row 3: Outcomes */}
+                                        <div className="space-y-4">
+                                            {/* Stillborn - matching Total Born layout */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                                    Stillborn (Born dead)
                                                 </label>
-                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1 ml-6">
-                                                    When enabled, losses will be subtracted from the gender counts above, showing only surviving offspring.
-                                                </p>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                {/* Total Losses - read-only, summed from M+F+U */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                        Total Losses
+                
+                                                {/* Checkbox to extract from total counts */}
+                                                <div className="mb-3">
+                                                    <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.extractStillbornFromTotal || false}
+                                                            onChange={(e) => {
+                                                                const checked = e.target.checked;
+                                                                setFormData(prev => {
+                                                                    if (checked) {
+                                                                        // Extract stillborn from gender counts
+                                                                        const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleStillborn || 0));
+                                                                        const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleStillborn || 0));
+                                                                        const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownStillborn || 0));
+                                                                        return {
+                                                                            ...prev,
+                                                                            extractStillbornFromTotal: true,
+                                                                            maleCount: newMale || null,
+                                                                            femaleCount: newFemale || null,
+                                                                            unknownCount: newUnknown || null,
+                                                                            litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                        };
+                                                                    } else {
+                                                                        // Add stillborn back to gender counts
+                                                                        const newMale = (prev.maleCount || 0) + (prev.maleStillborn || 0);
+                                                                        const newFemale = (prev.femaleCount || 0) + (prev.femaleStillborn || 0);
+                                                                        const newUnknown = (prev.unknownCount || 0) + (prev.unknownStillborn || 0);
+                                                                        return {
+                                                                            ...prev,
+                                                                            extractStillbornFromTotal: false,
+                                                                            maleCount: newMale || null,
+                                                                            femaleCount: newFemale || null,
+                                                                            unknownCount: newUnknown || null,
+                                                                            litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                        };
+                                                                    }
+                                                                });
+                                                            }}
+                                    className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
+                                                        />
+                                                        <span>Extract stillborn from total counts (reduce M/F/U counts by stillborn amounts)</span>
                                                     </label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
-                                                        readOnly
-                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
-                                                        placeholder="0"
-                                                    />
-                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
+                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1 ml-6">
+                                                        When enabled, stillborn will be subtracted from the gender counts above, showing only live-born offspring.
+                                                    </p>
                                                 </div>
-
-                                                {/* Male Losses */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Male Losses</label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.maleLosses === 'number' ? formData.maleLosses : (formData.maleLosses || '')}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value ? parseInt(e.target.value) : null;
-                                                            const f = formData.femaleLosses || 0;
-                                                            const u = formData.unknownLosses || 0;
-                                                            setFormData({...formData, maleLosses: v, lossesCount: (v || 0) + f + u || null});
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                {/* Female Losses */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Female Losses</label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.femaleLosses === 'number' ? formData.femaleLosses : (formData.femaleLosses || '')}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value ? parseInt(e.target.value) : null;
-                                                            const m = formData.maleLosses || 0;
-                                                            const u = formData.unknownLosses || 0;
-                                                            setFormData({...formData, femaleLosses: v, lossesCount: m + (v || 0) + u || null});
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                {/* Unknown Losses */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown Losses</label>
-                                                    <input
-                                                        type="number"
-                                                        value={typeof formData.unknownLosses === 'number' ? formData.unknownLosses : (formData.unknownLosses || '')}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value ? parseInt(e.target.value) : null;
-                                                            const m = formData.maleLosses || 0;
-                                                            const f = formData.femaleLosses || 0;
-                                                            setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
+    
+                                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                    {/* Total Stillborn - read-only, summed from M+F+U */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                            Total Stillborn
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                                            readOnly
+                                                            className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
+                                                            placeholder="0"
+                                                        />
+                                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
+                                                    </div>
+    
+                                                    {/* Male Stillborn */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Male Stillborn</label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.maleStillborn === 'number' ? formData.maleStillborn : (formData.maleStillborn || '')}
+                                                            onChange={(e) => {
+                                                                const v = e.target.value ? parseInt(e.target.value) : null;
+                                                                const f = formData.femaleStillborn || 0;
+                                                                const u = formData.unknownStillborn || 0;
+                                                                setFormData({...formData, maleStillborn: v, stillbornCount: (v || 0) + f + u || null});
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                            placeholder="0"
+                                                            min="0"
+                                                        />
+                                                    </div>
+    
+                                                    {/* Female Stillborn */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Female Stillborn</label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.femaleStillborn === 'number' ? formData.femaleStillborn : (formData.femaleStillborn || '')}
+                                                            onChange={(e) => {
+                                                                const v = e.target.value ? parseInt(e.target.value) : null;
+                                                                const m = formData.maleStillborn || 0;
+                                                                const u = formData.unknownStillborn || 0;
+                                                                setFormData({...formData, femaleStillborn: v, stillbornCount: m + (v || 0) + u || null});
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                            placeholder="0"
+                                                            min="0"
+                                                        />
+                                                    </div>
+    
+                                                    {/* Unknown Stillborn */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown Stillborn</label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.unknownStillborn === 'number' ? formData.unknownStillborn : (formData.unknownStillborn || '')}
+                                                            onChange={(e) => {
+                                                                const v = e.target.value ? parseInt(e.target.value) : null;
+                                                                const m = formData.maleStillborn || 0;
+                                                                const f = formData.femaleStillborn || 0;
+                                                                setFormData({...formData, unknownStillborn: v, stillbornCount: m + f + (v || 0) || null});
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                            placeholder="0"
+                                                            min="0"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
+    
+                                            {/* Losses - matching Total Born layout */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                                    Losses (Died after birth)
+                                                </label>
+                
+                                                {/* Checkbox to extract from total counts */}
+                                                <div className="mb-3">
+                                                    <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.extractLossesFromTotal || false}
+                                                            onChange={(e) => {
+                                                                const checked = e.target.checked;
+                                                                setFormData(prev => {
+                                                                    if (checked) {
+                                                                        // Extract losses from gender counts
+                                                                        const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleLosses || 0));
+                                                                        const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleLosses || 0));
+                                                                        const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownLosses || 0));
+                                                                        return {
+                                                                            ...prev,
+                                                                            extractLossesFromTotal: true,
+                                                                            maleCount: newMale || null,
+                                                                            femaleCount: newFemale || null,
+                                                                            unknownCount: newUnknown || null,
+                                                                            litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                        };
+                                                                    } else {
+                                                                        // Add losses back to gender counts
+                                                                        const newMale = (prev.maleCount || 0) + (prev.maleLosses || 0);
+                                                                        const newFemale = (prev.femaleCount || 0) + (prev.femaleLosses || 0);
+                                                                        const newUnknown = (prev.unknownCount || 0) + (prev.unknownLosses || 0);
+                                                                        return {
+                                                                            ...prev,
+                                                                            extractLossesFromTotal: false,
+                                                                            maleCount: newMale || null,
+                                                                            femaleCount: newFemale || null,
+                                                                            unknownCount: newUnknown || null,
+                                                                            litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                        };
+                                                                    }
+                                                                });
+                                                            }}
+                                                            className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
+                                                        />
+                                                        <span>Extract losses from total counts (reduce M/F/U counts by loss amounts)</span>
+                                                    </label>
+                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1 ml-6">
+                                                        When enabled, losses will be subtracted from the gender counts above, showing only surviving offspring.
+                                                    </p>
+                                                </div>
+    
+                                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                    {/* Total Losses - read-only, summed from M+F+U */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                            Total Losses
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
+                                                            readOnly
+                                                            className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
+                                                            placeholder="0"
+                                                        />
+                                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
+                                                    </div>
+    
+                                                    {/* Male Losses */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Male Losses</label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.maleLosses === 'number' ? formData.maleLosses : (formData.maleLosses || '')}
+                                                            onChange={(e) => {
+                                                                const v = e.target.value ? parseInt(e.target.value) : null;
+                                                                const f = formData.femaleLosses || 0;
+                                                                const u = formData.unknownLosses || 0;
+                                                                setFormData({...formData, maleLosses: v, lossesCount: (v || 0) + f + u || null});
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                            placeholder="0"
+                                                            min="0"
+                                                        />
+                                                    </div>
+    
+                                                    {/* Female Losses */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Female Losses</label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.femaleLosses === 'number' ? formData.femaleLosses : (formData.femaleLosses || '')}
+                                                            onChange={(e) => {
+                                                                const v = e.target.value ? parseInt(e.target.value) : null;
+                                                                const m = formData.maleLosses || 0;
+                                                                const u = formData.unknownLosses || 0;
+                                                                setFormData({...formData, femaleLosses: v, lossesCount: m + (v || 0) + u || null});
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                            placeholder="0"
+                                                            min="0"
+                                                        />
+                                                    </div>
+    
+                                                    {/* Unknown Losses */}
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown Losses</label>
+                                                        <input
+                                                            type="number"
+                                                            value={typeof formData.unknownLosses === 'number' ? formData.unknownLosses : (formData.unknownLosses || '')}
+                                                            onChange={(e) => {
+                                                                const v = e.target.value ? parseInt(e.target.value) : null;
+                                                                const m = formData.maleLosses || 0;
+                                                                const f = formData.femaleLosses || 0;
+                                                                setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                            placeholder="0"
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+    
+                                            {/* Total Weaned */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                    Total Weaned
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
+                                                    onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    placeholder="0"
+                                                    min="0"
+                                                />
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Survived to weaning</p>
+                                            </div>
                                         </div>
-
-                                        {/* Total Weaned */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Total Weaned
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
-                                                onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Survived to weaning</p>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 {/* Link Existing Offspring */}
-                                {formData.sireId_public && formData.damId_public && (
-                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                                            Link Existing Animals as Offspring
-                                        </label>
-                                        <div className="bg-gray-50 dark:bg-dark-card-bg p-3 rounded-lg">
-                                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-3">
-                                                Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
-                                            </p>
-                                            <div className="space-y-2">
-                                                {myAnimals
-                                                    .filter(animal => {
-                                                        const matchesSire = animal.sireId_public === formData.sireId_public;
-                                                        const matchesDam = animal.damId_public === formData.damId_public;
+                                                                {formData.sireId_public && formData.damId_public && (
+                                                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
+                                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                                                            Link Existing Animals as Offspring
+                                                                        </label>
+                                                                        <div className="bg-gray-50 dark:bg-dark-card-bg p-3 rounded-lg">
+                                                                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-3">
+                                                                                Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
+                                                                            </p>
+                                                                            <div className="space-y-2">
+                                                                                {myAnimals
+                                                                                    .filter(animal => {
+                                                                                        const matchesSire = animal.sireId_public === formData.sireId_public;
+                                                                                        const matchesDam = animal.damId_public === formData.damId_public;
                                                         
-                                                        // If litter has birthdate, only show animals with matching birthdate
-                                                        if (formData.birthDate && animal.birthDate) {
-                                                            const litterDate = formData.birthDate.split('T')[0];
-                                                            const animalDate = animal.birthDate.split('T')[0];
-                                                            return matchesSire && matchesDam && litterDate === animalDate;
-                                                        }
+                                                                                        // If litter has birthdate, only show animals with matching birthdate
+                                                                                        if (formData.birthDate && animal.birthDate) {
+                                                                                            const litterDate = formData.birthDate.split('T')[0];
+                                                                                            const animalDate = animal.birthDate.split('T')[0];
+                                                                                            return matchesSire && matchesDam && litterDate === animalDate;
+                                                                                        }
                                                         
-                                                        return matchesSire && matchesDam;
-                                                    })
-                                                    .map(animal => (
-                                                        <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded cursor-pointer">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={formData.linkedOffspringIds?.includes(animal.id_public)}
-                                                                onChange={(e) => {
-                                                                    if (e.target.checked) {
-                                                                        // Check if litter has a birthdate and animal has a different birthdate
-                                                                        if (formData.birthDate && animal.birthDate) {
-                                                                            const litterDate = formData.birthDate.split('T')[0];
-                                                                            const animalDate = animal.birthDate.split('T')[0];
+                                                                                        return matchesSire && matchesDam;
+                                                                                    })
+                                                                                    .map(animal => (
+                                                                                        <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded cursor-pointer">
+                                                                                            <input
+                                                                                                type="checkbox"
+                                                                                                checked={formData.linkedOffspringIds?.includes(animal.id_public)}
+                                                                                                onChange={(e) => {
+                                                                                                    if (e.target.checked) {
+                                                                                                        // Check if litter has a birthdate and animal has a different birthdate
+                                                                                                        if (formData.birthDate && animal.birthDate) {
+                                                                                                            const litterDate = formData.birthDate.split('T')[0];
+                                                                                                            const animalDate = animal.birthDate.split('T')[0];
                                                                             
-                                                                            if (litterDate !== animalDate) {
-                                                                                const confirmChange = window.confirm(
-                                                                                    `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
-                                                                                    `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
-                                                                                );
+                                                                                                            if (litterDate !== animalDate) {
+                                                                                                                const confirmChange = window.confirm(
+                                                                                                                    `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
+                                                                                                                    `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
+                                                                                                                );
                                                                                 
-                                                                                if (!confirmChange) {
-                                                                                    // User cancelled, abort the link
-                                                                                    return;
+                                                                                                                if (!confirmChange) {
+                                                                                                                    // User cancelled, abort the link
+                                                                                                                    return;
+                                                                                                                }
+                                                                                
+                                                                                                                // User accepted, update litter birthdate and link the animal
+                                                                                                                setFormData({
+                                                                                                                    ...formData,
+                                                                                                                    birthDate: animalDate,
+                                                                                                                    linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
+                                                                                                                });
+                                                                                                                return;
+                                                                                                            }
+                                                                                                        }
+                                                                        
+                                                                                                        // Normal linking flow
+                                                                                                        const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
+                                                                                                        const newFormData = { ...formData, linkedOffspringIds: newLinked };
+                                                                        
+                                                                                                        // Auto-fill birthdate from offspring if litter has no birthdate
+                                                                                                        if (!formData.birthDate && animal.birthDate) {
+                                                                                                            newFormData.birthDate = animal.birthDate.split('T')[0];
+                                 newFormData.birthDateUnknown = false;
+                                                                                                        }
+                                                                        
+                                                                                                        setFormData(newFormData);
+                                                                                                    } else {
+                                                                                                        // Unlinking
+                                                                                                        const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
+                                                                                                        setFormData({ ...formData, linkedOffspringIds: newLinked });
+                                                                                                    }
+                                                                                                }}
+                                                                                                className="h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary"
+                                                                                            />
+                                                                                            <span className="text-sm text-gray-800 dark:text-dark-text">
+                                                                                                {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
+                                                                                            </span>
+                                                                                        </label>
+                                                                                    ))
                                                                                 }
-                                                                                
-                                                                                // User accepted, update litter birthdate and link the animal
-                                                                                setFormData({
-                                                                                    ...formData,
-                                                                                    birthDate: animalDate,
-                                                                                    linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
-                                                                                });
-                                                                                return;
-                                                                            }
-                                                                        }
-                                                                        
-                                                                        // Normal linking flow
-                                                                        const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
-                                                                        const newFormData = { ...formData, linkedOffspringIds: newLinked };
-                                                                        
-                                                                        // Auto-fill birthdate from offspring if litter has no birthdate
-                                                                        if (!formData.birthDate && animal.birthDate) {
-                                                                            newFormData.birthDate = animal.birthDate.split('T')[0];
-                                                                        }
-                                                                        
-                                                                        setFormData(newFormData);
-                                                                    } else {
-                                                                        // Unlinking
-                                                                        const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                                                        setFormData({ ...formData, linkedOffspringIds: newLinked });
-                                                                    }
-                                                                }}
-                                                                className="h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary"
-                                                            />
-                                                            <span className="text-sm text-gray-800 dark:text-dark-text">
-                                                                {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
-                                                            </span>
-                                                        </label>
-                                                    ))
-                                                }
-                                                {myAnimals.filter(animal => {
-                                                    const matchesSire = animal.sireId_public === formData.sireId_public;
-                                                    const matchesDam = animal.damId_public === formData.damId_public;
+                                                                                {myAnimals.filter(animal => {
+                                                                                    const matchesSire = animal.sireId_public === formData.sireId_public;
+                                                                                    const matchesDam = animal.damId_public === formData.damId_public;
                                                     
-                                                    // If litter has birthdate, only show animals with matching birthdate
-                                                    if (formData.birthDate && animal.birthDate) {
-                                                        const litterDate = formData.birthDate.split('T')[0];
-                                                        const animalDate = animal.birthDate.split('T')[0];
-                                                        return matchesSire && matchesDam && litterDate === animalDate;
-                                                    }
+                                                                                    // If litter has birthdate, only show animals with matching birthdate
+                                                                                    if (formData.birthDate && animal.birthDate) {
+                                                                                        const litterDate = formData.birthDate.split('T')[0];
+                                                                                        const animalDate = animal.birthDate.split('T')[0];
+                                                                                        return matchesSire && matchesDam && litterDate === animalDate;
+                                                                                    }
                                                     
-                                                    return matchesSire && matchesDam;
-                                                }).length === 0 && (
-                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">No matching animals found</p>
-                                                )}
-                                                {formData.linkedOffspringIds?.length > 0 && (
-                                                    <p className="text-xs text-green-600 font-semibold mt-2">
-                                                        {formData.linkedOffspringIds.length} animal(s) selected
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Create New Offspring */}
-                                {formData.sireId_public && formData.damId_public && formData.birthDate && (
-                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                                            Create New Offspring Animals
-                                        </label>
-                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800/40">
-                                            <p className="text-xs text-blue-800 dark:text-blue-300 mb-3">
-                                                <strong>Create placeholder animals:</strong> Created with names M1, M2… / F1, F2… You can edit names and details after saving.
-                                            </p>
-                                            {(() => {
-                                                const linkedMales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length;
-                                                const linkedFemales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length;
-                                                const linkedUnknown = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length;
-                                                const totalMales = formData.maleCount || 0;
-                                                const totalFemales = formData.femaleCount || 0;
-                                                const totalUnknown = formData.unknownCount || 0;
-                                                const remainingMales = Math.max(0, totalMales - linkedMales);
-                                                const remainingFemales = Math.max(0, totalFemales - linkedFemales);
-                                                const remainingUnknown = Math.max(0, totalUnknown - linkedUnknown);
-                                                const hasCountInfo = totalMales > 0 || totalFemales > 0 || totalUnknown > 0;
-                                                return (
-                                                    <>
-                                                        {hasCountInfo && (
-                                                            <div className="grid grid-cols-2 gap-3 mb-3">
-                                                                {totalMales > 0 && (
-                                                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-blue-200 dark:border-blue-800/40 p-3">
-                                                                        <div className="flex items-center gap-1 mb-1">
-                                                                            <Mars size={13} className="text-blue-500" />
-                                                                            <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">Males</span>
+                                                                                    return matchesSire && matchesDam;
+                                                                                }).length === 0 && (
+                                                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">No matching animals found</p>
+                                                                                )}
+                                                                                {formData.linkedOffspringIds?.length > 0 && (
+                                                                                    <p className="text-xs text-green-600 font-semibold mt-2">
+                                                                                        {formData.linkedOffspringIds.length} animal(s) selected
+                                                                                    </p>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
-                                                                            <div>Total set: <span className="font-semibold">{totalMales}</span></div>
-                                                                            <div>Already linked: <span className="font-semibold">{linkedMales}</span></div>
-                                                                            <div>Remaining: <span className={`font-bold ${remainingMales > 0 ? 'text-blue-600' : 'text-green-600'}`}>{remainingMales}</span></div>
-                                                                        </div>
-                                                                        {remainingMales > 0 && (
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => setCreateOffspringCounts(c => ({...c, males: remainingMales.toString()}))}
-                                                                                className="mt-2 w-full px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold rounded transition"
-                                                                            >
-                                                                                + Add {remainingMales} remaining male{remainingMales > 1 ? 's' : ''}
-                                                                            </button>
-                                                                        )}
                                                                     </div>
                                                                 )}
-                                                                {totalFemales > 0 && (
-                                                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-pink-200 dark:border-pink-800/40 p-3">
-                                                                        <div className="flex items-center gap-1 mb-1">
-                                                                            <Venus size={13} className="text-pink-500" />
-                                                                            <span className="text-pink-600 dark:text-pink-400 font-bold text-sm">Females</span>
+
+                                                                {/* Create New Offspring */}
+                                                                {formData.sireId_public && formData.damId_public && formData.birthDate && (
+                                                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
+                                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                                                            Create New Offspring Animals
+                                                                        </label>
+                                                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800/40">
+                                                                            <p className="text-xs text-blue-800 dark:text-blue-300 mb-3">
+                                                                                <strong>Create placeholder animals:</strong> Created with names M1, M2… / F1, F2… You can edit names and details after saving.
+                                                                            </p>
+                                                                            {(() => {
+                                                                                const linkedMales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length;
+                                                                                const linkedFemales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length;
+                                                                                const linkedUnknown = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length;
+                                                                                const totalMales = formData.maleCount || 0;
+                                                                                const totalFemales = formData.femaleCount || 0;
+                                                                                const totalUnknown = formData.unknownCount || 0;
+                                                                                const remainingMales = Math.max(0, totalMales - linkedMales);
+                                                                                const remainingFemales = Math.max(0, totalFemales - linkedFemales);
+                                                                                const remainingUnknown = Math.max(0, totalUnknown - linkedUnknown);
+                                                                                const hasCountInfo = totalMales > 0 || totalFemales > 0 || totalUnknown > 0;
+                                                                                return (
+                                                                                    <>
+                                                                                        {hasCountInfo && (
+                                                                                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                                                                                {totalMales > 0 && (
+                                                                                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-blue-200 dark:border-blue-800/40 p-3">
+                                                                                                        <div className="flex items-center gap-1 mb-1">
+                                                                                                            <Mars size={13} className="text-blue-500" />
+                                                                                                            <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">Males</span>
+                                                                                                        </div>
+                                                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
+                                                                                                            <div>Total set: <span className="font-semibold">{totalMales}</span></div>
+                                                                                                            <div>Already linked: <span className="font-semibold">{linkedMales}</span></div>
+                                                                                                            <div>Remaining: <span className={`font-bold ${remainingMales > 0 ? 'text-blue-600' : 'text-green-600'}`}>{remainingMales}</span></div>
+                                                                                                        </div>
+                                                                                                        {remainingMales > 0 && (
+                                                                                                            <button
+                                                                                                                type="button"
+                                                                                                                onClick={() => setCreateOffspringCounts(c => ({...c, males: remainingMales.toString()}))}
+                                                                                                                className="mt-2 w-full px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold rounded transition"
+                                                                                                            >
+                                                                                                                + Add {remainingMales} remaining male{remainingMales > 1 ? 's' : ''}
+                                                                                                            </button>
+                                                                                                        )}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                                {totalFemales > 0 && (
+                                                                                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-pink-200 dark:border-pink-800/40 p-3">
+                                                                                                        <div className="flex items-center gap-1 mb-1">
+                                                                                                            <Venus size={13} className="text-pink-500" />
+                                                                                                            <span className="text-pink-600 dark:text-pink-400 font-bold text-sm">Females</span>
+                                                                                                        </div>
+                                                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
+                                                                                                            <div>Total set: <span className="font-semibold">{totalFemales}</span></div>
+                                                                                                            <div>Already linked: <span className="font-semibold">{linkedFemales}</span></div>
+                                                                                                            <div>Remaining: <span className={`font-bold ${remainingFemales > 0 ? 'text-pink-600' : 'text-green-600'}`}>{remainingFemales}</span></div>
+                                                                                                        </div>
+                                                                                                        {remainingFemales > 0 && (
+                                                                                                            <button
+                                                                                                                type="button"
+                                                                                                                onClick={() => setCreateOffspringCounts(c => ({...c, females: remainingFemales.toString()}))}
+                                                                                                                className="mt-2 w-full px-2 py-1 bg-pink-100 hover:bg-pink-200 text-pink-800 text-xs font-semibold rounded transition"
+                                                                                                            >
+                                                                                                                + Add {remainingFemales} remaining female{remainingFemales > 1 ? 's' : ''}
+                                                                                                            </button>
+                                                                                                        )}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {hasCountInfo && (remainingMales > 0 || remainingFemales > 0 || remainingUnknown > 0) && (
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => setCreateOffspringCounts({ males: remainingMales.toString(), females: remainingFemales.toString(), unknown: remainingUnknown.toString() })}
+                                                                                                className="w-full mb-3 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition"
+                                                                                            >
+                                                                                                Fill all remaining ({remainingMales}M + {remainingFemales}F + {remainingUnknown}U = {remainingMales + remainingFemales + remainingUnknown} animals)
+                                                                                            </button>
+                                                                                        )}
+                                                                                        {!hasCountInfo && (
+                                                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">Set the male, female, and unknown counts above to see smart creation options.</p>
+                                                                                        )}
+                                                                                        {hasCountInfo && remainingMales === 0 && remainingFemales === 0 && remainingUnknown === 0 && (
+                                                                                            <p className="text-xs text-green-600 font-semibold flex items-center gap-1"><CheckCircle size={13} /> All offspring are accounted for via linked animals.</p>
+                                                                                        )}
+                                                                                        {(parseInt(createOffspringCounts.males || 0) > 0 || parseInt(createOffspringCounts.females || 0) > 0 || parseInt(createOffspringCounts.unknown || 0) > 0) && (
+                                                                                            <p className="text-xs text-green-600 font-semibold mt-2">
+                                                                                                Will create {(parseInt(createOffspringCounts.males || 0)) + (parseInt(createOffspringCounts.females || 0)) + (parseInt(createOffspringCounts.unknown || 0))} new animal(s)
+                                                                                            </p>
+                                                                                        )}
+                                                                                    </>
+                                                                                );
+                                                                            })()}
                                                                         </div>
-                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
-                                                                            <div>Total set: <span className="font-semibold">{totalFemales}</span></div>
-                                                                            <div>Already linked: <span className="font-semibold">{linkedFemales}</span></div>
-                                                                            <div>Remaining: <span className={`font-bold ${remainingFemales > 0 ? 'text-pink-600' : 'text-green-600'}`}>{remainingFemales}</span></div>
-                                                                        </div>
-                                                                        {remainingFemales > 0 && (
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => setCreateOffspringCounts(c => ({...c, females: remainingFemales.toString()}))}
-                                                                                className="mt-2 w-full px-2 py-1 bg-pink-100 hover:bg-pink-200 text-pink-800 text-xs font-semibold rounded transition"
-                                                                            >
-                                                                                + Add {remainingFemales} remaining female{remainingFemales > 1 ? 's' : ''}
-                                                                            </button>
-                                                                        )}
                                                                     </div>
                                                                 )}
-                                                            </div>
-                                                        )}
-                                                        {hasCountInfo && (remainingMales > 0 || remainingFemales > 0 || remainingUnknown > 0) && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setCreateOffspringCounts({ males: remainingMales.toString(), females: remainingFemales.toString(), unknown: remainingUnknown.toString() })}
-                                                                className="w-full mb-3 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition"
-                                                            >
-                                                                Fill all remaining ({remainingMales}M + {remainingFemales}F + {remainingUnknown}U = {remainingMales + remainingFemales + remainingUnknown} animals)
-                                                            </button>
-                                                        )}
-                                                        {!hasCountInfo && (
-                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">Set the male, female, and unknown counts above to see smart creation options.</p>
-                                                        )}
-                                                        {hasCountInfo && remainingMales === 0 && remainingFemales === 0 && remainingUnknown === 0 && (
-                                                            <p className="text-xs text-green-600 font-semibold flex items-center gap-1"><CheckCircle size={13} /> All offspring are accounted for via linked animals.</p>
-                                                        )}
-                                                        {(parseInt(createOffspringCounts.males || 0) > 0 || parseInt(createOffspringCounts.females || 0) > 0 || parseInt(createOffspringCounts.unknown || 0) > 0) && (
-                                                            <p className="text-xs text-green-600 font-semibold mt-2">
-                                                                Will create {(parseInt(createOffspringCounts.males || 0)) + (parseInt(createOffspringCounts.females || 0)) + (parseInt(createOffspringCounts.unknown || 0))} new animal(s)
-                                                            </p>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                    </div>
-                                )}
 
-                                {/* Notes */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                        Notes
-                                    </label>
-                                    <textarea
-                                        value={formData.notes}
-                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        rows="3"
-                                        placeholder="Additional notes about this litter..."
-                                    />
-                                </div>
+                                {/* Litter Photos ? always visible, including while converting a still-Planned litter */}
+                                                                <div className="mb-2 p-4 border border-amber-200 dark:border-amber-800/40 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                                                                        <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
+                                                                            <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
+                                                                            <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
+                                                                        </h4>
+                                                                        {/* Photos can only be stored against a litter that is no longer
+                                                                            Planned. Say so up front rather than letting the user pick a
+                                                                            photo and then fail server-side. */}
+                                                                        {editingLitter && litters.find((l) => l._id === editingLitter)?.isPlanned && (
+                                                                            <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                                                                                This entry is still Planned or Mated, so photos can't be added yet. Add a birth date (or tick "Born"), save, then add photos.
+                                                                            </p>
+                                                                        )}
+
+                                                                        {/* Thumbnail grid */}
+                                                                        {editingLitter ? (
+                                                                            litterImages.length > 0 && (
+                                                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                                                    {litterImages.map((img, idx) => (
+                                                                                        <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted group">
+                                                                                            <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                                                            {img.r2Key === '__uploading__' ? (
+                                                                                                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                                                                                    <Hourglass size={12} className="inline-block align-middle text-white" />
+                                                                                                </div>
+                                                                                            ) : (
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    onClick={() => handleLitterImageDelete(img.r2Key)}
+                                                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                title="Remove photo"
+                                                                                            ><X size={14} /></button>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )
+                                                                        ) : (
+                                                                            pendingLitterImages.length > 0 && (
+                                                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                                                    {pendingLitterImages.map((item, idx) => (
+                                                                                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted group">
+                                                                                            <img src={item.previewUrl} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => {
+                                                                                                    URL.revokeObjectURL(item.previewUrl);
+                                                                                                    setPendingLitterImages(prev => prev.filter((_, i) => i !== idx));
+                                                                                                }}
+                                                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                title="Remove photo"
+                                                                            ><X size={14} /></button>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )
+                                                                        )}
+
+                                                                        {/* Upload button */}
+                                                                        {(editingLitter ? litterImages.length : pendingLitterImages.length) < 5 && (editingLitter || formIsBorn) && (
+                                                                            <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                                                <input
+                                                                                    type="file"
+                                                                                    accept="image/*"
+                                                                                    className="hidden"
+                                                                                    onChange={(e) => {
+                                                                                        const file = e.target.files?.[0];
+                                                                                        if (!file) return;
+                                                                                        if (editingLitter) {
+                                                                                            handleLitterImageUpload(file);
+                                                                                        } else {
+                                                                                            if (pendingLitterImages.length >= 5) return;
+                                                                                            const previewUrl = URL.createObjectURL(file);
+                                                                                            setPendingLitterImages(prev => [...prev, { file, previewUrl }]);
+                                                                                        }
+                                                                                        e.target.value = '';
+                                                                                    }}
+                                                                                />
+                                                                                {litterImageUploading ? <><Loader2 size={14} className="inline-block align-middle animate-spin mr-1" />Uploading?</> : '+ Add Photo'}
+                                                                            </label>
+                                                                        )}
+                                                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : (formIsBorn ? 'Photos will be uploaded when you save the entry.' : 'Photos can be added once the entry is born (add a birth date or tick "Born").')}</p>
+                                                                    </div>
 
                             </form>
                     </div>
@@ -3212,227 +3181,11 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                             data-tutorial-target="create-litter-btn"
                             className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-bold py-2 px-6 rounded-lg"
                         >
-                            {editingLitter ? 'Update Litter' : 'Create Litter'}
+                            {editingLitter ? 'Update Entry' : 'Save Entry'}
                         </button>
                     </div>
                 </div>
             </div>
-            )}
-
-            {/* Planned Mating Quick-Add Modal */}
-            {showAddMatingForm && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-lg">
-                        <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
-                            <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
-                                <Heart size={18} className="text-indigo-500" />
-                                {editingMatingId ? 'Edit Planned Mating' : 'Record Planned Mating'}
-                                {/* No lessonId: this is an open, unsaved form, so there's no nav-away help link. */}
-                                <InfoButton title="Recording a Planned Mating">
-                                    <p>Pick a Sire and Dam to start tracking a pairing — status (Mated, Pregnant, Born) is updated later by editing this same entry as things progress.</p>
-                                </InfoButton>
-                            </h3>
-                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text">
-                                <X size={22} />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSubmitMating} className="p-4 space-y-4 overflow-y-auto max-h-[75vh]">
-                            {/* Species */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Species <span className="text-red-500">*</span></label>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowMatingSpeciesPicker(true)}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    {matingData.species
-                                        ? <span className="font-medium text-gray-800 dark:text-dark-text">{matingData.species}</span>
-                                        : <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>}
-                                </button>
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Choose species to filter the sire &amp; dam search</p>
-                            </div>
-                            {/* Sire */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Sire (Father) <span className="text-red-500">*</span></label>
-                                <button
-                                    type="button"
-                                    onClick={() => setModalTarget('sire-mating')}
-                                    disabled={!matingData.species}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed"
-                                >
-                                    {matingData.sireId_public ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{(myAnimals.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire)?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.sireId_public}</div>
-                                            </div>
-                                        </div>
-                                    ) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Sire...' : 'Select species first'}</span>}
-                                </button>
-                            </div>
-                            {/* Dam */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
-                                <button
-                                    type="button"
-                                    onClick={() => setModalTarget('dam-mating')}
-                                    disabled={!matingData.species}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed"
-                                >
-                                    {matingData.damId_public ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{(myAnimals.find(a => a.id_public === matingData.damId_public) || selectedMatingDam)?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.damId_public}</div>
-                                            </div>
-                                        </div>
-                                    ) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Dam...' : 'Select species first'}</span>}
-                                </button>
-                            </div>
-                            {/* COI display */}
-                            {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary'}`}>
-                                    {matingCalcCOI
-                                        ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-dark-text-muted border-t-gray-600 dark:border-t-dark-text animate-spin" /> Calculating COI...</>
-                                        : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%
-                                            {matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}
-                                          </>
-                                    }
-                                </div>
-                            )}
-                            {/* Common breeding-line warning / different-lines info */}
-                            {(() => {
-                                const { common, sireOnly, damOnly } = compareBreedingLines(matingData.sireId_public, matingData.damId_public, animalBreedingLines, breedingLineDefs);
-                                if (common.length > 0) {
-                                    return (
-                                        <div className="flex items-start gap-2 text-xs px-3 py-2 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
-                                            <Info size={14} className="flex-shrink-0 mt-0.5" />
-                                            <span>
-                                                Sire and dam share {common.length} assigned breeding line{common.length !== 1 ? 's' : ''}: <span className="font-semibold">{common.map(l => l.name).join(', ')}</span>.
-                                            </span>
-                                        </div>
-                                    );
-                                }
-                                if (sireOnly.length > 0 && damOnly.length > 0) {
-                                    return (
-                                        <div className="flex items-start gap-2 text-xs px-3 py-2 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
-                                            <Info size={14} className="flex-shrink-0 mt-0.5" />
-                                            <span>
-                                                Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
-                                            </span>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            })()}
-                            {/* Mating Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Mating Date</label>
-                                <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Today or future — shows on calendar as "Mated"</p>
-                            </div>
-                            {/* Expected Due Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Expected Due Date</label>
-                                <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Must be on or after mating date — shows on calendar as "Due"</p>
-                            </div>
-                            {/* Expandable breeding details */}
-                            <button
-                                type="button"
-                                onClick={() => setShowMatingBreedingDetails(p => !p)}
-                                className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-                            >
-                                {showMatingBreedingDetails ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                                {showMatingBreedingDetails ? 'Hide breeding details' : '+ Breeding details (optional)'}
-                            </button>
-                            {showMatingBreedingDetails && (
-                                <div className="space-y-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 rounded-lg">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Method</label>
-                                        <select
-                                            value={matingData.breedingMethod}
-                                            onChange={(e) => setMatingData({...matingData, breedingMethod: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
-                                        >
-                                            <option value="Natural">Natural</option>
-                                            <option value="AI">Artificial Insemination</option>
-                                            <option value="Assisted">Assisted</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Condition</label>
-                                        <select
-                                            value={matingData.breedingConditionAtTime}
-                                            onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
-                                        >
-                                            <option value="">Select Condition...</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Okay">Okay</option>
-                                            <option value="Poor">Poor</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            )}
-                            {/* Notes */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Notes</label>
-                                <textarea
-                                    value={matingData.notes}
-                                    onChange={(e) => setMatingData({...matingData, notes: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-indigo-400 text-sm"
-                                    rows="2"
-                                    placeholder="Any notes about this mating..."
-                                />
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">The entry will appear as <span className="font-semibold text-indigo-600 dark:text-indigo-400">Planned</span> until you edit it and add a birth date.</p>
-                            <div className="flex gap-3 justify-end border-t dark:border-dark-text-muted pt-3">
-                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover font-semibold text-sm">Cancel</button>
-                                <button type="submit" className="bg-indigo-600 dark:bg-dark-accent-purple hover:bg-indigo-700 dark:hover:bg-dark-accent-purple/80 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Mating Edit Choice Modal */}
-            {matingEditChoice && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-sm p-6">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text mb-1">Planned Mating</h3>
-                        <p className="text-sm text-gray-500 dark:text-dark-text-muted mb-5">
-                            {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
-                            {[matingEditChoice.sire?.prefix, matingEditChoice.sire?.name].filter(Boolean).join(' ') || matingEditChoice.sireId_public || '?'}
-                            {' x '}
-                            {[matingEditChoice.dam?.prefix, matingEditChoice.dam?.name].filter(Boolean).join(' ') || matingEditChoice.damId_public || '?'}
-                        </p>
-                        <div className="space-y-3">
-                            <button
-                                onClick={() => handleEditMating(matingEditChoice)}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition text-left"
-                            >
-                                <Heart size={18} className="text-indigo-500 flex-shrink-0" />
-                                <div>
-                                    <div className="font-semibold text-indigo-800 dark:text-indigo-300 text-sm">Edit Mating</div>
-                                    <div className="text-xs text-indigo-500 dark:text-indigo-400">Update sire, dam, dates or notes</div>
-                                </div>
-                            </button>
-                            <button
-                                onClick={() => { handleEditLitter(matingEditChoice); setMatingEditChoice(null); }}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/30 transition text-left"
-                            >
-                                <ClipboardList size={18} className="text-violet-600 flex-shrink-0" />
-                                <div>
-                                    <div className="font-semibold text-violet-800 dark:text-violet-300 text-sm">Convert to Litter</div>
-                                    <div className="text-xs text-violet-600 dark:text-violet-400">Record birth date and offspring details</div>
-                                </div>
-                            </button>
-                        </div>
-                        <button onClick={() => setMatingEditChoice(null)} className="mt-4 w-full text-center text-sm text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary">Cancel</button>
-                    </div>
-                </div>
             )}
 
             {/* Litter List */}
@@ -3549,10 +3302,12 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
                         // Mating state helpers
                         const hasBirth = !!litter.birthDate;
+                        // Born with an unknown birth date: its own class (Born, but no date/age/nursing/weaning)
+                        const isBornUnknown = !!litter.birthDateUnknown && !hasBirth;
                         const hasPregnancy = !!litter.pregnancyDate;
-                        const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth;
-                        const isPregnant = hasPregnancy && !hasBirth;
-                        const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth;
+                        const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth && !isBornUnknown;
+                        const isPregnant = hasPregnancy && !hasBirth && !isBornUnknown;
+                        const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth && !isBornUnknown;
                         // Mirror the Reproduction tab: rely on the dam's isNursing flag, which the backend
                         // already recomputes using each species' maxNursingDays safety-net cutoff — not just
                         // weaningConfirmed — so a litter past that window stops showing as nursing here too.
@@ -3580,6 +3335,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                             <div className="flex-1">
                                                 <p className="font-bold text-gray-800 dark:text-dark-text text-sm">
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded mr-2">Planned</span>}
+                                    {isBornUnknown && <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded mr-2">Born · date unknown</span>}
                                                     {isMated && <span className="text-[10px] font-semibold bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded mr-2">Mated</span>}
                                                     {isPregnant && <span className="text-[10px] font-semibold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
@@ -3587,7 +3343,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : isBornUnknown ? `Born · ${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups` : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600 dark:text-dark-text-secondary">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
@@ -3624,6 +3380,8 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                 ? <span className="text-xs font-semibold text-sky-600 dark:text-sky-400"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
                                                 : isPregnant
                                                 ? <span className="text-xs font-semibold text-pink-600 dark:text-pink-400"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
+                                                : isBornUnknown
+                                                ? <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Born · date unknown</span>
                                                 : <span className="text-xs text-gray-500 dark:text-dark-text-muted">{formatDate(litter.birthDate) || '—'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
@@ -3773,7 +3531,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (litter.isPlanned) { setMatingEditChoice(litter); } else { handleEditLitter(litter); }
+                                                    handleEditLitter(litter);
                                                 }}
                                                 className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
@@ -4422,59 +4180,6 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']}
                     species={formData.species || undefined}
-                />
-            )}
-
-            {/* Mating Form ? Species Picker */}
-            {showMatingSpeciesPicker && (
-                <SpeciesPickerModal
-                    speciesOptions={speciesOptions}
-                    onSelect={(speciesName) => {
-                        setMatingData(prev => ({...prev, species: speciesName, sireId_public: '', damId_public: ''}));
-                        setSelectedMatingSire(null);
-                        setSelectedMatingDam(null);
-                        setMatingCOI(null);
-                        setShowMatingSpeciesPicker(false);
-                    }}
-                    onClose={() => setShowMatingSpeciesPicker(false)}
-                    X={X}
-                    Search={Search}
-                />
-            )}
-
-            {/* Mating Form ? Sire Modal */}
-            {modalTarget === 'sire-mating' && (
-                <ParentSearchModal
-                    title="Select Sire"
-                    onSelect={handleSelectOtherParentForLitter}
-                    onClose={() => setModalTarget(null)}
-                    authToken={authToken}
-                    showModalMessage={showModalMessage}
-                    API_BASE_URL={API_BASE_URL}
-                    X={X}
-                    Search={Search}
-                    Loader2={Loader2}
-                    LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Male', 'Intersex', 'Mixed', 'Unknown']}
-                    species={matingData.species || undefined}
-                />
-            )}
-
-            {/* Mating Form ? Dam Modal */}
-            {modalTarget === 'dam-mating' && (
-                <ParentSearchModal
-                    title="Select Dam"
-                    onSelect={handleSelectOtherParentForLitter}
-                    onClose={() => setModalTarget(null)}
-                    authToken={authToken}
-                    showModalMessage={showModalMessage}
-                    API_BASE_URL={API_BASE_URL}
-                    X={X}
-                    Search={Search}
-                    Loader2={Loader2}
-                    LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']}
-                    species={matingData.species || undefined}
                 />
             )}
 

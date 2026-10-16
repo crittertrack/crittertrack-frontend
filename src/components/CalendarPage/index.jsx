@@ -270,7 +270,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             }
         } else {
             addLitterEvent(l.matingDate, 'mated', l);
-            addLitterEvent(l.expectedDueDate, 'due', l);
+            if (!l.birthDateUnknown) addLitterEvent(l.expectedDueDate, 'due', l);
             addLitterEvent(l.birthDate, 'born', l);
             addLitterEvent(l.weaningDate, 'weaned', l);
         }

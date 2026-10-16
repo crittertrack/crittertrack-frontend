@@ -1127,16 +1127,19 @@ useEffect(() => {
                             !litter.isPlanned &&
                             !!litter.matingDate &&
                             !litter.pregnancyDate &&
-                            !litter.birthDate;
+                            !litter.birthDate &&
+                            !litter.birthDateUnknown;
 
                         const lIsPlannedOnly =
                             !!litter.isPlanned &&
                             !litter.pregnancyDate &&
-                            !litter.birthDate;
+                            !litter.birthDate &&
+                            !litter.birthDateUnknown;
 
                         const lIsPregnant =
                             !!litter.pregnancyDate &&
-                            !litter.birthDate;
+                            !litter.birthDate &&
+                            !litter.birthDateUnknown;
 
                         return (
                             <div

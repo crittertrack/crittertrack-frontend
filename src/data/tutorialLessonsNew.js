@@ -794,7 +794,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 2,
         title: 'Starting a planned mating',
-        content: 'Click "Add Mating" and choose a Sire and Dam (by search, local or global). The form automatically calculates the pairing\'s inbreeding coefficient (COI) once both parents are selected, so you can check compatibility before confirming.',
+        content: 'In Litter Management, click "+ Add" and choose a Sire and Dam (by search, local or global). The form automatically calculates the pairing\'s inbreeding coefficient (COI) once both parents are selected, so you can check compatibility before confirming.',
       },
       {
         stepNumber: 3,
@@ -1189,13 +1189,13 @@ const LITTER_MANAGEMENT_LESSONS = [
   },
   {
     id: 'litter-planned-mating',
-    title: 'Recording a Planned Mating',
-    description: 'Starting a new pairing record before anything has happened yet.',
+    title: 'Adding an Entry: Planned, Mated or Born',
+    description: 'How the single + Add button works, from a planned pairing through to a born litter.',
     steps: [
       {
         stepNumber: 1,
-        title: 'Starting a mating record',
-        content: 'The "+ Mating" button opens a quick-add form for a future or just-happened pairing. Species is required and, once set, locks in place - you can\'t change a litter\'s species after starting it.',
+        title: 'One + Add button',
+        content: 'The "+ Add" button opens one form for the whole cycle. Start with just a species, sire and dam; add a mating date, due date, birth date or weaning date whenever you have them, or come back and edit the entry later. Species is required and, once set, locks in place - you can\'t change a litter\'s species after starting it.',
       },
       {
         stepNumber: 2,
@@ -1209,13 +1209,18 @@ const LITTER_MANAGEMENT_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Mating date and expected due date',
-        content: 'Mating Date and Expected Due Date sit directly on the form, both optional at this stage.',
+        title: 'The Dates section sets the status',
+        content: 'The status is worked out from the dates, so you never pick it by hand. No dates, or a mating date in the future = Planned. A mating date of today or earlier = Mated. A birth date = Born. Expected Due Date and Weaning Date sit in the same section, and the Birth Date has a "Born, but I don\'t know the birth date" checkbox for litters you want to record as born without a date - those count nursing from the day you save.',
       },
       {
         stepNumber: 5,
-        title: 'Optional breeding details and saving',
-        content: 'An expandable "Breeding Details" section adds the breeding method and condition, also optional. "Save Mating" records it as a Planned pairing.',
+        title: 'Optional mating and birth information',
+        content: 'Two collapsible sections hold the extras. Mating information has Method, Condition and Mating Outcome (plus the "pregnancy confirmed but no litter" option for mated entries). Birth information has Birth Method, Complications and Birth Outcome. Open them only when you need them.',
+      },
+      {
+        stepNumber: 6,
+        title: 'Offspring and photos',
+        content: 'The Offspring section holds Total Born, Males, Females and Unknown, then Stillborn and Losses (each with its "extract from total" checkbox). Once a sire and dam are chosen you can link existing animals, and once there is also a birth date you can create new offspring animals right from the form. Photos come last, and can be added once the entry is born. Press "Save Entry" when you\'re done.',
       },
     ],
   },
@@ -1236,8 +1241,8 @@ const LITTER_MANAGEMENT_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Editing a still-planned mating',
-        content: 'Clicking a card that\'s still Planned opens a chooser instead of the full form: "Edit Mating" (change sire, dam, dates, or notes) or "Convert to Litter" (jump straight into recording birth details).',
+        title: 'Editing any entry',
+        content: 'The Edit button on any card - Planned, Mated, Pregnant or Born - opens the same form with everything filled in. Change a date and the status follows: add a birth date to turn a Mated entry into Born, or move a mating date into the future to make it Planned again. Editing other details (like notes) never changes the status by itself.',
       },
     ],
   },
@@ -1334,6 +1339,56 @@ const LITTER_MANAGEMENT_LESSONS = [
         stepNumber: 4,
         title: 'Pedigree and editing',
         content: 'Horizontal and Vertical Pedigree buttons (shown once both parents are set) open that pairing\'s family tree. The Edit button reopens the full litter form - or the Edit/Convert chooser if the pairing is still only Planned.',
+      },
+    ],
+  },
+  // NOTE: the day counts below mirror crittertrack-pedigree/utils/autoWeaningDate.js (the
+  // source of truth). Update both together if a species value changes.
+  {
+    id: 'litter-auto-calculations',
+    title: 'Auto-Calculated Due & Weaning Dates',
+    description: 'How the Auto due date and Auto weaning date options work, and the values used for each species.',
+    searchTerms: ['auto due date', 'auto weaning date', 'gestation', 'weaning age', 'expected due date', 'wean', 'checkbox', 'species days'],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What it does',
+        content: 'Two optional helpers fill in dates for you, so the birth-due and weaning reminders work without typing anything. Auto due date sets the Expected Due Date to the mating date plus the species\' gestation. Auto weaning date sets the Weaning Date to the birth date plus the species\' weaning age. Each has its own checkbox at the top of Litter Management, and both are on by default. If you don\'t see the checkboxes, the feature isn\'t switched on for your account yet.',
+      },
+      {
+        stepNumber: 2,
+        title: 'When a date is filled in',
+        content: 'The due date is filled once a litter has a mating date, and the weaning date once it has a birth date. The species comes from the litter itself, or else from the dam, then the sire. If the species can\'t be worked out, or isn\'t in the lists below, nothing is filled in and the date stays blank for you to enter.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Values: rodents and small mammals',
+        content: 'Species: days from mating to birth (due date) / days from birth to weaning\nFancy Mouse: 19 / 31\nFancy Rat: 21 / 40\nSyrian Hamster: 16 / 28\nDwarf Hamsters (Russian, Campbells, Chinese, Roborovski): 18 / 24\nGuinea Pig: 63 / 21\nGerbil: 24 / 21\nFat-tailed Gerbil: 19 / 21\nNatal Rats: 23 / 21\nDeer Mouse: 22 / 21\nAfrican Pygmy Mouse: 18 / 21\nAfrican Pygmy Dormouse: 24 / 35\nDegu: 87 / 28\nChinchilla: 105 / 42\nPrairie Dog: 34 / 42',
+      },
+      {
+        stepNumber: 4,
+        title: 'Values: other mammals',
+        content: 'Species: days from mating to birth (due date) / days from birth to weaning\nRabbit (also Rabbit (Domesticated)): 28 / 28\nFerret: 41 / 42\nCat: 63 / 42\nDog: 58 / 42\nHedgehog: 34 / 28\n\nSpecies that aren\'t listed (for example Sugar Gliders), and all fish, reptiles, invertebrates, birds and amphibians, get no automatic dates.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Treat them as estimates',
+        content: 'The numbers are the low end of each species\' typical range, so a reminder arrives a little early rather than late. Real gestation can run several days longer - guinea pigs especially, where 63 to 68 days is normal. Use the date as a heads-up and enter the actual date when the birth or weaning happens.',
+      },
+      {
+        stepNumber: 6,
+        title: 'What it never overwrites',
+        content: 'A date you typed yourself is never replaced. A litter you\'ve confirmed with \"Wean Today\", and a litter marked as a lost pregnancy, are left alone. If a date was filled in automatically and you later correct the mating or birth date (or the species), it updates to match. Clearing a date and saving fills it in again while the option is on.',
+      },
+      {
+        stepNumber: 7,
+        title: 'Turning it off',
+        content: 'Untick Auto due date or Auto weaning date to stop that one - they are independent, and your choice is saved to your account. Turning one off only stops new dates being filled in: dates already on your litters stay until you edit them. Reminders and the Calendar use whatever date is on the litter, so with an option off, no reminder appears until you enter a date yourself.',
+      },
+      {
+        stepNumber: 8,
+        title: 'How long a weaning reminder lasts',
+        content: 'The weaning reminder keeps showing from the weaning date until a cut-off counted from the birth date. After that, a litter nobody confirmed is closed automatically and the dam\'s Nursing status clears. The cut-off is the weaning age plus 14 days for rodents and plus 31 days for other mammals - for example a Fancy Mouse litter closes 45 days after birth (31 + 14), and a Rabbit litter 59 days after birth (28 + 31). Tap \"Wean Today\" to close a litter sooner.',
       },
     ],
   },

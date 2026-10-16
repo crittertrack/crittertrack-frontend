@@ -159,7 +159,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     }
                 }
             }
-            if (l.expectedDueDate && !l.birthDate && !l.pregnancyLost && !l.isPlanned) {
+            if (l.expectedDueDate && !l.birthDate && !l.birthDateUnknown && !l.pregnancyLost && !l.isPlanned) {
                 const due = parseLocalDate(l.expectedDueDate);
                 if (due) {
                     const diff = Math.round((due - today) / 86400000);

@@ -2210,17 +2210,19 @@ useEffect(() => {
 
         sortedLitters.forEach(litter => {
             const hasBirth = !!litter.birthDate;
+            // Born with an unknown birth date: its own class — not nursing, mated, pregnant or planned
+            const isBornUnknown = !!litter.birthDateUnknown && !hasBirth;
             // Nursing only ends once weaning is explicitly confirmed via the "Wean Today" action —
             // recording/correcting a weaningDate value alone shouldn't close the litter.
             const isWeaned = !!litter.weaningConfirmed;
             const hasPregnancy = !!litter.pregnancyDate;
             const isClosed = litter.pregnancyLost || (hasBirth && isWeaned);
             const isNursing = hasBirth && !isWeaned && !isClosed;
-            const isPregnant = hasPregnancy && !hasBirth && !isClosed;
+            const isPregnant = hasPregnancy && !hasBirth && !isClosed && !isBornUnknown;
             // A planned mating only advances to "mating" via the explicit "Mated Today" action
             // (which clears isPlanned) — a matingDate arriving on its own doesn't advance it.
-            const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth && !isClosed;
-            const isPlanned = litter.isPlanned && !hasPregnancy && !hasBirth && !isClosed;
+            const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth && !isClosed && !isBornUnknown;
+            const isPlanned = litter.isPlanned && !hasPregnancy && !hasBirth && !isClosed && !isBornUnknown;
 
             let status = null;
             if (isNursing) status = 'nursing';

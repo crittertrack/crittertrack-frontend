@@ -18,6 +18,8 @@ import InfoButton from '../shared/InfoButton';
 
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
+// "Born, birth date unknown" entries are Born, but carry no birth date (no age, no nursing, no weaning).
+const isBornLitter = (l) => !!(l && (l.birthDate || l.birthDateUnknown));
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -1347,19 +1349,19 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 };
                 const inYear = (l) => !litterYearFilter || litterYear(l) === litterYearFilter;
                 const showStatus = (key) => !litterStatusFilter || litterStatusFilter === key;
-                const plannedOnly = showStatus('planned') ? publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate && inYear(l)) : [];
-                const mated = showStatus('mated') ? publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate && inYear(l)) : [];
-                const pregnant = showStatus('pregnant') ? publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate && inYear(l)) : [];
-                let born = showStatus('born') ? publicLitters.filter(l => !!l.birthDate && inYear(l)) : [];
+                const plannedOnly = showStatus('planned') ? publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !isBornLitter(l) && inYear(l)) : [];
+                const mated = showStatus('mated') ? publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !isBornLitter(l) && inYear(l)) : [];
+                const pregnant = showStatus('pregnant') ? publicLitters.filter(l => !!l.pregnancyDate && !isBornLitter(l) && inYear(l)) : [];
+                let born = showStatus('born') ? publicLitters.filter(l => isBornLitter(l) && inYear(l)) : [];
                 const hasAnyMatch = plannedOnly.length + mated.length + pregnant.length + born.length > 0;
                 
                 // Years and statuses that actually exist, so the filter menus only offer real options
                 const allYears = [...new Set(publicLitters.map(litterYear).filter(Boolean))].sort((a, b) => b - a); // newest first
                 const statusOptions = [
-                    { key: 'planned', label: 'Planned', count: publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate).length },
-                    { key: 'mated', label: 'Mated', count: publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate).length },
-                    { key: 'pregnant', label: 'Pregnant', count: publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate).length },
-                    { key: 'born', label: 'Born', count: publicLitters.filter(l => !!l.birthDate).length },
+                    { key: 'planned', label: 'Planned', count: publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !isBornLitter(l)).length },
+                    { key: 'mated', label: 'Mated', count: publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !isBornLitter(l)).length },
+                    { key: 'pregnant', label: 'Pregnant', count: publicLitters.filter(l => !!l.pregnancyDate && !isBornLitter(l)).length },
+                    { key: 'born', label: 'Born', count: publicLitters.filter(l => isBornLitter(l)).length },
                 ].filter(o => o.count > 0);
                 
                 // Filter born litters by selected year
@@ -1413,7 +1415,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <div className="border-t border-gray-200 dark:border-dark-border my-2"></div>
                         
                         {/* Born stats - full width */}
-                        {!!l.birthDate && l.litterSizeBorn != null && (
+                        {isBornLitter(l) && l.litterSizeBorn != null && (
                             <div className="flex items-center justify-center text-xs">
                                 <span className="font-semibold text-gray-700 dark:text-dark-text-secondary">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
@@ -1434,7 +1436,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {/* Dates - full width centered */}
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-dark-text-muted">
                             {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
-                            {l.expectedDueDate && !l.birthDate && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
+                            {l.expectedDueDate && !isBornLitter(l) && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
+                            {l.birthDateUnknown && !l.birthDate && <span><span className="font-medium">Born:</span> date unknown</span>}
                             {l.birthDate && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(l.birthDate)}</span>}</span>}
                         </div>
 
@@ -1552,8 +1555,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     return acc;
                 }, {});
 
-                const bornLitters = publicLitters.filter(l => !!l.birthDate);
-                const plannedLitters = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate);
+                const bornLitters = publicLitters.filter(l => isBornLitter(l));
+                const plannedLitters = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !isBornLitter(l));
 
                 const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
 
@@ -1579,8 +1582,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
                 const withPetStatus = animals.filter(a => a.status === 'Pet').length;
-                const matedLitters = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate).length;
-                const pregnantLitters = publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate).length;
+                const matedLitters = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !isBornLitter(l)).length;
+                const pregnantLitters = publicLitters.filter(l => !!l.pregnancyDate && !isBornLitter(l)).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-xl p-4 flex flex-col gap-1">
