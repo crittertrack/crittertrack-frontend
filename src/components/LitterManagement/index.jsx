@@ -1349,10 +1349,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         </InfoButton>
     );
 
-    // An entry counts as born once it has a birth date OR is marked "born, birth date unknown".
-    // "Born, birth date unknown" is a plain born entry with no birth date: it is Born, but has no age,
-    // nursing or weaning of its own (the server never stores a date for it).
-    const formIsBorn = !!(formData.birthDate || formData.birthDateUnknown);
+    // (birth-date / "born, date unknown" helpers were inlined — photos no longer gate on them,
+    // so the formIsBorn flag was removed.)
     const editingOriginal = editingLitter ? (litters.find((l) => l._id === editingLitter) || null) : null;
 
     // Predicted COI for the pairing, shown in the form as soon as both parents are picked
@@ -1544,15 +1542,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
     };
 
     const handleLitterImageUpload = async (file) => {
-        // The server rejects image uploads for a still-Planned litter (litterRoutes.js returns
-        // 400 "Images can only be added to born litters"). The Photos panel below is shown
-        // unconditionally so photos can be added while converting a planned litter to born -
-        // but that conversion is only persisted on Save, so uploading mid-edit always failed.
-        // Fail fast with a clear message instead of round-tripping to a server 400.
-        if (editingLitter && litters.find((l) => l._id === editingLitter)?.isPlanned) {
-            showModalMessage('Cannot add photos yet', 'This litter is still marked as Planned. Record the birth (and save) first, then add photos to it.');
-            return;
-        }
         if (litterImages.length >= 5) {
             showModalMessage('Error', 'Maximum of 5 images per litter');
             return;
@@ -3109,14 +3098,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                             <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
                                                                             <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
                                                                         </h4>
-                                                                        {/* Photos can only be stored against a litter that is no longer
-                                                                            Planned. Say so up front rather than letting the user pick a
-                                                                            photo and then fail server-side. */}
-                                                                        {editingLitter && litters.find((l) => l._id === editingLitter)?.isPlanned && (
-                                                                            <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
-                                                                                This entry is still Planned or Mated, so photos can't be added yet. Add a birth date (or tick "Born"), save, then add photos.
-                                                                            </p>
-                                                                        )}
+                                                                        {/* Photos can be attached at any stage — planned, mated or born. */}
 
                                                                         {/* Thumbnail grid */}
                                                                         {editingLitter ? (
@@ -3163,7 +3145,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                         )}
 
                                                                         {/* Upload button */}
-                                                                        {(editingLitter ? litterImages.length : pendingLitterImages.length) < 5 && (editingLitter || formIsBorn) && (
+                                                                        {(editingLitter ? litterImages.length : pendingLitterImages.length) < 5 && (
                                                                             <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                                                                                 <input
                                                                                     type="file"
@@ -3185,7 +3167,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                                 {litterImageUploading ? <><Loader2 size={14} className="inline-block align-middle animate-spin mr-1" />Uploading?</> : '+ Add Photo'}
                                                                             </label>
                                                                         )}
-                                                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : (formIsBorn ? 'Photos will be uploaded when you save the entry.' : 'Photos can be added once the entry is born (add a birth date or tick "Born").')}</p>
+                                                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the entry.'}</p>
                                                                     </div>
 
                             </form>

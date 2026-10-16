@@ -4111,7 +4111,7 @@ useEffect(() => {
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Mating: </span>{matingDate}</div>
 
                 {/* Due/Birth Date */}
-                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Due/Born: </span>{(animal.isPregnant || animal.isInMating || animal.isPlannedMating) ? dueDate : birthDate}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">{(animal.isPregnant || animal.isInMating || animal.isPlannedMating) ? 'Due: ' : 'Born: '}</span>{(animal.isPregnant || animal.isInMating || animal.isPlannedMating) ? dueDate : birthDate}</div>
 
                 {/* Weaning Date */}
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Weaning: </span>{weaningDate}</div>
@@ -5182,8 +5182,8 @@ useEffect(() => {
                                                             <>
                                                                 <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted">
                                                                     <div className="col-span-2">Animal</div>
-                                                                    <div>Planned / Mating Date</div>
-                                                                    <div>Due Date / Birth Date</div>
+                                                                    <div>{section.key === 'planned' ? 'Planned / Mating Date' : 'Mating Date'}</div>
+                                                                    <div>{section.key === 'nursing' ? 'Birth Date' : 'Due Date'}</div>
                                                                     <div>Weaning Date</div>
                                                                     <div className="text-center">Status</div>
                                                                     <div className="text-right pr-2">Action</div>
