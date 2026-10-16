@@ -2109,11 +2109,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted mb-4 sm:mb-6 pl-0.5">
-                <span><span className="font-semibold text-gray-700 dark:text-dark-text-secondary">{litterStats.litters}</span> Litters</span>
-                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-blue-600 dark:text-blue-400">{litterStats.males}</span> Males</span>
-                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> Females</span>
-                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> Unknown</span>
+            <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted mb-4 sm:mb-6 pl-0.5">
+                <span><span className="font-semibold text-gray-700 dark:text-dark-text-secondary">{litterStats.litters}</span><span className="hidden sm:inline"> Litters</span></span>
+                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-blue-600 dark:text-blue-400">{litterStats.males}</span> <span className="sm:hidden" title="Males">M</span><span className="hidden sm:inline">Males</span></span>
+                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> <span className="sm:hidden" title="Females">F</span><span className="hidden sm:inline">Females</span></span>
+                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> <span className="sm:hidden" title="Unknown">U</span><span className="hidden sm:inline">Unknown</span></span>
                 {autoCalcAvailable && (
                     <div className="contents sm:hidden"> {/* mobile only — desktop uses the header copy beside the buttons */}
                         {[
