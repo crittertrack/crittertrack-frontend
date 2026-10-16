@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { ArrowLeft, Flame, Gem, Loader2, Moon, Save, Search, Star, User } from 'lucide-react';
+import { ArrowLeft, Flame, Gem, Loader2, Moon, Save, Search, Settings, Star, User } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
 const getSpeciesDisplayName = (species) => {
@@ -392,6 +392,17 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack, embedded = false })
                                 <p>Browse breeders who've opted into the public directory. Use the search and filters to find breeders by species, country, or state.</p>
                             </InfoButton>
                         </h1>
+                        {authToken && (
+                            <button
+                                type="button"
+                                onClick={() => navigate('/settings/directory')}
+                                title="Choose whether you appear in this list"
+                                className="ml-auto flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-black bg-primary dark:bg-dark-primary hover:bg-primary-dark rounded-lg shadow-sm transition shrink-0"
+                            >
+                                <Settings size={16} />
+                                <span>List me here</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Search */}
