@@ -1,4 +1,4 @@
-import { validateSuggestion, buildSuggestionBody, MAX_DAYS } from './speciesValuesSuggestion';
+import { validateSuggestion, buildSuggestionBody, withoutCovered, MAX_DAYS } from './speciesValuesSuggestion';
 
 describe('validateSuggestion', () => {
   it('needs a species', () => {
@@ -22,6 +22,19 @@ describe('validateSuggestion', () => {
 
   it('rejects a bad value even when the other one is fine', () => {
     expect(validateSuggestion({ species: 'Gerbil', gestationDays: '24', weaningDays: '0' })).toMatch(/weaning/i);
+  });
+});
+
+describe('withoutCovered', () => {
+  const options = [{ name: 'Fancy Rat' }, { name: 'Gerbil' }, { name: 'Syrian Hamster' }];
+
+  it('hides species that already have values, ignoring case', () => {
+    expect(withoutCovered(options, ['fancy rat', 'Syrian Hamster']).map((s) => s.name)).toEqual(['Gerbil']);
+  });
+
+  it('shows everything when the covered list is empty (e.g. it failed to load)', () => {
+    expect(withoutCovered(options, [])).toBe(options);
+    expect(withoutCovered(options)).toBe(options);
   });
 });
 

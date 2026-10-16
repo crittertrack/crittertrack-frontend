@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Send, ChevronDown, Search, X } from 'lucide-react';
 import apiClient from '../../utils/apiClient';
 import { SpeciesPickerModal } from '../Modals/SpeciesModals';
-import { MAX_DAYS, validateSuggestion, buildSuggestionBody } from '../../utils/speciesValuesSuggestion';
+import { MAX_DAYS, validateSuggestion, buildSuggestionBody, withoutCovered } from '../../utils/speciesValuesSuggestion';
 
 // Help Center -> "Suggest values for a species". Sends a species plus a gestation and/or weaning
 // duration (in days) to the moderation panel (Calculator Feedback tab) for a moderator to judge.
@@ -17,6 +17,18 @@ const SpeciesValuesSuggestion = ({ speciesOptions = [], showModalMessage }) => {
     const [sending, setSending] = useState(false);
     const [error, setError] = useState('');
     const [sent, setSent] = useState(false);
+
+    // Species that already have both values can't be picked. If this list fails to load the picker
+    // just shows everything; the server rejects covered species either way.
+    const [covered, setCovered] = useState([]);
+    useEffect(() => {
+        let cancelled = false;
+        apiClient.get('/species/auto-calc-covered')
+            .then((res) => { if (!cancelled && Array.isArray(res.data)) setCovered(res.data); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, []);
+    const pickable = useMemo(() => withoutCovered(speciesOptions, covered), [speciesOptions, covered]);
 
     const values = { species, gestationDays, weaningDays };
     const canSend = !validateSuggestion(values) && !sending;
@@ -81,7 +93,7 @@ const SpeciesValuesSuggestion = ({ speciesOptions = [], showModalMessage }) => {
 
             {showPicker && (
                 <SpeciesPickerModal
-                    speciesOptions={speciesOptions}
+                    speciesOptions={pickable}
                     onSelect={(name) => { setSpecies(name); setError(''); setSent(false); setShowPicker(false); }}
                     onClose={() => setShowPicker(false)}
                     X={X}

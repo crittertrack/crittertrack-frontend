@@ -25,6 +25,13 @@ export const validateSuggestion = ({ species, gestationDays, weaningDays }) => {
     return null;
 };
 
+/** Species options minus those that already have both values (matched by name). */
+export const withoutCovered = (speciesOptions = [], coveredNames = []) => {
+  if (!coveredNames.length) return speciesOptions;
+  const covered = new Set(coveredNames.map((n) => String(n).toLowerCase()));
+  return speciesOptions.filter((s) => !covered.has(String(s.name).toLowerCase()));
+};
+
 /** The JSON body to send: an empty box becomes null, a filled one a number. */
 export const buildSuggestionBody = ({ species, gestationDays, weaningDays }) => ({
     species,
