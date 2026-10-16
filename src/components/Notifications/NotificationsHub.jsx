@@ -129,6 +129,15 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const breedingItems = [];
     if (breedingEnabled && !littersLoading) {
+        // Latest born litter per dam — the weaning reminder only belongs to the dam's
+        // most recent litter (mirrors AnimalList's reproNeedsAttentionList).
+        const latestBirthByDam = new Map();
+        litters.forEach(l => {
+            if (l.birthDate && l.damId_public) {
+                const cur = latestBirthByDam.get(l.damId_public);
+                if (!cur || new Date(l.birthDate) > new Date(cur.birthDate)) latestBirthByDam.set(l.damId_public, l);
+            }
+        });
         litters.forEach(l => {
             const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
             const sn = [l.sire?.prefix, l.sire?.name || l.sireId_public || '?', l.sire?.suffix].filter(Boolean).join(' ');
@@ -150,7 +159,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     }
                 }
             }
-            if (l.expectedDueDate && !l.birthDate) {
+            if (l.expectedDueDate && !l.birthDate && !l.pregnancyLost && !l.isPlanned) {
                 const due = parseLocalDate(l.expectedDueDate);
                 if (due) {
                     const diff = Math.round((due - today) / 86400000);
@@ -161,12 +170,21 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 }
             }
             if (l.weaningDate && !l.weaningDismissed) {
-                const wean = parseLocalDate(l.weaningDate);
-                if (wean) {
-                    const diff = Math.round((wean - today) / 86400000);
-                    if (diff <= 0) {
-                        const key = `${l._id}-weaned-${todayStr}`;
-                        if (!breedingDismissed[key]) breedingItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff, litterId: l._id });
+                // Same safety-net as AnimalList/NotificationBar: only while the dam is still
+                // flagged nursing (the backend auto-clears that past Species.maxNursingDays)
+                // and only for the dam's latest birth, so never-confirmed historical litters
+                // don't resurface as "weaning due" forever after a weaning-date backfill.
+                const dam = l.damId_public ? animals.find(a => a.id_public === l.damId_public) : null;
+                const isLatestBirthForDam = l.damId_public && latestBirthByDam.get(l.damId_public)?._id === l._id;
+                const stillNursing = dam ? (!!dam.isNursing && isLatestBirthForDam) : (!l.weaningConfirmed && !l.pregnancyLost);
+                if (stillNursing) {
+                    const wean = parseLocalDate(l.weaningDate);
+                    if (wean) {
+                        const diff = Math.round((wean - today) / 86400000);
+                        if (diff <= 0) {
+                            const key = `${l._id}-weaned-${todayStr}`;
+                            if (!breedingDismissed[key]) breedingItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff, litterId: l._id });
+                        }
                     }
                 }
             }

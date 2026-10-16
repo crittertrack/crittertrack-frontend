@@ -269,6 +269,15 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         return animal ? animalDisplayName(animal) : id;
       };
       const litterName = litter => litter.litter_id_public || litter.breedingPairCodeName || 'Litter';
+      // Latest born litter per dam — the weaning reminder only belongs to the dam's most
+      // recent litter (mirrors AnimalList's reproNeedsAttentionList).
+      const latestBirthByDam = new Map();
+      litters.forEach(l => {
+        if (l.birthDate && l.damId_public) {
+          const cur = latestBirthByDam.get(l.damId_public);
+          if (!cur || new Date(l.birthDate) > new Date(cur.birthDate)) latestBirthByDam.set(l.damId_public, l);
+        }
+      });
 
       litters.forEach(l => {
         if (l.matingDate && !l.pregnancyDate && !l.birthDate) {
@@ -279,16 +288,25 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
             matedAnimals.push(parentNames.length ? parentNames.join(' × ') : litterName(l));
           }
         }
-        if (l.expectedDueDate && !l.birthDate) {
+        if (l.expectedDueDate && !l.birthDate && !l.pregnancyLost && !l.isPlanned) {
           const d = parseLocalDate(l.expectedDueDate);
           if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) {
             dueAnimals.push(animalNameForId(l.damId_public) || litterName(l));
           }
         }
         if (l.birthDate && !l.weaningConfirmed && l.weaningDate) {
-          const d = parseLocalDate(l.weaningDate);
-          if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) {
-            weanedAnimals.push(animalNameForId(l.damId_public) || litterName(l));
+          const dam = l.damId_public ? animals.find(a => a.id_public === l.damId_public) : null;
+          // Same safety-net as AnimalList: only while the dam is still flagged nursing
+          // (the backend auto-clears that past Species.maxNursingDays) and only for the
+          // dam's latest birth — so never-confirmed historical litters stop showing as
+          // "weaning due" forever after a weaning-date backfill.
+          const isLatestBirthForDam = l.damId_public && latestBirthByDam.get(l.damId_public)?._id === l._id;
+          const stillNursing = dam ? (!!dam.isNursing && isLatestBirthForDam) : !l.pregnancyLost;
+          if (stillNursing) {
+            const d = parseLocalDate(l.weaningDate);
+            if (d && Math.round((d.setHours(0, 0, 0, 0) - today) / 86400000) <= 0) {
+              weanedAnimals.push(animalNameForId(l.damId_public) || litterName(l));
+            }
           }
         }
       });
