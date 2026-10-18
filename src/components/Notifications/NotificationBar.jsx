@@ -63,7 +63,13 @@ const NOTIFICATION_TYPE_LABELS = {
 };
 const describeNotification = (n) => {
   if (!n) return '';
-  if (n.animalName) return `${n.animalPrefix ? n.animalPrefix + ' ' : ''}${n.animalName}`.trim();
+  if (n.animalName) {
+    const name = String(n.animalName).trim();
+    const prefix = n.animalPrefix ? String(n.animalPrefix).trim() : '';
+    // animalName may already include the prefix; avoid showing it twice.
+    if (!prefix || name.toLowerCase().startsWith(`${prefix.toLowerCase()} `) || name.toLowerCase() === prefix.toLowerCase()) return name;
+    return `${prefix} ${name}`;
+  }
   if (n.requestedBy_name) return n.requestedBy_name;
   return NOTIFICATION_TYPE_LABELS[n.type] || 'an update';
 };
