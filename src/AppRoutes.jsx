@@ -506,6 +506,7 @@ export function AppRoutes({
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           showModalMessage={showModalMessage}
+          onViewAnimal={handleViewAnimal}
         />
       } />
 

@@ -20,11 +20,17 @@ const waitlist = [
     { _id: 'W2', name: 'Sam', contactInfo: 'sam@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 3 }], isActive: true, assignedAnimals: [] },
 ];
 
+const contacts = [
+    { _id: 'C1', personalName: 'Jane Doe', breederName: 'Doe Rats', linkedCTUID: 'CTU-1', isKeeper: true, isBreeder: true, breederStatus: 'active', address: { city: 'Portland', country: 'USA' } },
+    { _id: 'C2', personalName: 'Sam Smith', linkedCTUID: 'CTU-2', isKeeper: true, isBreeder: false, breederStatus: 'active', address: {} },
+];
+
 const setup = async (overrides = {}) => {
     apiClient.get.mockImplementation((url) => {
         if (url === '/animals') return Promise.resolve({ data: overrides.animals || animals });
         if (url === '/waitlist') return Promise.resolve({ data: overrides.waitlist || waitlist });
         if (url === '/species') return Promise.resolve({ data: [{ name: 'Fancy Rat' }, { name: 'Fancy Mouse' }, { name: 'Fancy Gerbil' }] });
+        if (url === '/contacts') return Promise.resolve({ data: overrides.contacts || contacts });
         return Promise.resolve({ data: [] });
     });
     apiClient.put.mockImplementation((url, payload) => Promise.resolve({ data: { animal: payload } }));
@@ -32,11 +38,12 @@ const setup = async (overrides = {}) => {
     apiClient.patch.mockImplementation((url, payload) => Promise.resolve({ data: payload }));
     apiClient.delete.mockImplementation(() => Promise.resolve({ data: {} }));
     const showModalMessage = jest.fn();
-    const utils = render(<ReservationsPage authToken="t" API_BASE_URL="/api" showModalMessage={showModalMessage} />);
+    const onViewAnimal = jest.fn();
+    const utils = render(<ReservationsPage authToken="t" API_BASE_URL="/api" showModalMessage={showModalMessage} onViewAnimal={onViewAnimal} />);
     await screen.findByText('Reservations');
     // Await the async animal data load so assertions run after the cards render.
     await screen.findByText('Peanut');
-    return { ...utils, showModalMessage };
+    return { ...utils, showModalMessage, onViewAnimal };
 };
 
 beforeEach(() => jest.clearAllMocks());
@@ -153,6 +160,26 @@ test('waitlist card shows the per-gender split and fulfillment respects it', asy
     expect(screen.getByText(/2\/5/)).toBeTruthy();
 });
 
+test('active waitlist entry counts live animals reserved to it via reservedWaitlistEntryId', async () => {
+    const live = [{
+        _id: 'W10', name: 'Lee', contactInfo: 'lee@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Female'], amount: 1 }],
+        isActive: true,
+        // No snapshot yet: the backend only writes assignedAnimals when the entry is finalized.
+        assignedAnimals: [],
+    }];
+    const reservedAnimals = [
+        ...animals,
+        { id_public: 'CTC5', name: 'Nibbles', species: 'Fancy Mouse', gender: 'Female', status: 'Booked', reservedWaitlistEntryId: 'W10' },
+    ];
+    await setup({ waitlist: live, animals: reservedAnimals });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Lee');
+    // The live reservation counts toward the fulfillment, so the entry reads 1/1 and is fulfilled.
+    expect(screen.getByText(/1\/1/)).toBeTruthy();
+    expect(screen.getByText(/Fulfilled/)).toBeTruthy();
+});
+
 test('finalizing a waitlist entry calls the finalize endpoint', async () => {
     await setup();
     fireEvent.click(screen.getByText('Waitlist'));
@@ -163,3 +190,169 @@ test('finalizing a waitlist entry calls the finalize endpoint', async () => {
     fireEvent.click(within(janeCard).getByText('Finalize'));
     await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist/W1/finalize'));
 });
+
+// --- Waitlist: assigning an existing contact -----------------------------------------------
+
+// Opens the waitlist tab, opens the new-entry form and returns the form element.
+const openNewWaitlistForm = async () => {
+    fireEvent.click(screen.getByText('Waitlist'));
+    fireEvent.click(screen.getByText('Add to Waitlist'));
+    return await screen.findByText('New Waitlist Entry');
+};
+
+test('assigning a contact to a new waitlist entry posts its contactId', async () => {
+    await setup();
+    await openNewWaitlistForm();
+    fireEvent.change(screen.getByPlaceholderText('e.g. Jane Doe'), { target: { value: 'Test Buyer' } });
+    fireEvent.change(screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0], { target: { value: 'Fancy Mouse' } });
+
+    // Open the contact picker and choose an existing Contacts record.
+    fireEvent.click(screen.getByText('Click to assign a contact'));
+    await screen.findByText('Jane Doe (Doe Rats)');
+    fireEvent.click(screen.getByText('Jane Doe (Doe Rats)'));
+
+    // The form now shows the assigned contact and the address was copied into Contact Info.
+    expect(screen.getByText('Jane Doe (Doe Rats)')).toBeTruthy();
+    expect(screen.getByDisplayValue('Portland, USA')).toBeTruthy();
+
+    fireEvent.click(screen.getByText('Add'));
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
+        name: 'Test Buyer',
+        contactId: 'C1',
+    })));
+});
+
+test('the contact picker only offers existing contact records', async () => {
+    await setup();
+    await openNewWaitlistForm();
+    fireEvent.click(screen.getByText('Click to assign a contact'));
+    await screen.findByText('Jane Doe (Doe Rats)');
+    // No "Search User"/"Manual Entry" modes in the waitlist picker.
+    expect(screen.queryByText('Search User')).toBeNull();
+    expect(screen.queryByText('Manual Entry')).toBeNull();
+});
+
+test('editing a waitlist entry shows the linked contact and can change it', async () => {
+    const linked = [{
+        _id: 'W20', name: 'Pat', contactInfo: 'pat@example.com',
+        contactId: { _id: 'C2', personalName: 'Sam Smith' }, contactName: 'Sam Smith',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, assignedAnimals: [],
+    }];
+    await setup({ waitlist: linked });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Pat');
+    fireEvent.click(screen.getByText('Edit'));
+    await screen.findByText('Edit Waitlist Entry');
+
+    // The current link is displayed both on the card and in the edit form.
+    expect(screen.getAllByText('Sam Smith').length).toBeGreaterThan(0);
+
+    // Change it to a different contact.
+    fireEvent.click(screen.getByText('Change'));
+    await screen.findByText('Jane Doe (Doe Rats)');
+    fireEvent.click(screen.getByText('Jane Doe (Doe Rats)'));
+
+    fireEvent.click(screen.getByText('Update'));
+    await waitFor(() => expect(apiClient.patch).toHaveBeenCalledWith('/waitlist/W20', expect.objectContaining({
+        contactId: 'C1',
+    })));
+});
+
+test('unlinking a contact sends contactId null', async () => {
+    const linked = [{
+        _id: 'W21', name: 'Lee', contactInfo: 'lee@example.com',
+        contactId: { _id: 'C2', personalName: 'Sam Smith' }, contactName: 'Sam Smith',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, assignedAnimals: [],
+    }];
+    await setup({ waitlist: linked });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Lee');
+    fireEvent.click(screen.getByText('Edit'));
+    await screen.findByText('Edit Waitlist Entry');
+
+    fireEvent.click(screen.getByTitle('Unlink contact'));
+    expect(screen.getByText('Click to assign a contact')).toBeTruthy();
+
+    fireEvent.click(screen.getByText('Update'));
+    await waitFor(() => expect(apiClient.patch).toHaveBeenCalledWith('/waitlist/W21', expect.objectContaining({
+        contactId: null,
+    })));
+});
+
+// --- Animals tab: filters + opening the full animal modal ---------------------------------
+const cardIds = () => screen.queryAllByTestId(/^animal-card-/).map(c => c.getAttribute('data-testid').replace('animal-card-', ''));
+const pick = (label, value) => fireEvent.change(screen.getByLabelText(`${label} filter`), { target: { value } });
+
+test('filter by species narrows the list and only offers species that exist', async () => {
+    await setup();
+    const speciesSelect = screen.getByLabelText('Species filter');
+    // Retired Doe is a Fancy Rat too, but only Rat + Mouse exist among sale animals
+    expect(Array.from(speciesSelect.options).map(o => o.value)).toEqual(['', 'Fancy Mouse', 'Fancy Rat']);
+    pick('Species', 'Fancy Mouse');
+    expect(cardIds()).toEqual(['CTC4']);
+    pick('Species', 'Fancy Rat');
+    expect(cardIds().sort()).toEqual(['CTC1', 'CTC2']);
+});
+
+test('filter by gender', async () => {
+    await setup();
+    pick('Gender', 'Male');
+    expect(cardIds()).toEqual(['CTC2']);
+    pick('Gender', 'Female');
+    expect(cardIds().sort()).toEqual(['CTC1', 'CTC4']);
+});
+
+test('filter by status (Available / Booked)', async () => {
+    await setup();
+    pick('Status', 'Booked');
+    expect(cardIds()).toEqual(['CTC2']);
+    pick('Status', 'Available');
+    expect(cardIds().sort()).toEqual(['CTC1', 'CTC4']);
+});
+
+test('filter by assigned / unassigned', async () => {
+    await setup();
+    pick('Assigned', 'assigned');
+    expect(cardIds()).toEqual(['CTC2']);
+    pick('Assigned', 'unassigned');
+    expect(cardIds().sort()).toEqual(['CTC1', 'CTC4']);
+    pick('Assigned', 'all');
+    expect(cardIds()).toHaveLength(3);
+});
+
+test('filters combine, show a count, and Clear filters resets them', async () => {
+    await setup();
+    pick('Species', 'Fancy Rat');
+    pick('Assigned', 'unassigned');
+    expect(cardIds()).toEqual(['CTC1']);
+    expect(screen.getByText('Showing 1 of 3 animals')).toBeTruthy();
+    // A combination with no matches shows the empty state instead of a blank page
+    pick('Gender', 'Male');
+    expect(cardIds()).toEqual([]);
+    fireEvent.click(screen.getByText('Clear filters'));
+    expect(cardIds()).toHaveLength(3);
+    expect(screen.queryByText('Clear filters')).toBeNull();
+});
+
+test('clicking the animal image opens the full animal modal for that animal', async () => {
+    const { onViewAnimal } = await setup();
+    fireEvent.click(within(screen.getByTestId('animal-card-CTC2')).getByLabelText('Open Butter'));
+    expect(onViewAnimal).toHaveBeenCalledTimes(1);
+    expect(onViewAnimal.mock.calls[0][0]).toEqual(expect.objectContaining({ id_public: 'CTC2', name: 'Butter' }));
+});
+
+test('edits made in the animal modal (animal-updated) are reflected in the list', async () => {
+    await setup();
+    // Booked -> filter shows Butter; modal changes Peanut to Booked, so it now matches too
+    pick('Status', 'Booked');
+    expect(cardIds()).toEqual(['CTC2']);
+    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: 'CTC1', status: 'Booked' } }));
+    await waitFor(() => expect(cardIds().sort()).toEqual(['CTC1', 'CTC2']));
+    // ...and moving Butter to Retired drops it from the sale list entirely
+    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: 'CTC2', status: 'Retired' } }));
+    await waitFor(() => expect(cardIds()).toEqual(['CTC1']));
+});
+
+

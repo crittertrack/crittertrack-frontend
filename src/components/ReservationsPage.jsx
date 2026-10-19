@@ -5,8 +5,9 @@ import AnimalImage from './shared/AnimalImage';
 import InfoButton from './shared/InfoButton';
 import { formatDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
+import ContactAssignModal from './Contacts/ContactAssignModal';
 
-const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
+const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', contactId: null, contactName: '', speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
 const GENDER_CHOICES = ['Male', 'Female', 'Any'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'AED'];
 const STATUS_PILL = {
@@ -27,7 +28,7 @@ const getGenderCounts = (req) => {
     return [{ gender: 'Any', count: amount }];
 };
 
-const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
+const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAnimal }) => {
     const [activeTab, setActiveTab] = useState('animals');
     const [waitlistView, setWaitlistView] = useState('active'); // 'active' | 'history'
     const [animals, setAnimals] = useState([]);
@@ -37,6 +38,11 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [speciesOptions, setSpeciesOptions] = useState([]);
     const [wlSpeciesFocus, setWlSpeciesFocus] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    // Animals-tab filters ('' / 'all' = no filter).
+    const [speciesFilter, setSpeciesFilter] = useState('');
+    const [genderFilter, setGenderFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [assignedFilter, setAssignedFilter] = useState('all'); // 'all' | 'assigned' | 'unassigned'
     // Shared with Budget Tracker + Supplies currency pickers (same localStorage key).
     const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
     const handleCurrencyChange = (c) => { setCurrency(c); localStorage.setItem('budgetCurrency', c); };
@@ -52,6 +58,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [editingWlId, setEditingWlId] = useState(null);
     const [wlForm, setWlForm] = useState(EMPTY_WAITLIST_FORM);
     const [wlSaving, setWlSaving] = useState(false);
+    // Contact picker for the waitlist form (assign an existing Contacts record).
+    const [wlContactModalOpen, setWlContactModalOpen] = useState(false);
 
     const fetchAnimals = useCallback(async () => {
         if (!authToken) return;
@@ -81,6 +89,32 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     }, []);
 
     useEffect(() => { fetchAnimals(); }, [fetchAnimals]);
+
+    // The full animal modal (opened from the card image) edits animals outside this page and
+    // broadcasts 'animal-updated' / 'animals-changed' — mirror those so status, species etc.
+    // changed there show up here immediately (an animal that is no longer Available/Booked
+    // simply drops out of the list via the sale filter).
+    useEffect(() => {
+        const onUpdated = (e) => {
+            const u = e.detail;
+            if (!u?.id_public) return;
+            setAnimals(prev => (u.archived
+                ? prev.filter(a => a.id_public !== u.id_public)
+                : prev.map(a => (a.id_public === u.id_public ? { ...a, ...u } : a))));
+        };
+        const onChanged = () => {
+            if (!authToken) return;
+            apiClient.get('/animals')
+                .then(res => setAnimals((res.data || []).filter(a => !a.archived && !a.isViewOnly)))
+                .catch(err => console.error('[refreshReservationAnimals]', err));
+        };
+        window.addEventListener('animal-updated', onUpdated);
+        window.addEventListener('animals-changed', onChanged);
+        return () => {
+            window.removeEventListener('animal-updated', onUpdated);
+            window.removeEventListener('animals-changed', onChanged);
+        };
+    }, [authToken]);
     useEffect(() => { fetchWaitlist(); }, [fetchWaitlist]);
     useEffect(() => { fetchSpecies(); }, [fetchSpecies]);
 
@@ -113,12 +147,40 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         return { ...req, breakdown: counts, requested, fulfilled, remaining: Math.max(0, requested - fulfilled), isFulfilled: fulfilled >= requested };
     };
 
+    // The animals that count towards an entry's fulfillment. Two sources:
+    //  - the snapshot stored on the entry (finalized entries), and
+    //  - the live animals still reserved to this entry (active entries), which the
+    //    backend only copies into assignedAnimals when the entry is finalized.
+    // The live reservation is the source of truth while an entry is active, so without it
+    // an active entry would always show "0 / N" fulfilled.
+    const getEntryAssignedAnimals = (entry) => {
+        const byId = new Map();
+        (entry.assignedAnimals || []).forEach(a => {
+            if (!a?.id_public) return;
+            byId.set(a.id_public, { ...a });
+        });
+        animals.forEach(a => {
+            if (!a?.id_public || !a.reservedWaitlistEntryId) return;
+            if (String(a.reservedWaitlistEntryId) !== String(entry._id)) return;
+            const existing = byId.get(a.id_public) || {};
+            byId.set(a.id_public, {
+                ...existing,
+                id_public: a.id_public,
+                name: existing.name || a.name,
+                species: existing.species || a.species,
+                gender: existing.gender || a.gender,
+            });
+        });
+        return Array.from(byId.values());
+    };
+
     const computeEntryFulfillment = (entry) => {
         const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: entry.amount }] : []);
-        const assigned = entry.assignedAnimals || [];
+        const assigned = getEntryAssignedAnimals(entry);
         const progress = reqs.map(r => computeRequestFulfillment(r, assigned));
         return {
             progress,
+            assigned,
             totalRequested: progress.reduce((s, p) => s + p.requested, 0),
             totalFulfilled: progress.reduce((s, p) => s + p.fulfilled, 0),
             isFulfilled: progress.length > 0 && progress.every(p => p.isFulfilled),
@@ -143,13 +205,32 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     });
 
     // Animals available for sale: status Available or Booked.
+    const baseSaleAnimals = useMemo(
+        () => animals.filter(a => a.status === 'Available' || a.status === 'Booked'),
+        [animals]
+    );
+    // Species/gender choices only list what actually exists among sale animals.
+    const filterSpeciesOptions = useMemo(
+        () => [...new Set(baseSaleAnimals.map(a => a.species).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+        [baseSaleAnimals]
+    );
+    const filterGenderOptions = useMemo(
+        () => [...new Set(baseSaleAnimals.map(a => a.gender).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+        [baseSaleAnimals]
+    );
+    const isAssigned = (a) => !!(a.reservedBuyerName || a.reservedWaitlistEntryId);
     const saleAnimals = useMemo(() => {
         const q = searchTerm.trim().toLowerCase();
-        return animals
-            .filter(a => a.status === 'Available' || a.status === 'Booked')
+        return baseSaleAnimals
+            .filter(a => !speciesFilter || a.species === speciesFilter)
+            .filter(a => !genderFilter || a.gender === genderFilter)
+            .filter(a => !statusFilter || a.status === statusFilter)
+            .filter(a => assignedFilter === 'all' || (assignedFilter === 'assigned' ? isAssigned(a) : !isAssigned(a)))
             .filter(a => !q || [a.name, a.prefix, a.suffix, a.id_public, a.species, a.breed, a.reservedBuyerName].filter(Boolean).join(' ').toLowerCase().includes(q))
             .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }, [animals, searchTerm]);
+    }, [baseSaleAnimals, searchTerm, speciesFilter, genderFilter, statusFilter, assignedFilter]);
+    const filtersActive = !!(speciesFilter || genderFilter || statusFilter || assignedFilter !== 'all' || searchTerm.trim());
+    const clearFilters = () => { setSpeciesFilter(''); setGenderFilter(''); setStatusFilter(''); setAssignedFilter('all'); setSearchTerm(''); };
 
     const activeWaitlist = useMemo(() => waitlist.filter(e => e.isActive !== false), [waitlist]);
     const historyWaitlist = useMemo(() => waitlist.filter(e => e.isActive === false), [waitlist]);
@@ -281,6 +362,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
             const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: String(entry.amount ?? 1) }] : [emptySpeciesRequest()]);
             setWlForm({
                 name: entry.name || '', contactInfo: entry.contactInfo || '',
+                contactId: entry.contactId?._id || entry.contactId || null,
+                contactName: entry.contactName || (entry.contactId?.personalName || ''),
                 speciesRequests: reqs.map(r => { const counts = { Male: '', Female: '', Any: '' }; getGenderCounts(r).forEach(c => { counts[c.gender] = String(c.count); }); return { species: r.species || '', counts }; }),
                 notes: entry.notes || '',
             });
@@ -301,6 +384,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         try {
             const payload = {
                 name: wlForm.name.trim(), contactInfo: wlForm.contactInfo?.trim() || '',
+                // null explicitly unlinks the contact; an id links/relinks it.
+                contactId: wlForm.contactId || null,
                 speciesRequests: validRows.map(r => {
                     let genderCounts = GENDER_CHOICES
                         .map(g => ({ gender: g, count: parseInt(r.counts?.[g], 10) || 0 }))
@@ -410,6 +495,28 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 <input type="text" placeholder="Search animals, species, buyers..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                                     className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary" />
                             </div>
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-2">
+                                {[
+                                    { label: 'Species', value: speciesFilter, set: setSpeciesFilter, all: 'All species', opts: filterSpeciesOptions.map(s => [s, s]) },
+                                    { label: 'Gender', value: genderFilter, set: setGenderFilter, all: 'All genders', opts: filterGenderOptions.map(g => [g, g]) },
+                                    { label: 'Status', value: statusFilter, set: setStatusFilter, all: 'Available & Booked', opts: [['Available', 'Available'], ['Booked', 'Booked']] },
+                                    { label: 'Assigned', value: assignedFilter, set: setAssignedFilter, all: null, opts: [['all', 'All'], ['assigned', 'Assigned'], ['unassigned', 'Unassigned']] },
+                                ].map(f => (
+                                    <label key={f.label} className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted">
+                                        {f.label}
+                                        <select aria-label={`${f.label} filter`} value={f.value} onChange={e => f.set(e.target.value)} className={`${inputCls} w-full mt-0.5`}>
+                                            {f.all && <option value="">{f.all}</option>}
+                                            {f.opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                                        </select>
+                                    </label>
+                                ))}
+                            </div>
+                            {filtersActive && (
+                                <div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-dark-text-muted">
+                                    <span>Showing {saleAnimals.length} of {baseSaleAnimals.length} animals</span>
+                                    <button type="button" onClick={clearFilters} className="text-green-600 dark:text-green-400 hover:underline">Clear filters</button>
+                                </div>
+                            )}
                         </div>
 
                         {animalsLoading ? (
@@ -434,9 +541,11 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         <div key={animal.id_public} data-testid={`animal-card-${animal.id_public}`} className={cardCls}>
                                             <div className="p-3 sm:p-4 space-y-3">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface">
+                                                    <button type="button" onClick={() => onViewAnimal?.(animal)} disabled={!onViewAnimal}
+                                                        aria-label={`Open ${animal.name || animal.id_public}`} title="Open full animal details"
+                                                        className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface flex items-center justify-center ring-0 hover:ring-2 hover:ring-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition cursor-pointer disabled:cursor-default">
                                                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={22} />
-                                                    </div>
+                                                    </button>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="font-semibold text-gray-800 dark:text-dark-text truncate">
                                                             {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}
@@ -596,6 +705,26 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Contact Info</label>
                                         <input type="text" value={wlForm.contactInfo} onChange={e => setWlForm(f => ({ ...f, contactInfo: e.target.value }))} placeholder="Phone, email, or address" className={inputCls} />
                                     </div>
+                                {/* Assigned contact: pick an existing Contacts record, or unlink the current one. */}
+                                <div className="mt-2">
+                                    <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Assigned Contact</label>
+                                    {wlForm.contactId ? (
+                                        <div className="flex items-center justify-between gap-2 p-2.5 border border-green-200 dark:border-green-700/40 rounded-lg bg-white/60 dark:bg-dark-surface/40">
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">{wlForm.contactName || 'Linked contact'}</p>
+                                                {wlForm.contactInfo && <p className="text-[11px] text-gray-500 dark:text-dark-text-muted truncate">{wlForm.contactInfo}</p>}
+                                            </div>
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <button type="button" onClick={() => setWlContactModalOpen(true)} className="px-2 py-1 text-xs text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition">Change</button>
+                                                <button type="button" title="Unlink contact" onClick={() => setWlForm(f => ({ ...f, contactId: null, contactName: '' }))} className="px-2 py-1 text-xs text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">Unlink</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <button type="button" onClick={() => setWlContactModalOpen(true)} className="w-full text-left p-2.5 border border-dashed border-green-300 dark:border-green-700/40 rounded-lg text-sm text-gray-500 dark:text-dark-text-muted hover:border-green-500 dark:hover:border-green-500 transition">
+                                            Click to assign a contact
+                                        </button>
+                                    )}
+                                </div>
                                 {/* Species requests: one row per species with its own amount + genders */}
                                 <div className="space-y-2 mt-2">
                                     <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1 flex items-center justify-between">
@@ -656,6 +785,27 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             </div>
                         )}
 
+                        {wlContactModalOpen && (
+                            <ContactAssignModal
+                                isOpen={wlContactModalOpen}
+                                contactOnly
+                                target="Contact"
+                                API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
+                                onClose={() => setWlContactModalOpen(false)}
+                                onSelect={(sel) => {
+                                    setWlForm(f => ({
+                                        ...f,
+                                        contactId: sel.contactId || null,
+                                        contactName: sel.name || '',
+                                        // Fill the free-text contact info from the contact's address.
+                                        contactInfo: sel.contactInfo || f.contactInfo || '',
+                                    }));
+                                    setWlContactModalOpen(false);
+                                }}
+                            />
+                        )}
+
                         {waitlistLoading ? (
                             <div className="text-center py-12 text-gray-500 dark:text-dark-text-muted"><Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" /> Loading waitlist...</div>
                         ) : shownWaitlist.length === 0 ? (
@@ -666,7 +816,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-                                {shownWaitlist.map(entry => (
+                                {shownWaitlist.map(entry => {
+                                    const ful = computeEntryFulfillment(entry);
+                                    return (
                                     <div key={entry._id} className={cardCls}>
                                         <div className="p-3 sm:p-4 space-y-2.5">
                                             <div className="flex items-start justify-between gap-2">
@@ -675,43 +827,41 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                     <div className="min-w-0">
                                                         <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
                                                         {entry.contactInfo && <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate flex items-center gap-1"><Phone size={10} /> {entry.contactInfo}</div>}
+                                                        {entry.contactId && (
+                                                            <div className="text-xs text-green-700 dark:text-green-400 truncate flex items-center gap-1">
+                                                                <User size={10} /> {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 {waitlistView === 'history' && <span className="text-[11px] bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted px-2 py-0.5 rounded-full shrink-0">History</span>}
                                             </div>
 
                                             <div className="text-xs sm:text-sm space-y-1 bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5">
-                                                {(() => {
-                                                    const ful = computeEntryFulfillment(entry);
-                                                    return (
-                                                        <>
-                                                            {ful.isFulfilled && (
-                                                                <span className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium mb-1"><Check size={10} /> Fulfilled</span>
-                                                            )}
-                                                            {ful.progress.map((p, pi) => (
-                                                                <div key={pi} className="flex justify-between gap-2 mb-0.5">
-                                                                    <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={10} /> {p.species}</span>
-                                                                    <span className="text-right text-[11px]">
-                                                                        {p.breakdown.map(b => b.count + ' ' + b.gender).join(' / ')}{` • ${p.fulfilled}/${p.requested}`}
-                                                                    </span>
-                                                                </div>
-                                                            ))}
-                                                            {ful.progress.length > 1 && (
-                                                                <div className="flex justify-between gap-2 border-t border-gray-200 dark:border-dark-text-muted pt-0.5 mt-0.5">
-                                                                    <span className="text-gray-500 dark:text-dark-text-muted text-[10px]">Total</span>
-                                                                    <span className={`text-right text-[11px] font-medium ${ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalFulfilled}/{ful.totalRequested}</span>
-                                                                </div>
-                                                            )}
-                                                            {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}
-                                                        </>
-                                                    );
-                                                })()}
+                                                {ful.isFulfilled && (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium mb-1"><Check size={10} /> Fulfilled</span>
+                                                )}
+                                                {ful.progress.map((p, pi) => (
+                                                    <div key={pi} className="flex justify-between gap-2 mb-0.5">
+                                                        <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={10} /> {p.species}</span>
+                                                        <span className="text-right text-[11px]">
+                                                            {p.breakdown.map(b => b.count + ' ' + b.gender).join(' / ')}{` • ${p.fulfilled}/${p.requested}`}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {ful.progress.length > 1 && (
+                                                    <div className="flex justify-between gap-2 border-t border-gray-200 dark:border-dark-text-muted pt-0.5 mt-0.5">
+                                                        <span className="text-gray-500 dark:text-dark-text-muted text-[10px]">Total</span>
+                                                        <span className={`text-right text-[11px] font-medium ${ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalFulfilled}/{ful.totalRequested}</span>
+                                                    </div>
+                                                )}
+                                                {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}
                                                 {waitlistView === 'history' && (
                                                     <div className="pt-1 border-t border-gray-200 dark:border-dark-border mt-1">
                                                         <div className="text-gray-500 dark:text-dark-text-muted mb-0.5 text-[10px]">Assigned animals</div>
-                                                        {(entry.assignedAnimals || []).length > 0 ? (
+                                                        {ful.assigned.length > 0 ? (
                                                             <div className="flex flex-wrap gap-1">
-                                                                {entry.assignedAnimals.map((a, i) => (
+                                                                {ful.assigned.map((a, i) => (
                                                                     <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
                                                                 ))}
                                                             </div>
@@ -739,7 +889,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </>
