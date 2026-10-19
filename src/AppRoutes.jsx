@@ -24,6 +24,7 @@ const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const HelpCenterPage = lazy(() => import('./components/tools/HelpCenterPage'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
+const ReservationsPage = lazy(() => import('./components/ReservationsPage'));
 const LiteNotificationsPage = lazy(() => import('./components/Notifications/LiteNotificationsPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
@@ -493,6 +494,15 @@ export function AppRoutes({
       {/* Supplies */}
       <Route path="/supplies" element={
         <SuppliesPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage}
+        />
+      } />
+
+      {/* Reservations (Finance: animals + waitlist) */}
+      <Route path="/reservations" element={
+        <ReservationsPage
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           showModalMessage={showModalMessage}

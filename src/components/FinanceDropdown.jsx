@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, Package } from 'lucide-react';
+import { DollarSign, Package, ClipboardList } from 'lucide-react';
 
 const FinanceDropdown = ({ onLinkClick }) => {
     const navigate = useNavigate();
@@ -19,6 +19,9 @@ const FinanceDropdown = ({ onLinkClick }) => {
             </button>
             <button onClick={() => handleNavigate('/supplies')} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                 <Package size={15} /> Supplies
+            </button>
+            <button onClick={() => handleNavigate('/reservations')} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                <ClipboardList size={15} /> Reservations
             </button>
         </div>
     );

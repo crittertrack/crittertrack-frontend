@@ -9,6 +9,7 @@ import {
 import { useUnreadMessages, useUnreadNotifications } from '../../hooks/useNotificationCounts';
 import { getUserKey } from '../../utils/userKey';
 import { ALERT_CATEGORIES } from '../../utils/alertCategories';
+import { isDeadStatus } from '../../utils/constants';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { parseLocalDate } from '../../utils/dateFormatter';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -349,7 +350,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     }
     if (alertSettings.birthdays) {
       const due = animals.filter(a => {
-        if (!a.birthDate || a.status === 'Deceased') return false;
+        if (!a.birthDate || isDeadStatus(a.status)) return false;
         const b = new Date(a.birthDate);
         // Only from the first anniversary onward (not on the birth date itself)
         return !isNaN(b.getTime()) && b.getFullYear() < today.getFullYear() && b.getMonth() === today.getMonth() && b.getDate() === today.getDate();

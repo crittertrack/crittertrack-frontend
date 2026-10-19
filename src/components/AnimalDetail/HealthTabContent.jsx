@@ -238,7 +238,7 @@ export const HealthTabContent = ({ animal }) => {
                 <InfoCard title="End of Life Information" icon={<Scale size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults || animal.endOfLifeCareNotes) ? (
                         <div className="space-y-3">
-                            {animal.deceasedDate && <InfoItem label="Deceased Date" value={formatDate(animal.deceasedDate)} />}
+                            {animal.deceasedDate && <InfoItem label={animal.status === 'Culled' ? 'Culled Date' : 'Deceased Date'} value={formatDate(animal.deceasedDate)} />}
                             {animal.causeOfDeath && <InfoItem label="Cause of Death" value={animal.causeOfDeath} />}
                             {animal.necropsyResults && <InfoItem label="Necropsy Results" value={animal.necropsyResults} />}
                             {animal.endOfLifeCareNotes && <InfoItem label="End of Life Care Notes">

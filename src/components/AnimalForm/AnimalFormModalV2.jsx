@@ -22,6 +22,7 @@ import { ENCLOSURE_PURPOSE_OPTIONS, getEnclosurePurposeLabel } from '../../utils
 import { MANUAL_PEDIGREE_ENABLED } from '../../utils/pedigreeFlags';
 import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { buildChangedSaveFields } from '../../utils/saveDiff';
+import { isDeadStatus } from '../../utils/constants';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
@@ -1507,7 +1508,7 @@ const AnimalFormModalV2 = ({
     handleWithdrawTransfer,
     speciesOptions = [],
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'], // NOSONAR
-    STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'],
+    STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Culled', 'Rehomed', 'Unknown'],
     submitLabel,
     submitIcon,
     // Optional: when provided, shows a second submit button that saves the current
@@ -3115,7 +3116,8 @@ const AnimalFormModalV2 = ({
         const caret = isTextField ? el.selectionStart : null;
         setFormData(prev => {
             const updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
-            if (name === 'deceasedDate' && value) {
+            if (name === 'deceasedDate' && value && !isDeadStatus(prev.status)) {
+                // Don't clobber 'Culled' — the same deceasedDate field backs both dead statuses.
                 updated.status = 'Deceased';
             }
             return updated;
@@ -4080,9 +4082,9 @@ const AnimalFormModalV2 = ({
                                                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                                         </select>
                                                     </div>
-                                                    {formData.status === 'Deceased' && (
+                                                    {isDeadStatus(formData.status) && (
                                                         <div>
-                                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Deceased Date</label>
+                                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{formData.status === 'Culled' ? 'Culled Date' : 'Deceased Date'}</label>
                                                             <input type="date" name="deceasedDate" value={formData.deceasedDate} onChange={handleChange}
                                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                         </div>
@@ -5331,7 +5333,7 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="End of Life" icon={<Scale size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Deceased Date</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{formData.status === 'Culled' ? 'Culled Date' : 'Deceased Date'}</label>
                                             <DatePicker name="deceasedDate" value={formData.deceasedDate} onChange={handleChange} maxDate={new Date()} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div>

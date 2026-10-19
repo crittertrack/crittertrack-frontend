@@ -327,6 +327,8 @@ const EMPTY_LITTER_FORM = {
     maleLosses: null,
     femaleLosses: null,
     unknownLosses: null,
+    hasCulls: false,
+    cullsCount: null,
     maleStillborn: null,
     femaleStillborn: null,
     unknownStillborn: null,
@@ -849,11 +851,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         const stillborn    = parseInt(fd.stillbornCount) || 0;
         const losses      = parseInt(fd.lossesCount) || 0;
         const weaned       = parseInt(fd.litterSizeWeaned) || 0;
+        const culls        = fd.hasCulls ? (parseInt(fd.cullsCount) || 0) : 0;
         const warnings     = [];
         if (litterSizeBorn && stillborn > litterSizeBorn)
             warnings.push(`Stillborn (${stillborn}) exceeds Total Born (${litterSizeBorn}).`);
         if (litterSizeBorn && losses > litterSizeBorn)
             warnings.push(`Losses (${losses}) exceeds Total Born (${litterSizeBorn}).`);
+        if (culls > losses)
+            warnings.push(`Culls (${culls}) exceeds Total Losses (${losses}).`);
         if (litterSizeBorn && weaned > litterSizeBorn)
             warnings.push(`Weaned (${weaned}) exceeds Total Born (${litterSizeBorn}).`);
         if (litterSizeBorn && (stillborn + losses + weaned) > litterSizeBorn)
@@ -945,6 +950,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 maleLossesCount: formData.maleLosses || null,
                 femaleLossesCount: formData.femaleLosses || null,
                 unknownLossesCount: formData.unknownLosses || null,
+                // Cull tracking (a subset of total losses)
+                hasCulls: !!formData.hasCulls,
+                cullsCount: formData.cullsCount || null,
                 birthComplications: formData.birthComplications || null,
                 birthOutcome: formData.birthOutcome || null,
                 ...(formData.pregnancyLost ? {
@@ -1522,6 +1530,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             maleLosses: litter.maleLossesCount || null,
             femaleLosses: litter.femaleLossesCount || null,
             unknownLosses: litter.unknownLossesCount || null,
+            // Cull tracking — restore the flag and amount so the checkbox and field persist
+            hasCulls: !!litter.hasCulls,
+            cullsCount: (litter.hasCulls ? (litter.cullsCount ?? null) : null),
             // Extraction flags — restore so the checkboxes persist across edits and
             // reflect how the stored M/F/U counts were derived.
             extractStillbornFromTotal: !!litter.extractStillbornFromTotal,
@@ -1694,6 +1705,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 maleLossesCount: formData.maleLosses || null,
                 femaleLossesCount: formData.femaleLosses || null,
                 unknownLossesCount: formData.unknownLosses || null,
+                // Cull tracking (a subset of total losses)
+                hasCulls: !!formData.hasCulls,
+                cullsCount: formData.cullsCount || null,
                 birthComplications: formData.birthComplications || null,
                 birthOutcome: formData.birthOutcome || null,
                 pregnancyLost: !!formData.pregnancyLost,
@@ -2865,6 +2879,46 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                             min="0"
                                                         />
                                                     </div>
+
+                                                    {/* Culls - opt-in subset of total losses */}
+                                                    {(formData.lossesCount || 0) > 0 && (
+                                                        <div>
+                                                            <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer mb-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={formData.hasCulls || false}
+                                                                    onChange={(e) => {
+                                                                        const checked = e.target.checked;
+                                                                        setFormData(prev => ({
+                                                                            ...prev,
+                                                                            hasCulls: checked,
+                                                                            // Clear the amount when unticking so a stale value can't re-split the overview
+                                                                            cullsCount: checked ? (prev.cullsCount ?? null) : null
+                                                                        }));
+                                                                    }}
+                                                                    className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
+                                                                />
+                                                                <span>Some losses were culls</span>
+                                                            </label>
+                                                            {formData.hasCulls && (
+                                                                <>
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                                        Total Culls
+                                                                    </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={typeof formData.cullsCount === 'number' ? formData.cullsCount : (formData.cullsCount || '')}
+                                                                        onChange={(e) => setFormData({ ...formData, cullsCount: e.target.value ? parseInt(e.target.value) : null })}
+                                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                                        placeholder="0"
+                                                                        min="0"
+                                                                        max={formData.lossesCount || undefined}
+                                                                    />
+                                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Subset of Total Losses</p>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
     
@@ -3678,25 +3732,47 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                         {/* -- 3. Litter Stats: left = counts, right = sex ------------ */}
                                         {!litter.isPlanned && <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-4 mb-4 shadow-sm">
                                             <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 dark:divide-dark-text-muted gap-3 sm:gap-0">
-                                                {/* Left: Born / Stillborn / Weaned / Losses */}
-                                                <div className="grid grid-cols-4 sm:pr-4">
-                                                    <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Born</div>
-                                                        <div className="text-xl font-bold text-gray-800 dark:text-dark-text">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Stillborn</div>
-                                                        <div className="text-xl font-bold text-gray-400 dark:text-dark-text-muted">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Weaned</div>
-                                                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Losses</div>
-                                                        <div className="text-xl font-bold text-red-500 dark:text-red-400">{litter.lossesCount ?? litter.losses ?? 0}</div>
-                                                    </div>
-                                                </div>
+                                                {/* Left: Born / Stillborn / Weaned (always) + Losses / Culls (only when 1+) */}
+                                                {(() => {
+                                                    const totalLosses = litter.lossesCount ?? litter.losses ?? 0;
+                                                    // Culls are opt-in (see the litter form's Losses section); when recorded they
+                                                    // are extracted OUT of the total losses: 5 losses / 5 culls → Losses 0, Culls 5.
+                                                    const culls = litter.hasCulls ? Math.min(litter.cullsCount ?? 0, totalLosses) : 0;
+                                                    const losses = totalLosses - culls;
+                                                    const showLosses = losses >= 1;
+                                                    const showCulls = culls >= 1;
+                                                    // Tailwind can't see dynamically-built class names, so map the possible
+                                                    // column counts (3 base + Losses + Culls) to literal classes.
+                                                    const colsClass = { 3: 'grid-cols-3', 4: 'grid-cols-4', 5: 'grid-cols-5' }[3 + (showLosses ? 1 : 0) + (showCulls ? 1 : 0)];
+                                                    return (
+                                                        <div className={`grid ${colsClass} sm:pr-4`}>
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Born</div>
+                                                                <div className="text-xl font-bold text-gray-800 dark:text-dark-text">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Stillborn</div>
+                                                                <div className="text-xl font-bold text-gray-400 dark:text-dark-text-muted">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Weaned</div>
+                                                                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
+                                                            </div>
+                                                            {showLosses && (
+                                                                <div>
+                                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Losses</div>
+                                                                    <div className="text-xl font-bold text-red-500 dark:text-red-400">{losses}</div>
+                                                                </div>
+                                                            )}
+                                                            {showCulls && (
+                                                                <div>
+                                                                    <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Culls</div>
+                                                                    <div className="text-xl font-bold text-red-500 dark:text-red-400">{culls}</div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
                                                 {/* Right: Males / Females / Unknown */}
                                                 <div className="grid grid-cols-3 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-dark-text-muted">
                                                     <div>

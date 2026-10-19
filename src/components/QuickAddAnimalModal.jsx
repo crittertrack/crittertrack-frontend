@@ -4,7 +4,7 @@ import { X, Loader2, ChevronLeft, Search, Plus, Camera, Cat } from 'lucide-react
 import { getSpeciesCategory, getAppearanceFields } from '../utils/appearanceFields';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Culled', 'Rehomed', 'Unknown'];
 const FALLBACK_CATEGORIES = ['Mammal', 'Reptile', 'Bird', 'Fish', 'Amphibian', 'Invertebrate', 'Other'];
 
 // Lite mode's "Add Animal" flow — ported from crittertrack-lite's own QuickAddAnimalModal so

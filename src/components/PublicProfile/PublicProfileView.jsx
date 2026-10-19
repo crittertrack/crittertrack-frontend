@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import apiClient from '../../utils/apiClient';
 import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
+import { isDeadStatus } from '../../utils/constants';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, ArrowDown, ArrowLeftRight, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
@@ -16,7 +17,7 @@ import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalD
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
 
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Culled', 'Rehomed', 'Unknown'];
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
 // "Born, birth date unknown" entries are Born, but carry no birth date (no age, no nursing, no weaning).
 const isBornLitter = (l) => !!(l && (l.birthDate || l.birthDateUnknown));
@@ -1123,12 +1124,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                             // Shrink-wrapped to the rendered (letterboxed) image size, not the tile, so the corner badge anchors to the actual photo edge instead of empty tile space.
                                                             <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28">
                                                                 <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28 w-auto h-auto object-contain rounded-md" />
-                                                                {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
+                                                                {isDeadStatus(animal.status) && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                                             </div>
                                                         ) : (
                                                             <>
                                                                 <Cat size={36} />
-                                                                {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
+                                                                {isDeadStatus(animal.status) && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
                                                             </>
                                                         )}
                                                     </div>
@@ -1166,8 +1167,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
                                                 {/* Status bar at bottom, identical to the private card
                                                     including the transfer icon on the left. */}
-                                                {animal.status === 'Deceased' ? (
-                                                    <DeceasedBanner />
+                                                {isDeadStatus(animal.status) ? (
+                                                    <DeceasedBanner status={animal.status} />
                                                 ) : (
                                                     <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto relative">
                                                         {/* The public animal payload exposes

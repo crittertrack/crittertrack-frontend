@@ -10,6 +10,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { DeceasedCornerBadge } from '../shared/DeceasedBanner';
+import { isDeadStatus } from '../../utils/constants';
 import { openExternalLink } from '../../utils/externalLink';
 import { animalShareUrl } from '../../utils/publicUrl';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -467,12 +468,12 @@ useEffect(() => {
                                             }
                                         }}
                                     />
-                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                    {isDeadStatus(animal.status) && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
                                 </div>
                             ) : (
                                 <>
                                     <Cat size={64} className="text-gray-300 dark:text-dark-border" />
-                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
+                                    {isDeadStatus(animal.status) && <DeceasedCornerBadge iconClassName="w-10 h-10" />}
                                 </>
                             )}
                         </div>
@@ -519,7 +520,7 @@ useEffect(() => {
                                                     {animal.isDisplay ? <Eye size={12} /> : <EyeOff size={12} />}
                                                     {animal.isDisplay ? 'Public' : 'Private'}
                                                 </span>
-                                                {animal.status && (animal.status === 'Deceased' ? (
+                                                {animal.status && (isDeadStatus(animal.status) ? (
                                                     <span className="bg-gray-800 dark:bg-black/70 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5">{animal.status}</span>
                                                 ) : (
                                                     <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>

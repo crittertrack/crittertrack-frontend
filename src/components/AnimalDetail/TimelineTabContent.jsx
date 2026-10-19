@@ -458,7 +458,7 @@ const aggregateAnimalTimelineEvents = (animal, animalLogs) => {
                 id: 'death-' + animal.dateOfDeath,
                 type: 'status',
                 date: animal.dateOfDeath,
-                title: 'Animal Deceased',
+                title: animal.status === 'Culled' ? 'Animal Culled' : 'Animal Deceased',
                 description: `Status: ${animal.status || 'Deceased'}`
             });
         }

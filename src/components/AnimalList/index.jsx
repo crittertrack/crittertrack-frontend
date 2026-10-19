@@ -9,6 +9,7 @@ import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import DeceasedBanner, { DeceasedCornerBadge } from '../shared/DeceasedBanner';
+import { DEAD_STATUSES, isDeadStatus } from '../../utils/constants';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import {
@@ -50,7 +51,7 @@ const LitterEntryForm = React.lazy(() => import('../LitterManagement'));
 const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Culled', 'Rehomed', 'Unknown'];
 
 // Curated icon/color pickers for user-created Collections (folders under the Collections tab).
 const COLLECTION_ICON_OPTIONS = [
@@ -139,7 +140,7 @@ const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclo
 const renderHealthColumnCell = (animal) => {
     if (animal.isQuarantine) return <span className="font-medium text-orange-600 dark:text-orange-400">Quarantine</span>;
     if (animal.isInTreatment) return <span className="font-medium text-red-600 dark:text-red-400">Treatment</span>;
-    if (animal.status === 'Deceased') return <span className="text-gray-500 dark:text-dark-text-muted">Deceased</span>;
+    if (isDeadStatus(animal.status)) return <span className="text-gray-500 dark:text-dark-text-muted">{animal.status}</span>;
     const status = remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy';
     return <span className={`font-medium ${HEALTH_STATUS_TEXT_COLORS[status] || HEALTH_STATUS_TEXT_COLORS.Healthy}`}>{status}</span>;
 };
@@ -1682,7 +1683,7 @@ useEffect(() => {
         if (!selectedEnclosure) return [];
         
         const suitableSpecies = new Set(selectedEnclosure.speciesLabels || []);
-        const unassignableStatuses = ['Deceased', 'Rehomed', 'Sold'];
+        const unassignableStatuses = [...DEAD_STATUSES, 'Rehomed', 'Sold'];
 
         let filteredAnimals = allAnimalsRaw.filter(a => 
             !a.enclosureId && 
@@ -2372,7 +2373,7 @@ useEffect(() => {
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
     // Enclosures view should never show transferred/archived/deceased animals as occupants.
-    const housedAnimals = allAnimals.filter(a => !a.archived && a.status !== 'Deceased');
+    const housedAnimals = allAnimals.filter(a => !a.archived && !isDeadStatus(a.status));
     housedAnimals.forEach(a => {
         const key = a.enclosureId || 'unassigned';
         if (!enclosureAnimalMap[key]) enclosureAnimalMap[key] = [];
@@ -2888,12 +2889,12 @@ useEffect(() => {
                                 // Shrink-wrapped to the rendered (letterboxed) image size so the corner badge anchors to the actual photo edge instead of empty tile space.
                                 <div className="relative inline-block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28">
                                     <img src={imgSrc} alt={animal.name} className="block max-w-24 sm:max-w-28 md:max-w-32 max-h-24 md:max-h-28 w-auto h-auto object-contain rounded-md" />
-                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
+                                    {isDeadStatus(animal.status) && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-0 right-0" />}
                                 </div>
                             ) : (
                                 <>
                                     <Cat size={36} />
-                                    {animal.status === 'Deceased' && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
+                                    {isDeadStatus(animal.status) && <DeceasedCornerBadge iconClassName="w-8 h-8" positionClassName="bottom-3 right-0" />}
                                 </>
                             )}
                         </div>
@@ -3034,8 +3035,8 @@ useEffect(() => {
                     </div>
 
                     {/* Status bar at bottom */}
-                    {animal.status === 'Deceased' ? (
-                        <DeceasedBanner />
+                    {isDeadStatus(animal.status) ? (
+                        <DeceasedBanner status={animal.status} />
                     ) : (
                         <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto relative">
                             {/* Transfer icon on the left of the status bar. It was text-black,
@@ -3326,7 +3327,7 @@ useEffect(() => {
                                                             <span className="text-gray-400 dark:text-dark-text-muted">Parents:</span> {[animal.sireId_public, animal.damId_public].filter(Boolean).join(' • ')}
                                                         </div>
                                                     )}
-                                                    <div className="text-xs"><span className="text-gray-400 dark:text-dark-text-muted">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500 dark:text-dark-text-muted' : 'text-green-600 dark:text-green-400'}>{animal.status || 'N/A'}</span></div>
+                                                    <div className="text-xs"><span className="text-gray-400 dark:text-dark-text-muted">Status:</span> <span className={isDeadStatus(animal.status) ? 'text-gray-500 dark:text-dark-text-muted' : 'text-green-600 dark:text-green-400'}>{animal.status || 'N/A'}</span></div>
                                                 </div>
                                             ))}
                                         </div>

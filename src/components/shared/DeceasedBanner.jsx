@@ -14,13 +14,14 @@ const DeceasedCornerBadge = ({ iconClassName = 'w-8 h-8', positionClassName = 'b
 );
 
 
-// Replaces a card's plain "Deceased" status-bar text, matching that bar's original padding/
-// font/text size exactly (size="sm" = AnimalList card, size="md" = PublicProfileView card).
-const DeceasedBanner = ({ size = 'md' }) => {
+// Replaces a card's plain status-bar text for animals that have died (Deceased/Culled),
+// matching that bar's original padding/font/text size exactly
+// (size="sm" = AnimalList card, size="md" = PublicProfileView card).
+const DeceasedBanner = ({ size = 'md', status = 'Deceased' }) => {
     const isSm = size === 'sm';
     return (
         <div className={`w-full mt-auto bg-gray-800/90 dark:bg-black/80 text-center border-t border-gray-700 dark:border-black/60 ${isSm ? 'py-0.5 sm:py-1' : 'py-1'}`}>
-            <div className={`font-medium capitalize text-white ${isSm ? 'text-[10px] sm:text-xs' : 'text-xs'}`}>Deceased</div>
+            <div className={`font-medium capitalize text-white ${isSm ? 'text-[10px] sm:text-xs' : 'text-xs'}`}>{status}</div>
         </div>
     );
 };

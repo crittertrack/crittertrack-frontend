@@ -1,0 +1,612 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle } from 'lucide-react';
+import apiClient from '../utils/apiClient';
+import AnimalImage from './shared/AnimalImage';
+import InfoButton from './shared/InfoButton';
+import { formatDate } from '../utils/dateFormatter';
+import { getCurrencySymbol } from '../utils/locationUtils';
+
+const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', species: '', genders: [], amount: '1', notes: '' };
+const GENDER_CHOICES = ['Male', 'Female', 'Any'];
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'AED'];
+const STATUS_PILL = {
+    Available: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+    Booked: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300',
+};
+const DUE_DONE = (status) => status === 'done'
+    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+    : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300';
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
+    const [activeTab, setActiveTab] = useState('animals');
+    const [waitlistView, setWaitlistView] = useState('active'); // 'active' | 'history'
+    const [animals, setAnimals] = useState([]);
+    const [animalsLoading, setAnimalsLoading] = useState(true);
+    const [waitlist, setWaitlist] = useState([]);
+    const [waitlistLoading, setWaitlistLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    // Shared with Budget Tracker + Supplies currency pickers (same localStorage key).
+    const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
+    const handleCurrencyChange = (c) => { setCurrency(c); localStorage.setItem('budgetCurrency', c); };
+
+    // Per-animal reservation editor state, keyed by id_public.
+    const [resForms, setResForms] = useState({});
+    const [editingAnimalId, setEditingAnimalId] = useState(null);
+    const [resSaving, setResSaving] = useState(false);
+    const [rehomingId, setRehomingId] = useState(null);
+
+    // Waitlist add/edit form
+    const [wlFormVisible, setWlFormVisible] = useState(false);
+    const [editingWlId, setEditingWlId] = useState(null);
+    const [wlForm, setWlForm] = useState(EMPTY_WAITLIST_FORM);
+    const [wlSaving, setWlSaving] = useState(false);
+
+    const fetchAnimals = useCallback(async () => {
+        if (!authToken) return;
+        setAnimalsLoading(true);
+        try {
+            const res = await apiClient.get('/animals');
+            setAnimals((res.data || []).filter(a => !a.archived && !a.isViewOnly));
+        } catch (err) { console.error('[fetchReservationAnimals]', err); }
+        setAnimalsLoading(false);
+    }, [authToken]);
+
+    const fetchWaitlist = useCallback(async () => {
+        if (!authToken) return;
+        setWaitlistLoading(true);
+        try {
+            const res = await apiClient.get('/waitlist');
+            setWaitlist(res.data || []);
+        } catch (err) { console.error('[fetchWaitlist]', err); }
+        setWaitlistLoading(false);
+    }, [authToken]);
+
+    useEffect(() => { fetchAnimals(); }, [fetchAnimals]);
+    useEffect(() => { fetchWaitlist(); }, [fetchWaitlist]);
+
+    // Animals available for sale: status Available or Booked.
+    const saleAnimals = useMemo(() => {
+        const q = searchTerm.trim().toLowerCase();
+        return animals
+            .filter(a => a.status === 'Available' || a.status === 'Booked')
+            .filter(a => !q || [a.name, a.prefix, a.suffix, a.id_public, a.species, a.breed, a.reservedBuyerName].filter(Boolean).join(' ').toLowerCase().includes(q))
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }, [animals, searchTerm]);
+
+    const activeWaitlist = useMemo(() => waitlist.filter(e => e.isActive !== false), [waitlist]);
+    const historyWaitlist = useMemo(() => waitlist.filter(e => e.isActive === false), [waitlist]);
+    const shownWaitlist = waitlistView === 'active' ? activeWaitlist : historyWaitlist;
+
+    // Seed/clear an animal's inline editor from its stored reservation.
+    const seedResForm = (animal) => ({
+        buyerName: animal.reservedBuyerName || '',
+        buyerContact: animal.reservedBuyerContact || '',
+        waitlistEntryId: animal.reservedWaitlistEntryId ? String(animal.reservedWaitlistEntryId) : '',
+        price: animal.reservedPrice ?? '',
+        priceCurrency: animal.reservedPriceCurrency || 'USD',
+        deposit: animal.reservedDeposit ?? '',
+        depositStatus: animal.reservedDepositStatus || 'due',
+        paymentStatus: animal.reservedPaymentStatus || 'due',
+        date: animal.reservedDate ? new Date(animal.reservedDate).toISOString().slice(0, 10) : '',
+    });
+    const getResForm = (animal) => resForms[animal.id_public] || seedResForm(animal);
+    const setResField = (animal, field, value) => {
+        if (field === 'waitlistEntryId') {
+            // Picking a waitlist entry fills the buyer name/contact from it.
+            const entry = waitlist.find(e => String(e._id) === String(value));
+            setResForms(prev => ({
+                ...prev,
+                [animal.id_public]: {
+                    ...(prev[animal.id_public] || seedResForm(animal)),
+                    waitlistEntryId: value,
+                    buyerName: entry ? entry.name : (prev[animal.id_public]?.buyerName ?? animal.reservedBuyerName ?? ''),
+                    buyerContact: entry ? (entry.contactInfo || '') : (prev[animal.id_public]?.buyerContact ?? animal.reservedBuyerContact ?? ''),
+                },
+            }));
+            return;
+        }
+        setResForms(prev => ({ ...prev, [animal.id_public]: { ...(prev[animal.id_public] || seedResForm(animal)), [field]: value } }));
+    };
+    const handleSaveReservation = async (animal) => {
+        const f = getResForm(animal);
+        setResSaving(true);
+        try {
+            const payload = {
+                reservedBuyerName: f.buyerName?.trim() || null,
+                reservedBuyerContact: f.buyerContact?.trim() || null,
+                reservedWaitlistEntryId: f.waitlistEntryId || null,
+                reservedPrice: f.price !== '' && f.price != null ? Number(f.price) : null,
+                reservedPriceCurrency: f.priceCurrency || 'USD',
+                reservedDeposit: f.deposit !== '' && f.deposit != null ? Number(f.deposit) : null,
+                reservedDepositStatus: f.depositStatus || 'due',
+                reservedPaymentStatus: f.paymentStatus || 'due',
+                reservedDate: f.date || null,
+                // Claiming an animal for a buyer marks it Booked; clearing the buyer frees it back.
+                status: f.buyerName?.trim() ? 'Booked' : 'Available',
+            };
+            const res = await apiClient.put(`/animals/${animal.id_public}`, payload);
+            const updated = res.data?.animal || res.data;
+            setAnimals(prev => prev.map(a => (a.id_public === animal.id_public ? { ...a, ...(updated || {}), ...payload } : a)));
+            setResForms(prev => { const next = { ...prev }; delete next[animal.id_public]; return next; });
+            setEditingAnimalId(null);
+            window.dispatchEvent(new Event('animals-changed'));
+            showModalMessage?.('Success', 'Reservation saved');
+        } catch (err) {
+            console.error('[saveReservation]', err);
+            showModalMessage?.('Error', err.response?.data?.message || 'Failed to save reservation');
+        }
+        setResSaving(false);
+    };
+
+    const handleClearReservation = async (animal) => {
+        if (!window.confirm(`Clear the reservation for ${animal.name || animal.id_public}?`)) return;
+        setResSaving(true);
+        try {
+            const payload = {
+                reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
+                reservedPrice: null, reservedDeposit: null, reservedDate: null,
+                reservedDepositStatus: null, reservedPaymentStatus: null, status: 'Available',
+            };
+            await apiClient.put(`/animals/${animal.id_public}`, payload);
+            setAnimals(prev => prev.map(a => (a.id_public === animal.id_public ? { ...a, ...payload } : a)));
+            setResForms(prev => { const next = { ...prev }; delete next[animal.id_public]; return next; });
+            setEditingAnimalId(null);
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err) {
+            console.error('[clearReservation]', err);
+            showModalMessage?.('Error', 'Failed to clear reservation');
+        }
+        setResSaving(false);
+    };
+
+    // Quick action: promote the reservation into the animal's Sale info (date, price, buyer —
+    // which auto-creates the Budget sale transaction server-side) and mark Rehomed + archived.
+    const handleRehome = async (animal) => {
+        const resForm = getResForm(animal);
+        const buyer = (resForm.buyerName?.trim() || animal.reservedBuyerName || '').trim();
+        const price = resForm.price !== '' && resForm.price != null ? Number(resForm.price) : (animal.reservedPrice ?? null);
+        if (!buyer) { showModalMessage?.('Missing buyer', 'Assign a buyer/adoptee before rehoming.'); return; }
+        if (price == null || Number.isNaN(price)) { showModalMessage?.('Missing price', 'Enter the payment amount before rehoming.'); return; }
+        const saleDate = resForm.date || (animal.reservedDate ? new Date(animal.reservedDate).toISOString().slice(0, 10) : todayStr());
+        if (!window.confirm(`Mark ${animal.name || animal.id_public} as Rehomed and record the sale to ${buyer}?`)) return;
+        setRehomingId(animal.id_public);
+        try {
+            const payload = {
+                saleDate,
+                salePrice: price,
+                saleRecordCurrency: resForm.priceCurrency || animal.reservedPriceCurrency || 'USD',
+                buyerName: buyer,
+                buyerContact: resForm.buyerContact?.trim() || animal.reservedBuyerContact || null,
+                // Clear the pending reservation — it has been fulfilled.
+                reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
+                reservedPrice: null, reservedDeposit: null, reservedDate: null,
+                reservedDepositStatus: null, reservedPaymentStatus: null,
+                status: 'Rehomed', archived: true,
+            };
+            const res = await apiClient.put(`/animals/${animal.id_public}`, payload);
+            const updated = res.data?.animal || res.data;
+            setAnimals(prev => prev.map(a => (a.id_public === animal.id_public ? { ...a, ...(updated || {}), ...payload } : a)));
+            setResForms(prev => { const next = { ...prev }; delete next[animal.id_public]; return next; });
+            setEditingAnimalId(null);
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed', archived: true } }));
+            window.dispatchEvent(new Event('animals-changed'));
+            showModalMessage?.('Success', `${animal.name || animal.id_public} marked as Rehomed — sale logged to Budget`);
+        } catch (err) {
+            console.error('[rehomeAnimal]', err);
+            showModalMessage?.('Error', err.response?.data?.message || 'Failed to rehome animal');
+        }
+        setRehomingId(null);
+    };
+
+    const openWlForm = (entry) => {
+        if (entry) {
+            setWlForm({
+                name: entry.name || '', contactInfo: entry.contactInfo || '', species: entry.species || '',
+                genders: entry.genders || [], amount: entry.amount ?? 1, notes: entry.notes || '',
+            });
+            setEditingWlId(entry._id);
+        } else {
+            setWlForm(EMPTY_WAITLIST_FORM);
+            setEditingWlId(null);
+        }
+        setWlFormVisible(true);
+    };
+
+    const handleWlSave = async () => {
+        if (!wlForm.name.trim()) { showModalMessage?.('Missing name', 'Enter the waitlist attendee name.'); return; }
+        setWlSaving(true);
+        try {
+            const payload = {
+                name: wlForm.name.trim(), contactInfo: wlForm.contactInfo?.trim() || '',
+                species: wlForm.species?.trim() || '', genders: wlForm.genders || [],
+                amount: wlForm.amount !== '' && wlForm.amount != null ? Number(wlForm.amount) : 1,
+                notes: wlForm.notes?.trim() || '',
+            };
+            if (editingWlId) {
+                const res = await apiClient.patch(`/waitlist/${editingWlId}`, payload);
+                setWaitlist(prev => prev.map(e => (e._id === editingWlId ? { ...e, ...res.data } : e)));
+            } else {
+                const res = await apiClient.post('/waitlist', payload);
+                setWaitlist(prev => [res.data, ...prev]);
+            }
+            setWlForm(EMPTY_WAITLIST_FORM);
+            setEditingWlId(null);
+            setWlFormVisible(false);
+            showModalMessage?.('Success', editingWlId ? 'Waitlist entry updated' : 'Added to waitlist');
+        } catch (err) {
+            console.error('[saveWaitlist]', err);
+            showModalMessage?.('Error', err.response?.data?.message || 'Failed to save waitlist entry');
+        }
+        setWlSaving(false);
+    };
+
+    const handleWlDelete = async (id) => {
+        if (!window.confirm('Delete this waitlist entry?')) return;
+        try {
+            await apiClient.delete(`/waitlist/${id}`);
+            setWaitlist(prev => prev.filter(e => e._id !== id));
+        } catch (err) {
+            console.error('[deleteWaitlist]', err);
+            showModalMessage?.('Error', 'Failed to delete waitlist entry');
+        }
+    };
+
+    const handleWlFinalize = async (entry) => {
+        if (!window.confirm(`Finalize ${entry.name}? This moves them to history.`)) return;
+        try {
+            const res = await apiClient.post(`/waitlist/${entry._id}/finalize`);
+            setWaitlist(prev => prev.map(e => (e._id === entry._id ? { ...e, ...res.data } : e)));
+            showModalMessage?.('Success', `${entry.name} moved to history`);
+        } catch (err) {
+            console.error('[finalizeWaitlist]', err);
+            showModalMessage?.('Error', 'Failed to finalize waitlist entry');
+        }
+    };
+
+    const handleWlReactivate = async (entry) => {
+        try {
+            const res = await apiClient.patch(`/waitlist/${entry._id}`, { isActive: true });
+            setWaitlist(prev => prev.map(e => (e._id === entry._id ? { ...e, ...res.data } : e)));
+        } catch (err) {
+            console.error('[reactivateWaitlist]', err);
+            showModalMessage?.('Error', 'Failed to reactivate entry');
+        }
+    };
+
+    const toggleWlGender = (g) => setWlForm(f => ({ ...f, genders: f.genders.includes(g) ? f.genders.filter(x => x !== g) : [...f.genders, g] }));
+    const inputCls = 'w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400';
+    const cardCls = 'bg-white dark:bg-dark-card-bg rounded-xl shadow-lg overflow-hidden';
+
+    return (
+        <div className="p-3 sm:p-6 max-w-7xl mx-auto">
+            <div className="space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                        <ClipboardList size={18} className="text-green-600 dark:text-green-400" />
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Reservations</h3>
+                        <InfoButton title="Reservations" lessonId="reservations">
+                            <p>Track planned sales for Available / Booked animals: assign a buyer, record price, deposit and payment status, then rehome in one click.</p>
+                            <p>The Waitlist tab collects interested buyers; picking one on an animal links them, and finalizing archives them to history with their assigned animals.</p>
+                        </InfoButton>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-text-muted">
+                        Currency:
+                        <select value={currency} onChange={e => handleCurrencyChange(e.target.value)}
+                            className="border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
+                            title="Sets the currency symbol shown across this page">
+                            {CURRENCIES.map(c => <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>)}
+                        </select>
+                    </label>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-1 bg-gray-100 dark:bg-dark-surface rounded-xl p-1 w-fit">
+                    {[{ id: 'animals', label: 'Animals', icon: PawPrint }, { id: 'waitlist', label: 'Waitlist', icon: Users }].map(t => (
+                        <button key={t.id} onClick={() => setActiveTab(t.id)}
+                            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === t.id ? 'bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow' : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text'}`}>
+                            <t.icon size={14} /> {t.label}
+                            <span className="text-xs bg-gray-200 dark:bg-dark-surface-hover px-1.5 py-0.5 rounded-full">{t.id === 'animals' ? saleAnimals.length : activeWaitlist.length}</span>
+                        </button>
+                    ))}
+                </div>
+
+                {activeTab === 'animals' && (
+                    <>
+                        <div className={`${cardCls} p-2 sm:p-4 mb-4`}>
+                            <div className="relative">
+                                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                                <input type="text" placeholder="Search animals, species, buyers..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+                                    className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary" />
+                            </div>
+                        </div>
+
+                        {animalsLoading ? (
+                            <div className="text-center py-12 text-gray-500 dark:text-dark-text-muted"><Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" /> Loading animals...</div>
+                        ) : saleAnimals.length === 0 ? (
+                            <div className={`${cardCls} text-center py-8 sm:py-12 text-gray-500 dark:text-dark-text-muted`}>
+                                <PawPrint className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300 dark:text-dark-border" />
+                                <p className="text-base sm:text-lg font-medium">No animals for sale</p>
+                                <p className="text-xs sm:text-sm mt-1">Mark animals as Available or Booked to reserve them here</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                                {saleAnimals.map(animal => {
+                                    const f = getResForm(animal);
+                                    const isEditing = editingAnimalId === animal.id_public;
+                                    const imgSrc = animal.imageUrl || animal.photoUrl;
+                                    const hasReservation = !!(animal.reservedBuyerName || f.buyerName);
+                                    const wlName = animal.reservedWaitlistEntryId
+                                        ? (waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))?.name || null)
+                                        : null;
+                                    return (
+                                        <div key={animal.id_public} data-testid={`animal-card-${animal.id_public}`} className={cardCls}>
+                                            <div className="p-3 sm:p-4 space-y-3">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-dark-surface">
+                                                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={22} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-semibold text-gray-800 dark:text-dark-text truncate">
+                                                            {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div>
+                                                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_PILL[animal.status] || STATUS_PILL.Available}`}>{animal.status}</span>
+                                                            <span className="text-[11px] text-gray-500 dark:text-dark-text-muted">{[animal.species, animal.gender].filter(Boolean).join(' • ')}</span>
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={fetchAnimals} title="Refresh" className="text-gray-400 hover:text-gray-600 dark:hover:text-dark-text transition"><RefreshCw size={13} /></button>
+                                                </div>
+
+                                                {/* Reservation summary (read mode) */}
+                                                {!isEditing && (
+                                                    <div className="text-xs sm:text-sm space-y-1 bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5">
+                                                        <div className="flex justify-between gap-2">
+                                                            <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><User size={11} /> Buyer</span>
+                                                            <span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{animal.reservedBuyerName || <span className="text-gray-400 dark:text-dark-text-muted font-normal">Unassigned</span>}</span>
+                                                        </div>
+                                                        {wlName && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{wlName}</span></div>}
+                                                        <div className="flex justify-between gap-2">
+                                                            <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><DollarSign size={11} /> Price</span>
+                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>}</span>
+                                                        </div>
+                                                        <div className="flex justify-between gap-2 items-center">
+                                                            <span className="text-gray-500 dark:text-dark-text-muted">Deposit{animal.reservedDeposit != null ? ` (${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedDeposit})` : ''}</span>
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedDepositStatus)}`}>{animal.reservedDepositStatus === 'done' ? 'Done' : 'Due'}</span>
+                                                        </div>
+                                                        <div className="flex justify-between gap-2 items-center">
+                                                            <span className="text-gray-500 dark:text-dark-text-muted">Payment</span>
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedPaymentStatus)}`}>{animal.reservedPaymentStatus === 'done' ? 'Done' : 'Due'}</span>
+                                                        </div>
+                                                        {animal.reservedDate && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Calendar size={11} /> Date</span><span className="font-medium text-gray-800 dark:text-dark-text">{formatDate(animal.reservedDate)}</span></div>}
+                                                    </div>
+                                                )}
+
+                                                {/* Reservation editor */}
+                                                {isEditing && (
+                                                    <div className="space-y-2.5 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700/40 rounded-lg p-3">
+                                                        <div>
+                                                            <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Buyer / Adoptee (from waitlist or manual)</label>
+                                                            <select value={f.waitlistEntryId} onChange={e => setResField(animal, 'waitlistEntryId', e.target.value)} className={inputCls}>
+                                                                <option value="">Manual entry…</option>
+                                                                {activeWaitlist.map(e => <option key={e._id} value={e._id}>{e.name}{e.species ? ` — ${e.species}` : ''}</option>)}
+                                                            </select>
+                                                            <input type="text" value={f.buyerName} onChange={e => setResField(animal, 'buyerName', e.target.value)} placeholder="Buyer name" className={`${inputCls} mt-1.5`} />
+                                                            <input type="text" value={f.buyerContact} onChange={e => setResField(animal, 'buyerContact', e.target.value)} placeholder="Phone, email, or address" className={`${inputCls} mt-1.5`} />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Price ({getCurrencySymbol(f.priceCurrency)})</label>
+                                                                <input type="number" min="0" step="0.01" value={f.price} onChange={e => setResField(animal, 'price', e.target.value)} placeholder="0.00" className={inputCls} />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Deposit</label>
+                                                                <input type="number" min="0" step="0.01" value={f.deposit} onChange={e => setResField(animal, 'deposit', e.target.value)} placeholder="0.00" className={inputCls} />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Deposit status</label>
+                                                                <select value={f.depositStatus} onChange={e => setResField(animal, 'depositStatus', e.target.value)} className={inputCls}>
+                                                                    <option value="due">Due</option>
+                                                                    <option value="done">Done</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Payment status</label>
+                                                                <select value={f.paymentStatus} onChange={e => setResField(animal, 'paymentStatus', e.target.value)} className={inputCls}>
+                                                                    <option value="due">Due</option>
+                                                                    <option value="done">Done</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Date</label>
+                                                                <input type="date" value={f.date} onChange={e => setResField(animal, 'date', e.target.value)} className={inputCls} />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Currency</label>
+                                                                <select value={f.priceCurrency} onChange={e => setResField(animal, 'priceCurrency', e.target.value)} className={inputCls}>
+                                                                    {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2 justify-end pt-1">
+                                                            <button onClick={() => { setEditingAnimalId(null); setResForms(prev => { const n = { ...prev }; delete n[animal.id_public]; return n; }); }} className="px-2.5 py-1 text-xs text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
+                                                            <button onClick={() => handleSaveReservation(animal)} disabled={resSaving} className="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1">
+                                                                {resSaving ? <Loader2 size={11} className="animate-spin" /> : <Save size={11} />} Save
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex gap-2 justify-end flex-wrap">
+                                                    {!isEditing && (
+                                                        <button onClick={() => setEditingAnimalId(animal.id_public)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Edit size={11} /> {hasReservation ? 'Edit' : 'Assign'}</button>
+                                                    )}
+                                                    {hasReservation && !isEditing && (
+                                                        <button onClick={() => handleClearReservation(animal)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Undo2 size={11} /> Clear</button>
+                                                    )}
+                                                    <button onClick={() => handleRehome(animal)} disabled={rehomingId === animal.id_public}
+                                                        className="flex items-center gap-1 text-xs text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 px-2.5 py-1 rounded-lg transition font-medium disabled:opacity-50">
+                                                        {rehomingId === animal.id_public ? <Loader2 size={11} className="animate-spin" /> : <Home size={11} />} Rehomed
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {activeTab === 'waitlist' && (
+                    <>
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex gap-1 bg-gray-100 dark:bg-dark-surface rounded-xl p-1 w-fit">
+                                {[['active', `Active (${activeWaitlist.length})`], ['history', `History (${historyWaitlist.length})`]].map(([id, label]) => (
+                                    <button key={id} onClick={() => setWaitlistView(id)}
+                                        className={`px-4 py-1.5 text-sm font-medium rounded-lg transition ${waitlistView === id ? 'bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow' : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text'}`}>
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                            <button onClick={() => openWlForm(null)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-medium transition">
+                                <Plus size={14} /> Add to Waitlist
+                            </button>
+                        </div>
+
+                        {wlFormVisible && (
+                            <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700/40 rounded-xl p-4 space-y-3">
+                                <h4 className="text-sm font-semibold text-green-800 dark:text-green-300">{editingWlId ? 'Edit Waitlist Entry' : 'New Waitlist Entry'}</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Name *</label>
+                                        <input type="text" value={wlForm.name} onChange={e => setWlForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Jane Doe" className={inputCls} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Contact Info</label>
+                                        <input type="text" value={wlForm.contactInfo} onChange={e => setWlForm(f => ({ ...f, contactInfo: e.target.value }))} placeholder="Phone, email, or address" className={inputCls} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Species</label>
+                                        <input type="text" value={wlForm.species} onChange={e => setWlForm(f => ({ ...f, species: e.target.value }))} placeholder="e.g. Fancy Rat" className={inputCls} />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Amount</label>
+                                        <input type="number" min="1" value={wlForm.amount} onChange={e => setWlForm(f => ({ ...f, amount: e.target.value }))} placeholder="1" className={inputCls} />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Gender(s)</label>
+                                        <div className="flex gap-2">
+                                            {GENDER_CHOICES.map(g => (
+                                                <button key={g} type="button" onClick={() => toggleWlGender(g)}
+                                                    className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${wlForm.genders.includes(g) ? 'bg-green-600 border-green-600 text-white' : 'bg-white dark:bg-dark-surface border-gray-300 dark:border-dark-text text-gray-600 dark:text-dark-text-muted hover:border-green-400'}`}>
+                                                    {g === 'Male' ? <Mars size={12} /> : g === 'Female' ? <Venus size={12} /> : <Users size={12} />} {g}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Notes</label>
+                                        <input type="text" value={wlForm.notes} onChange={e => setWlForm(f => ({ ...f, notes: e.target.value }))} placeholder="Preferences, timing, etc." className={inputCls} />
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 justify-end">
+                                    <button onClick={() => { setWlFormVisible(false); setEditingWlId(null); setWlForm(EMPTY_WAITLIST_FORM); }} className="px-3 py-1.5 text-sm text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
+                                    <button onClick={handleWlSave} disabled={wlSaving} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1">
+                                        {wlSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />} {editingWlId ? 'Update' : 'Add'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {waitlistLoading ? (
+                            <div className="text-center py-12 text-gray-500 dark:text-dark-text-muted"><Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" /> Loading waitlist...</div>
+                        ) : shownWaitlist.length === 0 ? (
+                            <div className={`${cardCls} text-center py-8 sm:py-12 text-gray-500 dark:text-dark-text-muted`}>
+                                <Users className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300 dark:text-dark-border" />
+                                <p className="text-base sm:text-lg font-medium">{waitlistView === 'active' ? 'Waitlist is empty' : 'No history yet'}</p>
+                                <p className="text-xs sm:text-sm mt-1">{waitlistView === 'active' ? 'Add interested buyers so you can assign them to animals' : 'Finalized entries will show here with their assigned animals'}</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                                {shownWaitlist.map(entry => (
+                                    <div key={entry._id} className={cardCls}>
+                                        <div className="p-3 sm:p-4 space-y-2.5">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center flex-shrink-0"><User size={16} /></div>
+                                                    <div className="min-w-0">
+                                                        <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
+                                                        {entry.contactInfo && <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate flex items-center gap-1"><Phone size={10} /> {entry.contactInfo}</div>}
+                                                    </div>
+                                                </div>
+                                                {waitlistView === 'history' && <span className="text-[11px] bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted px-2 py-0.5 rounded-full shrink-0">History</span>}
+                                            </div>
+
+                                            <div className="text-xs sm:text-sm space-y-1 bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5">
+                                                {entry.species && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={11} /> Species</span><span className="font-medium text-gray-800 dark:text-dark-text text-right">{entry.species}</span></div>}
+                                                {(entry.genders || []).length > 0 && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">Gender(s)</span><span className="font-medium text-gray-800 dark:text-dark-text text-right">{entry.genders.join(', ')}</span></div>}
+                                                <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">Amount</span><span className="font-medium text-gray-800 dark:text-dark-text">{entry.amount ?? 1}</span></div>
+                                                {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-0.5">{entry.notes}</div>}
+                                                {waitlistView === 'history' && (
+                                                    <div className="pt-1 border-t border-gray-200 dark:border-dark-border mt-1">
+                                                        <div className="text-gray-500 dark:text-dark-text-muted mb-0.5">Assigned animals</div>
+                                                        {(entry.assignedAnimals || []).length > 0 ? (
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {entry.assignedAnimals.map((a, i) => (
+                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[11px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-gray-400 dark:text-dark-text-muted italic">None assigned via picker</div>
+                                                        )}
+                                                        {entry.finalizedAt && <div className="text-[11px] text-gray-400 dark:text-dark-text-muted mt-1">Finalized {formatDate(entry.finalizedAt)}</div>}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex gap-2 justify-end flex-wrap">
+                                                {waitlistView === 'active' ? (
+                                                    <>
+                                                        <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
+                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                                        <button onClick={() => handleWlFinalize(entry)} className="flex items-center gap-1 text-xs text-white bg-green-600 hover:bg-green-700 px-2.5 py-1 rounded-lg transition font-medium"><CheckCircle size={11} /> Finalize</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => handleWlReactivate(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Undo2 size={11} /> Reactivate</button>
+                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {activeTab === 'animals' && saleAnimals.some(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName) && (
+                    <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-3">
+                        <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
+                        <div className="text-sm text-amber-700 dark:text-amber-300">
+                            <span className="font-semibold">Payments due:</span> {saleAnimals.filter(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName).map(a => a.name || a.id_public).join(', ')}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default ReservationsPage;
+
