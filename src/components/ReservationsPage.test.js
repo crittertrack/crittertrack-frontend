@@ -110,23 +110,47 @@ test('adding a multi-species waitlist entry posts speciesRequests array', async 
     fireEvent.click(screen.getByText('Add to Waitlist'));
     await screen.findByText('New Waitlist Entry');
     fireEvent.change(screen.getByPlaceholderText('e.g. Jane Doe'), { target: { value: 'Test Buyer' } });
-    // Species row 1: Fancy Mouse, amount 4
-    const s1 = screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0];
-    fireEvent.change(s1, { target: { value: 'Fancy Mouse' } });
-    fireEvent.change(screen.getAllByPlaceholderText('1')[0], { target: { value: '4' } });
-    // Add second species row, then Fancy Rat, amount 7
+    // Species row 1: Fancy Mouse, 3 Male + 2 Female
+    fireEvent.change(screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0], { target: { value: 'Fancy Mouse' } });
+    fireEvent.change(screen.getAllByLabelText('Male count')[0], { target: { value: '3' } });
+    fireEvent.change(screen.getAllByLabelText('Female count')[0], { target: { value: '2' } });
+    // Species row 2: Fancy Rat, 7 of any gender
     fireEvent.click(screen.getByText('+ Add species'));
-    const s2 = screen.getAllByPlaceholderText('e.g. Fancy Mouse')[1];
-    fireEvent.change(s2, { target: { value: 'Fancy Rat' } });
-    fireEvent.change(screen.getAllByPlaceholderText('1')[1], { target: { value: '7' } });
+    fireEvent.change(screen.getAllByPlaceholderText('e.g. Fancy Mouse')[1], { target: { value: 'Fancy Rat' } });
+    fireEvent.change(screen.getAllByLabelText('Any count')[1], { target: { value: '7' } });
     fireEvent.click(screen.getByText('Add'));
     await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
         name: 'Test Buyer',
-        speciesRequests: expect.arrayContaining([
-            expect.objectContaining({ species: 'Fancy Mouse', amount: 4 }),
-            expect.objectContaining({ species: 'Fancy Rat', amount: 7 }),
-        ]),
+        speciesRequests: [
+            expect.objectContaining({
+                species: 'Fancy Mouse',
+                amount: 5,
+                genderCounts: [{ gender: 'Male', count: 3 }, { gender: 'Female', count: 2 }],
+            }),
+            expect.objectContaining({
+                species: 'Fancy Rat',
+                amount: 7,
+                genderCounts: [{ gender: 'Any', count: 7 }],
+            }),
+        ],
     })));
+});
+
+test('waitlist card shows the per-gender split and fulfillment respects it', async () => {
+    const split = [{
+        _id: 'W9', name: 'Pat', speciesRequests: [{ species: 'Fancy Mouse', genderCounts: [{ gender: 'Male', count: 3 }, { gender: 'Female', count: 2 }], amount: 5 }],
+        isActive: true,
+        // 2 males assigned -> only 2/5 filled; a third female must not count toward the male slots
+        assignedAnimals: [
+            { id_public: 'A1', species: 'Fancy Mouse', gender: 'Male' },
+            { id_public: 'A2', species: 'Fancy Mouse', gender: 'Male' },
+        ],
+    }];
+    await setup({ waitlist: split });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Pat');
+    expect(screen.getByText(/3 Male \/ 2 Female/)).toBeTruthy();
+    expect(screen.getByText(/2\/5/)).toBeTruthy();
 });
 
 test('finalizing a waitlist entry calls the finalize endpoint', async () => {

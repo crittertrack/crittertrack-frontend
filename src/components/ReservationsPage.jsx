@@ -6,7 +6,7 @@ import InfoButton from './shared/InfoButton';
 import { formatDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
 
-const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', speciesRequests: [{ species: '', genders: [], amount: '1' }], notes: '' };
+const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
 const GENDER_CHOICES = ['Male', 'Female', 'Any'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'AED'];
 const STATUS_PILL = {
@@ -17,6 +17,15 @@ const DUE_DONE = (status) => status === 'done'
     ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
     : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300';
 const todayStr = () => new Date().toISOString().slice(0, 10);
+// Normalises a species request to [{ gender, count }]. Legacy entries only have
+// `genders` + a single total `amount`, so derive counts from those.
+const getGenderCounts = (req) => {
+    if (Array.isArray(req.genderCounts) && req.genderCounts.length > 0) return req.genderCounts.filter(c => c.count > 0);
+    const amount = Number(req.amount) > 0 ? Number(req.amount) : 1;
+    const g = req.genders || [];
+    if (g.length === 1 && g[0] !== 'Any') return [{ gender: g[0], count: amount }];
+    return [{ gender: 'Any', count: amount }];
+};
 
 const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [activeTab, setActiveTab] = useState('animals');
@@ -81,29 +90,27 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const entryFitsAnimal = (entry, animal) => {
         const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: entry.amount }] : []);
         return reqs.some(req => {
-            if (!req.species || req.species.toLowerCase() !== animal.species.toLowerCase()) return false;
-            const g = req.genders || [];
-            return g.includes('Any') || g.includes(animal.gender);
+            if (!req.species || req.species.toLowerCase() !== (animal.species || '').toLowerCase()) return false;
+            return getGenderCounts(req).some(c => c.gender === 'Any' || c.gender === animal.gender);
         });
     };
 
-    // Fulfillment progress for one species request, based on assigned animals snapshot.
+    // Fulfillment for one species request. Gender-specific counts are filled first;
+    // leftover animals of that species can then satisfy the "Any" count.
     const computeRequestFulfillment = (req, assignedAnimals) => {
-        const assigned = assignedAnimals || [];
-        let assignedCount = 0;
-        if ((req.genders || []).includes('Any')) {
-            assignedCount = assigned.filter(a => a.species && a.species.toLowerCase() === req.species.toLowerCase()).length;
-        } else {
-            assignedCount = assigned.filter(a => a.species && a.species.toLowerCase() === req.species.toLowerCase() && (req.genders || []).includes(a.gender)).length;
-        }
-        const requested = req.amount || 0;
-        return {
-            ...req,
-            requested,
-            fulfilled: Math.min(assignedCount, requested),
-            remaining: Math.max(0, requested - assignedCount),
-            isFulfilled: assignedCount >= requested,
-        };
+        const same = (assignedAnimals || []).filter(a => a.species && a.species.toLowerCase() === (req.species || '').toLowerCase());
+        const counts = getGenderCounts(req);
+        let usedSpecific = 0;
+        let fulfilled = 0;
+        let requested = 0;
+        counts.filter(c => c.gender !== 'Any').forEach(c => {
+            const used = Math.min(same.filter(a => a.gender === c.gender).length, c.count);
+            usedSpecific += used; fulfilled += used; requested += c.count;
+        });
+        const anyCount = counts.filter(c => c.gender === 'Any').reduce((s, c) => s + c.count, 0);
+        fulfilled += Math.min(Math.max(0, same.length - usedSpecific), anyCount);
+        requested += anyCount;
+        return { ...req, breakdown: counts, requested, fulfilled, remaining: Math.max(0, requested - fulfilled), isFulfilled: fulfilled >= requested };
     };
 
     const computeEntryFulfillment = (entry) => {
@@ -118,11 +125,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         };
     };
 
-    const emptySpeciesRequest = () => ({ species: '', genders: [], amount: '1' });
-    const toggleWlSpeciesGender = (reqIndex, g) => setWlForm(f => {
+    const emptySpeciesRequest = () => ({ species: '', counts: { Male: '', Female: '', Any: '' } });
+    const setWlCount = (reqIndex, g, value) => setWlForm(f => {
         const reqs = [...f.speciesRequests];
-        const genders = reqs[reqIndex].genders || [];
-        reqs[reqIndex].genders = genders.includes(g) ? genders.filter(x => x !== g) : [...genders, g];
+        reqs[reqIndex] = { ...reqs[reqIndex], counts: { ...reqs[reqIndex].counts, [g]: value } };
         return { ...f, speciesRequests: reqs };
     });
     const addWlSpeciesRow = () => setWlForm(f => ({ ...f, speciesRequests: [...f.speciesRequests, emptySpeciesRequest()] }));
@@ -275,7 +281,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
             const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: String(entry.amount ?? 1) }] : [emptySpeciesRequest()]);
             setWlForm({
                 name: entry.name || '', contactInfo: entry.contactInfo || '',
-                speciesRequests: reqs.map(r => ({ species: r.species || '', genders: r.genders || [], amount: String(r.amount ?? 1) })),
+                speciesRequests: reqs.map(r => { const counts = { Male: '', Female: '', Any: '' }; getGenderCounts(r).forEach(c => { counts[c.gender] = String(c.count); }); return { species: r.species || '', counts }; }),
                 notes: entry.notes || '',
             });
             setEditingWlId(entry._id);
@@ -295,11 +301,18 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         try {
             const payload = {
                 name: wlForm.name.trim(), contactInfo: wlForm.contactInfo?.trim() || '',
-                speciesRequests: validRows.map(r => ({
-                    species: r.species.trim(),
-                    genders: r.genders || [],
-                    amount: r.amount !== '' && r.amount != null ? Number(r.amount) : 1,
-                })),
+                speciesRequests: validRows.map(r => {
+                    let genderCounts = GENDER_CHOICES
+                        .map(g => ({ gender: g, count: parseInt(r.counts?.[g], 10) || 0 }))
+                        .filter(c => c.count > 0);
+                    if (genderCounts.length === 0) genderCounts = [{ gender: 'Any', count: 1 }];
+                    return {
+                        species: r.species.trim(),
+                        genderCounts,
+                        genders: genderCounts.map(c => c.gender),
+                        amount: genderCounts.reduce((s, c) => s + c.count, 0),
+                    };
+                }),
                 notes: wlForm.notes?.trim() || '',
             };
             if (editingWlId) {
@@ -472,7 +485,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                                 const fitting = activeWaitlist.filter(e => entryFitsAnimal(e, animal));
                                                                 const entryLabel = (e) => {
                                                                     const reqs = e.speciesRequests || (e.species ? [{ species: e.species, genders: e.genders || [] }] : []);
-                                                                    const spec = reqs.map(r => `${r.species} (${(r.genders || []).join('/') || 'Any'})`).join(' + ');
+                                                                    const spec = reqs.map(r => r.species + ' (' + getGenderCounts(r).map(c => c.count + ' ' + c.gender).join('/') + ')').join(' + ');
                                                                     return `${e.name}${spec ? ` — ${spec}` : ''}`;
                                                                 };
                                                                 return (
@@ -589,37 +602,45 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         Species requests
                                         <button type="button" onClick={addWlSpeciesRow} className="text-xs text-green-600 dark:text-green-400 hover:underline px-1">+ Add species</button>
                                     </label>
-                                    {wlForm.speciesRequests.map((req, i) => (
-                                        <div key={i} className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-end">
-                                            <div className="relative">
-                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Species {i + 1}</label>
-                                                <input type="text" value={req.species} onChange={e => setWlSpeciesField(i, 'species', e.target.value)} onFocus={() => setWlSpeciesFocus(i)} onBlur={() => setTimeout(() => setWlSpeciesFocus(null), 150)} placeholder="e.g. Fancy Mouse" className={`${inputCls} w-full`} />
-                                                {wlSpeciesFocus === i && speciesOptions.length > 0 && (
-                                                    <div className="absolute z-20 w-full bg-white dark:bg-dark-card-bg border border-gray-300 dark:border-dark-text rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-                                                        {speciesOptions.filter(s => !req.species || s.toLowerCase().includes(req.species.toLowerCase())).slice(0, 8).map(s => (
-                                                            <button key={s} type="button" onClick={() => { setWlSpeciesField(i, 'species', s); setWlSpeciesFocus(null); }} className="w-full text-left text-xs px-3 py-2 text-gray-800 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition">{s}</button>
+                                    {wlForm.speciesRequests.map((req, i) => {
+                                        const total = GENDER_CHOICES.reduce((s, g) => s + (parseInt(req.counts?.[g], 10) || 0), 0);
+                                        const filteredSpecies = speciesOptions.filter(s => !req.species || s.toLowerCase().includes(req.species.toLowerCase()));
+                                        return (
+                                            <div key={i} className="border border-green-200 dark:border-green-700/40 rounded-lg p-2.5 space-y-2 bg-white/60 dark:bg-dark-surface/40">
+                                                <div className="relative">
+                                                    <label className="text-[10px] font-medium text-gray-600 dark:text-dark-text-secondary block mb-1">Species {i + 1}</label>
+                                                    <input type="text" value={req.species} onChange={e => setWlSpeciesField(i, 'species', e.target.value)} onFocus={() => setWlSpeciesFocus(i)} onBlur={() => setTimeout(() => setWlSpeciesFocus(null), 150)} placeholder="e.g. Fancy Mouse" className={inputCls + ' w-full'} />
+                                                    {wlSpeciesFocus === i && speciesOptions.length > 0 && (
+                                                        <div className="absolute z-20 w-full bg-white dark:bg-dark-card-bg border border-gray-300 dark:border-dark-text rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                                            {filteredSpecies.slice(0, 8).map(s => (
+                                                                <button key={s} type="button" onClick={() => { setWlSpeciesField(i, 'species', s); setWlSpeciesFocus(null); }} className="w-full text-left text-xs px-3 py-2 text-gray-800 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition">{s}</button>
+                                                            ))}
+                                                            {filteredSpecies.length === 0 && <div className="text-xs text-gray-400 dark:text-dark-text-muted px-3 py-2">No matching species</div>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-medium text-gray-600 dark:text-dark-text-secondary block mb-1">How many of each gender? (leave blank for none)</label>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {GENDER_CHOICES.map(g => (
+                                                            <div key={g}>
+                                                                <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-dark-text-muted mb-0.5">
+                                                                    {g === 'Male' ? <Mars size={10} /> : g === 'Female' ? <Venus size={10} /> : <Users size={10} />} {g === 'Any' ? 'Any gender' : g}
+                                                                </div>
+                                                                <input type="number" min="0" value={req.counts?.[g] ?? ''} onChange={e => setWlCount(i, g, e.target.value)} placeholder="0" aria-label={g + ' count'} className={inputCls + ' w-full'} />
+                                                            </div>
                                                         ))}
-                                                        {speciesOptions.filter(s => !req.species || s.toLowerCase().includes(req.species.toLowerCase())).length === 0 && <div className="text-xs text-gray-400 dark:text-dark-text-muted px-3 py-2">No matching species</div>}
                                                     </div>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-2">
-                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted">Gender(s)</label>
-                                                <div className="flex gap-1">
-                                                    {GENDER_CHOICES.map(g => (
-                                                        <button key={g} type="button" onClick={() => toggleWlSpeciesGender(i, g)} className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border transition ${(req.genders || []).includes(g) ? 'bg-green-600 border-green-600 text-white' : 'bg-white dark:bg-dark-surface border-gray-300 dark:border-dark-text text-gray-600 dark:text-dark-text-muted hover:border-green-400'}`}>{g === 'Male' ? <Mars size={11} /> : g === 'Female' ? <Venus size={11} /> : <Users size={11} />} {g}</button>
-                                                    ))}
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[11px] text-gray-500 dark:text-dark-text-muted">Total: <span className="font-semibold">{total || 1}</span></span>
+                                                    {wlForm.speciesRequests.length > 1 && (
+                                                        <button type="button" onClick={() => removeWlSpeciesRow(i)} className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition" title="Remove species"><Trash2 size={14} /></button>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div>
-                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Amount</label>
-                                                <input type="number" min="1" value={req.amount} onChange={e => setWlSpeciesField(i, 'amount', e.target.value)} placeholder="1" className={inputCls} />
-                                            </div>
-                                            {wlForm.speciesRequests.length > 1 && (
-                                                <button type="button" onClick={() => removeWlSpeciesRow(i)} className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-2 rounded-lg transition" title="Remove species"><Trash2 size={14} /></button>
-                                            )}
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                                 <div className="mt-2">
                                     <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Notes</label>
@@ -671,7 +692,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                                 <div key={pi} className="flex justify-between gap-2 mb-0.5">
                                                                     <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={10} /> {p.species}</span>
                                                                     <span className="text-right text-[11px]">
-                                                                        {p.genders.includes('Any') ? 'Any' : (p.genders || []).join('/')}{` • ${p.fulfilled}/${p.requested}`}
+                                                                        {p.breakdown.map(b => b.count + ' ' + b.gender).join(' / ')}{` • ${p.fulfilled}/${p.requested}`}
                                                                     </span>
                                                                 </div>
                                                             ))}
