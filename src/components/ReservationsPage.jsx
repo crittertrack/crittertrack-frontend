@@ -534,9 +534,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     const isEditing = editingAnimalId === animal.id_public;
                                     const imgSrc = animal.imageUrl || animal.photoUrl;
                                     const hasReservation = !!(animal.reservedBuyerName || f.buyerName);
-                                    const wlName = animal.reservedWaitlistEntryId
-                                        ? (waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))?.name || null)
+                                    const wlEntry = animal.reservedWaitlistEntryId
+                                        ? waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))
                                         : null;
+                                    const wlName = wlEntry?.name || null;
+                                    // The buyer name is copied from the waitlist entry when one is picked,
+                                    // so only show "via Waitlist" when it adds information.
+                                    const showWlName = !!wlName && wlName !== animal.reservedBuyerName;
                                     return (
                                         <div key={animal.id_public} data-testid={`animal-card-${animal.id_public}`} className={cardCls}>
                                             <div className="p-3 sm:p-4 space-y-3">
@@ -566,7 +570,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                             <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><User size={11} /> Buyer</span>
                                                             <span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{animal.reservedBuyerName || <span className="text-gray-400 dark:text-dark-text-muted font-normal">Unassigned</span>}</span>
                                                         </div>
-                                                        {wlName && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{wlName}</span></div>}
+                                                        {showWlName && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{wlName}</span></div>}
                                                         <div className="flex justify-between gap-2">
                                                             <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><DollarSign size={11} /> Price</span>
                                                             <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>}</span>

@@ -87,6 +87,37 @@ test('assigning a buyer saves the reservation via PUT', async () => {
     expect(payload.status).toBe('Booked');
 });
 
+test('the reservation summary hides "via Waitlist" when it repeats the buyer name', async () => {
+    const wl = [{ _id: 'W40', name: 'Kenysha (Bush Garden Animals)', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [] }];
+    const reserved = [
+        ...animals,
+        {
+            id_public: 'CTC6', name: 'Nibbles', species: 'Fancy Mouse', gender: 'Female', status: 'Booked',
+            reservedBuyerName: 'Kenysha (Bush Garden Animals)', reservedWaitlistEntryId: 'W40',
+        },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    const card = screen.getByTestId('animal-card-CTC6');
+    // The buyer name is shown once; the "via Waitlist" row is redundant and hidden.
+    expect(within(card).getAllByText('Kenysha (Bush Garden Animals)')).toHaveLength(1);
+    expect(within(card).queryByText('via Waitlist')).toBeNull();
+});
+
+test('the reservation summary still shows "via Waitlist" when the buyer name differs', async () => {
+    const wl = [{ _id: 'W41', name: 'Kenysha', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [] }];
+    const reserved = [
+        ...animals,
+        {
+            id_public: 'CTC7', name: 'Nibbles', species: 'Fancy Mouse', gender: 'Female', status: 'Booked',
+            reservedBuyerName: 'Kenysha (Bush Garden Animals)', reservedWaitlistEntryId: 'W41',
+        },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    const card = screen.getByTestId('animal-card-CTC7');
+    expect(within(card).getByText('via Waitlist')).toBeTruthy();
+    expect(within(card).getByText('Kenysha')).toBeTruthy();
+});
+
 test('rehomed button promotes the reservation to sale + rehomed status', async () => {
     await setup();
     const butterCard = screen.getByTestId('animal-card-CTC2');
