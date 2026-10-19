@@ -217,7 +217,48 @@ test('assigning a contact to a new waitlist entry posts its contactId', async ()
 
     fireEvent.click(screen.getByText('Add'));
     await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
-        name: 'Test Buyer',
+        // The typed name was replaced by the contact's display name on assignment.
+        name: 'Jane Doe (Doe Rats)',
+        contactId: 'C1',
+    })));
+});
+
+test('assigning a contact replaces the attendee name with the contact display name', async () => {
+    await setup();
+    await openNewWaitlistForm();
+    fireEvent.change(screen.getByPlaceholderText('e.g. Jane Doe'), { target: { value: 'Test Buyer' } });
+    fireEvent.change(screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0], { target: { value: 'Fancy Mouse' } });
+
+    fireEvent.click(screen.getByText('Click to assign a contact'));
+    await screen.findByText('Jane Doe (Doe Rats)');
+    fireEvent.click(screen.getByText('Jane Doe (Doe Rats)'));
+
+    // The attendee name field now holds the contact's display name.
+    expect(screen.getByPlaceholderText('e.g. Jane Doe').value).toBe('Jane Doe (Doe Rats)');
+
+    fireEvent.click(screen.getByText('Add'));
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
+        name: 'Jane Doe (Doe Rats)',
+        contactId: 'C1',
+    })));
+});
+
+test('the name stays editable after a contact is assigned', async () => {
+    await setup();
+    await openNewWaitlistForm();
+    fireEvent.change(screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0], { target: { value: 'Fancy Mouse' } });
+
+    fireEvent.click(screen.getByText('Click to assign a contact'));
+    await screen.findByText('Jane Doe (Doe Rats)');
+    fireEvent.click(screen.getByText('Jane Doe (Doe Rats)'));
+
+    // The user can still adjust the attendee name afterwards.
+    fireEvent.change(screen.getByPlaceholderText('e.g. Jane Doe'), { target: { value: 'Jane D.' } });
+    expect(screen.getByPlaceholderText('e.g. Jane Doe').value).toBe('Jane D.');
+
+    fireEvent.click(screen.getByText('Add'));
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
+        name: 'Jane D.',
         contactId: 'C1',
     })));
 });
@@ -257,6 +298,20 @@ test('editing a waitlist entry shows the linked contact and can change it', asyn
     await waitFor(() => expect(apiClient.patch).toHaveBeenCalledWith('/waitlist/W20', expect.objectContaining({
         contactId: 'C1',
     })));
+});
+
+test('the card shows the linked contact only when it differs from the attendee name', async () => {
+    const same = [{
+        _id: 'W30', name: 'Sam Smith', contactInfo: 'sam@example.com',
+        contactId: { _id: 'C2', personalName: 'Sam Smith' }, contactName: 'Sam Smith',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, assignedAnimals: [],
+    }];
+    await setup({ waitlist: same });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Sam Smith');
+    // The attendee name already is the contact name, so it is not repeated.
+    expect(screen.getAllByText('Sam Smith')).toHaveLength(1);
 });
 
 test('unlinking a contact sends contactId null', async () => {

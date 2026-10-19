@@ -798,6 +798,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                         ...f,
                                         contactId: sel.contactId || null,
                                         contactName: sel.name || '',
+                                        // Assigning a contact replaces the attendee name with the
+                                        // contact's display name, so both point at the same person.
+                                        // The name stays editable afterwards if it needs tweaking.
+                                        name: sel.name || f.name,
                                         // Fill the free-text contact info from the contact's address.
                                         contactInfo: sel.contactInfo || f.contactInfo || '',
                                     }));
@@ -828,9 +832,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
                                                         {entry.contactInfo && <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate flex items-center gap-1"><Phone size={10} /> {entry.contactInfo}</div>}
                                                         {entry.contactId && (
-                                                            <div className="text-xs text-green-700 dark:text-green-400 truncate flex items-center gap-1">
-                                                                <User size={10} /> {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
-                                                            </div>
+                                                            // The attendee name is replaced with the contact's display name when a
+                                                            // contact is assigned, so only show the linked contact when it adds
+                                                            // information (e.g. the attendee name was edited afterwards).
+                                                            (entry.contactName || entry.contactId?.personalName || 'Linked contact') !== entry.name && (
+                                                                <div className="text-xs text-green-700 dark:text-green-400 truncate flex items-center gap-1">
+                                                                    <User size={10} /> {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
+                                                                </div>
+                                                            )
                                                         )}
                                                     </div>
                                                 </div>
