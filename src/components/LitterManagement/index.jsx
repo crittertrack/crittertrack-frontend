@@ -2760,7 +2760,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                             {/* Losses - matching Total Born layout */}
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                                                    Losses (Died after birth)
+                                                    Losses (Died after birth or culled)
                                                 </label>
                 
                                                 {/* Checkbox to extract from total counts */}
@@ -2880,8 +2880,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                         />
                                                     </div>
 
-                                                    {/* Culls - opt-in subset of total losses */}
-                                                    {(formData.lossesCount || 0) > 0 && (
+                                                    {/* Culls - opt-in subset of total losses. Shown as soon as the Losses
+                                                        section is opened if a total already exists, otherwise appears
+                                                        once the first M/F/U loss is entered. */}
+                                                    {((formData.lossesCount || 0) > 0 || formData.hasCulls) && (
                                                         <div>
                                                             <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer mb-2">
                                                                 <input

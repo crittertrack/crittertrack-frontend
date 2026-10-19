@@ -6,7 +6,7 @@ import InfoButton from './shared/InfoButton';
 import { formatDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
 
-const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', species: '', genders: [], amount: '1', notes: '' };
+const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', speciesRequests: [{ species: '', genders: [], amount: '1' }], notes: '' };
 const GENDER_CHOICES = ['Male', 'Female', 'Any'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'AED'];
 const STATUS_PILL = {
@@ -25,6 +25,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [animalsLoading, setAnimalsLoading] = useState(true);
     const [waitlist, setWaitlist] = useState([]);
     const [waitlistLoading, setWaitlistLoading] = useState(true);
+    const [speciesOptions, setSpeciesOptions] = useState([]);
+    const [wlSpeciesFocus, setWlSpeciesFocus] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     // Shared with Budget Tracker + Supplies currency pickers (same localStorage key).
     const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
@@ -62,8 +64,77 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         setWaitlistLoading(false);
     }, [authToken]);
 
+    const fetchSpecies = useCallback(async () => {
+        try {
+            const res = await apiClient.get('/species');
+            setSpeciesOptions((res.data || []).map(s => s.name).filter(Boolean));
+        } catch (err) { console.error('[fetchSpecies]', err); setSpeciesOptions([]); }
+    }, []);
+
     useEffect(() => { fetchAnimals(); }, [fetchAnimals]);
     useEffect(() => { fetchWaitlist(); }, [fetchWaitlist]);
+    useEffect(() => { fetchSpecies(); }, [fetchSpecies]);
+
+    // --- Waitlist multi-species helpers ---------------------------------------
+    // A waitlist entry "fits" an animal if ANY of its speciesRequests matches the
+    // animal's species AND (genders includes 'Any' OR genders includes the animal's gender).
+    const entryFitsAnimal = (entry, animal) => {
+        const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: entry.amount }] : []);
+        return reqs.some(req => {
+            if (!req.species || req.species.toLowerCase() !== animal.species.toLowerCase()) return false;
+            const g = req.genders || [];
+            return g.includes('Any') || g.includes(animal.gender);
+        });
+    };
+
+    // Fulfillment progress for one species request, based on assigned animals snapshot.
+    const computeRequestFulfillment = (req, assignedAnimals) => {
+        const assigned = assignedAnimals || [];
+        let assignedCount = 0;
+        if ((req.genders || []).includes('Any')) {
+            assignedCount = assigned.filter(a => a.species && a.species.toLowerCase() === req.species.toLowerCase()).length;
+        } else {
+            assignedCount = assigned.filter(a => a.species && a.species.toLowerCase() === req.species.toLowerCase() && (req.genders || []).includes(a.gender)).length;
+        }
+        const requested = req.amount || 0;
+        return {
+            ...req,
+            requested,
+            fulfilled: Math.min(assignedCount, requested),
+            remaining: Math.max(0, requested - assignedCount),
+            isFulfilled: assignedCount >= requested,
+        };
+    };
+
+    const computeEntryFulfillment = (entry) => {
+        const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: entry.amount }] : []);
+        const assigned = entry.assignedAnimals || [];
+        const progress = reqs.map(r => computeRequestFulfillment(r, assigned));
+        return {
+            progress,
+            totalRequested: progress.reduce((s, p) => s + p.requested, 0),
+            totalFulfilled: progress.reduce((s, p) => s + p.fulfilled, 0),
+            isFulfilled: progress.length > 0 && progress.every(p => p.isFulfilled),
+        };
+    };
+
+    const emptySpeciesRequest = () => ({ species: '', genders: [], amount: '1' });
+    const toggleWlSpeciesGender = (reqIndex, g) => setWlForm(f => {
+        const reqs = [...f.speciesRequests];
+        const genders = reqs[reqIndex].genders || [];
+        reqs[reqIndex].genders = genders.includes(g) ? genders.filter(x => x !== g) : [...genders, g];
+        return { ...f, speciesRequests: reqs };
+    });
+    const addWlSpeciesRow = () => setWlForm(f => ({ ...f, speciesRequests: [...f.speciesRequests, emptySpeciesRequest()] }));
+    const removeWlSpeciesRow = (idx) => setWlForm(f => {
+        const reqs = f.speciesRequests.filter((_, i) => i !== idx);
+        return { ...f, speciesRequests: reqs.length > 0 ? reqs : [emptySpeciesRequest()] };
+    });
+    const setWlSpeciesField = (reqIndex, field, value) => setWlForm(f => {
+        const reqs = [...f.speciesRequests];
+        reqs[reqIndex] = { ...reqs[reqIndex], [field]: value };
+        return { ...f, speciesRequests: reqs };
+    });
 
     // Animals available for sale: status Available or Booked.
     const saleAnimals = useMemo(() => {
@@ -201,9 +272,11 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const openWlForm = (entry) => {
         if (entry) {
+            const reqs = entry.speciesRequests || (entry.species ? [{ species: entry.species, genders: entry.genders || [], amount: String(entry.amount ?? 1) }] : [emptySpeciesRequest()]);
             setWlForm({
-                name: entry.name || '', contactInfo: entry.contactInfo || '', species: entry.species || '',
-                genders: entry.genders || [], amount: entry.amount ?? 1, notes: entry.notes || '',
+                name: entry.name || '', contactInfo: entry.contactInfo || '',
+                speciesRequests: reqs.map(r => ({ species: r.species || '', genders: r.genders || [], amount: String(r.amount ?? 1) })),
+                notes: entry.notes || '',
             });
             setEditingWlId(entry._id);
         } else {
@@ -215,12 +288,18 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const handleWlSave = async () => {
         if (!wlForm.name.trim()) { showModalMessage?.('Missing name', 'Enter the waitlist attendee name.'); return; }
+        // At least one species row must be filled in.
+        const validRows = wlForm.speciesRequests.filter(r => r.species?.trim());
+        if (validRows.length === 0) { showModalMessage?.('Missing species', 'Add at least one species request.'); return; }
         setWlSaving(true);
         try {
             const payload = {
                 name: wlForm.name.trim(), contactInfo: wlForm.contactInfo?.trim() || '',
-                species: wlForm.species?.trim() || '', genders: wlForm.genders || [],
-                amount: wlForm.amount !== '' && wlForm.amount != null ? Number(wlForm.amount) : 1,
+                speciesRequests: validRows.map(r => ({
+                    species: r.species.trim(),
+                    genders: r.genders || [],
+                    amount: r.amount !== '' && r.amount != null ? Number(r.amount) : 1,
+                })),
                 notes: wlForm.notes?.trim() || '',
             };
             if (editingWlId) {
@@ -274,7 +353,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         }
     };
 
-    const toggleWlGender = (g) => setWlForm(f => ({ ...f, genders: f.genders.includes(g) ? f.genders.filter(x => x !== g) : [...f.genders, g] }));
     const inputCls = 'w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400';
     const cardCls = 'bg-white dark:bg-dark-card-bg rounded-xl shadow-lg overflow-hidden';
 
@@ -387,11 +465,23 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 {isEditing && (
                                                     <div className="space-y-2.5 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700/40 rounded-lg p-3">
                                                         <div>
+                                                            {/* Buyer / adoptee picker: only show waitlist entries that fit this animal's
+                                                                species + genders. Falls back to manual entry when nothing fits. */}
                                                             <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Buyer / Adoptee (from waitlist or manual)</label>
-                                                            <select value={f.waitlistEntryId} onChange={e => setResField(animal, 'waitlistEntryId', e.target.value)} className={inputCls}>
-                                                                <option value="">Manual entry…</option>
-                                                                {activeWaitlist.map(e => <option key={e._id} value={e._id}>{e.name}{e.species ? ` — ${e.species}` : ''}</option>)}
-                                                            </select>
+                                                            {(() => {
+                                                                const fitting = activeWaitlist.filter(e => entryFitsAnimal(e, animal));
+                                                                const entryLabel = (e) => {
+                                                                    const reqs = e.speciesRequests || (e.species ? [{ species: e.species, genders: e.genders || [] }] : []);
+                                                                    const spec = reqs.map(r => `${r.species} (${(r.genders || []).join('/') || 'Any'})`).join(' + ');
+                                                                    return `${e.name}${spec ? ` — ${spec}` : ''}`;
+                                                                };
+                                                                return (
+                                                                    <select value={f.waitlistEntryId} onChange={e => setResField(animal, 'waitlistEntryId', e.target.value)} className={inputCls}>
+                                                                        <option value="">Manual entry…</option>
+                                                                        {fitting.length > 0 ? fitting.map(e => <option key={e._id} value={e._id}>{entryLabel(e)}</option>) : <option value="" disabled className="text-gray-400">No matching waitlist entries</option>}
+                                                                    </select>
+                                                                );
+                                                            })()}
                                                             <input type="text" value={f.buyerName} onChange={e => setResField(animal, 'buyerName', e.target.value)} placeholder="Buyer name" className={`${inputCls} mt-1.5`} />
                                                             <input type="text" value={f.buyerContact} onChange={e => setResField(animal, 'buyerContact', e.target.value)} placeholder="Phone, email, or address" className={`${inputCls} mt-1.5`} />
                                                         </div>
@@ -493,30 +583,48 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Contact Info</label>
                                         <input type="text" value={wlForm.contactInfo} onChange={e => setWlForm(f => ({ ...f, contactInfo: e.target.value }))} placeholder="Phone, email, or address" className={inputCls} />
                                     </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Species</label>
-                                        <input type="text" value={wlForm.species} onChange={e => setWlForm(f => ({ ...f, species: e.target.value }))} placeholder="e.g. Fancy Rat" className={inputCls} />
-                                    </div>
-
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Amount</label>
-                                        <input type="number" min="1" value={wlForm.amount} onChange={e => setWlForm(f => ({ ...f, amount: e.target.value }))} placeholder="1" className={inputCls} />
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Gender(s)</label>
-                                        <div className="flex gap-2">
-                                            {GENDER_CHOICES.map(g => (
-                                                <button key={g} type="button" onClick={() => toggleWlGender(g)}
-                                                    className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${wlForm.genders.includes(g) ? 'bg-green-600 border-green-600 text-white' : 'bg-white dark:bg-dark-surface border-gray-300 dark:border-dark-text text-gray-600 dark:text-dark-text-muted hover:border-green-400'}`}>
-                                                    {g === 'Male' ? <Mars size={12} /> : g === 'Female' ? <Venus size={12} /> : <Users size={12} />} {g}
-                                                </button>
-                                            ))}
+                                {/* Species requests: one row per species with its own amount + genders */}
+                                <div className="space-y-2 mt-2">
+                                    <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1 flex items-center justify-between">
+                                        Species requests
+                                        <button type="button" onClick={addWlSpeciesRow} className="text-xs text-green-600 dark:text-green-400 hover:underline px-1">+ Add species</button>
+                                    </label>
+                                    {wlForm.speciesRequests.map((req, i) => (
+                                        <div key={i} className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-end">
+                                            <div className="relative">
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Species {i + 1}</label>
+                                                <input type="text" value={req.species} onChange={e => setWlSpeciesField(i, 'species', e.target.value)} onFocus={() => setWlSpeciesFocus(i)} onBlur={() => setTimeout(() => setWlSpeciesFocus(null), 150)} placeholder="e.g. Fancy Mouse" className={`${inputCls} w-full`} />
+                                                {wlSpeciesFocus === i && speciesOptions.length > 0 && (
+                                                    <div className="absolute z-20 w-full bg-white dark:bg-dark-card-bg border border-gray-300 dark:border-dark-text rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                                        {speciesOptions.filter(s => !req.species || s.toLowerCase().includes(req.species.toLowerCase())).slice(0, 8).map(s => (
+                                                            <button key={s} type="button" onClick={() => { setWlSpeciesField(i, 'species', s); setWlSpeciesFocus(null); }} className="w-full text-left text-xs px-3 py-2 text-gray-800 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition">{s}</button>
+                                                        ))}
+                                                        {speciesOptions.filter(s => !req.species || s.toLowerCase().includes(req.species.toLowerCase())).length === 0 && <div className="text-xs text-gray-400 dark:text-dark-text-muted px-3 py-2">No matching species</div>}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted">Gender(s)</label>
+                                                <div className="flex gap-1">
+                                                    {GENDER_CHOICES.map(g => (
+                                                        <button key={g} type="button" onClick={() => toggleWlSpeciesGender(i, g)} className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border transition ${(req.genders || []).includes(g) ? 'bg-green-600 border-green-600 text-white' : 'bg-white dark:bg-dark-surface border-gray-300 dark:border-dark-text text-gray-600 dark:text-dark-text-muted hover:border-green-400'}`}>{g === 'Male' ? <Mars size={11} /> : g === 'Female' ? <Venus size={11} /> : <Users size={11} />} {g}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Amount</label>
+                                                <input type="number" min="1" value={req.amount} onChange={e => setWlSpeciesField(i, 'amount', e.target.value)} placeholder="1" className={inputCls} />
+                                            </div>
+                                            {wlForm.speciesRequests.length > 1 && (
+                                                <button type="button" onClick={() => removeWlSpeciesRow(i)} className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-2 rounded-lg transition" title="Remove species"><Trash2 size={14} /></button>
+                                            )}
                                         </div>
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Notes</label>
-                                        <input type="text" value={wlForm.notes} onChange={e => setWlForm(f => ({ ...f, notes: e.target.value }))} placeholder="Preferences, timing, etc." className={inputCls} />
-                                    </div>
+                                    ))}
+                                </div>
+                                <div className="mt-2">
+                                    <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-1">Notes</label>
+                                    <input type="text" value={wlForm.notes} onChange={e => setWlForm(f => ({ ...f, notes: e.target.value }))} placeholder="Preferences, timing, etc." className={inputCls} />
+                                </div>
                                 </div>
                                 <div className="flex gap-2 justify-end">
                                     <button onClick={() => { setWlFormVisible(false); setEditingWlId(null); setWlForm(EMPTY_WAITLIST_FORM); }} className="px-3 py-1.5 text-sm text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
@@ -552,21 +660,42 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             </div>
 
                                             <div className="text-xs sm:text-sm space-y-1 bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5">
-                                                {entry.species && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={11} /> Species</span><span className="font-medium text-gray-800 dark:text-dark-text text-right">{entry.species}</span></div>}
-                                                {(entry.genders || []).length > 0 && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">Gender(s)</span><span className="font-medium text-gray-800 dark:text-dark-text text-right">{entry.genders.join(', ')}</span></div>}
-                                                <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">Amount</span><span className="font-medium text-gray-800 dark:text-dark-text">{entry.amount ?? 1}</span></div>
-                                                {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-0.5">{entry.notes}</div>}
+                                                {(() => {
+                                                    const ful = computeEntryFulfillment(entry);
+                                                    return (
+                                                        <>
+                                                            {ful.isFulfilled && (
+                                                                <span className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium mb-1"><Check size={10} /> Fulfilled</span>
+                                                            )}
+                                                            {ful.progress.map((p, pi) => (
+                                                                <div key={pi} className="flex justify-between gap-2 mb-0.5">
+                                                                    <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={10} /> {p.species}</span>
+                                                                    <span className="text-right text-[11px]">
+                                                                        {p.genders.includes('Any') ? 'Any' : (p.genders || []).join('/')}{` • ${p.fulfilled}/${p.requested}`}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                            {ful.progress.length > 1 && (
+                                                                <div className="flex justify-between gap-2 border-t border-gray-200 dark:border-dark-text-muted pt-0.5 mt-0.5">
+                                                                    <span className="text-gray-500 dark:text-dark-text-muted text-[10px]">Total</span>
+                                                                    <span className={`text-right text-[11px] font-medium ${ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalFulfilled}/{ful.totalRequested}</span>
+                                                                </div>
+                                                            )}
+                                                            {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}
+                                                        </>
+                                                    );
+                                                })()}
                                                 {waitlistView === 'history' && (
                                                     <div className="pt-1 border-t border-gray-200 dark:border-dark-border mt-1">
-                                                        <div className="text-gray-500 dark:text-dark-text-muted mb-0.5">Assigned animals</div>
+                                                        <div className="text-gray-500 dark:text-dark-text-muted mb-0.5 text-[10px]">Assigned animals</div>
                                                         {(entry.assignedAnimals || []).length > 0 ? (
                                                             <div className="flex flex-wrap gap-1">
                                                                 {entry.assignedAnimals.map((a, i) => (
-                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[11px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
+                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
                                                                 ))}
                                                             </div>
                                                         ) : (
-                                                            <div className="text-gray-400 dark:text-dark-text-muted italic">None assigned via picker</div>
+                                                            <div className="text-gray-400 dark:text-dark-text-muted italic text-[11px]">None assigned via picker</div>
                                                         )}
                                                         {entry.finalizedAt && <div className="text-[11px] text-gray-400 dark:text-dark-text-muted mt-1">Finalized {formatDate(entry.finalizedAt)}</div>}
                                                     </div>

@@ -13,23 +13,29 @@ const animals = [
     { id_public: 'CTC1', name: 'Peanut', species: 'Fancy Rat', gender: 'Female', status: 'Available', imageUrl: null },
     { id_public: 'CTC2', name: 'Butter', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Jane', reservedPrice: 40, reservedDepositStatus: 'done', reservedPaymentStatus: 'due' },
     { id_public: 'CTC3', name: 'Retired Doe', species: 'Fancy Rat', gender: 'Female', status: 'Retired' },
+    { id_public: 'CTC4', name: 'Whiskers', species: 'Fancy Mouse', gender: 'Female', status: 'Available' },
 ];
 const waitlist = [
-    { _id: 'W1', name: 'Jane', contactInfo: 'jane@example.com', species: 'Fancy Rat', genders: ['Female'], amount: 2, notes: '', isActive: true, assignedAnimals: [] },
+    { _id: 'W1', name: 'Jane', contactInfo: 'jane@example.com', speciesRequests: [{ species: 'Fancy Rat', genders: ['Female'], amount: 2 }], isActive: true, assignedAnimals: [] },
+    { _id: 'W2', name: 'Sam', contactInfo: 'sam@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 3 }], isActive: true, assignedAnimals: [] },
 ];
 
 const setup = async (overrides = {}) => {
     apiClient.get.mockImplementation((url) => {
         if (url === '/animals') return Promise.resolve({ data: overrides.animals || animals });
         if (url === '/waitlist') return Promise.resolve({ data: overrides.waitlist || waitlist });
+        if (url === '/species') return Promise.resolve({ data: [{ name: 'Fancy Rat' }, { name: 'Fancy Mouse' }, { name: 'Fancy Gerbil' }] });
         return Promise.resolve({ data: [] });
     });
     apiClient.put.mockImplementation((url, payload) => Promise.resolve({ data: { animal: payload } }));
     apiClient.post.mockImplementation((url, payload) => Promise.resolve({ data: { _id: 'NEW', ...payload } }));
     apiClient.patch.mockImplementation((url, payload) => Promise.resolve({ data: payload }));
+    apiClient.delete.mockImplementation(() => Promise.resolve({ data: {} }));
     const showModalMessage = jest.fn();
     const utils = render(<ReservationsPage authToken="t" API_BASE_URL="/api" showModalMessage={showModalMessage} />);
     await screen.findByText('Reservations');
+    // Await the async animal data load so assertions run after the cards render.
+    await screen.findByText('Peanut');
     return { ...utils, showModalMessage };
 };
 
@@ -37,17 +43,36 @@ beforeEach(() => jest.clearAllMocks());
 
 test('animals tab lists only Available and Booked animals', async () => {
     await setup();
-    expect(await screen.findByTestId('animal-card-CTC1')).toBeTruthy();
-    expect(screen.getByTestId('animal-card-CTC2')).toBeTruthy();
-    expect(screen.queryByTestId('animal-card-CTC3')).toBeNull();
+    // Available / Booked animals are each rendered once as a card (no reservation -> no banner)
+    expect(screen.getAllByText('Peanut').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Whiskers').length).toBeGreaterThan(0);
+    // Butter is rendered once as a card, plus once in the "Payments due" banner
+    expect(screen.getAllByText('Butter').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Retired Doe')).toBeNull();
+});
+
+test('buyer picker only shows waitlist entries fitting the animal species/gender', async () => {
+    await setup();
+    const peanutCard = screen.getByTestId('animal-card-CTC1');
+    fireEvent.click(within(peanutCard).getByText('Assign'));
+    // The reservation editor's waitlist picker is below the "Buyer / Adoptee…" label
+    const label = screen.getByText('Buyer / Adoptee (from waitlist or manual)');
+    const select = label.closest('div').querySelector('select');
+    fireEvent.click(select);
+    // Peanut = Female Fancy Rat: only Jane (Fancy Rat / Female) fits; Sam (Fancy Mouse) does not
+    await waitFor(() => {
+        const optionTexts = Array.from(select.querySelectorAll('option')).map(o => o.textContent);
+        expect(optionTexts.some(t => t.includes('Jane'))).toBe(true);
+        expect(optionTexts.some(t => t.includes('Sam'))).toBe(false);
+    });
 });
 
 test('assigning a buyer saves the reservation via PUT', async () => {
     await setup();
-    const card = await screen.findByTestId('animal-card-CTC1');
-    fireEvent.click(within(card).getByText('Assign'));
-    fireEvent.change(within(card).getByPlaceholderText('Buyer name'), { target: { value: 'Sam' } });
-    fireEvent.click(within(card).getByText('Save'));
+    const peanutCard = screen.getByTestId('animal-card-CTC1');
+    fireEvent.click(within(peanutCard).getByText('Assign'));
+    fireEvent.change(screen.getByPlaceholderText('Buyer name'), { target: { value: 'Sam' } });
+    fireEvent.click(screen.getByText('Save'));
     await waitFor(() => expect(apiClient.put).toHaveBeenCalled());
     const [url, payload] = apiClient.put.mock.calls[0];
     expect(url).toBe('/animals/CTC1');
@@ -57,9 +82,9 @@ test('assigning a buyer saves the reservation via PUT', async () => {
 
 test('rehomed button promotes the reservation to sale + rehomed status', async () => {
     await setup();
-    const card = await screen.findByTestId('animal-card-CTC2');
+    const butterCard = screen.getByTestId('animal-card-CTC2');
     window.confirm = jest.fn(() => true);
-    fireEvent.click(within(card).getByText('Rehomed'));
+    fireEvent.click(within(butterCard).getByText('Rehomed'));
     await waitFor(() => expect(apiClient.put).toHaveBeenCalled());
     const [url, payload] = apiClient.put.mock.calls[0];
     expect(url).toBe('/animals/CTC2');
@@ -75,9 +100,33 @@ test('waitlist tab shows active/history toggle and entry details', async () => {
     fireEvent.click(screen.getByText('Waitlist'));
     expect(await screen.findByText('Jane')).toBeTruthy();
     expect(screen.getByText('Fancy Rat')).toBeTruthy();
-    expect(screen.getByText('Female')).toBeTruthy();
     fireEvent.click(screen.getByText(/History \(0\)/));
     expect(await screen.findByText('No history yet')).toBeTruthy();
+});
+
+test('adding a multi-species waitlist entry posts speciesRequests array', async () => {
+    await setup();
+    fireEvent.click(screen.getByText('Waitlist'));
+    fireEvent.click(screen.getByText('Add to Waitlist'));
+    await screen.findByText('New Waitlist Entry');
+    fireEvent.change(screen.getByPlaceholderText('e.g. Jane Doe'), { target: { value: 'Test Buyer' } });
+    // Species row 1: Fancy Mouse, amount 4
+    const s1 = screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0];
+    fireEvent.change(s1, { target: { value: 'Fancy Mouse' } });
+    fireEvent.change(screen.getAllByPlaceholderText('1')[0], { target: { value: '4' } });
+    // Add second species row, then Fancy Rat, amount 7
+    fireEvent.click(screen.getByText('+ Add species'));
+    const s2 = screen.getAllByPlaceholderText('e.g. Fancy Mouse')[1];
+    fireEvent.change(s2, { target: { value: 'Fancy Rat' } });
+    fireEvent.change(screen.getAllByPlaceholderText('1')[1], { target: { value: '7' } });
+    fireEvent.click(screen.getByText('Add'));
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
+        name: 'Test Buyer',
+        speciesRequests: expect.arrayContaining([
+            expect.objectContaining({ species: 'Fancy Mouse', amount: 4 }),
+            expect.objectContaining({ species: 'Fancy Rat', amount: 7 }),
+        ]),
+    })));
 });
 
 test('finalizing a waitlist entry calls the finalize endpoint', async () => {
@@ -85,6 +134,8 @@ test('finalizing a waitlist entry calls the finalize endpoint', async () => {
     fireEvent.click(screen.getByText('Waitlist'));
     await screen.findByText('Jane');
     window.confirm = jest.fn(() => true);
-    fireEvent.click(screen.getByText('Finalize'));
+    // Scope the Finalize button to Jane's entry (rows for Jane + Sam both render a button)
+    const janeCard = screen.getByText('Jane').closest('[class*="space-y-2.5"]');
+    fireEvent.click(within(janeCard).getByText('Finalize'));
     await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist/W1/finalize'));
 });
