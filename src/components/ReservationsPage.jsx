@@ -539,11 +539,63 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     };
 
     const handleWlFinalize = async (entry) => {
-        if (!window.confirm(`Finalize ${entry.name}? This moves them to history.`)) return;
+        // Collect assigned animals that have sale info (buyer + price) and can be auto-rehomed.
+        const assignedAnimals = getEntryAssignedAnimals(entry);
+        const animalsToRehome = assignedAnimals.filter(a => {
+            const animal = animals.find(an => an.id_public === a.id_public);
+            return animal && animal.reservedBuyerName && animal.reservedPrice != null;
+        });
+
+        const rehomeNote = animalsToRehome.length > 0
+            ? `\n\n${animalsToRehome.length} assigned animal(s) will also be rehomed (sale logged to Budget).`
+            : '';
+        if (!window.confirm(`Finalize ${entry.name}? This moves them to history.${rehomeNote}`)) return;
+
         try {
+            // Finalize first so the assigned-animal snapshot is captured before reservation links are cleared.
             const res = await apiClient.post(`/waitlist/${entry._id}/finalize`);
             setWaitlist(prev => prev.map(e => (e._id === entry._id ? { ...e, ...res.data } : e)));
-            showModalMessage?.('Success', `${entry.name} moved to history`);
+
+            // Then rehome each assigned animal that has sale info.
+            let rehomedCount = 0;
+            for (const animal of animalsToRehome) {
+                const fullAnimal = animals.find(an => an.id_public === animal.id_public);
+                if (!fullAnimal) continue;
+                const saleDate = fullAnimal.reservedDate
+                    ? new Date(fullAnimal.reservedDate).toISOString().slice(0, 10)
+                    : todayStr();
+                try {
+                    await apiClient.put(`/animals/${animal.id_public}`, {
+                        saleDate,
+                        salePrice: fullAnimal.reservedPrice,
+                        saleRecordCurrency: fullAnimal.reservedPriceCurrency || 'USD',
+                        buyerName: fullAnimal.reservedBuyerName,
+                        buyerContact: fullAnimal.reservedBuyerContact || null,
+                        reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
+                        reservedPrice: null, reservedDeposit: null, reservedDate: null,
+                        reservedDepositStatus: null, reservedPaymentStatus: null,
+                        status: 'Rehomed', archived: true,
+                    });
+                    setAnimals(prev => prev.map(a => (a.id_public === animal.id_public
+                        ? { ...a, status: 'Rehomed', archived: true,
+                            reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
+                            reservedPrice: null, reservedDeposit: null, reservedDate: null,
+                            reservedDepositStatus: null, reservedPaymentStatus: null,
+                            saleDate, salePrice: fullAnimal.reservedPrice,
+                            saleRecordCurrency: fullAnimal.reservedPriceCurrency || 'USD',
+                            buyerName: fullAnimal.reservedBuyerName,
+                            buyerContact: fullAnimal.reservedBuyerContact || null }
+                        : a)));
+                    rehomedCount++;
+                } catch (rehomeErr) {
+                    console.error(`[finalizeWaitlist] Rehome failed for ${animal.id_public}:`, rehomeErr);
+                }
+            }
+
+            const msg = animalsToRehome.length > 0
+                ? `${entry.name} moved to history — ${rehomedCount}/${animalsToRehome.length} animal(s) rehomed.`
+                : `${entry.name} moved to history`;
+            showModalMessage?.('Success', msg);
         } catch (err) {
             console.error('[finalizeWaitlist]', err);
             showModalMessage?.('Error', 'Failed to finalize waitlist entry');
@@ -1006,6 +1058,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <span className="text-gray-500 dark:text-dark-text-muted text-[10px]">Total</span>
                                                         {/* Over-assignment outranks the fulfilled/amber colours so extra animals stand out */}
                                                         <span className={`text-right text-[11px] font-medium ${ful.totalMatched > ful.totalRequested ? 'text-red-600 dark:text-red-400' : ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalMatched}/{ful.totalRequested}</span>
+                                                    </div>
+                                                )}
+                                                {waitlistView === 'active' && ful.assigned.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 pt-1 mt-1 border-t border-gray-200 dark:border-dark-border">
+                                                        <span className="text-[10px] text-gray-500 dark:text-dark-text-muted">Assigned:</span>
+                                                        {ful.assigned.map((a, i) => (
+                                                            <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
+                                                        ))}
                                                     </div>
                                                 )}
                                                 {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}

@@ -336,13 +336,13 @@ const RESERVATIONS_ARTICLE = {
     },
     {
       title: 'Keep a buyer waitlist',
-      content: 'Switch to the Waitlist tab to record interested buyers before animals are ready. Add entries with a name, contact details, an optional linked contact, and one or more species requests with counts per gender. Each entry shows how many matching animals have been assigned and a Fulfilled badge when the request is met. Assign a waitlist entry as a buyer from an animal\u2019s card with the dropdown; when the deal is done, choose Finalize to move the entry to History together with its assigned animals (Reactivate brings it back).',
+      content: 'Switch to the Waitlist tab to record interested buyers before animals are ready. Add entries with a name, contact details, an optional linked contact, and one or more species requests with counts per gender. Each entry shows how many matching animals have been assigned and a Fulfilled badge when the request is met. Assign a waitlist entry as a buyer from an animal\u2019s card with the dropdown; when the deal is done, choose Finalize to move the entry to History together with its assigned animals. Finalize also auto-rehomes any assigned animal that has a buyer name and price recorded (the sale is logged to Budget Tracker automatically \\u2014 don\\u2019t record that income again manually). Reactivate brings a finalized entry back.',
     },
   ],
   tips: [
     'Animals only appear here once their status is Available or Booked \u2014 set that on the animal record in My Animals first.',
     'The quick Paid button is a one-way shortcut on the card; the Edit form can flip a payment back to Due if you made a mistake.',
-    'Finalizing a waitlist entry archives it \u2014 it does not rehome or transfer any animals. Rehome each animal from its own card.',
+    'Finalizing a waitlist entry archives it \u2014 it also auto-rehomes any assigned animal that has a buyer name and price recorded (sale logged to Budget Tracker). Animals without sale info stay reserved and can still be rehomed from their own card.',
   ],
   nextSteps: [
     { articleId: 'budget-tracker', label: 'Record sale income in the Budget Tracker' },
