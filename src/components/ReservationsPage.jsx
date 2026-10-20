@@ -593,7 +593,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <div>
                                                             {/* Buyer / adoptee picker: only show waitlist entries that fit this animal's
                                                                 species + genders. Falls back to manual entry when nothing fits. */}
-                                                            <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Buyer / Adoptee (from waitlist or manual)</label>
+                                                            <label htmlFor={`wlBuyerPicker-${animal.id_public}`} className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Buyer / Adoptee (from waitlist or manual)</label>
                                                             {(() => {
                                                                 const fitting = activeWaitlist.filter(e => entryFitsAnimal(e, animal));
                                                                 const entryLabel = (e) => {
@@ -602,7 +602,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                                     return `${e.name}${spec ? ` — ${spec}` : ''}`;
                                                                 };
                                                                 return (
-                                                                    <select value={f.waitlistEntryId} onChange={e => setResField(animal, 'waitlistEntryId', e.target.value)} className={inputCls}>
+                                                                    <select id={`wlBuyerPicker-${animal.id_public}`} value={f.waitlistEntryId} onChange={e => setResField(animal, 'waitlistEntryId', e.target.value)} className={inputCls}>
                                                                         <option value="">Manual entry…</option>
                                                                         {fitting.length > 0 ? fitting.map(e => <option key={e._id} value={e._id}>{entryLabel(e)}</option>) : <option value="" disabled className="text-gray-400">No matching waitlist entries</option>}
                                                                     </select>
@@ -827,7 +827,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 {shownWaitlist.map(entry => {
                                     const ful = computeEntryFulfillment(entry);
                                     return (
-                                    <div key={entry._id} className={cardCls}>
+                                    <div key={entry._id} data-testid={`waitlist-entry-${entry._id}`} className={cardCls}>
                                         <div className="p-3 sm:p-4 space-y-2.5">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-2 min-w-0">

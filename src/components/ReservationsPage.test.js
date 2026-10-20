@@ -26,14 +26,22 @@ const contacts = [
 ];
 
 const setup = async (overrides = {}) => {
+    // Keep a mutable copy of the animals so a PUT (e.g. "Clear") is reflected in the
+    // next /animals refetch — the page refetches after every reservation change.
+    const animalState = (overrides.animals || animals).map(a => ({ ...a }));
     apiClient.get.mockImplementation((url) => {
-        if (url === '/animals') return Promise.resolve({ data: overrides.animals || animals });
+        if (url === '/animals') return Promise.resolve({ data: animalState.map(a => ({ ...a })) });
         if (url === '/waitlist') return Promise.resolve({ data: overrides.waitlist || waitlist });
         if (url === '/species') return Promise.resolve({ data: [{ name: 'Fancy Rat' }, { name: 'Fancy Mouse' }, { name: 'Fancy Gerbil' }] });
         if (url === '/contacts') return Promise.resolve({ data: overrides.contacts || contacts });
         return Promise.resolve({ data: [] });
     });
-    apiClient.put.mockImplementation((url, payload) => Promise.resolve({ data: { animal: payload } }));
+    apiClient.put.mockImplementation((url, payload) => {
+        const id = String(url).split('/').pop();
+        const idx = animalState.findIndex(a => a.id_public === id);
+        if (idx !== -1) animalState[idx] = { ...animalState[idx], ...payload };
+        return Promise.resolve({ data: { animal: { ...animalState[idx] } } });
+    });
     apiClient.post.mockImplementation((url, payload) => Promise.resolve({ data: { _id: 'NEW', ...payload } }));
     apiClient.patch.mockImplementation((url, payload) => Promise.resolve({ data: payload }));
     apiClient.delete.mockImplementation(() => Promise.resolve({ data: {} }));
@@ -62,16 +70,12 @@ test('buyer picker only shows waitlist entries fitting the animal species/gender
     await setup();
     const peanutCard = screen.getByTestId('animal-card-CTC1');
     fireEvent.click(within(peanutCard).getByText('Assign'));
-    // The reservation editor's waitlist picker is below the "Buyer / Adoptee…" label
-    const label = screen.getByText('Buyer / Adoptee (from waitlist or manual)');
-    const select = label.closest('div').querySelector('select');
+    // The reservation editor's waitlist picker is labelled "Buyer / Adoptee…"
+    const select = screen.getByLabelText('Buyer / Adoptee (from waitlist or manual)');
     fireEvent.click(select);
     // Peanut = Female Fancy Rat: only Jane (Fancy Rat / Female) fits; Sam (Fancy Mouse) does not
-    await waitFor(() => {
-        const optionTexts = Array.from(select.querySelectorAll('option')).map(o => o.textContent);
-        expect(optionTexts.some(t => t.includes('Jane'))).toBe(true);
-        expect(optionTexts.some(t => t.includes('Sam'))).toBe(false);
-    });
+    expect(await within(select).findByRole('option', { name: /Jane/ })).toBeTruthy();
+    expect(within(select).queryByRole('option', { name: /Sam/ })).toBeNull();
 });
 
 test('assigning a buyer saves the reservation via PUT', async () => {
@@ -116,6 +120,63 @@ test('the reservation summary still shows "via Waitlist" when the buyer name dif
     const card = screen.getByTestId('animal-card-CTC7');
     expect(within(card).getByText('via Waitlist')).toBeTruthy();
     expect(within(card).getByText('Kenysha')).toBeTruthy();
+});
+
+test('clearing a reservation removes the animal from the waitlist fulfillment count', async () => {
+    const wl = [{
+        _id: 'W50', name: 'Kenysha (Bush Garden Animals)', contactInfo: 'k@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 2 }],
+        isActive: true, assignedAnimals: [],
+    }];
+    const reserved = [
+        ...animals,
+        {
+            id_public: 'CTC9', name: 'Nibbles', species: 'Fancy Mouse', gender: 'Female', status: 'Booked',
+            reservedBuyerName: 'Kenysha (Bush Garden Animals)', reservedWaitlistEntryId: 'W50',
+        },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+
+    // The waitlist entry counts the reserved animal: 1 of 2 filled.
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Kenysha (Bush Garden Animals)');
+    expect(screen.getByText(/1\/2/)).toBeTruthy();
+    expect(screen.queryByText(/Fulfilled/)).toBeNull();
+
+    // Unassign the buyer from the animal.
+    fireEvent.click(screen.getByText('Animals'));
+    await screen.findByText('Nibbles');
+    window.confirm = jest.fn(() => true);
+    fireEvent.click(within(screen.getByTestId('animal-card-CTC9')).getByText('Clear'));
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/animals/CTC9', expect.objectContaining({
+        reservedWaitlistEntryId: null,
+    })));
+
+    // The fulfillment count must drop back to 0 of 2.
+    fireEvent.click(screen.getByText('Waitlist'));
+    expect(await screen.findByText(/0\/2/)).toBeTruthy();
+    expect(screen.queryByText(/Fulfilled/)).toBeNull();
+});
+
+test('the Clear button resets the whole reservation back to Available', async () => {
+    await setup();
+    const butterCard = screen.getByTestId('animal-card-CTC2');
+    window.confirm = jest.fn(() => true);
+    fireEvent.click(within(butterCard).getByText('Clear'));
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalled());
+    const [url, payload] = apiClient.put.mock.calls[0];
+    expect(url).toBe('/animals/CTC2');
+    expect(payload).toEqual(expect.objectContaining({
+        reservedBuyerName: null,
+        reservedBuyerContact: null,
+        reservedWaitlistEntryId: null,
+        reservedPrice: null,
+        reservedDeposit: null,
+        reservedDate: null,
+        reservedDepositStatus: null,
+        reservedPaymentStatus: null,
+        status: 'Available',
+    }));
 });
 
 test('rehomed button promotes the reservation to sale + rehomed status', async () => {
@@ -217,7 +278,7 @@ test('finalizing a waitlist entry calls the finalize endpoint', async () => {
     await screen.findByText('Jane');
     window.confirm = jest.fn(() => true);
     // Scope the Finalize button to Jane's entry (rows for Jane + Sam both render a button)
-    const janeCard = screen.getByText('Jane').closest('[class*="space-y-2.5"]');
+    const janeCard = screen.getByTestId('waitlist-entry-W1');
     fireEvent.click(within(janeCard).getByText('Finalize'));
     await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist/W1/finalize'));
 });
