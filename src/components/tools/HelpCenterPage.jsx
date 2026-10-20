@@ -328,11 +328,11 @@ const RESERVATIONS_ARTICLE = {
     },
     {
       title: 'Mark payments as paid',
-      content: 'While a reservation\u2019s payment is still Due, the card shows a Paid button \u2014 one click marks the payment Done. It only flips the payment status; no Budget Tracker entry is created, so record the income in the Budget Tracker yourself. To switch a payment back to Due, choose Edit on the card and change the Payment status dropdown. Deposits have their own status, shown only while a deposit amount is set.',
+      content: 'While a reservation\u2019s payment is still Due, the card shows a Paid button \u2014 one click marks the payment Done. It only flips the payment status; no Budget Tracker entry is created. The sale income is recorded automatically when you Rehome the animal (see the next step). To switch a payment back to Due, choose Edit on the card and change the Payment status dropdown. Deposits have their own status, shown only while a deposit amount is set.',
     },
     {
       title: 'Rehome the animal',
-      content: 'When the animal actually leaves your care, choose Rehomed on its card. This promotes the reservation into the animal\u2019s permanent sale information and sets its status to Rehomed. If the buyer matches one of your Contacts with a linked CritterTrack profile, CritterTrack offers to send that person an ownership transfer request as well \u2014 accept to send it, or decline to skip it. Declining (or a failed lookup) never cancels the rehome itself.',
+      content: 'When the animal actually leaves your care, choose Rehomed on its card. This promotes the reservation into the animal\u2019s permanent sale information and sets its status to Rehomed. Entering sale info here auto-logs the sale to the Budget Tracker \u2014 you\u2019ll see "sale logged to Budget" on success \u2014 so don\u2019t record that income again manually. If the buyer matches one of your Contacts with a linked CritterTrack profile, CritterTrack offers to send that person an ownership transfer request as well \u2014 accept to send it, or decline to skip it. Declining (or a failed lookup) never cancels the rehome itself.',
     },
     {
       title: 'Keep a buyer waitlist',
