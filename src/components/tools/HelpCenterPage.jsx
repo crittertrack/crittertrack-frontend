@@ -304,6 +304,53 @@ const CUSTOM_SPECIES_ARTICLE = {
   relatedArticleIds: ['how-to-add-an-animal', 'animal-tab-customize'],
 };
 
+// Canonical article for the Reservations page. The page's InfoButton links with
+// lessonId="reservations"; the ?lesson= lookup falls back to the raw id when it isn't a
+// legacy lesson, so this id must stay in sync with that prop.
+const RESERVATIONS_ARTICLE = {
+  id: 'reservations',
+  title: 'Track reservations, payments, and the waitlist',
+  description: 'Hold animals for buyers, record prices and payments, keep a waitlist of interested buyers, and rehome an animal when the sale is done.',
+  topicId: 'planning',
+  searchTerms: ['reservation', 'booking', 'booked', 'buyer', 'deposit', 'payment', 'waitlist', 'rehome', 'for sale', 'sold'],
+  steps: [
+    {
+      title: 'Open Reservations',
+      content: 'Go to Finance \u2192 Reservations. The page opens on the Animals tab, which lists every animal whose status is Available or Booked \u2014 other statuses never appear here. Use the Currency selector at the top of the page to set the currency used for new reservations.',
+    },
+    {
+      title: 'Find the animals you need',
+      content: 'Search by animal, species, or buyer name, and narrow the list with the Species, Gender, Status, Assigned, and Payment filters. The Payment filter shows only animals whose payment is Due or already Done. When any animal with a buyer still owes money, a \u201CPayments due\u201D banner at the top of the tab lists them.',
+    },
+    {
+      title: 'Assign a buyer and record the deal',
+      content: 'Choose Assign on an animal card (or Edit if it already has a reservation). If waitlist entries match the animal\u2019s species and requested genders, pick one from the dropdown to copy the buyer across and link the entry; otherwise type the buyer\u2019s name and contact by hand. Enter the price, deposit, payment status, date, and currency, then Save. Saving with a buyer name automatically sets the animal\u2019s status to Booked; clearing the buyer (or using Clear on the card) returns it to Available.',
+    },
+    {
+      title: 'Mark payments as paid',
+      content: 'While a reservation\u2019s payment is still Due, the card shows a Paid button \u2014 one click marks the payment Done. It only flips the payment status; no Budget Tracker entry is created, so record the income in the Budget Tracker yourself. To switch a payment back to Due, choose Edit on the card and change the Payment status dropdown. Deposits have their own status, shown only while a deposit amount is set.',
+    },
+    {
+      title: 'Rehome the animal',
+      content: 'When the animal actually leaves your care, choose Rehomed on its card. This promotes the reservation into the animal\u2019s permanent sale information and sets its status to Rehomed. If the buyer matches one of your Contacts with a linked CritterTrack profile, CritterTrack offers to send that person an ownership transfer request as well \u2014 accept to send it, or decline to skip it. Declining (or a failed lookup) never cancels the rehome itself.',
+    },
+    {
+      title: 'Keep a buyer waitlist',
+      content: 'Switch to the Waitlist tab to record interested buyers before animals are ready. Add entries with a name, contact details, an optional linked contact, and one or more species requests with counts per gender. Each entry shows how many matching animals have been assigned and a Fulfilled badge when the request is met. Assign a waitlist entry as a buyer from an animal\u2019s card with the dropdown; when the deal is done, choose Finalize to move the entry to History together with its assigned animals (Reactivate brings it back).',
+    },
+  ],
+  tips: [
+    'Animals only appear here once their status is Available or Booked \u2014 set that on the animal record in My Animals first.',
+    'The quick Paid button is a one-way shortcut on the card; the Edit form can flip a payment back to Due if you made a mistake.',
+    'Finalizing a waitlist entry archives it \u2014 it does not rehome or transfer any animals. Rehome each animal from its own card.',
+  ],
+  nextSteps: [
+    { articleId: 'budget-tracker', label: 'Record sale income in the Budget Tracker' },
+    { articleId: 'getting-started-transfers', label: 'Send a full ownership transfer' },
+  ],
+  relatedArticleIds: ['budget-tracker', 'marketplace-overview', 'contacts-overview', 'getting-started-transfers'],
+};
+
 const LESSONS = TUTORIAL_LESSONS.sections.flatMap(section =>
   section.lessons.map(lesson => ({ ...lesson, sourceSectionId: section.id }))
 );
@@ -318,6 +365,7 @@ const ARTICLES = [
   PWA_INSTALL_ARTICLE,
   SUPPORT_CRITTERTRACK_ARTICLE,
   CUSTOM_SPECIES_ARTICLE,
+  RESERVATIONS_ARTICLE,
   ...LESSONS.filter(lesson => lesson.id !== 'getting-started-animals').map(lesson => {
     const topicId = getTopicId(lesson, lesson.sourceSectionId);
     return {
