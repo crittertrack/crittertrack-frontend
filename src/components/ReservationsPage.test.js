@@ -54,7 +54,11 @@ const setup = async (overrides = {}) => {
     return { ...utils, showModalMessage, onViewAnimal };
 };
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+    jest.clearAllMocks();
+    // Tests flip the shared page currency; reset it so each test starts on the USD default.
+    localStorage.clear();
+});
 
 test('animals tab lists only Available and Booked animals', async () => {
     await setup();
@@ -89,6 +93,32 @@ test('assigning a buyer saves the reservation via PUT', async () => {
     expect(url).toBe('/animals/CTC1');
     expect(payload.reservedBuyerName).toBe('Sam');
     expect(payload.status).toBe('Booked');
+});
+
+test('the top currency toggle drives every reservation currency dropdown', async () => {
+    await setup();
+    // Flip the page currency to EUR before touching any animal.
+    fireEvent.change(screen.getByTitle(/Sets the currency across this page/), { target: { value: 'EUR' } });
+    const peanutCard = screen.getByTestId('animal-card-CTC1');
+    fireEvent.click(within(peanutCard).getByText('Assign'));
+    // The editor opens on EUR without ever touching the per-animal dropdown…
+    expect(within(peanutCard).getByDisplayValue('EUR')).toBeTruthy();
+    // …and saving persists EUR to the server.
+    fireEvent.change(screen.getByPlaceholderText('Buyer name'), { target: { value: 'Sam' } });
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/animals/CTC1', expect.objectContaining({ reservedPriceCurrency: 'EUR' })));
+});
+
+test('changing the top currency rewrites an already-open reservation editor', async () => {
+    await setup();
+    const butterCard = screen.getByTestId('animal-card-CTC2');
+    fireEvent.click(within(butterCard).getByText('Edit'));
+    // Editing the buyer name creates a draft seeded with the page currency (USD).
+    fireEvent.change(screen.getByPlaceholderText('Buyer name'), { target: { value: 'Jane D' } });
+    expect(within(butterCard).getByDisplayValue('USD')).toBeTruthy();
+    // Flipping the top toggle must update that open draft too.
+    fireEvent.change(screen.getByTitle(/Sets the currency across this page/), { target: { value: 'EUR' } });
+    expect(within(butterCard).getByDisplayValue('EUR')).toBeTruthy();
 });
 
 test('the reservation summary hides "via Waitlist" when it repeats the buyer name', async () => {

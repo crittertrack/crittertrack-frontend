@@ -45,10 +45,20 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const [assignedFilter, setAssignedFilter] = useState('all'); // 'all' | 'assigned' | 'unassigned'
     // Shared with Budget Tracker + Supplies currency pickers (same localStorage key).
     const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
-    const handleCurrencyChange = (c) => { setCurrency(c); localStorage.setItem('budgetCurrency', c); };
 
     // Per-animal reservation editor state, keyed by id_public.
     const [resForms, setResForms] = useState({});
+    // The page-level currency drives every per-animal currency dropdown: flipping it also
+    // rewrites reservation drafts that are already open, so one change at the top is enough.
+    const handleCurrencyChange = (c) => {
+        setCurrency(c);
+        localStorage.setItem('budgetCurrency', c);
+        setResForms(prev => {
+            const next = { ...prev };
+            Object.keys(next).forEach(id => { next[id] = { ...next[id], priceCurrency: c }; });
+            return next;
+        });
+    };
     const [editingAnimalId, setEditingAnimalId] = useState(null);
     const [resSaving, setResSaving] = useState(false);
     const [rehomingId, setRehomingId] = useState(null);
@@ -237,12 +247,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const shownWaitlist = waitlistView === 'active' ? activeWaitlist : historyWaitlist;
 
     // Seed/clear an animal's inline editor from its stored reservation.
+    // Currency is the exception: it always follows the page-level currency toggle (not the
+    // stored value), so flipping the toggle at the top sets every animal's dropdown at once.
     const seedResForm = (animal) => ({
         buyerName: animal.reservedBuyerName || '',
         buyerContact: animal.reservedBuyerContact || '',
         waitlistEntryId: animal.reservedWaitlistEntryId ? String(animal.reservedWaitlistEntryId) : '',
         price: animal.reservedPrice ?? '',
-        priceCurrency: animal.reservedPriceCurrency || 'USD',
+        priceCurrency: currency,
         deposit: animal.reservedDeposit ?? '',
         depositStatus: animal.reservedDepositStatus || 'due',
         paymentStatus: animal.reservedPaymentStatus || 'due',
@@ -275,7 +287,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 reservedBuyerContact: f.buyerContact?.trim() || null,
                 reservedWaitlistEntryId: f.waitlistEntryId || null,
                 reservedPrice: f.price !== '' && f.price != null ? Number(f.price) : null,
-                reservedPriceCurrency: f.priceCurrency || 'USD',
+                reservedPriceCurrency: f.priceCurrency || currency,
                 reservedDeposit: f.deposit !== '' && f.deposit != null ? Number(f.deposit) : null,
                 reservedDepositStatus: f.depositStatus || 'due',
                 reservedPaymentStatus: f.paymentStatus || 'due',
@@ -470,7 +482,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                         Currency:
                         <select value={currency} onChange={e => handleCurrencyChange(e.target.value)}
                             className="border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
-                            title="Sets the currency symbol shown across this page">
+                            title="Sets the currency across this page, including every reservation's currency dropdown">
                             {CURRENCIES.map(c => <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>)}
                         </select>
                     </label>
