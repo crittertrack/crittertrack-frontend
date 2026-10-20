@@ -501,6 +501,15 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
 
                 {activeTab === 'animals' && (
                     <>
+                        {/* Outstanding payments up top so overdue buyers are seen first */}
+                        {saleAnimals.some(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName) && (
+                            <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-3">
+                                <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
+                                <div className="text-sm text-amber-700 dark:text-amber-300">
+                                    <span className="font-semibold">Payments due:</span> {saleAnimals.filter(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName).map(a => a.name || a.id_public).join(', ')}
+                                </div>
+                            </div>
+                        )}
                         <div className={`${cardCls} p-2 sm:p-4 mb-4`}>
                             <div className="relative">
                                 <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-[18px] sm:h-[18px]" />
@@ -546,6 +555,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     const isEditing = editingAnimalId === animal.id_public;
                                     const imgSrc = animal.imageUrl || animal.photoUrl;
                                     const hasReservation = !!(animal.reservedBuyerName || f.buyerName);
+                                    // Stored deposit amount (read mode); 0/none = deposits not used for this animal.
+                                    const depositAmt = parseFloat(animal.reservedDeposit) || 0;
                                     const wlEntry = animal.reservedWaitlistEntryId
                                         ? waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))
                                         : null;
@@ -588,8 +599,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                             <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>}</span>
                                                         </div>
                                                         <div className="flex justify-between gap-2 items-center">
-                                                            <span className="text-gray-500 dark:text-dark-text-muted">Deposit{animal.reservedDeposit != null ? ` (${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedDeposit})` : ''}</span>
-                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedDepositStatus)}`}>{animal.reservedDepositStatus === 'done' ? 'Done' : 'Due'}</span>
+                                                            <span className="text-gray-500 dark:text-dark-text-muted">Deposit{depositAmt > 0 ? ` (${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedDeposit})` : ''}</span>
+                                                            {/* Due/Done only means something when a deposit is actually charged */}
+                                                            {depositAmt > 0 ? (
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedDepositStatus)}`}>{animal.reservedDepositStatus === 'done' ? 'Done' : 'Due'}</span>
+                                                            ) : (
+                                                                <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>
+                                                            )}
                                                         </div>
                                                         <div className="flex justify-between gap-2 items-center">
                                                             <span className="text-gray-500 dark:text-dark-text-muted">Payment</span>
@@ -634,21 +650,26 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                             </div>
                                                         </div>
 
+                                                        {/* Payment status sits under Price, Deposit status under Deposit so each
+                                                            status pairs with its own amount. Deposit status is only shown when a
+                                                            deposit is actually charged (> 0) — "Due" means nothing without one. */}
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <div>
-                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Deposit status</label>
-                                                                <select value={f.depositStatus} onChange={e => setResField(animal, 'depositStatus', e.target.value)} className={inputCls}>
+                                                                <label htmlFor={`payStatus-${animal.id_public}`} className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Payment status</label>
+                                                                <select id={`payStatus-${animal.id_public}`} value={f.paymentStatus} onChange={e => setResField(animal, 'paymentStatus', e.target.value)} className={inputCls}>
                                                                     <option value="due">Due</option>
                                                                     <option value="done">Done</option>
                                                                 </select>
                                                             </div>
-                                                            <div>
-                                                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Payment status</label>
-                                                                <select value={f.paymentStatus} onChange={e => setResField(animal, 'paymentStatus', e.target.value)} className={inputCls}>
-                                                                    <option value="due">Due</option>
-                                                                    <option value="done">Done</option>
-                                                                </select>
-                                                            </div>
+                                                            {(parseFloat(f.deposit) || 0) > 0 && (
+                                                                <div>
+                                                                    <label htmlFor={`depStatus-${animal.id_public}`} className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Deposit status</label>
+                                                                    <select id={`depStatus-${animal.id_public}`} value={f.depositStatus} onChange={e => setResField(animal, 'depositStatus', e.target.value)} className={inputCls}>
+                                                                        <option value="due">Due</option>
+                                                                        <option value="done">Done</option>
+                                                                    </select>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <div>
@@ -921,14 +942,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                     </>
                 )}
 
-                {activeTab === 'animals' && saleAnimals.some(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName) && (
-                    <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-3">
-                        <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
-                        <div className="text-sm text-amber-700 dark:text-amber-300">
-                            <span className="font-semibold">Payments due:</span> {saleAnimals.filter(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName).map(a => a.name || a.id_public).join(', ')}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

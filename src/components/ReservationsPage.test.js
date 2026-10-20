@@ -11,7 +11,7 @@ jest.mock('react-router-dom', () => ({ useNavigate: () => jest.fn() }), { virtua
 
 const animals = [
     { id_public: 'CTC1', name: 'Peanut', species: 'Fancy Rat', gender: 'Female', status: 'Available', imageUrl: null },
-    { id_public: 'CTC2', name: 'Butter', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Jane', reservedPrice: 40, reservedDepositStatus: 'done', reservedPaymentStatus: 'due' },
+    { id_public: 'CTC2', name: 'Butter', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Jane', reservedPrice: 40, reservedDeposit: 20, reservedDepositStatus: 'done', reservedPaymentStatus: 'due' },
     { id_public: 'CTC3', name: 'Retired Doe', species: 'Fancy Rat', gender: 'Female', status: 'Retired' },
     { id_public: 'CTC4', name: 'Whiskers', species: 'Fancy Mouse', gender: 'Female', status: 'Available' },
 ];
@@ -119,6 +119,29 @@ test('changing the top currency rewrites an already-open reservation editor', as
     // Flipping the top toggle must update that open draft too.
     fireEvent.change(screen.getByTitle(/Sets the currency across this page/), { target: { value: 'EUR' } });
     expect(within(butterCard).getByDisplayValue('EUR')).toBeTruthy();
+});
+
+test('deposit status only shows when a deposit is actually charged', async () => {
+    await setup();
+    // Peanut has no deposit: Due/Done means nothing, so the control is hidden.
+    const peanutCard = screen.getByTestId('animal-card-CTC1');
+    fireEvent.click(within(peanutCard).getByText('Assign'));
+    expect(screen.queryByLabelText('Deposit status')).toBeNull();
+    // Butter has a 20 deposit: the control shows…
+    const butterCard = screen.getByTestId('animal-card-CTC2');
+    fireEvent.click(within(butterCard).getByText('Edit'));
+    expect(screen.getByLabelText('Deposit status')).toBeTruthy();
+    // …hides again when the amount drops to zero, and returns once it is charged.
+    fireEvent.change(screen.getByDisplayValue('20'), { target: { value: '0' } });
+    expect(screen.queryByLabelText('Deposit status')).toBeNull();
+    fireEvent.change(screen.getByDisplayValue('0'), { target: { value: '15' } });
+    expect(screen.getByLabelText('Deposit status')).toBeTruthy();
+});
+
+test('buyers with outstanding payments are flagged in a banner', async () => {
+    await setup();
+    // Butter is Booked with payment status due and a buyer -> banner shows (now above the grid).
+    expect(screen.getByText('Payments due:')).toBeTruthy();
 });
 
 test('the reservation summary hides "via Waitlist" when it repeats the buyer name', async () => {
