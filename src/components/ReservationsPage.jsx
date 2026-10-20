@@ -43,6 +43,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const [genderFilter, setGenderFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [assignedFilter, setAssignedFilter] = useState('all'); // 'all' | 'assigned' | 'unassigned'
+    const [paymentFilter, setPaymentFilter] = useState(''); // '' | 'due' | 'done'
     // Shared with Budget Tracker + Supplies currency pickers (same localStorage key).
     const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
 
@@ -62,6 +63,11 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const [editingAnimalId, setEditingAnimalId] = useState(null);
     const [resSaving, setResSaving] = useState(false);
     const [rehomingId, setRehomingId] = useState(null);
+    // Spinner lock for the card's quick "Paid" action.
+    const [paidSavingId, setPaidSavingId] = useState(null);
+    // Contacts book — used to spot buyers whose contact is linked to a CritterTrack
+    // account (linkedCTUID), so rehoming can offer a true ownership transfer.
+    const [contacts, setContacts] = useState([]);
 
     // Waitlist add/edit form
     const [wlFormVisible, setWlFormVisible] = useState(false);
@@ -98,6 +104,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         } catch (err) { console.error('[fetchSpecies]', err); setSpeciesOptions([]); }
     }, []);
 
+    const fetchContacts = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await apiClient.get('/contacts');
+            setContacts(res.data || []);
+        } catch (err) { console.error('[fetchReservationContacts]', err); }
+    }, [authToken]);
+
     useEffect(() => { fetchAnimals(); }, [fetchAnimals]);
 
     // The full animal modal (opened from the card image) edits animals outside this page and
@@ -127,6 +141,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     }, [authToken]);
     useEffect(() => { fetchWaitlist(); }, [fetchWaitlist]);
     useEffect(() => { fetchSpecies(); }, [fetchSpecies]);
+    useEffect(() => { fetchContacts(); }, [fetchContacts]);
 
     // --- Waitlist multi-species helpers ---------------------------------------
     // A waitlist entry "fits" an animal if ANY of its speciesRequests matches the
@@ -144,6 +159,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const computeRequestFulfillment = (req, assignedAnimals) => {
         const same = (assignedAnimals || []).filter(a => a.species && a.species.toLowerCase() === (req.species || '').toLowerCase());
         const counts = getGenderCounts(req);
+        // Uncapped count of assigned animals that fit this request (species + gender).
+        // The card shows this even when it exceeds the requested amount, so extra
+        // assignments stay visible instead of being hidden behind the cap.
+        const matched = same.filter(a => counts.some(c => c.gender === 'Any' || c.gender === a.gender)).length;
         let usedSpecific = 0;
         let fulfilled = 0;
         let requested = 0;
@@ -154,7 +173,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         const anyCount = counts.filter(c => c.gender === 'Any').reduce((s, c) => s + c.count, 0);
         fulfilled += Math.min(Math.max(0, same.length - usedSpecific), anyCount);
         requested += anyCount;
-        return { ...req, breakdown: counts, requested, fulfilled, remaining: Math.max(0, requested - fulfilled), isFulfilled: fulfilled >= requested };
+        return { ...req, breakdown: counts, requested, fulfilled, matched, remaining: Math.max(0, requested - fulfilled), isFulfilled: fulfilled >= requested };
     };
 
     // The animals that count towards an entry's fulfillment. Two sources:
@@ -193,6 +212,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             assigned,
             totalRequested: progress.reduce((s, p) => s + p.requested, 0),
             totalFulfilled: progress.reduce((s, p) => s + p.fulfilled, 0),
+            // Uncapped: summed across requests, so over-assignment stays visible.
+            totalMatched: progress.reduce((s, p) => s + p.matched, 0),
             isFulfilled: progress.length > 0 && progress.every(p => p.isFulfilled),
         };
     };
@@ -236,11 +257,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             .filter(a => !genderFilter || a.gender === genderFilter)
             .filter(a => !statusFilter || a.status === statusFilter)
             .filter(a => assignedFilter === 'all' || (assignedFilter === 'assigned' ? isAssigned(a) : !isAssigned(a)))
+            // Payment filter: only reserved animals carry a payment status, so unassigned
+            // animals drop out of both the Due and Done views.
+            .filter(a => !paymentFilter || (isAssigned(a) && ((a.reservedPaymentStatus || 'due') === paymentFilter)))
             .filter(a => !q || [a.name, a.prefix, a.suffix, a.id_public, a.species, a.breed, a.reservedBuyerName].filter(Boolean).join(' ').toLowerCase().includes(q))
             .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }, [baseSaleAnimals, searchTerm, speciesFilter, genderFilter, statusFilter, assignedFilter]);
-    const filtersActive = !!(speciesFilter || genderFilter || statusFilter || assignedFilter !== 'all' || searchTerm.trim());
-    const clearFilters = () => { setSpeciesFilter(''); setGenderFilter(''); setStatusFilter(''); setAssignedFilter('all'); setSearchTerm(''); };
+    }, [baseSaleAnimals, searchTerm, speciesFilter, genderFilter, statusFilter, assignedFilter, paymentFilter]);
+    const filtersActive = !!(speciesFilter || genderFilter || statusFilter || assignedFilter !== 'all' || paymentFilter || searchTerm.trim());
+    const clearFilters = () => { setSpeciesFilter(''); setGenderFilter(''); setStatusFilter(''); setAssignedFilter('all'); setPaymentFilter(''); setSearchTerm(''); };
 
     const activeWaitlist = useMemo(() => waitlist.filter(e => e.isActive !== false), [waitlist]);
     const historyWaitlist = useMemo(() => waitlist.filter(e => e.isActive === false), [waitlist]);
@@ -330,6 +354,76 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         setResSaving(false);
     };
 
+    // Quick action: flip the reservation's payment status to Done without opening the editor.
+    const handleMarkPaid = async (animal) => {
+        setPaidSavingId(animal.id_public);
+        try {
+            await apiClient.put(`/animals/${animal.id_public}`, { reservedPaymentStatus: 'done' });
+            setAnimals(prev => prev.map(a => (a.id_public === animal.id_public ? { ...a, reservedPaymentStatus: 'done' } : a)));
+            // Keep an open editor draft in sync so the select doesn't show a stale value.
+            setResForms(prev => prev[animal.id_public]
+                ? { ...prev, [animal.id_public]: { ...prev[animal.id_public], paymentStatus: 'done' } }
+                : prev);
+            window.dispatchEvent(new Event('animals-changed'));
+            showModalMessage?.('Success', `${animal.name || animal.id_public} marked as paid`);
+        } catch (err) {
+            console.error('[markPaid]', err);
+            showModalMessage?.('Error', err.response?.data?.message || 'Failed to mark payment as done');
+        }
+        setPaidSavingId(null);
+    };
+
+    // Find the Contacts record behind a reservation's buyer, so rehoming can offer a true
+    // transfer when that contact is linked to a CritterTrack account (linkedCTUID).
+    // Sources: the waitlist entry the reservation came from (only while the buyer name still
+    // matches that entry — a manually overridden buyer disqualifies it), then an exact
+    // name match against the contacts book. Returns the contact's linkedCTUID or null.
+    const findLinkedBuyerCtuid = (animal, buyer) => {
+        if (!buyer) return null;
+        const norm = (s) => (s || '').trim().toLowerCase();
+        const b = norm(buyer);
+        const entry = animal.reservedWaitlistEntryId
+            ? waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))
+            : null;
+        if (entry) {
+            // The waitlist route populates contactId; fall back to the fetched list for plain ids.
+            const entryContact = entry.contactId && typeof entry.contactId === 'object'
+                ? entry.contactId
+                : contacts.find(c => String(c._id) === String(entry.contactId));
+            if (entryContact?.linkedCTUID && (b === norm(entry.name) || b === norm(entryContact.personalName) || b === norm(entryContact.breederName))) {
+                return entryContact.linkedCTUID;
+            }
+        }
+        const match = contacts.find(c => c.linkedCTUID && (b === norm(c.personalName) || b === norm(c.breederName)));
+        return match ? match.linkedCTUID : null;
+    };
+
+    // Resolve a contact's linkedCTUID to a CritterTrack account and, when the user confirms,
+    // send a real ownership-transfer request for the rehomed animal (the buyer accepts it
+    // from their own account). Failures never undo the rehome itself.
+    const maybeSendTrueTransfer = async (animal, buyer, ctuid, price) => {
+        try {
+            const res = await apiClient.get('/public/profiles/search', { params: { query: ctuid, limit: 10 } });
+            const results = res.data || [];
+            // linkedCTUID may be formatted ("CTU-1") while id_public is stored plain ("CTU1").
+            const norm = (s) => String(s || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            const recipient = results.find(u => norm(u.id_public) === norm(ctuid)) || (results.length === 1 ? results[0] : null);
+            if (!recipient?.userId_backend) return;
+            if (!window.confirm(`${buyer} is linked to CritterTrack account ${ctuid}. Send a true transfer of ${animal.name || animal.id_public} to their account? They must accept to take ownership.`)) return;
+            await apiClient.post('/transfers', {
+                animalId_public: animal.id_public,
+                toUserId: recipient.userId_backend,
+                price: price ?? 0,
+                notes: `Recorded via Reservations (rehome sale to ${buyer})`,
+                transferType: 'sale',
+            });
+            showModalMessage?.('Success', `Transfer of ${animal.name || animal.id_public} to ${buyer} (${ctuid}) requested — they must accept to take ownership`);
+        } catch (err) {
+            console.error('[rehomeTransfer]', err);
+            showModalMessage?.('Error', `Rehomed, but the transfer to ${buyer} failed: ${err.response?.data?.message || err.message}`);
+        }
+    };
+
     // Quick action: promote the reservation into the animal's Sale info (date, price, buyer —
     // which auto-creates the Budget sale transaction server-side) and mark Rehomed + archived.
     const handleRehome = async (animal) => {
@@ -362,6 +456,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed', archived: true } }));
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage?.('Success', `${animal.name || animal.id_public} marked as Rehomed — sale logged to Budget`);
+            // Buyer with a linked CritterTrack account? Offer a true ownership transfer too.
+            const linkedCtuid = findLinkedBuyerCtuid(animal, buyer);
+            if (linkedCtuid) await maybeSendTrueTransfer(animal, buyer, linkedCtuid, price);
         } catch (err) {
             console.error('[rehomeAnimal]', err);
             showModalMessage?.('Error', err.response?.data?.message || 'Failed to rehome animal');
@@ -516,12 +613,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 <input type="text" placeholder="Search animals, species, buyers..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                                     className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary" />
                             </div>
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-2">
+                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 mt-2">
                                 {[
                                     { label: 'Species', value: speciesFilter, set: setSpeciesFilter, all: 'All species', opts: filterSpeciesOptions.map(s => [s, s]) },
                                     { label: 'Gender', value: genderFilter, set: setGenderFilter, all: 'All genders', opts: filterGenderOptions.map(g => [g, g]) },
                                     { label: 'Status', value: statusFilter, set: setStatusFilter, all: 'Available & Booked', opts: [['Available', 'Available'], ['Booked', 'Booked']] },
                                     { label: 'Assigned', value: assignedFilter, set: setAssignedFilter, all: null, opts: [['all', 'All'], ['assigned', 'Assigned'], ['unassigned', 'Unassigned']] },
+                                    { label: 'Payment', value: paymentFilter, set: setPaymentFilter, all: 'All payments', opts: [['due', 'Due'], ['done', 'Done']] },
                                 ].map(f => (
                                     <label key={f.label} className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted">
                                         {f.label}
@@ -698,6 +796,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     )}
                                                     {hasReservation && !isEditing && (
                                                         <button onClick={() => handleClearReservation(animal)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Undo2 size={11} /> Clear</button>
+                                                    )}
+                                                    {/* Quick "Paid" — only while the payment is still outstanding. */}
+                                                    {hasReservation && !isEditing && animal.reservedPaymentStatus !== 'done' && (
+                                                        <button onClick={() => handleMarkPaid(animal)} disabled={paidSavingId === animal.id_public} title="Mark payment as done"
+                                                            className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 border border-green-500/60 hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-lg transition font-medium disabled:opacity-50">
+                                                            {paidSavingId === animal.id_public ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />} Paid
+                                                        </button>
                                                     )}
                                                     <button onClick={() => handleRehome(animal)} disabled={rehomingId === animal.id_public}
                                                         className="flex items-center gap-1 text-xs text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 px-2.5 py-1 rounded-lg transition font-medium disabled:opacity-50">
@@ -890,15 +995,17 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 {ful.progress.map((p, pi) => (
                                                     <div key={pi} className="flex justify-between gap-2 mb-0.5">
                                                         <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={10} /> {p.species}</span>
-                                                        <span className="text-right text-[11px]">
-                                                            {p.breakdown.map(b => b.count + ' ' + b.gender).join(' / ')}{` • ${p.fulfilled}/${p.requested}`}
+                                                        {/* matched is uncapped: extra assignments show as e.g. 3/2 (red) instead of hiding behind the cap */}
+                                                        <span className={`text-right text-[11px] ${p.matched > p.requested ? 'text-red-600 dark:text-red-400 font-medium' : ''}`}>
+                                                            {p.breakdown.map(b => b.count + ' ' + b.gender).join(' / ')}{` • ${p.matched}/${p.requested}`}
                                                         </span>
                                                     </div>
                                                 ))}
                                                 {ful.progress.length > 1 && (
                                                     <div className="flex justify-between gap-2 border-t border-gray-200 dark:border-dark-text-muted pt-0.5 mt-0.5">
                                                         <span className="text-gray-500 dark:text-dark-text-muted text-[10px]">Total</span>
-                                                        <span className={`text-right text-[11px] font-medium ${ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalFulfilled}/{ful.totalRequested}</span>
+                                                        {/* Over-assignment outranks the fulfilled/amber colours so extra animals stand out */}
+                                                        <span className={`text-right text-[11px] font-medium ${ful.totalMatched > ful.totalRequested ? 'text-red-600 dark:text-red-400' : ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalMatched}/{ful.totalRequested}</span>
                                                     </div>
                                                 )}
                                                 {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}

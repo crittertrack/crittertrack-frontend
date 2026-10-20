@@ -34,6 +34,7 @@ const setup = async (overrides = {}) => {
         if (url === '/waitlist') return Promise.resolve({ data: overrides.waitlist || waitlist });
         if (url === '/species') return Promise.resolve({ data: [{ name: 'Fancy Rat' }, { name: 'Fancy Mouse' }, { name: 'Fancy Gerbil' }] });
         if (url === '/contacts') return Promise.resolve({ data: overrides.contacts || contacts });
+        if (url === '/public/profiles/search') return Promise.resolve({ data: overrides.profilesSearch || [] });
         return Promise.resolve({ data: [] });
     });
     apiClient.put.mockImplementation((url, payload) => {
@@ -144,6 +145,27 @@ test('buyers with outstanding payments are flagged in a banner', async () => {
     expect(screen.getByText('Payments due:')).toBeTruthy();
 });
 
+test('shows extra assignments even when more animals are assigned than requested', async () => {
+    const wl = [{
+        _id: 'W60', name: 'Riley', contactInfo: 'riley@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, assignedAnimals: [],
+    }];
+    const reserved = [
+        ...animals,
+        { id_public: 'CTC10', name: 'Nibbles', species: 'Fancy Mouse', gender: 'Female', status: 'Booked', reservedBuyerName: 'Riley', reservedWaitlistEntryId: 'W60' },
+        { id_public: 'CTC11', name: 'Munch', species: 'Fancy Mouse', gender: 'Male', status: 'Booked', reservedBuyerName: 'Riley', reservedWaitlistEntryId: 'W60' },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Riley');
+    // Only 1 was requested but 2 are assigned: the count must show 2/1, flagged as over.
+    const count = screen.getByText(/2\/1/);
+    expect(count.className).toContain('text-red-600');
+    // The request itself is covered, so the entry still counts as fulfilled.
+    expect(screen.getByText(/Fulfilled/)).toBeTruthy();
+});
+
 test('the reservation summary hides "via Waitlist" when it repeats the buyer name', async () => {
     const wl = [{ _id: 'W40', name: 'Kenysha (Bush Garden Animals)', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [] }];
     const reserved = [
@@ -245,6 +267,83 @@ test('rehomed button promotes the reservation to sale + rehomed status', async (
     expect(payload.salePrice).toBe(40);
     expect(payload.buyerName).toBe('Jane');
     expect(payload.saleDate).toBeTruthy();
+});
+
+// --- Payments: quick "Paid" action + payment filter -------------------------------------
+
+test('the Paid button marks the reservation payment as done', async () => {
+    const { showModalMessage } = await setup();
+    const butterCard = screen.getByTestId('animal-card-CTC2');
+    fireEvent.click(within(butterCard).getByRole('button', { name: 'Paid' }));
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/animals/CTC2', { reservedPaymentStatus: 'done' }));
+    expect(showModalMessage).toHaveBeenCalledWith('Success', 'Butter marked as paid');
+    // After the refetch the payment is done, so the quick action disappears.
+    await waitFor(() => expect(within(screen.getByTestId('animal-card-CTC2')).queryByRole('button', { name: 'Paid' })).toBeNull());
+});
+
+test('the payment filter separates due from done payments', async () => {
+    const mixed = [
+        ...animals,
+        { id_public: 'CTC13', name: 'Mochi', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Kim', reservedPrice: 30, reservedPaymentStatus: 'done' },
+    ];
+    await setup({ animals: mixed });
+    // Done: only Mochi — Butter is still due, and unassigned animals have no payment status.
+    fireEvent.change(screen.getByLabelText('Payment filter'), { target: { value: 'done' } });
+    expect(await screen.findByText('Mochi')).toBeTruthy();
+    expect(screen.queryByText('Butter')).toBeNull();
+    expect(screen.queryByText('Peanut')).toBeNull();
+    // Due: only Butter (shown on the card and in the payments-due banner).
+    fireEvent.change(screen.getByLabelText('Payment filter'), { target: { value: 'due' } });
+    await waitFor(() => expect(screen.getAllByText('Butter').length).toBeGreaterThan(0));
+    expect(screen.queryByText('Mochi')).toBeNull();
+    expect(screen.queryByText('Peanut')).toBeNull();
+});
+
+// --- Rehome + true transfer to a linked CritterTrack account ----------------------------
+
+// Booked animal whose buyer (Jane Doe) comes from waitlist entry W70, whose contact C1
+// is linked to CritterTrack account CTU-1.
+const rehomeSetup = (extra = {}) => setup({
+    waitlist: [{
+        _id: 'W70', name: 'Jane Doe', contactInfo: 'jane@example.com', contactId: 'C1',
+        speciesRequests: [{ species: 'Fancy Rat', genders: ['Female'], amount: 1 }],
+        isActive: true, assignedAnimals: [],
+    }],
+    animals: [
+        ...animals,
+        { id_public: 'CTC12', name: 'Nibbles', species: 'Fancy Rat', gender: 'Female', status: 'Booked', reservedBuyerName: 'Jane Doe', reservedWaitlistEntryId: 'W70', reservedPrice: 55 },
+    ],
+    profilesSearch: [{ id_public: 'CTU1', userId_backend: 'USER-BACKEND-1', personalName: 'Jane Doe' }],
+    ...extra,
+});
+
+test('rehoming a buyer with a linked CTUID offers a true transfer to their account', async () => {
+    await rehomeSetup();
+    window.confirm = jest.fn(() => true);
+    fireEvent.click(within(screen.getByTestId('animal-card-CTC12')).getByText('Rehomed'));
+    // The sale is still recorded locally first…
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/animals/CTC12', expect.objectContaining({ status: 'Rehomed' })));
+    // …then a real ownership transfer is requested for the linked account.
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/transfers', expect.objectContaining({
+        animalId_public: 'CTC12',
+        toUserId: 'USER-BACKEND-1',
+        transferType: 'sale',
+        price: 55,
+    })));
+    // The user was explicitly asked about the true transfer (second confirm).
+    expect(window.confirm.mock.calls.some(([msg]) => /true transfer/i.test(msg))).toBe(true);
+});
+
+test('declining the transfer prompt still rehomes without requesting a transfer', async () => {
+    const { showModalMessage } = await rehomeSetup();
+    window.confirm = jest.fn()
+        .mockReturnValueOnce(true)   // mark as Rehomed…
+        .mockReturnValueOnce(false); // …but skip the true transfer
+    fireEvent.click(within(screen.getByTestId('animal-card-CTC12')).getByText('Rehomed'));
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/animals/CTC12', expect.objectContaining({ status: 'Rehomed' })));
+    // The rehome completed and the success message is the one shown (the transfer never ran).
+    expect(showModalMessage).toHaveBeenCalledWith('Success', expect.stringMatching(/Nibbles marked as Rehomed/));
+    expect(apiClient.post).not.toHaveBeenCalledWith('/transfers', expect.anything());
 });
 
 test('waitlist tab shows active/history toggle and entry details', async () => {
