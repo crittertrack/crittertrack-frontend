@@ -1089,7 +1089,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 <p className="text-xs sm:text-sm mt-1">{waitlistView === 'active' ? 'Add interested buyers so you can assign them to animals' : 'Finalized entries will show here with their assigned animals'}</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
                                 {sortedWaitlist.map((entry, idx) => {
                                     const ful = computeEntryFulfillment(entry);
                                     return (
@@ -1132,8 +1132,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                             {entry.speciesRequests?.map(r => r.species).filter(Boolean).join(', ') || '—'}
                                                         </span>
                                                     </div>
-                                                    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-md ${ful.totalMatched > ful.totalRequested ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : ful.isFulfilled ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'}`}>
-                                                        {ful.totalMatched}/{ful.totalRequested}
+                                                      }`}>
+                                                        
                                                     </span>
                                                 </div>
                                             </div>
@@ -1153,16 +1153,16 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     <div className="space-y-1.5">
                                                         {groups.map(g => {
                                                             const isOpen = !!expandedSpecGroups[g.key];
-                                                            const symbol = g.gender === 'Male' ? '♂' : g.gender === 'Female' ? '♀' : '';
-                                                            const symbolCls = g.gender === 'Male' ? 'text-blue-600 dark:text-blue-400' : g.gender === 'Female' ? 'text-pink-600 dark:text-pink-400' : 'text-gray-500';
+                                                            const symbolMale = g.gender === 'Male' ? '♂' : g.gender === 'Female' ? '' : g.gender === 'Any' ? '♂' : ''; const symbolFemale = g.gender === 'Female' ? '♀' : g.gender === 'Male' ? '' : g.gender === 'Any' ? '♀' : '';
+                                                            const symbolClsMale = g.gender === 'Male' ? 'text-blue-600 dark:text-blue-400' : g.gender === 'Female' ? 'text-pink-600 dark:text-pink-400' : 'text-gray-500'; const symbolClsFemale = g.gender === 'Female' ? 'text-pink-600 dark:text-pink-400' : g.gender === 'Male' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500';
                                                             const toggle = () => setExpandedSpecGroups(prev => ({ ...prev, [g.key]: !prev[g.key] }));
                                                             return (
                                                                 <div key={g.key} className="rounded-lg border border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-surface">
                                                                     <button type="button" onClick={toggle} className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 text-left">
                                                                         <span className="flex items-center gap-1.5 min-w-0">
                                                                             {isOpen ? <ChevronDown size={12} className="shrink-0 text-gray-400" /> : <ChevronRight size={12} className="shrink-0 text-gray-400" />}
-                                                                            {symbol && <span className={`text-sm font-bold shrink-0 ${symbolCls}`}>{symbol}</span>}
-                                                                            <span className="text-xs text-gray-700 dark:text-dark-text truncate">{g.species}{g.gender !== 'Any' ? ` (${g.gender.charAt(0)})` : ''}</span>
+                                                                            {symbolMale && <span className={`text-sm font-bold shrink-0 ${symbolClsMale}`}>{symbolMale}</span>}{symbolFemale && <span className={`text-sm font-bold shrink-0 ${symbolClsFemale}`}>{symbolFemale}</span>}
+                                                                            <span className="text-xs text-gray-700 dark:text-dark-text truncate">{g.species}{g.gender !== 'Any' ? ` (${g.gender.charAt(0)})` : g.gender === 'Any' ? ' (Any)' : ''}</span>
                                                                         </span>
                                                                         <span className={`text-xs font-medium px-2 py-0.5 rounded-md shrink-0 ${g.matched > g.requested ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : g.matched >= g.requested && g.requested > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'}`}>
                                                                             {g.matched}/{g.requested}
@@ -1207,14 +1207,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-dark-border pt-2 mt-1">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-dark-border pt-2 mt-1 w-full min-w-0">
                                                 {waitlistView === 'active' ? (
                                                     <div className="flex flex-wrap items-center gap-1">
                                                         <button onClick={() => idx > 0 && handleWlMoveUp(entry)} disabled={idx === 0} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition" title="Move up"><ArrowUp size={10} /></button>
                                                         <button onClick={() => idx < sortedWaitlist.length - 1 && handleWlMoveDown(entry)} disabled={idx === sortedWaitlist.length - 1} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition" title="Move down"><ArrowDown size={10} /></button>
                                                         <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Edit size={11} /> Edit</button>
                                                         <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
-                                                        <button onClick={() => handleWlFinalize(entry)} className="ml-2 flex items-center gap-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition"><CheckCircle size={11} /> Finalize</button>
+                                                        <button onClick={() => handleWlFinalize(entry)} className="flex items-center gap-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition"><CheckCircle size={11} /> Finalize</button>
                                                     </div>
                                                 ) : (
                                                     <div className="flex flex-wrap items-center gap-1">
