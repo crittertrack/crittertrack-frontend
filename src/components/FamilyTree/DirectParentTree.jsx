@@ -74,8 +74,8 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
         {depth < 4 && (
           <div style={{ display: 'flex', gap: 16, position: 'relative' }}>
             <div style={{ position:'absolute', bottom:-8, left:'25%', right:'25%', height:2, background:'#999' }} />
-            {renderLevel(animal?.sireId_public, depth + 1)}
-            {renderLevel(animal?.damId_public, depth + 1)}
+            {renderLevel(animal?.sireId_public, depth + 1) || <div style={{ minWidth: 140 }} />}
+            {renderLevel(animal?.damId_public, depth + 1) || <div style={{ minWidth: 140 }} />}
           </div>
         )}
         <div style={{ height: 8, width: 2, background: '#999' }} />
