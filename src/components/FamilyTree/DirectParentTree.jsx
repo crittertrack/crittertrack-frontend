@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import apiClient from '../../utils/apiClient';
 import { Mars, Venus } from 'lucide-react';
 
-const Node = ({ animal, onClick }) => (
-  <button onClick={() => onClick?.(animal?.id_public)} style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 140, textAlign: 'left' }}>
+const Node = ({ animal, onClick, onViewAnimal }) => (
+  <button onClick={() => { onClick?.(animal?.id_public); onViewAnimal?.(animal); }} style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 140, textAlign: 'left' }}>
     {animal?.birthDate && <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{String(animal.birthDate).slice(0,10)}</div>}
     {animal?.imageUrl && <img src={animal.imageUrl} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 4 }} />}
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
@@ -14,7 +14,7 @@ const Node = ({ animal, onClick }) => (
   </button>
 );
 
-const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick }) => {
+const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal }) => {
   const [nodes, setNodes] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -71,7 +71,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick }) => {
           </div>
         )}
         <div style={{ height: 8, width: 2, background: '#999' }} />
-        <Node animal={animal} onClick={onNodeClick} />
+        <Node animal={animal} onClick={onNodeClick} onViewAnimal={onViewAnimal} />
       </div>
     );
   };
