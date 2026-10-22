@@ -86,7 +86,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
 
   return (
     <div>
-      <div style={{ marginBottom: 8, display: 'flex', gap: 8 }}>
+      <div style={{ marginBottom: 8, display: 'flex', gap: 8, position: 'sticky', top: 0, zIndex: 10, background: 'white' }}>
         <button onClick={() => setZoom(z => Math.max(50, z - 10))}>Zoom Out</button>
         <button onClick={() => setZoom(z => Math.min(200, z + 10))}>Zoom In</button>
       </div>
