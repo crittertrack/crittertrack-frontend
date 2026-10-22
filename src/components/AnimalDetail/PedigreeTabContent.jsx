@@ -21,8 +21,9 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     // Wrapper for onViewAnimal that coordinates opening AnimalModalV2 with Pedigree tab
     // and keeping the DirectParentTree in sync with the new focus animal
     const handleViewAnimal = (clickedAnimal) => {
-        // Open AnimalModalV2 for the clicked animal
-        onViewAnimal?.(clickedAnimal);
+        // Open AnimalModalV2 for the clicked animal and ensure Pedigree tab is selected
+        // Pass true as second argument to indicate this is from DirectParentTree navigation
+        onViewAnimal?.(clickedAnimal, true);
         // Update DirectParentTree focus to the clicked animal ID
         // This causes the tree to re-fetch with the new focusAnimalId, keeping it in sync
         setTreeFocusId(clickedAnimal.id_public);
