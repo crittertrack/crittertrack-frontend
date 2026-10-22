@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import apiClient from '../../utils/apiClient';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Mars, Venus } from 'lucide-react';
+import { Mars, Venus, Cat } from 'lucide-react';
 
 // ============================================================
 // NODE COMPONENT
@@ -35,18 +35,10 @@ const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
             draggable={false}
           />
         ) : (
-          <div className="flex items-center justify-center text-gray-400">
-            <svg
-              className="w-6 h-6"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-11H2a2 2 0 01-2-2V6a2 2 0 012-2h2v2h2v4h2V6a2 2 0 012-2h4v2h4v4h2V6a2 2 0 012-2h2v2Z" />
-            </svg>
-            <span>No Image</span>
-          </div>
-        )}
+  <div className="flex items-center justify-center text-gray-400">
+    <Cat size={40} strokeWidth={1.5} aria-hidden="true" />
+  </div>
+)}
       </div>
 
       {/* Name - centered horizontally */}
