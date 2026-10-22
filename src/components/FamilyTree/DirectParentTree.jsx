@@ -59,8 +59,10 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
           // Capture node IDs after counter increments for correct edge targets
           let sireNodeId = null;
           let damNodeId = null;
-          if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - 280, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: nodeId, target: sireNodeId }); }
-          if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + 220, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: nodeId, target: damNodeId }); }
+          const sireOffset = 280 + depth * 5;  // depth-dependent offset to prevent overlap
+        const damOffset = 220 + depth * 7;  // different coefficient so sire's dam ≠ dam's sire
+        if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: nodeId, target: sireNodeId }); }
+        if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: nodeId, target: damNodeId }); }
         }
       }
       if (!cancelled) { setNodes(ns); setEdges(es); setLoading(false); }
