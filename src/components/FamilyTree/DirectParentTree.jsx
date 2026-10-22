@@ -64,10 +64,10 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
           let sireOffset, damOffset;
         // Per-ancestor-pair spacing configuration:
         // Base offsets at depth 1, and depth increment multipliers
-        const sireBase = 400;   // base horizontal offset for sire at depth 1
-        const damBase = 350;    // base horizontal offset for dam at depth 1
-        const sireDepthMultiplier = 50;  // additional offset per depth for sire lineage
-        const damDepthMultiplier = 40;   // additional offset per depth for dam lineage (can be different!)
+        const sireBase = 600;   // increased = more space between ancestor pairs at all depths
+        const damBase = 550;    // increased = more space between ancestor pairs at all depths
+        const sireDepthMultiplier = 25;  // moderate growth per depth for sire lineage
+        const damDepthMultiplier = 20;   // moderate growth per depth for dam lineage (can be different!)
         
         // Calculate offsets based on depth with independent multipliers
         sireOffset = sireBase + depth * sireDepthMultiplier;
