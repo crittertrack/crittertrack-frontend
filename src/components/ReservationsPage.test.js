@@ -162,8 +162,10 @@ test('shows extra assignments even when more animals are assigned than requested
     // Only 1 was requested but 2 are assigned: the "Any" counter must show the full 2/1.
     const count = screen.getByLabelText('Any 2 of 1');
     expect(count).toBeTruthy();
-    // Over-assignment is never flagged red.
+    // Over-assignment is never flagged red — the request is still covered, so it
+    // keeps the green "done" colour.
     expect(count.className).not.toContain('text-red');
+    expect(count.className).toContain('bg-green-100');
     // The request itself is covered, so the entry still counts as fulfilled.
     expect(screen.getByText(/Fulfilled/)).toBeTruthy();
 });
@@ -189,6 +191,8 @@ test('the per-species counter shows the full overcount (16/1) instead of capping
     const count = screen.getByLabelText('Any 16 of 1');
     expect(count).toBeTruthy();
     expect(count.className).not.toContain('text-red');
+    // Over-assignment is still fulfilled, so it is green.
+    expect(count.className).toContain('bg-green-100');
 });
 
 test('counters are per species AND per gender', async () => {
@@ -780,6 +784,71 @@ test('the entry number is rendered larger and darker than the surrounding text',
     expect(number.className).toContain('text-xs');
     expect(number.className).toContain('font-bold');
     expect(number.className).toContain('text-gray-500');
+});
+
+test('the waitlist entry totals the deposit and payment still due across its animals', async () => {
+    const wl = [{
+        _id: 'W80', name: 'Payer', contactInfo: 'payer@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 2 }],
+        isActive: true, entryDate: '2026-02-05', sortOrder: 0, assignedAnimals: [],
+    }];
+    const reserved = [
+        ...animals,
+        // $40 price, $20 deposit, both still due.
+        { id_public: 'CTC40', name: 'One', species: 'Fancy Mouse', gender: 'Female', status: 'Booked', reservedBuyerName: 'Payer', reservedWaitlistEntryId: 'W80', reservedPrice: 40, reservedPriceCurrency: 'USD', reservedDeposit: 20, reservedDepositStatus: 'due', reservedPaymentStatus: 'due' },
+        // $30 price, $15 deposit, both already paid.
+        { id_public: 'CTC41', name: 'Two', species: 'Fancy Mouse', gender: 'Male', status: 'Booked', reservedBuyerName: 'Payer', reservedWaitlistEntryId: 'W80', reservedPrice: 30, reservedPriceCurrency: 'USD', reservedDeposit: 15, reservedDepositStatus: 'done', reservedPaymentStatus: 'done' },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Payer');
+
+    // Only the animal that is still unpaid contributes to the totals.
+    expect(screen.getByText('deposit due')).toBeTruthy();
+    expect(screen.getByText('payment due')).toBeTruthy();
+    expect(screen.getByText('$20')).toBeTruthy();
+    expect(screen.getByText('$40')).toBeTruthy();
+    // The paid animal's amounts are not counted.
+    expect(screen.queryByText('$15')).toBeNull();
+    expect(screen.queryByText('$30')).toBeNull();
+});
+
+test('no deposit/payment totals are shown when everything is already paid', async () => {
+    const wl = [{
+        _id: 'W81', name: 'Settled', contactInfo: 's@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, entryDate: '2026-02-06', sortOrder: 0, assignedAnimals: [],
+    }];
+    const reserved = [
+        ...animals,
+        { id_public: 'CTC42', name: 'Paid', species: 'Fancy Mouse', gender: 'Female', status: 'Booked', reservedBuyerName: 'Settled', reservedWaitlistEntryId: 'W81', reservedPrice: 40, reservedPriceCurrency: 'USD', reservedDeposit: 20, reservedDepositStatus: 'done', reservedPaymentStatus: 'done' },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Settled');
+    expect(screen.queryByText('deposit due')).toBeNull();
+    expect(screen.queryByText('payment due')).toBeNull();
+});
+
+test('totals are kept separate per currency', async () => {
+    const wl = [{
+        _id: 'W82', name: 'Mixed', contactInfo: 'm@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 2 }],
+        isActive: true, entryDate: '2026-02-07', sortOrder: 0, assignedAnimals: [],
+    }];
+    const reserved = [
+        ...animals,
+        { id_public: 'CTC43', name: 'Dollar', species: 'Fancy Mouse', gender: 'Female', status: 'Booked', reservedBuyerName: 'Mixed', reservedWaitlistEntryId: 'W82', reservedPrice: 40, reservedPriceCurrency: 'USD', reservedDeposit: 20, reservedDepositStatus: 'due', reservedPaymentStatus: 'due' },
+        { id_public: 'CTC44', name: 'Euro', species: 'Fancy Mouse', gender: 'Male', status: 'Booked', reservedBuyerName: 'Mixed', reservedWaitlistEntryId: 'W82', reservedPrice: 50, reservedPriceCurrency: 'EUR', reservedDeposit: 25, reservedDepositStatus: 'due', reservedPaymentStatus: 'due' },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Mixed');
+    // The two currencies are totalled separately, not added together.
+    expect(screen.getByText('$20')).toBeTruthy();
+    expect(screen.getByText('$40')).toBeTruthy();
+    expect(screen.getByText('€25')).toBeTruthy();
+    expect(screen.getByText('€50')).toBeTruthy();
 });
 
 test('clicking the animal image opens the full animal modal for that animal', async () => {

@@ -238,9 +238,55 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 suffix: existing.suffix || a.suffix,
                 species: existing.species || a.species,
                 gender: existing.gender || a.gender,
+                // The reservation money comes from the live animal (the snapshot only
+                // exists on finalized entries).
+                reservedPrice: existing.reservedPrice ?? a.reservedPrice ?? null,
+                reservedPriceCurrency: existing.reservedPriceCurrency || a.reservedPriceCurrency || null,
+                reservedDeposit: existing.reservedDeposit ?? a.reservedDeposit ?? null,
+                reservedDepositStatus: existing.reservedDepositStatus ?? a.reservedDepositStatus ?? null,
+                reservedPaymentStatus: existing.reservedPaymentStatus ?? a.reservedPaymentStatus ?? null,
             });
         });
         return Array.from(byId.values());
+    };
+
+    // The deposit/payment still outstanding for an entry's assigned animals.
+    //
+    // Each animal carries its own reservation money, and the money can be in different
+    // currencies, so the totals are grouped per currency rather than summed blindly.
+    //
+    // The deposit is PART OF the price, not on top of it: with a price of 75 and a
+    // paid deposit of 25, the outstanding payment is 50. The two figures therefore
+    // always add up to what is still owed, and never double-count:
+    //
+    //   deposit due = the charged deposit, while it has not been paid yet
+    //   payment due = the price minus the deposit (the balance), while the
+    //                 payment is not marked done
+    //
+    //   price 75, deposit 25 unpaid -> 25 deposit due + 50 payment due = 75 owed
+    //   price 75, deposit 25 paid   ->  0 deposit due + 50 payment due = 50 owed
+    //   price 75, no deposit        ->  0 deposit due + 75 payment due = 75 owed
+    const computeEntryTotals = (assigned) => {
+        const byCurrency = new Map();
+        const addTo = (currency, key, amount) => {
+            const c = currency || 'USD';
+            if (!byCurrency.has(c)) byCurrency.set(c, { currency: c, depositDue: 0, paymentDue: 0, totalPrice: 0 });
+            byCurrency.get(c)[key] += amount;
+        };
+        (assigned || []).forEach(a => {
+            const currency = a.reservedPriceCurrency || 'USD';
+            const deposit = parseFloat(a.reservedDeposit) || 0;
+            const price = a.reservedPrice != null ? Number(a.reservedPrice) || 0 : 0;
+            if (price > 0) addTo(currency, 'totalPrice', price);
+            // A deposit that is charged and not yet marked paid.
+            if (deposit > 0 && a.reservedDepositStatus !== 'done') addTo(currency, 'depositDue', deposit);
+            // The outstanding payment is the balance: the price minus the deposit
+            // (the deposit is part of the price). Never below zero.
+            if (price > 0 && a.reservedPaymentStatus !== 'done') {
+                addTo(currency, 'paymentDue', Math.max(0, price - deposit));
+            }
+        });
+        return Array.from(byCurrency.values()).filter(t => t.depositDue > 0 || t.paymentDue > 0);
     };
 
     const computeEntryFulfillment = (entry) => {
@@ -250,6 +296,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         return {
             progress,
             assigned,
+            totals: computeEntryTotals(assigned),
             totalRequested: progress.reduce((s, p) => s + p.requested, 0),
             totalFulfilled: progress.reduce((s, p) => s + p.fulfilled, 0),
             // Uncapped: summed across requests, so over-assignment stays visible.
@@ -823,6 +870,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     const hasReservation = !!(animal.reservedBuyerName || f.buyerName);
                                     // Stored deposit amount (read mode); 0/none = deposits not used for this animal.
                                     const depositAmt = parseFloat(animal.reservedDeposit) || 0;
+                                    // The balance still to pay: the full price minus the deposit (the
+                                    // deposit is part of the price, not on top of it).
+                                    const fullPriceAmt = animal.reservedPrice != null ? Number(animal.reservedPrice) || 0 : 0;
+                                    const paymentBalance = Math.max(0, fullPriceAmt - depositAmt);
                                     const wlEntry = animal.reservedWaitlistEntryId
                                         ? waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))
                                         : null;
@@ -865,7 +916,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         </div>
                                                         {showWlName && <div className="flex justify-between gap-2 items-start"><span className="text-gray-500 dark:text-dark-text-muted shrink-0">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right min-w-0 break-words">{wlName}</span></div>}
                                                         <div className="flex justify-between gap-2">
-                                                            <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><DollarSign size={11} /> Price</span>
+                                                            {/* "Full price" is the total price of the animal — the deposit is
+                                                                part of it, not on top of it. */}
+                                                            <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><DollarSign size={11} /> Full price</span>
                                                             <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>}</span>
                                                         </div>
                                                         <div className="flex justify-between gap-2 items-center">
@@ -879,7 +932,15 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         </div>
                                                         <div className="flex justify-between gap-2 items-center">
                                                             <span className="text-gray-500 dark:text-dark-text-muted">Payment</span>
-                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedPaymentStatus)}`}>{animal.reservedPaymentStatus === 'done' ? 'Done' : 'Due'}</span>
+                                                            <span className="flex items-center gap-1.5">
+                                                                {/* The balance still to pay: the full price minus the deposit. */}
+                                                                {paymentBalance > 0 && (
+                                                                    <span className="text-[11px] text-gray-600 dark:text-dark-text-secondary">
+                                                                        {getCurrencySymbol(animal.reservedPriceCurrency || currency)}{paymentBalance}
+                                                                    </span>
+                                                                )}
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedPaymentStatus)}`}>{animal.reservedPaymentStatus === 'done' ? 'Done' : 'Due'}</span>
+                                                            </span>
                                                         </div>
                                                         {animal.reservedDate && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Calendar size={11} /> Date</span><span className="font-medium text-gray-800 dark:text-dark-text">{formatDate(animal.reservedDate)}</span></div>}
                                                     </div>
@@ -1211,6 +1272,32 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         </span>
                                                     </div>
                                                 </div>
+                                                {/* Deposit / payment still outstanding across the entry's
+                                                    assigned animals (grouped per currency). These mirror the
+                                                    separate "Deposit" and "Payment" statuses on the animal
+                                                    card, so they are shown as two separate figures. */}
+                                                {ful.totals.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 pt-2 border-t border-gray-100 dark:border-dark-border">
+                                                        {ful.totals.map(t => (
+                                                            <span key={t.currency} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+                                                                {t.depositDue > 0 && (
+                                                                    <span className="inline-flex items-center gap-1">
+                                                                        <DollarSign size={9} className="text-amber-600 dark:text-amber-400" />
+                                                                        <span className="font-medium text-amber-700 dark:text-amber-300">{getCurrencySymbol(t.currency)}{t.depositDue}</span>
+                                                                        <span className="text-gray-500 dark:text-dark-text-muted">deposit due</span>
+                                                                    </span>
+                                                                )}
+                                                                {t.paymentDue > 0 && (
+                                                                    <span className="inline-flex items-center gap-1">
+                                                                        <DollarSign size={9} className="text-amber-600 dark:text-amber-400" />
+                                                                        <span className="font-medium text-amber-700 dark:text-amber-300">{getCurrencySymbol(t.currency)}{t.paymentDue}</span>
+                                                                        <span className="text-gray-500 dark:text-dark-text-muted">payment due</span>
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {(() => {
@@ -1245,20 +1332,18 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                                             {g.genderCounters.map(c => {
                                                                                 const over = c.matched > c.requested;
                                                                                 const done = c.matched >= c.requested;
-                                                                                // Over-assignment is never flagged red — it is shown in a
-                                                                                // neutral colour so it reads as informational, not an error.
-                                                                                const cls = over
-                                                                                    ? 'bg-gray-200 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary'
-                                                                                    : done
-                                                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                                                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
+                                                                                // Over-assignment is never flagged red: the request IS covered
+                                                                                // (it is fulfilled), so it keeps the green "done" colour.
+                                                                                const cls = done
+                                                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                                                    : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
                                                                                 const Icon = c.gender === 'Male' ? Mars : c.gender === 'Female' ? Venus : Users;
                                                                                 return (
                                                                                     <span key={c.gender}
                                                                                         data-testid={`wl-counter-${g.key}-${c.gender}`}
                                                                                         aria-label={`${c.gender} ${c.matched} of ${c.requested}`}
                                                                                         className={`inline-flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-md ${cls}`}
-                                                                                        title={`${c.gender}: ${c.matched} assigned of ${c.requested} requested`}>
+                                                                                        title={`${c.gender}: ${c.matched} assigned of ${c.requested} requested${over ? ' (over-assigned)' : ''}`}>
                                                                                         <Icon size={9} />
                                                                                         {c.matched}/{c.requested}
                                                                                     </span>
@@ -1307,8 +1392,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
 
                                             {/* Actions live in their own row pinned to the bottom-right of the
                                                 card, with extra padding below so the buttons never look like
-                                                they are falling out of the card. */}
-                                            <div className="w-full min-w-0 border-t border-gray-100 dark:border-dark-border mt-2 pt-2 pb-1 sm:pb-2">
+                                                they are falling out of the card. The extra right padding keeps
+                                                the last button (Finalize / Delete) off the card's edge. */}
+                                            <div className="w-full min-w-0 border-t border-gray-100 dark:border-dark-border mt-2 pt-2 pb-1 sm:pb-2 pr-2 sm:pr-3">
                                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                                     <div className="flex flex-wrap items-center gap-1" />
                                                     {/* Primary actions stay pinned to the bottom-right. */}
