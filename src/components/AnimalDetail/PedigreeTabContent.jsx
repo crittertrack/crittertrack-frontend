@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
 import { Loader2, ScrollText, Mars, Venus } from 'lucide-react';
 import { PedigreeChart } from '../AnimalForm';
-import { DirectParentTree } from '../FamilyTree/DirectParentTree';
+import DirectParentTree from '../FamilyTree/DirectParentTree';
 import { formatDate } from '../../utils/dateFormatter';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
