@@ -84,7 +84,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
     );
   };
 
-  return <div style={{ padding: 16, overflow: 'auto', width: '100%' }}>{renderLevel(focusAnimalId)}</div>;
+  return <div style={{ padding: 16, overflow: 'hidden', width: '100%', transform: 'scale(0.85)', transformOrigin: 'top center' }}>{renderLevel(focusAnimalId)}</div>;
 };
 
 export default DirectParentTree;
