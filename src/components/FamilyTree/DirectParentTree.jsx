@@ -62,23 +62,16 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
           let sireNodeId = null;
           let damNodeId = null;
           let sireOffset, damOffset;
-        if (depth === 1) {
-          // Generation 1 (parents): tighter spacing
-          sireOffset = 400;
-          damOffset = 350;
-        } else if (depth === 2) {
-          // Generation 2 (grandparents): moderate spacing
-          sireOffset = 450;
-          damOffset = 400;
-        } else if (depth === 3) {
-          // Generation 3 (great-grandparents): more spacing
-          sireOffset = 500;
-          damOffset = 450;
-        } else {
-          // Fallback for any other depth
-          sireOffset = 400 + depth * 50;
-          damOffset = 350 + depth * 50;
-        }
+        // Per-ancestor-pair spacing configuration:
+        // Base offsets at depth 1, and depth increment multipliers
+        const sireBase = 400;   // base horizontal offset for sire at depth 1
+        const damBase = 350;    // base horizontal offset for dam at depth 1
+        const sireDepthMultiplier = 50;  // additional offset per depth for sire lineage
+        const damDepthMultiplier = 40;   // additional offset per depth for dam lineage (can be different!)
+        
+        // Calculate offsets based on depth with independent multipliers
+        sireOffset = sireBase + depth * sireDepthMultiplier;
+        damOffset = damBase + depth * damDepthMultiplier;
         if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: sireNodeId, target: nodeId, type: 'straight', style: { stroke: '#888', strokeWidth: 1 } }); }
         if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: damNodeId, target: nodeId, type: 'straight', style: { stroke: '#888', strokeWidth: 1 } }); }
         }
