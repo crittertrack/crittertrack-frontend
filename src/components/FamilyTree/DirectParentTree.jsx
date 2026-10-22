@@ -61,10 +61,10 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
           // Capture node IDs after counter increments for correct edge targets
           let sireNodeId = null;
           let damNodeId = null;
-          const sireOffset = 400 + depth * 100;  // larger coefficient for more spacing between ancestor cards
-        const damOffset = 350 + depth * 100;  // larger coefficient so sire's dam ≠ dam's sire with extra space
-        if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: sireNodeId, target: nodeId, type: 'straight', style: { stroke: '#888', strokeWidth: 1 } }); }
-        if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: damNodeId, target: nodeId, type: 'straight', style: { stroke: '#888', strokeWidth: 1 } }); }
+          const sireOffset = 400;  // fixed horizontal spacing between ancestor cards (same for all depths)
+        const damOffset = 350;  // fixed horizontal spacing between ancestor cards (same for all depths)
+        if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: sireNodeId, target: nodeId, type: 'step', style: { stroke: '#888', strokeWidth: 1 } }); }
+        if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: damNodeId, target: nodeId, type: 'step', style: { stroke: '#888', strokeWidth: 1 } }); }
         }
       }
       if (!cancelled) { setNodes(ns); setEdges(es); setLoading(false); }
