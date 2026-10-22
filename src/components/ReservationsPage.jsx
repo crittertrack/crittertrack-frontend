@@ -1094,62 +1094,83 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     return (
                                     <div key={entry._id} data-testid={`waitlist-entry-${entry._id}`} className={cardCls}>
                                         <div className="p-3 sm:p-4 space-y-2.5">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center flex-shrink-0"><User size={16} /></div>
-                                                    <div className="min-w-0">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="text-[10px] font-bold text-gray-400 dark:text-dark-text-muted shrink-0">#{idx + 1}</span>
-                                                            <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
-                                                        </div>
-                                                        {entry.contactInfo && <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate flex items-center gap-1"><Phone size={10} /> {entry.contactInfo}</div>}
-                                                        <div className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-0.5"><Calendar size={10} /> {entry.entryDate ? formatDate(entry.entryDate) : formatDate(entry.createdAt)}</div>
-                                                        {entry.contactId && (
-                                                            // The attendee name is replaced with the contact's display name when a
-                                                            // contact is assigned, so only show the linked contact when it adds
-                                                            // information (e.g. the attendee name was edited afterwards).
-                                                            (entry.contactName || entry.contactId?.personalName || 'Linked contact') !== entry.name && (
-                                                                <div className="text-xs text-green-700 dark:text-green-400 truncate flex items-center gap-1">
-                                                                    <User size={10} /> {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
-                                                                </div>
-                                                            )
-                                                        )}
-                                                    </div>
+                                            <div className="flex flex-wrap items-start justify-between gap-2">
+                                                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                                                    <span className="text-[10px] font-bold text-gray-400 dark:text-dark-text-muted shrink-0 rounded-md px-1.5 py-0.5 bg-gray-100 dark:bg-dark-surface-hover">#{idx + 1}</span>
+                                                    <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
                                                 </div>
                                                 {waitlistView === 'history' && <span className="text-[11px] bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted px-2 py-0.5 rounded-full shrink-0">History</span>}
                                             </div>
 
-                                            <div className="text-xs sm:text-sm space-y-1 bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5">
-                                                {ful.isFulfilled && (
-                                                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium mb-1"><Check size={10} /> Fulfilled</span>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted">
+                                                {entry.contactInfo && (
+                                                    <span className="flex items-center gap-1 truncate">
+                                                        <Phone size={10} className="shrink-0" />
+                                                        <span className="truncate">{entry.contactInfo}</span>
+                                                    </span>
                                                 )}
-                                                {ful.progress.map((p, pi) => (
-                                                    <div key={pi} className="flex justify-between gap-2 mb-0.5">
-                                                        <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><Tag size={10} /> {p.species}</span>
-                                                        {/* matched is uncapped: extra assignments show as e.g. 3/2 (red) instead of hiding behind the cap */}
-                                                        <span className={`text-right text-[11px] ${p.matched > p.requested ? 'text-red-600 dark:text-red-400 font-medium' : ''}`}>
-                                                            {p.breakdown.map(b => b.count + ' ' + b.gender).join(' / ')}{` • ${p.matched}/${p.requested}`}
+                                                <span className="flex items-center gap-1">
+                                                    <Calendar size={10} className="shrink-0" />
+                                                    {entry.entryDate ? formatDate(entry.entryDate) : formatDate(entry.createdAt)}
+                                                </span>
+                                                {entry.contactId && (
+                                                    <span className="flex items-center gap-1 text-green-700 dark:text-green-400">
+                                                        <User size={10} />
+                                                        {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                            <div className="bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5 border border-gray-100 dark:border-dark-border">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {ful.isFulfilled && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={9} /> Fulfilled</span>
+                                                    )}
+                                                    <div className="flex flex-wrap items-center gap-1.5">
+                                                        <span className="text-xs font-medium text-gray-700 dark:text-dark-text">Species:</span>
+                                                        <span className="text-xs text-gray-600 dark:text-dark-text-muted">
+                                                            {entry.speciesRequests?.map(r => r.species).filter(Boolean).join(', ') || '—'}
                                                         </span>
                                                     </div>
-                                                ))}
-                                                {ful.progress.length > 1 && (
-                                                    <div className="flex justify-between gap-2 border-t border-gray-200 dark:border-dark-text-muted pt-0.5 mt-0.5">
-                                                        <span className="text-gray-500 dark:text-dark-text-muted text-[10px]">Total</span>
-                                                        {/* Over-assignment outranks the fulfilled/amber colours so extra animals stand out */}
-                                                        <span className={`text-right text-[11px] font-medium ${ful.totalMatched > ful.totalRequested ? 'text-red-600 dark:text-red-400' : ful.isFulfilled ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}>{ful.totalMatched}/{ful.totalRequested}</span>
+                                                    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-md ${ful.totalMatched > ful.totalRequested ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : ful.isFulfilled ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'}`}>
+                                                        {ful.totalMatched}/{ful.totalRequested}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {ful.progress.map((p, pi) => (
+                                                <div key={pi} className="flex justify-between gap-2 py-1 border-b border-gray-100 dark:border-dark-border last:border-0">
+                                                    <span className="text-xs text-gray-600 dark:text-dark-text-secondary flex items-center gap-1">
+                                                        <Tag size={9} className="shrink-0" />
+                                                        {p.species}
+                                                    </span>
+                                                    <span className={`text-xs ${p.matched > p.requested ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-dark-text-secondary'}`}>
+                                                        {p.breakdown.map(b => `${b.count} ${b.gender}`).join(' / ')}{` • ${p.matched}/${p.requested}`}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                            {waitlistView === 'active' && ful.assigned.length > 0 && (
+                                                <div className="space-y-1.5 border-t border-gray-100 dark:border-dark-border pt-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Assigned</span>
+                                                        <span className="text-[10px] text-gray-400 dark:text-dark-text-muted">{ful.assigned.length} animals</span>
                                                     </div>
-                                                )}
-                                                {waitlistView === 'active' && ful.assigned.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 pt-1 mt-1 border-t border-gray-200 dark:border-dark-border">
-                                                        <span className="text-[10px] text-gray-500 dark:text-dark-text-muted">Assigned:</span>
-                                                        {ful.assigned.map((a, i) => (
-                                                            <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                                        {ful.assigned.map(a => (
+                                                            <div key={a.id_public} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                                                                <Check size={9} className="text-green-600 dark:text-green-400 shrink-0" />
+                                                                <span className="text-xs text-gray-700 dark:text-dark-text truncate flex-1">{a.name || a.id_public}</span>
+                                                                <span className="text-[10px] text-gray-400 dark:text-dark-text-muted shrink-0">({a.id_public})</span>
+                                                            </div>
                                                         ))}
                                                     </div>
-                                                )}
-                                                {entry.notes && <div className="text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}
-                                                {waitlistView === 'history' && (
-                                                    <div className="pt-1 border-t border-gray-200 dark:border-dark-border mt-1">
+                                                </div>
+                                            )}
+
+                                            {entry.notes && <div className="text-xs text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}
+
+                                            {waitlistView === 'history' && (
+                                                <div className="pt-2 border-t border-gray-100 dark:border-dark-border mt-2">
                                                         <div className="text-gray-500 dark:text-dark-text-muted mb-0.5 text-[10px]">Assigned animals</div>
                                                         {ful.assigned.length > 0 ? (
                                                             <div className="flex flex-wrap gap-1">
@@ -1165,15 +1186,23 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 )}
                                             </div>
 
-                                            <div className="flex gap-2 justify-end flex-wrap">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-dark-border pt-2 mt-1">
                                                 {waitlistView === 'active' ? (
-                                                    <>
-                                                        <button onClick={() => idx > 0 && handleWlMoveUp(entry)} disabled={idx === 0} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition" title="Move up"><ArrowUp size={10} /></button>
-                                                        <button onClick={() => idx < sortedWaitlist.length - 1 && handleWlMoveDown(entry)} disabled={idx === sortedWaitlist.length - 1} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition" title="Move down"><ArrowDown size={10} /></button>
-                                                        <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
-                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
-                                                        <button onClick={() => handleWlFinalize(entry)} className="flex items-center gap-1 text-xs text-white bg-green-600 hover:bg-green-700 px-2.5 py-1 rounded-lg transition font-medium"><CheckCircle size={11} /> Finalize</button>
-                                                    </>
+                                                    <div className="flex flex-wrap items-center gap-1">
+                                                        <button onClick={() => idx > 0 && handleWlMoveUp(entry)} disabled={idx === 0} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition" title="Move up"><ArrowUp size={10} /></button>
+                                                        <button onClick={() => idx < sortedWaitlist.length - 1 && handleWlMoveDown(entry)} disabled={idx === sortedWaitlist.length - 1} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition" title="Move down"><ArrowDown size={10} /></button>
+                                                        <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Edit size={11} /> Edit</button>
+                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                                        <button onClick={() => handleWlFinalize(entry)} className="ml-2 flex items-center gap-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition"><CheckCircle size={11} /> Finalize</button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-wrap items-center gap-1">
+                                                        <button onClick={() => handleWlReactivate(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Undo2 size={11} /> Reactivate</button>
+                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                                    </div>
+                                                )}
+                                            </div>
+
                                                 ) : (
                                                     <>
                                                         <button onClick={() => handleWlReactivate(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Undo2 size={11} /> Reactivate</button>
