@@ -1246,12 +1246,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted">
-                                                {entry.contactInfo && (
-                                                    <span className="flex items-center gap-1 truncate">
-                                                        <Phone size={10} className="shrink-0" />
-                                                        <span className="truncate">{entry.contactInfo}</span>
-                                                    </span>
-                                                )}
                                                 {entry.contactId && (
                                                     // The attendee name is replaced with the contact's display name when a
                                                     // contact is assigned, so only show the linked contact when it adds
