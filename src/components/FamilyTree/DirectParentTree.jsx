@@ -61,13 +61,15 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick }) => {
     const animal = nodes[id];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <Node animal={animal} onClick={onNodeClick} />
         {depth < 4 && (
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 16, position: 'relative' }}>
+            <div style={{ position:'absolute', bottom:-8, left:'25%', right:'25%', height:2, background:'#999' }} />
             {renderLevel(animal?.sireId_public, depth + 1)}
             {renderLevel(animal?.damId_public, depth + 1)}
           </div>
         )}
+        <div style={{ height: 8, width: 2, background: '#999' }} />
+        <Node animal={animal} onClick={onNodeClick} />
       </div>
     );
   };
