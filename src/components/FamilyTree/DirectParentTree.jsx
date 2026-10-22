@@ -71,7 +71,7 @@ const WITHIN_PAIR_GAP = 24;
 const BETWEEN_BRANCH_GAP = 28;
 
 // Vertical distance between generations.
-const GENERATION_HEIGHT = 200;
+const GENERATION_HEIGHT = 300;
 
 // Number of ancestor generations to display.
 const MAX_DEPTH = 4;
@@ -340,7 +340,7 @@ const DirectParentTree = ({
   style={{
     boxSizing: 'border-box',
     width: NODE_WIDTH,
-    minHeight: 300,
+    minHeight: 250,
     border: '1px solid #ccc',
     padding: 8,
     borderRadius: 8,
