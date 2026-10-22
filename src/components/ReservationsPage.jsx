@@ -1221,13 +1221,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 order chevrons pinned to the top-right. */}
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-start gap-2 min-w-0 flex-1">
-                                                    <span className="text-xs font-bold text-gray-500 dark:text-dark-text-secondary shrink-0 rounded-md px-1.5 py-0.5 bg-gray-100 dark:bg-dark-surface-hover">#{idx + 1}</span>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-dark-text shrink-0 rounded-md px-1.5 py-0.5 bg-gray-200 dark:bg-dark-surface-hover">{idx + 1}</span>
                                                     {/* The name wraps onto a second line when it is long, rather
                                                         than being truncated or pushing the header to a new row. */}
                                                     <div className="flex items-baseline gap-2 flex-wrap min-w-0">
                                                         <div className="font-semibold text-gray-800 dark:text-dark-text min-w-0 break-words">{entry.name}</div>
                                                         {entry.entryDate && (
-                                                            <div className="text-xs text-gray-500 dark:text-dark-text-muted shrink-0">{formatDate(entry.entryDate)}</div>
+                                                            <div className="text-xs text-gray-600 dark:text-dark-text-muted shrink-0 flex items-center gap-1"><Calendar size={10} />{formatDate(entry.entryDate)}</div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -1249,10 +1249,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <span className="truncate">{entry.contactInfo}</span>
                                                     </span>
                                                 )}
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar size={10} className="shrink-0" />
-                                                    {entry.entryDate ? formatDate(entry.entryDate) : formatDate(entry.createdAt)}
-                                                </span>
                                                 {entry.contactId && (
                                                     // The attendee name is replaced with the contact's display name when a
                                                     // contact is assigned, so only show the linked contact when it adds
