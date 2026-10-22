@@ -1132,9 +1132,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                             {entry.speciesRequests?.map(r => r.species).filter(Boolean).join(', ') || '—'}
                                                         </span>
                                                     </div>
-                                                      }`}>
-                                                        
-                                                    </span>
                                                 </div>
                                             </div>
 
