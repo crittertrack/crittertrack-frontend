@@ -354,19 +354,50 @@ const DirectParentTree = ({
                     </div>
                   )}
 
-                  {animal?.imageUrl && (
-                    <img
-                      src={animal.imageUrl}
-                      alt=""
+                  
+                  <div
+                    style={{
+                      width: '100%',
+                      height: 160,
+                      background: '#f3f4f6',
+                      borderRadius: 4,
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {animal?.imageUrl && (
+                      <img
+                        src={animal.imageUrl}
+                        alt=""
+                        onError={(event) => {
+                          event.currentTarget.style.display = 'none';
+                          event.currentTarget.nextElementSibling.style.display = 'flex';
+                        }}
+                        style={{
+                          display: 'block',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    )}
+
+                    <div
                       style={{
-                        display: 'block',
+                        display: animal?.imageUrl ? 'none' : 'flex',
                         width: '100%',
-                        height: 160,
-                        objectFit: 'cover',
-                        borderRadius: 4,
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#9ca3af',
                       }}
-                    />
-                  )}
+                    >
+                      <Cat size={48} strokeWidth={1.5} aria-hidden="true" />
+                    </div>
+                  </div>
+
 
                   <div
                     style={{
