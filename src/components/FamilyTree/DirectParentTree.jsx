@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../../utils/apiClient';
+import { Mars, Venus } from 'lucide-react';
 
 const Node = ({ animal, onClick }) => (
   <button onClick={() => onClick?.(animal?.id_public)} style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 140, textAlign: 'left' }}>
+    {animal?.birthDate && <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{String(animal.birthDate).slice(0,10)}</div>}
     {animal?.imageUrl && <img src={animal.imageUrl} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 4 }} />}
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-      <span>{animal?.gender === 'Male' ? '♂' : animal?.gender === 'Female' ? '♀' : ''}</span>
+      <span>{animal?.gender === 'Male' ? <Mars size={14} /> : animal?.gender === 'Female' ? <Venus size={14} /> : null}</span>
       <span style={{ fontWeight: 600 }}>{[animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ')}</span>
     </div>
-    <div style={{ fontSize: 12, color: '#666' }}>Status: {animal?.status || 'Unknown'}</div>
+    <div style={{ height: 6, borderRadius: 3, marginTop: 6, background: animal?.status === 'Alive' ? '#22c55e' : '#94a3b8' }} />
   </button>
 );
 
