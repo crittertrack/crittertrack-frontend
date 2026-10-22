@@ -1355,7 +1355,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                                                 <div className="text-[10px] text-gray-400 dark:text-dark-text-muted pl-5">No assigned animals</div>
                                                                             ) : g.assigned.map(a => (
                                                                                 <div key={a.id_public} className="flex items-center gap-1.5 pl-5 py-0.5">
-                                                                                    <Check size={9} className="text-green-600 dark:text-green-400 shrink-0" />
+                                                                                    {a.gender === 'Male' ? <Mars size={9} className="text-blue-500 shrink-0" /> : a.gender === 'Female' ? <Venus size={9} className="text-pink-500 shrink-0" /> : <Check size={9} className="text-green-600 dark:text-green-400 shrink-0" />}
                                                                                     <span className="text-xs text-gray-700 dark:text-dark-text truncate flex-1">{formatAnimalDisplayName(a)}</span>
                                                                                     <span className="text-[10px] text-gray-400 dark:text-dark-text-muted shrink-0">{a.id_public}</span>
                                                                                 </div>
@@ -1377,7 +1377,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         {ful.assigned.length > 0 ? (
                                                             <div className="flex flex-wrap gap-1">
                                                                 {ful.assigned.map((a, i) => (
-                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.id_public ? `${formatAnimalDisplayName(a)} (${a.id_public})` : formatAnimalDisplayName(a)}</span>
+                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium">{a.gender === 'Male' ? <Mars size={10} className="text-blue-500" /> : a.gender === 'Female' ? <Venus size={10} className="text-pink-500" /> : <Check size={10} />} {a.id_public ? `${formatAnimalDisplayName(a)} (${a.id_public})` : formatAnimalDisplayName(a)}</span>
                                                                 ))}
                                                             </div>
                                                         ) : (
