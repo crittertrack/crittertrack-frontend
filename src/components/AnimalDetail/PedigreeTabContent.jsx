@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
 import { Loader2, ScrollText, Mars, Venus } from 'lucide-react';
 import { PedigreeChart } from '../AnimalForm';
+import { DirectParentTree } from '../FamilyTree/DirectParentTree';
 import { formatDate } from '../../utils/dateFormatter';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 
@@ -12,6 +13,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     const [mpEnrichedData, setMpEnrichedData] = useState(null); // Enriched manual pedigree data
     const [showHorizCert, setShowHorizCert] = useState(false);
     const [showVertCert, setShowVertCert] = useState(false);
+const [showFamilyTree, setShowFamilyTree] = useState(false);
 
     useEffect(() => {
         if (!animal?.id_public) return;
@@ -175,9 +177,20 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
                 <button onClick={() => setShowVertCert(true)} className="px-4 py-2 text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm">
                     <ScrollText size={16} /> Open Vertical Certificate
                 </button>
+                <button onClick={() => setShowFamilyTree(true)} className="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 transition flex items-center gap-1.5 font-semibold shadow-sm">
+                    <ScrollText size={16} /> Open Family Tree
+                </button>
                 </div>
             {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
             {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
+            {showFamilyTree && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-dark-surface rounded-xl w-full max-w-6xl h-[80vh] relative overflow-auto">
+                        <button onClick={() => setShowFamilyTree(false)} className="absolute top-2 right-2 z-10 px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300">Close</button>
+                        <DirectParentTree focusAnimalId={animal.id_public} authToken={authToken} />
+                    </div>
+                </div>
+            )}
             <div className="mt-6 space-y-4">
                 <div>
                     <p className="text-sm font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-2">Parents (Gen 1)</p>
