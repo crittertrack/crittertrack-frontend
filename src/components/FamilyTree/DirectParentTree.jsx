@@ -63,8 +63,8 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
           let damNodeId = null;
           const sireOffset = 400 + depth * 100;  // larger coefficient for more spacing between ancestor cards
         const damOffset = 350 + depth * 100;  // larger coefficient so sire's dam ≠ dam's sire with extra space
-        if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: nodeId, target: sireNodeId, type: 'step', style: { stroke: '#888', strokeWidth: 1 } }); }
-        if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: nodeId, target: damNodeId, type: 'step', style: { stroke: '#888', strokeWidth: 1 } }); }
+        if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y - 200 }); es.push({ id: `${nodeId}-${sire}`, source: sireNodeId, target: nodeId, type: 'straight', style: { stroke: '#888', strokeWidth: 1 } }); }
+        if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y - 200 }); es.push({ id: `${nodeId}-${dam}`, source: damNodeId, target: nodeId, type: 'straight', style: { stroke: '#888', strokeWidth: 1 } }); }
         }
       }
       if (!cancelled) { setNodes(ns); setEdges(es); setLoading(false); }
