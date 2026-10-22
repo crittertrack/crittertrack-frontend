@@ -13,8 +13,24 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     const [mpEnrichedData, setMpEnrichedData] = useState(null); // Enriched manual pedigree data
     const [showHorizCert, setShowHorizCert] = useState(false);
     const [showVertCert, setShowVertCert] = useState(false);
-const [showFamilyTree, setShowFamilyTree] = useState(false);
-const [treeFocusId, setTreeFocusId] = useState(animal.id_public);
+    const [showFamilyTree, setShowFamilyTree] = useState(false);
+    const [treeFocusId, setTreeFocusId] = useState(animal.id_public);
+    // Track the animal to navigate to when clicking nodes in DirectParentTree
+    const [navigateAnimalId, setNavigateAnimalId] = useState(null);
+
+    // Wrapper for onViewAnimal that coordinates opening AnimalModalV2 with Pedigree tab
+    // and keeping the DirectParentTree in sync with the new focus animal
+    const handleViewAnimal = (clickedAnimal) => {
+        // Open AnimalModalV2 for the clicked animal
+        onViewAnimal?.(clickedAnimal);
+        // Update DirectParentTree focus to the clicked animal ID
+        // This causes the tree to re-fetch with the new focusAnimalId, keeping it in sync
+        setTreeFocusId(clickedAnimal.id_public);
+        // Store the navigated animal ID for tracking
+        setNavigateAnimalId(clickedAnimal.id_public);
+        // Ensure the DirectParentTree modal is shown with the new focus animal as root
+        setShowFamilyTree(true);
+    };
 
     useEffect(() => {
         if (!animal?.id_public) return;
@@ -188,7 +204,7 @@ const [treeFocusId, setTreeFocusId] = useState(animal.id_public);
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-dark-surface rounded-xl w-full max-w-6xl h-[80vh] relative overflow-auto">
                         <button onClick={() => { setShowFamilyTree(false); setTreeFocusId(animal.id_public); }} style={{ position: 'sticky', top: 8, right: 8, zIndex: 20 }} className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300">Close</button>
-                        <DirectParentTree focusAnimalId={treeFocusId} authToken={authToken} onNodeClick={setTreeFocusId} onViewAnimal={onViewAnimal} />
+                        <DirectParentTree focusAnimalId={treeFocusId} authToken={authToken} onNodeClick={setTreeFocusId} onViewAnimal={handleViewAnimal} />
                     </div>
                 </div>
             )}

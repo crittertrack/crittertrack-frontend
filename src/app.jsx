@@ -737,10 +737,11 @@ const App = () => {
         }
     }, [API_BASE_URL, authToken]);
     
-    // Clear history when animal view is completely closed
+    // Auto-select Pedigree tab (5) when a new animal is viewed from DirectParentTree navigation
+    // This ensures the Pedigree tab is always active when navigating through the pedigree tree
     React.useEffect(() => {
-        if (!animalToView) {
-            setAnimalViewHistory([]);
+        if (animalToView) {
+            setDetailViewTab(5);
         }
     }, [animalToView]);
     
