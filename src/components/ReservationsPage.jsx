@@ -1229,6 +1229,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         {entry.entryDate && (
                                                             <div className="text-xs text-gray-600 dark:text-dark-text-muted shrink-0 flex items-center gap-1"><Calendar size={10} />{formatDate(entry.entryDate)}</div>
                                                         )}
+                                                        {entry.contactInfo && (
+                                                            <div className="text-xs text-gray-600 dark:text-dark-text-muted shrink-0 truncate">{entry.contactInfo}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 shrink-0">
