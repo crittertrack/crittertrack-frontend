@@ -91,7 +91,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
         <button onClick={() => setZoom(z => Math.min(200, z + 10))}>Zoom In</button>
       </div>
       <div
-        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom/100})`, transformOrigin: 'top center', padding: 16, overflow: 'auto', width: '100%', cursor: dragging ? 'grabbing' : 'grab' }}
+        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom/100})`, transformOrigin: 'top center', padding: 16, overflow: 'visible', width: '100%', cursor: dragging ? 'grabbing' : 'grab' }}
         onMouseDown={e => { setDragging(true); setStart({ x: e.clientX - pan.x, y: e.clientY - pan.y }); }}
         onMouseMove={e => { if (dragging) setPan({ x: e.clientX - start.x, y: e.clientY - start.y }); }}
         onMouseUp={() => setDragging(false)}
