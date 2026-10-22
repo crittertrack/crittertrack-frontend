@@ -295,7 +295,7 @@ const DirectParentTree = ({
     padding: 8,
     borderRadius: 8,
     background: '#fff',
-    textAlign: 'left',
+    textAlign: 'center',
     overflow: 'visible',
   }}
 >
