@@ -893,10 +893,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     <div className="flex-1 min-w-0">
                                                         {/* Prefix + name + suffix, so the animal shows with its full
                                                             display name (matching the rest of the app). */}
-                                                        <div className="font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                            {formatAnimalDisplayName(animal)}
+                                                        <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{formatAnimalDisplayName(animal)}</div>
+                                                            <div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono shrink-0">{animal.id_public}</div>
                                                         </div>
-                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div>
                                                         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_PILL[animal.status] || STATUS_PILL.Available}`}>{animal.status}</span>
                                                             <span className="text-[11px] text-gray-500 dark:text-dark-text-muted">{[animal.species, animal.gender].filter(Boolean).join(' • ')}</span>
@@ -1224,7 +1224,12 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     <span className="text-xs font-bold text-gray-500 dark:text-dark-text-secondary shrink-0 rounded-md px-1.5 py-0.5 bg-gray-100 dark:bg-dark-surface-hover">#{idx + 1}</span>
                                                     {/* The name wraps onto a second line when it is long, rather
                                                         than being truncated or pushing the header to a new row. */}
-                                                    <div className="font-semibold text-gray-800 dark:text-dark-text min-w-0 break-words">{entry.name}</div>
+                                                    <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+                                                        <div className="font-semibold text-gray-800 dark:text-dark-text min-w-0 break-words">{entry.name}</div>
+                                                        {entry.entryDate && (
+                                                            <div className="text-xs text-gray-500 dark:text-dark-text-muted shrink-0">{formatDate(entry.entryDate)}</div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 shrink-0">
                                                     {waitlistView === 'history' && <span className="text-[11px] bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted px-2 py-0.5 rounded-full">History</span>}
