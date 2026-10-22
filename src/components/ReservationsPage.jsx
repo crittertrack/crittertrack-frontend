@@ -1202,12 +1202,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     </div>
                                                 )}
                                             </div>
-
-                                                ) : (
-                                                    <>
-                                                        <button onClick={() => handleWlReactivate(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Undo2 size={11} /> Reactivate</button>
-                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
-                                                    </>
                                                 )}
                                             </div>
                                         </div>
