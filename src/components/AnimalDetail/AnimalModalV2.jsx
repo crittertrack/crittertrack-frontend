@@ -694,7 +694,7 @@ useEffect(() => {
                                         </div>
 
                                         <div className="w-full">
-                                            <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
+                                            <div className="flex flex-row items-center gap-3 w-full">
                                                 <div className="w-full md:w-1/4 min-w-0 flex items-center justify-center rounded-lg border border-gray-200 dark:border-dark-border bg-white/60 dark:bg-dark-surface/60 p-2.5 h-[56px]">
     <div className="text-center leading-none">
         <div className="text-[8px] uppercase tracking-[0.2em] text-gray-500 dark:text-dark-text-muted">
