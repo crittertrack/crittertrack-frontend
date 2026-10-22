@@ -49,7 +49,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
         if (depth < 4) {
           const sire = animal?.sireId_public;
           const dam = animal?.damId_public;
-          if (sire) { queue.push({ id: sire, nodeId: `node-${counter++}`, depth: depth + 1, x: x - 220, y: y - 200 }); es.push({ id: `${nodeId}-${sire}-${counter}`, source: nodeId, target: `node-${counter-1}` }); }
+          if (sire) { queue.push({ id: sire, nodeId: `node-${counter++}`, depth: depth + 1, x: x - 280, y: y - 200 }); es.push({ id: `${nodeId}-${sire}-${counter}`, source: nodeId, target: `node-${counter-1}` }); }
           if (dam) { queue.push({ id: dam, nodeId: `node-${counter++}`, depth: depth + 1, x: x + 220, y: y - 200 }); es.push({ id: `${nodeId}-${dam}-${counter}`, source: nodeId, target: `node-${counter-1}` }); }
         }
       }
