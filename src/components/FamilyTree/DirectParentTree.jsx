@@ -340,7 +340,7 @@ const DirectParentTree = ({
   style={{
     boxSizing: 'border-box',
     width: NODE_WIDTH,
-    minHeight: 400,
+    minHeight: 300,
     border: '1px solid #ccc',
     padding: 8,
     borderRadius: 8,
@@ -369,7 +369,7 @@ const DirectParentTree = ({
                       style={{
                         display: 'block',
                         width: '100%',
-                        height: 80,
+                        height: 160,
                         objectFit: 'cover',
                         borderRadius: 4,
                       }}
@@ -380,6 +380,7 @@ const DirectParentTree = ({
                     style={{
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: 6,
                       marginTop: 6,
                       minWidth: 0,
