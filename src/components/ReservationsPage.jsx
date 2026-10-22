@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle } from 'lucide-react';
+import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
 import apiClient from '../utils/apiClient';
 import AnimalImage from './shared/AnimalImage';
 import InfoButton from './shared/InfoButton';
@@ -7,7 +7,7 @@ import { formatDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
 import ContactAssignModal from './Contacts/ContactAssignModal';
 
-const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', contactId: null, contactName: '', speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
+const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', contactId: null, contactName: '', entryDate: new Date().toISOString().slice(0, 10), speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
 const GENDER_CHOICES = ['Male', 'Female', 'Any'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'AED'];
 const STATUS_PILL = {
@@ -31,6 +31,11 @@ const getGenderCounts = (req) => {
 const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAnimal }) => {
     const [activeTab, setActiveTab] = useState('animals');
     const [waitlistView, setWaitlistView] = useState('active'); // 'active' | 'history'
+    // Waitlist sort preference: 'oldest' (entryDate ASC, default) | 'newest' (entryDate DESC) | 'manual' (sortOrder ASC).
+    const [wlSort, setWlSort] = useState(() => {
+        const saved = localStorage.getItem('wlSort');
+        return saved === 'newest' || saved === 'manual' ? saved : 'oldest';
+    });
     const [animals, setAnimals] = useState([]);
     const [animalsLoading, setAnimalsLoading] = useState(true);
     const [waitlist, setWaitlist] = useState([]);
@@ -270,6 +275,19 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const historyWaitlist = useMemo(() => waitlist.filter(e => e.isActive === false), [waitlist]);
     const shownWaitlist = waitlistView === 'active' ? activeWaitlist : historyWaitlist;
 
+    // Waitlist sort: 'oldest' / 'newest' by entryDate, 'manual' by sortOrder.
+    const sortedWaitlist = useMemo(() => {
+        const entries = [...shownWaitlist];
+        if (wlSort === 'manual') {
+            return entries.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+        }
+        return entries.sort((a, b) => {
+            const da = new Date(a.entryDate || a.createdAt).getTime();
+            const db = new Date(b.entryDate || b.createdAt).getTime();
+            return wlSort === 'oldest' ? da - db : db - da;
+        });
+    }, [shownWaitlist, wlSort]);
+
     // Seed/clear an animal's inline editor from its stored reservation.
     // Currency is the exception: it always follows the page-level currency toggle (not the
     // stored value), so flipping the toggle at the top sets every animal's dropdown at once.
@@ -277,8 +295,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         buyerName: animal.reservedBuyerName || '',
         buyerContact: animal.reservedBuyerContact || '',
         waitlistEntryId: animal.reservedWaitlistEntryId ? String(animal.reservedWaitlistEntryId) : '',
-        price: animal.reservedPrice ?? '',
-        priceCurrency: currency,
+        // When the animal already has a public sale price, pre-fill the reservation editor's
+        // price/currency so the seller doesn't have to re-enter it.
+        price: animal.reservedPrice ?? (animal.isForSale && animal.salePriceAmount != null ? animal.salePriceAmount : ''),
+        priceCurrency: animal.reservedPriceCurrency || (animal.isForSale && animal.salePriceCurrency ? animal.salePriceCurrency : currency),
         deposit: animal.reservedDeposit ?? '',
         depositStatus: animal.reservedDepositStatus || 'due',
         paymentStatus: animal.reservedPaymentStatus || 'due',
@@ -306,18 +326,26 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         const f = getResForm(animal);
         setResSaving(true);
         try {
+            const isBooking = !!f.buyerName?.trim();
+            const salePrice = f.price !== '' && f.price != null ? Number(f.price) : null;
+            const status = isBooking ? 'Booked' : 'Available';
+            // Only mirror the reservation price to the public sale listing when the animal
+            // is Available. When Booked, remove the public sale listing.
+            const isForSale = status === 'Available' && salePrice != null;
             const payload = {
                 reservedBuyerName: f.buyerName?.trim() || null,
                 reservedBuyerContact: f.buyerContact?.trim() || null,
                 reservedWaitlistEntryId: f.waitlistEntryId || null,
-                reservedPrice: f.price !== '' && f.price != null ? Number(f.price) : null,
+                reservedPrice: salePrice,
                 reservedPriceCurrency: f.priceCurrency || currency,
                 reservedDeposit: f.deposit !== '' && f.deposit != null ? Number(f.deposit) : null,
                 reservedDepositStatus: f.depositStatus || 'due',
                 reservedPaymentStatus: f.paymentStatus || 'due',
                 reservedDate: f.date || null,
-                // Claiming an animal for a buyer marks it Booked; clearing the buyer frees it back.
-                status: f.buyerName?.trim() ? 'Booked' : 'Available',
+                status,
+                isForSale,
+                salePriceAmount: isForSale ? salePrice : null,
+                salePriceCurrency: isForSale ? (f.priceCurrency || currency) : null,
             };
             const res = await apiClient.put(`/animals/${animal.id_public}`, payload);
             const updated = res.data?.animal || res.data;
@@ -434,6 +462,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         if (price == null || Number.isNaN(price)) { showModalMessage?.('Missing price', 'Enter the payment amount before rehoming.'); return; }
         const saleDate = resForm.date || (animal.reservedDate ? new Date(animal.reservedDate).toISOString().slice(0, 10) : todayStr());
         if (!window.confirm(`Mark ${animal.name || animal.id_public} as Rehomed and record the sale to ${buyer}?`)) return;
+        // Prefer CTUID-linked ownership over free-text manualownerName.
+        const linkedCtuid = findLinkedBuyerCtuid(animal, buyer);
         setRehomingId(animal.id_public);
         try {
             const payload = {
@@ -442,6 +472,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 saleRecordCurrency: resForm.priceCurrency || animal.reservedPriceCurrency || 'USD',
                 buyerName: buyer,
                 buyerContact: resForm.buyerContact?.trim() || animal.reservedBuyerContact || null,
+                ...(linkedCtuid ? { ownerId_public: linkedCtuid } : { manualownerName: buyer }),
                 // Clear the pending reservation — it has been fulfilled.
                 reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
                 reservedPrice: null, reservedDeposit: null, reservedDate: null,
@@ -456,8 +487,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed', archived: true } }));
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage?.('Success', `${animal.name || animal.id_public} marked as Rehomed — sale logged to Budget`);
-            // Buyer with a linked CritterTrack account? Offer a true ownership transfer too.
-            const linkedCtuid = findLinkedBuyerCtuid(animal, buyer);
             if (linkedCtuid) await maybeSendTrueTransfer(animal, buyer, linkedCtuid, price);
         } catch (err) {
             console.error('[rehomeAnimal]', err);
@@ -473,6 +502,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 name: entry.name || '', contactInfo: entry.contactInfo || '',
                 contactId: entry.contactId?._id || entry.contactId || null,
                 contactName: entry.contactName || (entry.contactId?.personalName || ''),
+                entryDate: entry.entryDate ? new Date(entry.entryDate).toISOString().slice(0, 10) : '',
                 speciesRequests: reqs.map(r => { const counts = { Male: '', Female: '', Any: '' }; getGenderCounts(r).forEach(c => { counts[c.gender] = String(c.count); }); return { species: r.species || '', counts }; }),
                 notes: entry.notes || '',
             });
@@ -495,6 +525,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 name: wlForm.name.trim(), contactInfo: wlForm.contactInfo?.trim() || '',
                 // null explicitly unlinks the contact; an id links/relinks it.
                 contactId: wlForm.contactId || null,
+                entryDate: wlForm.entryDate || undefined,
                 speciesRequests: validRows.map(r => {
                     let genderCounts = GENDER_CHOICES
                         .map(g => ({ gender: g, count: parseInt(r.counts?.[g], 10) || 0 }))
@@ -609,6 +640,38 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         } catch (err) {
             console.error('[reactivateWaitlist]', err);
             showModalMessage?.('Error', 'Failed to reactivate entry');
+        }
+    };
+
+    // Move a waitlist entry up/down one position by reordering the whole active list
+    // and persisting the new sortOrder to the backend. Switches to manual sort mode.
+    const handleWlMoveUp = async (entry) => {
+        const idx = sortedWaitlist.findIndex(e => e._id === entry._id);
+        if (idx <= 0) return;
+        const ordered = [...sortedWaitlist];
+        [ordered[idx - 1], ordered[idx]] = [ordered[idx], ordered[idx - 1]];
+        await reorderWaitlist(ordered);
+    };
+
+    const handleWlMoveDown = async (entry) => {
+        const idx = sortedWaitlist.findIndex(e => e._id === entry._id);
+        if (idx < 0 || idx >= sortedWaitlist.length - 1) return;
+        const ordered = [...sortedWaitlist];
+        [ordered[idx], ordered[idx + 1]] = [ordered[idx + 1], ordered[idx]];
+        await reorderWaitlist(ordered);
+    };
+
+    const reorderWaitlist = async (ordered) => {
+        try {
+            const orderedIds = ordered.map(e => e._id);
+            await apiClient.post('/waitlist/reorder', { orderedIds });
+            setWlSort('manual');
+            localStorage.setItem('wlSort', 'manual');
+            await fetchWaitlist();
+            showModalMessage?.('Success', 'Waitlist order updated');
+        } catch (err) {
+            console.error('[reorderWaitlist]', err);
+            showModalMessage?.('Error', 'Failed to reorder waitlist entry');
         }
     };
 
@@ -881,6 +944,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     </button>
                                 ))}
                             </div>
+                            <div className="flex gap-1 bg-gray-100 dark:bg-dark-surface rounded-xl p-1 w-fit">
+                                {[['oldest', 'Oldest → Newest'], ['newest', 'Newest → Oldest']].map(([id, label]) => (
+                                    <button key={id} onClick={() => { setWlSort(id); localStorage.setItem('wlSort', id); }}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${wlSort === id ? 'bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow' : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text'}`} title={`Sort waitlist ${label.toLowerCase()}`}>
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
                             <button onClick={() => openWlForm(null)}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-medium transition">
                                 <Plus size={14} /> Add to Waitlist
@@ -898,6 +969,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     <div>
                                         <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Contact Info</label>
                                         <input type="text" value={wlForm.contactInfo} onChange={e => setWlForm(f => ({ ...f, contactInfo: e.target.value }))} placeholder="Phone, email, or address" className={inputCls} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Entry Date</label>
+                                        <input type="date" value={wlForm.entryDate || ''} onChange={e => setWlForm(f => ({ ...f, entryDate: e.target.value }))} className={inputCls} />
                                     </div>
                                 {/* Assigned contact: pick an existing Contacts record, or unlink the current one. */}
                                 <div className="mt-2">
@@ -1014,7 +1089,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-                                {shownWaitlist.map(entry => {
+                                {sortedWaitlist.map((entry, idx) => {
                                     const ful = computeEntryFulfillment(entry);
                                     return (
                                     <div key={entry._id} data-testid={`waitlist-entry-${entry._id}`} className={cardCls}>
@@ -1023,8 +1098,12 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 <div className="flex items-center gap-2 min-w-0">
                                                     <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center flex-shrink-0"><User size={16} /></div>
                                                     <div className="min-w-0">
-                                                        <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-[10px] font-bold text-gray-400 dark:text-dark-text-muted shrink-0">#{idx + 1}</span>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
+                                                        </div>
                                                         {entry.contactInfo && <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate flex items-center gap-1"><Phone size={10} /> {entry.contactInfo}</div>}
+                                                        <div className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-0.5"><Calendar size={10} /> {entry.entryDate ? formatDate(entry.entryDate) : formatDate(entry.createdAt)}</div>
                                                         {entry.contactId && (
                                                             // The attendee name is replaced with the contact's display name when a
                                                             // contact is assigned, so only show the linked contact when it adds
@@ -1089,6 +1168,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                             <div className="flex gap-2 justify-end flex-wrap">
                                                 {waitlistView === 'active' ? (
                                                     <>
+                                                        <button onClick={() => idx > 0 && handleWlMoveUp(entry)} disabled={idx === 0} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition" title="Move up"><ArrowUp size={10} /></button>
+                                                        <button onClick={() => idx < sortedWaitlist.length - 1 && handleWlMoveDown(entry)} disabled={idx === sortedWaitlist.length - 1} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition" title="Move down"><ArrowDown size={10} /></button>
                                                         <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
                                                         <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
                                                         <button onClick={() => handleWlFinalize(entry)} className="flex items-center gap-1 text-xs text-white bg-green-600 hover:bg-green-700 px-2.5 py-1 rounded-lg transition font-medium"><CheckCircle size={11} /> Finalize</button>

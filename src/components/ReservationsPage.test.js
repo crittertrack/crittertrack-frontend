@@ -16,8 +16,8 @@ const animals = [
     { id_public: 'CTC4', name: 'Whiskers', species: 'Fancy Mouse', gender: 'Female', status: 'Available' },
 ];
 const waitlist = [
-    { _id: 'W1', name: 'Jane', contactInfo: 'jane@example.com', speciesRequests: [{ species: 'Fancy Rat', genders: ['Female'], amount: 2 }], isActive: true, assignedAnimals: [] },
-    { _id: 'W2', name: 'Sam', contactInfo: 'sam@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 3 }], isActive: true, assignedAnimals: [] },
+    { _id: 'W1', name: 'Jane', contactInfo: 'jane@example.com', speciesRequests: [{ species: 'Fancy Rat', genders: ['Female'], amount: 2 }], isActive: true, assignedAnimals: [], entryDate: '2026-01-10', sortOrder: 0 },
+    { _id: 'W2', name: 'Sam', contactInfo: 'sam@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 3 }], isActive: true, assignedAnimals: [], entryDate: '2026-01-15', sortOrder: 0 },
 ];
 
 const contacts = [
@@ -149,7 +149,7 @@ test('shows extra assignments even when more animals are assigned than requested
     const wl = [{
         _id: 'W60', name: 'Riley', contactInfo: 'riley@example.com',
         speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
-        isActive: true, assignedAnimals: [],
+        isActive: true, assignedAnimals: [], entryDate: '2026-02-01', sortOrder: 0,
     }];
     const reserved = [
         ...animals,
@@ -167,7 +167,7 @@ test('shows extra assignments even when more animals are assigned than requested
 });
 
 test('the reservation summary hides "via Waitlist" when it repeats the buyer name', async () => {
-    const wl = [{ _id: 'W40', name: 'Kenysha (Bush Garden Animals)', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [] }];
+    const wl = [{ _id: 'W40', name: 'Kenysha (Bush Garden Animals)', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [], entryDate: '2026-03-01', sortOrder: 0 }];
     const reserved = [
         ...animals,
         {
@@ -183,7 +183,7 @@ test('the reservation summary hides "via Waitlist" when it repeats the buyer nam
 });
 
 test('the reservation summary still shows "via Waitlist" when the buyer name differs', async () => {
-    const wl = [{ _id: 'W41', name: 'Kenysha', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [] }];
+    const wl = [{ _id: 'W41', name: 'Kenysha', contactInfo: 'k@example.com', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, assignedAnimals: [], entryDate: '2026-03-05', sortOrder: 0 }];
     const reserved = [
         ...animals,
         {
@@ -201,7 +201,7 @@ test('clearing a reservation removes the animal from the waitlist fulfillment co
     const wl = [{
         _id: 'W50', name: 'Kenysha (Bush Garden Animals)', contactInfo: 'k@example.com',
         speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 2 }],
-        isActive: true, assignedAnimals: [],
+        isActive: true, assignedAnimals: [], entryDate: '2026-03-10', sortOrder: 0,
     }];
     const reserved = [
         ...animals,
@@ -307,7 +307,7 @@ const rehomeSetup = (extra = {}) => setup({
     waitlist: [{
         _id: 'W70', name: 'Jane Doe', contactInfo: 'jane@example.com', contactId: 'C1',
         speciesRequests: [{ species: 'Fancy Rat', genders: ['Female'], amount: 1 }],
-        isActive: true, assignedAnimals: [],
+        isActive: true, assignedAnimals: [], entryDate: '2026-04-01', sortOrder: 0,
     }],
     animals: [
         ...animals,
@@ -390,7 +390,7 @@ test('adding a multi-species waitlist entry posts speciesRequests array', async 
 test('waitlist card shows the per-gender split and fulfillment respects it', async () => {
     const split = [{
         _id: 'W9', name: 'Pat', speciesRequests: [{ species: 'Fancy Mouse', genderCounts: [{ gender: 'Male', count: 3 }, { gender: 'Female', count: 2 }], amount: 5 }],
-        isActive: true,
+        isActive: true, entryDate: '2026-05-01', sortOrder: 0,
         // 2 males assigned -> only 2/5 filled; a third female must not count toward the male slots
         assignedAnimals: [
             { id_public: 'A1', species: 'Fancy Mouse', gender: 'Male' },
@@ -408,7 +408,7 @@ test('active waitlist entry counts live animals reserved to it via reservedWaitl
     const live = [{
         _id: 'W10', name: 'Lee', contactInfo: 'lee@example.com',
         speciesRequests: [{ species: 'Fancy Mouse', genders: ['Female'], amount: 1 }],
-        isActive: true,
+        isActive: true, entryDate: '2026-05-05', sortOrder: 0,
         // No snapshot yet: the backend only writes assignedAnimals when the entry is finalized.
         assignedAnimals: [],
     }];
@@ -522,7 +522,7 @@ test('editing a waitlist entry shows the linked contact and can change it', asyn
         _id: 'W20', name: 'Pat', contactInfo: 'pat@example.com',
         contactId: { _id: 'C2', personalName: 'Sam Smith' }, contactName: 'Sam Smith',
         speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
-        isActive: true, assignedAnimals: [],
+        isActive: true, assignedAnimals: [], entryDate: '2026-05-10', sortOrder: 0,
     }];
     await setup({ waitlist: linked });
     fireEvent.click(screen.getByText('Waitlist'));
@@ -549,7 +549,7 @@ test('the card shows the linked contact only when it differs from the attendee n
         _id: 'W30', name: 'Sam Smith', contactInfo: 'sam@example.com',
         contactId: { _id: 'C2', personalName: 'Sam Smith' }, contactName: 'Sam Smith',
         speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
-        isActive: true, assignedAnimals: [],
+        isActive: true, assignedAnimals: [], entryDate: '2026-06-01', sortOrder: 0,
     }];
     await setup({ waitlist: same });
     fireEvent.click(screen.getByText('Waitlist'));
@@ -563,7 +563,7 @@ test('unlinking a contact sends contactId null', async () => {
         _id: 'W21', name: 'Lee', contactInfo: 'lee@example.com',
         contactId: { _id: 'C2', personalName: 'Sam Smith' }, contactName: 'Sam Smith',
         speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
-        isActive: true, assignedAnimals: [],
+        isActive: true, assignedAnimals: [], entryDate: '2026-06-05', sortOrder: 0,
     }];
     await setup({ waitlist: linked });
     fireEvent.click(screen.getByText('Waitlist'));
