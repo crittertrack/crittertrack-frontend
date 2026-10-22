@@ -59,8 +59,8 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
           // Capture node IDs after counter increments for correct edge targets
           let sireNodeId = null;
           let damNodeId = null;
-          const sireOffset = 400 + depth * 70;  // coefficient ensures ~140px separation between middle nodes
-        const damOffset = 350 + depth * 70;  // same coefficient so sire's dam ≠ dam's sire
+          const sireOffset = 400 + depth * 100;  // larger coefficient for more spacing between ancestor cards
+        const damOffset = 350 + depth * 100;  // larger coefficient so sire's dam ≠ dam's sire with extra space
         if (sire) { sireNodeId = `node-${counter++}`; queue.push({ id: sire, nodeId: sireNodeId, depth: depth + 1, x: x - sireOffset, y: y + 200 }); es.push({ id: `${nodeId}-${sire}`, source: nodeId, target: sireNodeId, type: 'step', style: { stroke: '#888', strokeWidth: 1 } }); }
         if (dam) { damNodeId = `node-${counter++}`; queue.push({ id: dam, nodeId: damNodeId, depth: depth + 1, x: x + damOffset, y: y + 200 }); es.push({ id: `${nodeId}-${dam}`, source: nodeId, target: damNodeId, type: 'step', style: { stroke: '#888', strokeWidth: 1 } }); }
         }
