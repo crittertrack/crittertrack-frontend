@@ -1089,7 +1089,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 <p className="text-xs sm:text-sm mt-1">{waitlistView === 'active' ? 'Add interested buyers so you can assign them to animals' : 'Finalized entries will show here with their assigned animals'}</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
+                            <div className="grid grid-cols-1 gap-2">
                                 {sortedWaitlist.map((entry, idx) => {
                                     const ful = computeEntryFulfillment(entry);
                                     return (
