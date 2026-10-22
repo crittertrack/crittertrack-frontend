@@ -48,8 +48,8 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
         if (depth < 4) {
           const sire = animal?.sireId_public;
           const dam = animal?.damId_public;
-          if (sire) { queue.push({ id: sire, depth: depth + 1, x: x - 180, y: y + 140 }); es.push({ id: `${id}-${sire}`, source: id, target: sire }); }
-          if (dam) { queue.push({ id: dam, depth: depth + 1, x: x + 180, y: y + 140 }); es.push({ id: `${id}-${dam}`, source: id, target: dam }); }
+          if (sire) { queue.push({ id: sire, depth: depth + 1, x: x - 220, y: y - 200 }); es.push({ id: `${id}-${sire}`, source: id, target: sire }); }
+          if (dam) { queue.push({ id: dam, depth: depth + 1, x: x + 220, y: y - 200 }); es.push({ id: `${id}-${dam}`, source: id, target: dam }); }
         }
       }
       if (!cancelled) { setNodes(ns); setEdges(es); setLoading(false); }
@@ -61,7 +61,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
   if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>Loading…</div>;
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', height: '90%' }}>
       <ReactFlow nodes={nodes} edges={edges} fitView onNodeClick={(_, node) => { onNodeClick?.(node.id); onViewAnimal?.(node.data.animal); }}>
         <Background />
         <Controls />
