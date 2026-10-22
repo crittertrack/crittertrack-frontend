@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../../utils/apiClient';
 
-const Node = ({ animal }) => (
-  <div style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 120 }}>
-    <div style={{ fontWeight: 600 }}>{animal?.name || 'Unknown'}</div>
-    <div style={{ fontSize: 12, color: '#666' }}>{animal?.id_public}</div>
-  </div>
+const Node = ({ animal, onClick }) => (
+  <button onClick={() => onClick?.(animal?.id_public)} style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 140, textAlign: 'left' }}>
+    {animal?.imageUrl && <img src={animal.imageUrl} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 4 }} />}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+      <span>{animal?.gender === 'Male' ? '♂' : animal?.gender === 'Female' ? '♀' : ''}</span>
+      <span style={{ fontWeight: 600 }}>{[animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ')}</span>
+    </div>
+    <div style={{ fontSize: 12, color: '#666' }}>Status: {animal?.status || 'Unknown'}</div>
+  </button>
 );
 
-const DirectParentTree = ({ focusAnimalId, authToken }) => {
+const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick }) => {
   const [nodes, setNodes] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -50,14 +54,14 @@ const DirectParentTree = ({ focusAnimalId, authToken }) => {
     return () => { cancelled = true; };
   }, [focusAnimalId]);
 
-  if (loading) return <div>Loading…</div>;
+  if (loading) return <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%' }}>Loading…</div>;
 
   const renderLevel = (id, depth = 0) => {
     if (!id || depth > 4) return null;
     const animal = nodes[id];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <Node animal={animal} />
+        <Node animal={animal} onClick={onNodeClick} />
         {depth < 4 && (
           <div style={{ display: 'flex', gap: 16 }}>
             {renderLevel(animal?.sireId_public, depth + 1)}

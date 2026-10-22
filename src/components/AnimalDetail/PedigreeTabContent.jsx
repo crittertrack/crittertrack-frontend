@@ -14,6 +14,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     const [showHorizCert, setShowHorizCert] = useState(false);
     const [showVertCert, setShowVertCert] = useState(false);
 const [showFamilyTree, setShowFamilyTree] = useState(false);
+const [treeFocusId, setTreeFocusId] = useState(animal.id_public);
 
     useEffect(() => {
         if (!animal?.id_public) return;
@@ -187,7 +188,7 @@ const [showFamilyTree, setShowFamilyTree] = useState(false);
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-dark-surface rounded-xl w-full max-w-6xl h-[80vh] relative overflow-auto">
                         <button onClick={() => setShowFamilyTree(false)} className="absolute top-2 right-2 z-10 px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300">Close</button>
-                        <DirectParentTree focusAnimalId={animal.id_public} authToken={authToken} />
+                        <DirectParentTree focusAnimalId={treeFocusId} authToken={authToken} onNodeClick={setTreeFocusId} />
                     </div>
                 </div>
             )}
