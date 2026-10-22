@@ -21,6 +21,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
       const dataMap = {};
       let counter = 0;
       // Set focus animal at y=800 (bottom) so ancestors appear at top with y - 200 growth
+      // Node height ~200px, so y offset of 200 connects center-to-center effectively
       const queue = [{ id: focusAnimalId, nodeId: `node-${counter++}`, depth: 0, x: 0, y: 800 }];
       const visited = new Set();
       const ns = [];
