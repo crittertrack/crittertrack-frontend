@@ -5,6 +5,7 @@ import AnimalImage from './shared/AnimalImage';
 import InfoButton from './shared/InfoButton';
 import { formatDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
+import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 import ContactAssignModal from './Contacts/ContactAssignModal';
 
 const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', contactId: null, contactName: '', entryDate: new Date().toISOString().slice(0, 10), speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
@@ -31,7 +32,8 @@ const getGenderCounts = (req) => {
 const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAnimal }) => {
     const [activeTab, setActiveTab] = useState('animals');
     const [waitlistView, setWaitlistView] = useState('active'); // 'active' | 'history'
-    // Waitlist sort preference: 'oldest' (entryDate ASC, default) | 'newest' (entryDate DESC) | 'manual' (sortOrder ASC).
+    // Waitlist sort preference: 'oldest' (entryDate ASC, default) | 'newest' (entryDate DESC)
+    // | 'manual' (custom order, driven by the chevrons on each card).
     const [wlSort, setWlSort] = useState(() => {
         const saved = localStorage.getItem('wlSort');
         return saved === 'newest' || saved === 'manual' ? saved : 'oldest';
@@ -97,11 +99,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         if (!authToken) return;
         setWaitlistLoading(true);
         try {
-            const res = await apiClient.get('/waitlist');
+            // The requested order is passed through so the server returns the entries in
+            // that order too (the client re-sorts as well, so both agree).
+            const res = await apiClient.get('/waitlist', { params: { sort: wlSort } });
             setWaitlist(res.data || []);
         } catch (err) { console.error('[fetchWaitlist]', err); }
         setWaitlistLoading(false);
-    }, [authToken]);
+    }, [authToken, wlSort]);
 
     const fetchSpecies = useCallback(async () => {
         try {
@@ -160,26 +164,54 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         });
     };
 
-    // Fulfillment for one species request. Gender-specific counts are filled first;
-    // leftover animals of that species can then satisfy the "Any" count.
+    // Fulfillment for one species request, counted per gender.
+    //
+    // Every gender gets its own counter (Female / Male / Any) showing how many animals
+    // of that gender are assigned against how many were requested for it.
+    //
+    // Gender-specific demands are filled first; whatever is left over (extra females,
+    // extra males, other genders) can then satisfy an "Any" demand.
     const computeRequestFulfillment = (req, assignedAnimals) => {
         const same = (assignedAnimals || []).filter(a => a.species && a.species.toLowerCase() === (req.species || '').toLowerCase());
         const counts = getGenderCounts(req);
-        // Uncapped count of assigned animals that fit this request (species + gender).
-        // The card shows this even when it exceeds the requested amount, so extra
-        // assignments stay visible instead of being hidden behind the cap.
-        const matched = same.filter(a => counts.some(c => c.gender === 'Any' || c.gender === a.gender)).length;
-        let usedSpecific = 0;
-        let fulfilled = 0;
-        let requested = 0;
-        counts.filter(c => c.gender !== 'Any').forEach(c => {
-            const used = Math.min(same.filter(a => a.gender === c.gender).length, c.count);
-            usedSpecific += used; fulfilled += used; requested += c.count;
-        });
-        const anyCount = counts.filter(c => c.gender === 'Any').reduce((s, c) => s + c.count, 0);
-        fulfilled += Math.min(Math.max(0, same.length - usedSpecific), anyCount);
-        requested += anyCount;
-        return { ...req, breakdown: counts, requested, fulfilled, matched, remaining: Math.max(0, requested - fulfilled), isFulfilled: fulfilled >= requested };
+        const requestedFor = (g) => counts.filter(c => c.gender === g).reduce((s, c) => s + c.count, 0);
+        const assignedFor = (g) => same.filter(a => a.gender === g).length;
+
+        const cFemale = requestedFor('Female');
+        const cMale = requestedFor('Male');
+        const cAny = requestedFor('Any');
+        const aFemale = assignedFor('Female');
+        const aMale = assignedFor('Male');
+
+        // Gender-specific demands are satisfied first…
+        const usedFemale = Math.min(aFemale, cFemale);
+        const usedMale = Math.min(aMale, cMale);
+        // …and everything that is left over can fill an "Any" demand.
+        const leftovers = Math.max(0, same.length - usedFemale - usedMale);
+
+        const requested = cFemale + cMale + cAny;
+        const fulfilled = usedFemale + usedMale + Math.min(leftovers, cAny);
+        // Uncapped: every assigned animal of this species, so extra assignments stay visible.
+        const matched = same.length;
+
+        // One counter per gender that was actually asked for. The counters are uncapped
+        // (an over-assignment shows as e.g. 2/1 instead of being hidden behind the cap).
+        const genderCounters = [
+            { gender: 'Female', requested: cFemale, matched: aFemale },
+            { gender: 'Male', requested: cMale, matched: aMale },
+            { gender: 'Any', requested: cAny, matched: cAny > 0 ? leftovers : 0 },
+        ].filter(c => c.requested > 0);
+
+        return {
+            ...req,
+            breakdown: counts,
+            requested,
+            fulfilled,
+            matched,
+            genderCounters,
+            remaining: Math.max(0, requested - fulfilled),
+            isFulfilled: fulfilled >= requested,
+        };
     };
 
     // The animals that count towards an entry's fulfillment. Two sources:
@@ -202,6 +234,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 ...existing,
                 id_public: a.id_public,
                 name: existing.name || a.name,
+                prefix: existing.prefix || a.prefix,
+                suffix: existing.suffix || a.suffix,
                 species: existing.species || a.species,
                 gender: existing.gender || a.gender,
             });
@@ -276,17 +310,28 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const historyWaitlist = useMemo(() => waitlist.filter(e => e.isActive === false), [waitlist]);
     const shownWaitlist = waitlistView === 'active' ? activeWaitlist : historyWaitlist;
 
-    // Waitlist sort: 'oldest' / 'newest' by entryDate, 'manual' by sortOrder.
+    // Waitlist sort: 'oldest' / 'newest' by entryDate, 'manual' = the custom order set
+    // with the chevrons on each card.
+    //
+    // In the custom order, entries that have never been positioned (sortOrder 0) go
+    // LAST — otherwise every newly added entry jumped to the top and scrambled the
+    // order the user had set.
     const sortedWaitlist = useMemo(() => {
         const entries = [...shownWaitlist];
-        if (wlSort === 'manual') {
-            return entries.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        }
-        return entries.sort((a, b) => {
+        const byEntryDate = (a, b) => {
             const da = new Date(a.entryDate || a.createdAt).getTime();
             const db = new Date(b.entryDate || b.createdAt).getTime();
-            return wlSort === 'oldest' ? da - db : db - da;
-        });
+            return da - db;
+        };
+        if (wlSort === 'manual') {
+            return entries.sort((a, b) => {
+                const sa = a.sortOrder > 0 ? a.sortOrder : Infinity;
+                const sb = b.sortOrder > 0 ? b.sortOrder : Infinity;
+                if (sa !== sb) return sa - sb;
+                return byEntryDate(a, b);
+            });
+        }
+        return entries.sort((a, b) => (wlSort === 'oldest' ? byEntryDate(a, b) : byEntryDate(b, a)));
     }, [shownWaitlist, wlSort]);
 
     // Seed/clear an animal's inline editor from its stored reservation.
@@ -645,7 +690,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     };
 
     // Move a waitlist entry up/down one position by reordering the whole active list
-    // and persisting the new sortOrder to the backend. Switches to manual sort mode.
+    // and persisting the new sortOrder to the backend. Switches to manual sort mode
+    // (this is the "override" the chevrons apply over the oldest/newest default).
     const handleWlMoveUp = async (entry) => {
         const idx = sortedWaitlist.findIndex(e => e._id === entry._id);
         if (idx <= 0) return;
@@ -662,9 +708,15 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         await reorderWaitlist(ordered);
     };
 
-    const reorderWaitlist = async (ordered) => {
+    // Persist the new order. The active list is sent first (in its new order) and the
+    // remaining entries follow, so every entry ends up with a unique position — otherwise
+    // two entries could share the same sortOrder and their relative order would flicker.
+    const reorderWaitlist = async (orderedActive) => {
         try {
-            const orderedIds = ordered.map(e => e._id);
+            const orderedIds = [
+                ...orderedActive.map(e => e._id),
+                ...waitlist.filter(e => !orderedActive.some(a => a._id === e._id)).map(e => e._id),
+            ];
             await apiClient.post('/waitlist/reorder', { orderedIds });
             setWlSort('manual');
             localStorage.setItem('wlSort', 'manual');
@@ -719,7 +771,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                             <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-3">
                                 <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
                                 <div className="text-sm text-amber-700 dark:text-amber-300">
-                                    <span className="font-semibold">Payments due:</span> {saleAnimals.filter(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName).map(a => a.name || a.id_public).join(', ')}
+                                    <span className="font-semibold">Payments due:</span> {saleAnimals.filter(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName).map(a => formatAnimalDisplayName(a)).join(', ')}
                                 </div>
                             </div>
                         )}
@@ -788,8 +840,10 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={22} />
                                                     </button>
                                                     <div className="flex-1 min-w-0">
+                                                        {/* Prefix + name + suffix, so the animal shows with its full
+                                                            display name (matching the rest of the app). */}
                                                         <div className="font-semibold text-gray-800 dark:text-dark-text truncate">
-                                                            {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}
+                                                            {formatAnimalDisplayName(animal)}
                                                         </div>
                                                         <div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div>
                                                         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -803,11 +857,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 {/* Reservation summary (read mode) */}
                                                 {!isEditing && (
                                                     <div className="text-xs sm:text-sm space-y-1 bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5">
-                                                        <div className="flex justify-between gap-2">
-                                                            <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><User size={11} /> Buyer</span>
-                                                            <span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{animal.reservedBuyerName || <span className="text-gray-400 dark:text-dark-text-muted font-normal">Unassigned</span>}</span>
+                                                        <div className="flex justify-between gap-2 items-start">
+                                                            <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1 shrink-0"><User size={11} /> Buyer</span>
+                                                            {/* A long buyer name wraps onto a second line inside its own
+                                                                column — the label stays put instead of the row jumping. */}
+                                                            <span className="font-medium text-gray-800 dark:text-dark-text text-right min-w-0 break-words">{animal.reservedBuyerName || <span className="text-gray-400 dark:text-dark-text-muted font-normal">Unassigned</span>}</span>
                                                         </div>
-                                                        {showWlName && <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-dark-text-muted">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right truncate">{wlName}</span></div>}
+                                                        {showWlName && <div className="flex justify-between gap-2 items-start"><span className="text-gray-500 dark:text-dark-text-muted shrink-0">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right min-w-0 break-words">{wlName}</span></div>}
                                                         <div className="flex justify-between gap-2">
                                                             <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><DollarSign size={11} /> Price</span>
                                                             <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>}</span>
@@ -946,9 +1002,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 ))}
                             </div>
                             <div className="flex gap-1 bg-gray-100 dark:bg-dark-surface rounded-xl p-1 w-fit">
-                                {[['oldest', 'Oldest → Newest'], ['newest', 'Newest → Oldest']].map(([id, label]) => (
+                                {[
+                                    ['oldest', 'Oldest → Newest'],
+                                    ['newest', 'Newest → Oldest'],
+                                    ['manual', 'Custom order'],
+                                ].map(([id, label]) => (
                                     <button key={id} onClick={() => { setWlSort(id); localStorage.setItem('wlSort', id); }}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${wlSort === id ? 'bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow' : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text'}`} title={`Sort waitlist ${label.toLowerCase()}`}>
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${wlSort === id ? 'bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow' : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text'}`}
+                                        title={id === 'manual' ? 'Use the order you set with the chevrons on each card' : `Sort waitlist ${label.toLowerCase()}`}>
                                         {label}
                                     </button>
                                 ))}
@@ -1095,12 +1156,24 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                     return (
                                     <div key={entry._id} data-testid={`waitlist-entry-${entry._id}`} className={cardCls}>
                                         <div className="p-3 sm:p-4 space-y-2.5">
-                                            <div className="flex flex-wrap items-start justify-between gap-2">
-                                                <div className="flex flex-wrap items-center gap-2 min-w-0">
-                                                    <span className="text-[10px] font-bold text-gray-400 dark:text-dark-text-muted shrink-0 rounded-md px-1.5 py-0.5 bg-gray-100 dark:bg-dark-surface-hover">#{idx + 1}</span>
-                                                    <div className="font-semibold text-gray-800 dark:text-dark-text truncate">{entry.name}</div>
+                                            {/* Card header: entry number + name on the left, the manual
+                                                order chevrons pinned to the top-right. */}
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-start gap-2 min-w-0 flex-1">
+                                                    <span className="text-xs font-bold text-gray-500 dark:text-dark-text-secondary shrink-0 rounded-md px-1.5 py-0.5 bg-gray-100 dark:bg-dark-surface-hover">#{idx + 1}</span>
+                                                    {/* The name wraps onto a second line when it is long, rather
+                                                        than being truncated or pushing the header to a new row. */}
+                                                    <div className="font-semibold text-gray-800 dark:text-dark-text min-w-0 break-words">{entry.name}</div>
                                                 </div>
-                                                {waitlistView === 'history' && <span className="text-[11px] bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted px-2 py-0.5 rounded-full shrink-0">History</span>}
+                                                <div className="flex items-center gap-1 shrink-0">
+                                                    {waitlistView === 'history' && <span className="text-[11px] bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted px-2 py-0.5 rounded-full">History</span>}
+                                                    {waitlistView === 'active' && (
+                                                        <>
+                                                            <button onClick={() => idx > 0 && handleWlMoveUp(entry)} disabled={idx === 0} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition disabled:opacity-40" title="Move up"><ArrowUp size={12} /></button>
+                                                            <button onClick={() => idx < sortedWaitlist.length - 1 && handleWlMoveDown(entry)} disabled={idx === sortedWaitlist.length - 1} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition disabled:opacity-40" title="Move down"><ArrowDown size={12} /></button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted">
@@ -1115,10 +1188,15 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     {entry.entryDate ? formatDate(entry.entryDate) : formatDate(entry.createdAt)}
                                                 </span>
                                                 {entry.contactId && (
-                                                    <span className="flex items-center gap-1 text-green-700 dark:text-green-400">
-                                                        <User size={10} />
-                                                        {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
-                                                    </span>
+                                                    // The attendee name is replaced with the contact's display name when a
+                                                    // contact is assigned, so only show the linked contact when it adds
+                                                    // information (e.g. the attendee name was edited afterwards).
+                                                    (entry.contactName || entry.contactId?.personalName || 'Linked contact') !== entry.name && (
+                                                        <span className="flex items-center gap-1 text-green-700 dark:text-green-400">
+                                                            <User size={10} />
+                                                            {entry.contactName || (entry.contactId?.personalName || 'Linked contact')}
+                                                        </span>
+                                                    )
                                                 )}
                                             </div>
                                             <div className="bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5 border border-gray-100 dark:border-dark-border">
@@ -1136,33 +1214,56 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                             </div>
 
                                             {(() => {
-                                                const groups = [];
-                                                ful.progress.forEach(p => {
-                                                    (p.breakdown || []).forEach(b => {
-                                                        const gender = b.gender;
-                                                        const requested = b.count;
-                                                        const assignedForGroup = ful.assigned.filter(a => (a.species || '').toLowerCase() === (p.species || '').toLowerCase() && (gender === 'Any' || (a.gender || '') === gender));
-                                                        groups.push({ key: `${entry._id}::${p.species}::${gender}`, species: p.species, gender, requested, assigned: assignedForGroup, matched: Math.min(assignedForGroup.length, requested) });
-                                                    });
-                                                });
+                                                // One row per species request, with a counter per gender.
+                                                // The counters are deliberately uncapped, so an over-assignment
+                                                // shows as e.g. 2/1 instead of hiding the extra animals.
+                                                const groups = ful.progress.map((p, i) => ({
+                                                    key: `${entry._id}::${p.species}::${i}`,
+                                                    species: p.species,
+                                                    breakdown: p.breakdown || [],
+                                                    genderCounters: p.genderCounters || [],
+                                                    requested: p.requested,
+                                                    matched: p.matched,
+                                                    assigned: ful.assigned.filter(a => (a.species || '').toLowerCase() === (p.species || '').toLowerCase() && (p.breakdown || []).some(b => b.gender === 'Any' || b.gender === a.gender)),
+                                                }));
                                                 if (groups.length === 0) return null;
                                                 return (
                                                     <div className="space-y-1.5">
                                                         {groups.map(g => {
                                                             const isOpen = !!expandedSpecGroups[g.key];
-                                                            const symbolMale = g.gender === 'Male' ? '♂' : g.gender === 'Female' ? '' : g.gender === 'Any' ? '♂' : ''; const symbolFemale = g.gender === 'Female' ? '♀' : g.gender === 'Male' ? '' : g.gender === 'Any' ? '♀' : '';
-                                                            const symbolClsMale = g.gender === 'Male' ? 'text-blue-600 dark:text-blue-400' : g.gender === 'Female' ? 'text-pink-600 dark:text-pink-400' : 'text-gray-500'; const symbolClsFemale = g.gender === 'Female' ? 'text-pink-600 dark:text-pink-400' : g.gender === 'Male' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500';
                                                             const toggle = () => setExpandedSpecGroups(prev => ({ ...prev, [g.key]: !prev[g.key] }));
                                                             return (
                                                                 <div key={g.key} className="rounded-lg border border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-surface">
                                                                     <button type="button" onClick={toggle} className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 text-left">
                                                                         <span className="flex items-center gap-1.5 min-w-0">
                                                                             {isOpen ? <ChevronDown size={12} className="shrink-0 text-gray-400" /> : <ChevronRight size={12} className="shrink-0 text-gray-400" />}
-                                                                            {symbolMale && <span className={`text-sm font-bold shrink-0 ${symbolClsMale}`}>{symbolMale}</span>}{symbolFemale && <span className={`text-sm font-bold shrink-0 ${symbolClsFemale}`}>{symbolFemale}</span>}
-                                                                            <span className="text-xs text-gray-700 dark:text-dark-text truncate">{g.species}{g.gender !== 'Any' ? ` (${g.gender.charAt(0)})` : g.gender === 'Any' ? ' (Any)' : ''}</span>
+                                                                            <span className="text-xs text-gray-700 dark:text-dark-text truncate">{g.species}</span>
                                                                         </span>
-                                                                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md shrink-0 ${g.matched > g.requested ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : g.matched >= g.requested && g.requested > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'}`}>
-                                                                            {g.matched}/{g.requested}
+                                                                        {/* One counter per gender, so it is clear which gender is
+                                                                            short and which is over-assigned. */}
+                                                                        <span className="flex items-center gap-1 shrink-0">
+                                                                            {g.genderCounters.map(c => {
+                                                                                const over = c.matched > c.requested;
+                                                                                const done = c.matched >= c.requested;
+                                                                                // Over-assignment is never flagged red — it is shown in a
+                                                                                // neutral colour so it reads as informational, not an error.
+                                                                                const cls = over
+                                                                                    ? 'bg-gray-200 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary'
+                                                                                    : done
+                                                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                                                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
+                                                                                const Icon = c.gender === 'Male' ? Mars : c.gender === 'Female' ? Venus : Users;
+                                                                                return (
+                                                                                    <span key={c.gender}
+                                                                                        data-testid={`wl-counter-${g.key}-${c.gender}`}
+                                                                                        aria-label={`${c.gender} ${c.matched} of ${c.requested}`}
+                                                                                        className={`inline-flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-md ${cls}`}
+                                                                                        title={`${c.gender}: ${c.matched} assigned of ${c.requested} requested`}>
+                                                                                        <Icon size={9} />
+                                                                                        {c.matched}/{c.requested}
+                                                                                    </span>
+                                                                                );
+                                                                            })}
                                                                         </span>
                                                                     </button>
                                                                     {isOpen && (
@@ -1172,7 +1273,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                                             ) : g.assigned.map(a => (
                                                                                 <div key={a.id_public} className="flex items-center gap-1.5 pl-5 py-0.5">
                                                                                     <Check size={9} className="text-green-600 dark:text-green-400 shrink-0" />
-                                                                                    <span className="text-xs text-gray-700 dark:text-dark-text truncate flex-1">{a.name || a.id_public}</span>
+                                                                                    <span className="text-xs text-gray-700 dark:text-dark-text truncate flex-1">{formatAnimalDisplayName(a)}</span>
                                                                                     <span className="text-[10px] text-gray-400 dark:text-dark-text-muted shrink-0">{a.id_public}</span>
                                                                                 </div>
                                                                             ))}
@@ -1193,7 +1294,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         {ful.assigned.length > 0 ? (
                                                             <div className="flex flex-wrap gap-1">
                                                                 {ful.assigned.map((a, i) => (
-                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.name ? `${a.name} (${a.id_public})` : a.id_public}</span>
+                                                                    <span key={`${a.id_public}-${i}`} className="inline-flex items-center gap-1 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-medium"><Check size={10} /> {a.id_public ? `${formatAnimalDisplayName(a)} (${a.id_public})` : formatAnimalDisplayName(a)}</span>
                                                                 ))}
                                                             </div>
                                                         ) : (
@@ -1204,21 +1305,28 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-dark-border pt-2 mt-1 w-full min-w-0">
-                                                {waitlistView === 'active' ? (
-                                                    <div className="flex flex-wrap items-center gap-1">
-                                                        <button onClick={() => idx > 0 && handleWlMoveUp(entry)} disabled={idx === 0} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition" title="Move up"><ArrowUp size={10} /></button>
-                                                        <button onClick={() => idx < sortedWaitlist.length - 1 && handleWlMoveDown(entry)} disabled={idx === sortedWaitlist.length - 1} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition" title="Move down"><ArrowDown size={10} /></button>
-                                                        <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Edit size={11} /> Edit</button>
-                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
-                                                        <button onClick={() => handleWlFinalize(entry)} className="flex items-center gap-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition"><CheckCircle size={11} /> Finalize</button>
+                                            {/* Actions live in their own row pinned to the bottom-right of the
+                                                card, with extra padding below so the buttons never look like
+                                                they are falling out of the card. */}
+                                            <div className="w-full min-w-0 border-t border-gray-100 dark:border-dark-border mt-2 pt-2 pb-1 sm:pb-2">
+                                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                                    <div className="flex flex-wrap items-center gap-1" />
+                                                    {/* Primary actions stay pinned to the bottom-right. */}
+                                                    <div className="flex flex-wrap items-center justify-end gap-1 ml-auto">
+                                                        {waitlistView === 'active' ? (
+                                                            <>
+                                                                <button onClick={() => openWlForm(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Edit size={11} /> Edit</button>
+                                                                <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                                                <button onClick={() => handleWlFinalize(entry)} className="flex items-center gap-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition"><CheckCircle size={11} /> Finalize</button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button onClick={() => handleWlReactivate(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Undo2 size={11} /> Reactivate</button>
+                                                                <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                                            </>
+                                                        )}
                                                     </div>
-                                                ) : (
-                                                    <div className="flex flex-wrap items-center gap-1">
-                                                        <button onClick={() => handleWlReactivate(entry)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1.5 rounded-lg transition"><Undo2 size={11} /> Reactivate</button>
-                                                        <button onClick={() => handleWlDelete(entry._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1.5 rounded-lg transition"><Trash2 size={11} /> Delete</button>
-                                                    </div>
-                                                )}
+                                                </div>
                                             </div>
                                         </div>
                                     );

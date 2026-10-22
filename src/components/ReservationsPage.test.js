@@ -159,11 +159,68 @@ test('shows extra assignments even when more animals are assigned than requested
     await setup({ waitlist: wl, animals: reserved });
     fireEvent.click(screen.getByText('Waitlist'));
     await screen.findByText('Riley');
-    // Only 1 was requested but 2 are assigned: the count must show 2/1, flagged as over.
-    const count = screen.getByText(/2\/1/);
-    expect(count.className).toContain('text-red-600');
+    // Only 1 was requested but 2 are assigned: the "Any" counter must show the full 2/1.
+    const count = screen.getByLabelText('Any 2 of 1');
+    expect(count).toBeTruthy();
+    // Over-assignment is never flagged red.
+    expect(count.className).not.toContain('text-red');
     // The request itself is covered, so the entry still counts as fulfilled.
     expect(screen.getByText(/Fulfilled/)).toBeTruthy();
+});
+
+test('the per-species counter shows the full overcount (16/1) instead of capping at the request', async () => {
+    const wl = [{
+        _id: 'W61', name: 'Over', contactInfo: 'over@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, assignedAnimals: [], entryDate: '2026-02-02', sortOrder: 0,
+    }];
+    // 16 animals of the requested species are reserved to the entry, but only 1 was asked for.
+    const reserved = [
+        ...animals,
+        ...Array.from({ length: 16 }, (_, i) => ({
+            id_public: `CTCO${i}`, name: `Extra ${i}`, species: 'Fancy Mouse', gender: i % 2 ? 'Male' : 'Female',
+            status: 'Booked', reservedBuyerName: 'Over', reservedWaitlistEntryId: 'W61',
+        })),
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Over');
+    // The counter is uncapped: 16 assigned against 1 requested, and still not red.
+    const count = screen.getByLabelText('Any 16 of 1');
+    expect(count).toBeTruthy();
+    expect(count.className).not.toContain('text-red');
+});
+
+test('counters are per species AND per gender', async () => {
+    const wl = [{
+        _id: 'W62', name: 'Split', contactInfo: 'split@example.com',
+        // 2 females + 1 male of Fancy Mouse, and 1 female of Fancy Rat.
+        speciesRequests: [
+            { species: 'Fancy Mouse', genderCounts: [{ gender: 'Female', count: 2 }, { gender: 'Male', count: 1 }], genders: ['Female', 'Male'], amount: 3 },
+            { species: 'Fancy Rat', genderCounts: [{ gender: 'Female', count: 1 }], genders: ['Female'], amount: 1 },
+        ],
+        isActive: true, assignedAnimals: [], entryDate: '2026-02-03', sortOrder: 0,
+    }];
+    const reserved = [
+        ...animals,
+        { id_public: 'CTC20', name: 'One', species: 'Fancy Mouse', gender: 'Female', status: 'Booked', reservedBuyerName: 'Split', reservedWaitlistEntryId: 'W62' },
+        { id_public: 'CTC21', name: 'Two', species: 'Fancy Mouse', gender: 'Male', status: 'Booked', reservedBuyerName: 'Split', reservedWaitlistEntryId: 'W62' },
+        { id_public: 'CTC22', name: 'Three', species: 'Fancy Rat', gender: 'Female', status: 'Booked', reservedBuyerName: 'Split', reservedWaitlistEntryId: 'W62' },
+    ];
+    await setup({ waitlist: wl, animals: reserved });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Split');
+
+    // Fancy Mouse has its own Female and Male counters…
+    const mouseKey = 'W62::Fancy Mouse::0';
+    expect(screen.getByLabelText('Female 1 of 2')).toBeTruthy();
+    expect(screen.getByLabelText('Male 1 of 1')).toBeTruthy();
+    // …and Fancy Rat has its own separate Female counter.
+    const ratKey = 'W62::Fancy Rat::1';
+    expect(screen.getByTestId(`wl-counter-${ratKey}-Female`)).toBeTruthy();
+    expect(screen.getByTestId(`wl-counter-${mouseKey}-Female`)).toBeTruthy();
+    // The mouse request is not fulfilled yet (1 of 2 females), so no "Fulfilled" badge.
+    expect(screen.queryByText(/Fulfilled/)).toBeNull();
 });
 
 test('the reservation summary hides "via Waitlist" when it repeats the buyer name', async () => {
@@ -350,7 +407,8 @@ test('waitlist tab shows active/history toggle and entry details', async () => {
     await setup();
     fireEvent.click(screen.getByText('Waitlist'));
     expect(await screen.findByText('Jane')).toBeTruthy();
-    expect(screen.getByText('Fancy Rat')).toBeTruthy();
+    // "Fancy Rat" appears in the species summary and again on the species counter row.
+    expect(screen.getAllByText('Fancy Rat').length).toBeGreaterThan(0);
     fireEvent.click(screen.getByText(/History \(0\)/));
     expect(await screen.findByText('No history yet')).toBeTruthy();
 });
@@ -400,8 +458,10 @@ test('waitlist card shows the per-gender split and fulfillment respects it', asy
     await setup({ waitlist: split });
     fireEvent.click(screen.getByText('Waitlist'));
     await screen.findByText('Pat');
-    expect(screen.getByText(/3 Male \/ 2 Female/)).toBeTruthy();
-    expect(screen.getByText(/2\/5/)).toBeTruthy();
+    // The counters are per gender: 2 of the 3 male slots are filled, and the
+    // 2 requested females have none assigned yet.
+    expect(screen.getByLabelText('Male 2 of 3')).toBeTruthy();
+    expect(screen.getByLabelText('Female 0 of 2')).toBeTruthy();
 });
 
 test('active waitlist entry counts live animals reserved to it via reservedWaitlistEntryId', async () => {
@@ -633,6 +693,93 @@ test('filters combine, show a count, and Clear filters resets them', async () =>
     fireEvent.click(screen.getByText('Clear filters'));
     expect(cardIds()).toHaveLength(3);
     expect(screen.queryByText('Clear filters')).toBeNull();
+});
+
+// --- Waitlist: custom ordering, layout and display names -------------------------------
+
+// The names of the waitlist cards in their current display order.
+const waitlistNames = () => screen.getAllByTestId(/^waitlist-entry-/).map(c => {
+    const nameEl = c.querySelector('.font-semibold');
+    return nameEl ? nameEl.textContent.trim() : '';
+});
+
+test('the order chevrons sit in the card header, not in the action row', async () => {
+    await setup();
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Jane');
+    const card = screen.getByTestId('waitlist-entry-W1');
+    // The chevrons are in the header (the first block of the card)…
+    const header = card.querySelector('.p-3 > div');
+    expect(within(header).getByTitle('Move up')).toBeTruthy();
+    expect(within(header).getByTitle('Move down')).toBeTruthy();
+    // …and Edit lives with Delete / Finalize in the bottom action row.
+    const actions = card.querySelector('.border-t');
+    expect(within(actions).getByText('Edit')).toBeTruthy();
+    expect(within(actions).getByText('Delete')).toBeTruthy();
+    expect(within(actions).getByText('Finalize')).toBeTruthy();
+});
+
+test('moving an entry down persists the new order and switches to the custom order', async () => {
+    await setup();
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Jane');
+    expect(waitlistNames()).toEqual(['Jane', 'Sam']);
+
+    // Move Jane down one position.
+    fireEvent.click(within(screen.getByTestId('waitlist-entry-W1')).getByTitle('Move down'));
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist/reorder', expect.objectContaining({
+        orderedIds: expect.arrayContaining(['W2', 'W1']),
+    })));
+    // The order is now the custom one, and the sort toggle reflects it.
+    expect(localStorage.getItem('wlSort')).toBe('manual');
+});
+
+test('the custom order toggle is available next to the oldest/newest options', async () => {
+    await setup();
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Jane');
+    expect(screen.getByText('Oldest → Newest')).toBeTruthy();
+    expect(screen.getByText('Newest → Oldest')).toBeTruthy();
+    expect(screen.getByText('Custom order')).toBeTruthy();
+});
+
+test('unpositioned entries go last in the custom order, not first', async () => {
+    const wl = [
+        { _id: 'WA', name: 'First', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, entryDate: '2026-01-01', sortOrder: 0 },
+        { _id: 'WB', name: 'Second', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, entryDate: '2026-01-02', sortOrder: 2 },
+        { _id: 'WC', name: 'Third', speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }], isActive: true, entryDate: '2026-01-03', sortOrder: 1 },
+    ];
+    await setup({ waitlist: wl });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('First');
+    fireEvent.click(screen.getByText('Custom order'));
+    await waitFor(() => expect(waitlistNames()).toEqual(['Third', 'Second', 'First']));
+});
+
+test('assigned animals show their prefix and suffix', async () => {
+    const wl = [{
+        _id: 'W70', name: 'Named', contactInfo: 'n@example.com',
+        speciesRequests: [{ species: 'Fancy Mouse', genders: ['Any'], amount: 1 }],
+        isActive: true, entryDate: '2026-02-04', sortOrder: 0,
+        assignedAnimals: [{ id_public: 'CTC30', name: 'Nibbles', prefix: 'Fancy', suffix: 'of Windwhistle', species: 'Fancy Mouse', gender: 'Female' }],
+    }];
+    await setup({ waitlist: wl });
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Named');
+    // Expand the species group so the assigned animals are listed.
+    fireEvent.click(screen.getByRole('button', { name: /Fancy Mouse/ }));
+    // The full display name (prefix + name + suffix) is shown.
+    expect(screen.getByText('Fancy Nibbles of Windwhistle')).toBeTruthy();
+});
+
+test('the entry number is rendered larger and darker than the surrounding text', async () => {
+    await setup();
+    fireEvent.click(screen.getByText('Waitlist'));
+    await screen.findByText('Jane');
+    const number = screen.getByText('#1');
+    expect(number.className).toContain('text-xs');
+    expect(number.className).toContain('font-bold');
+    expect(number.className).toContain('text-gray-500');
 });
 
 test('clicking the animal image opens the full animal modal for that animal', async () => {
