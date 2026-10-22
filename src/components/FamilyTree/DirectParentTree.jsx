@@ -4,19 +4,24 @@ import { Mars, Venus } from 'lucide-react';
 
 const Node = ({ animal, onClick, onViewAnimal }) => (
   <button onClick={() => { onClick?.(animal?.id_public); onViewAnimal?.(animal); }} style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 140, textAlign: 'left' }}>
-    {animal?.birthDate && <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{String(animal.birthDate).slice(0,10)}</div>}
+    {animal?.birthDate && <div style={{ fontSize: 11, color: '#666', marginBottom: 4, textAlign: 'center' }}>{String(animal.birthDate).slice(0,10)}</div>}
     {animal?.imageUrl && <img src={animal.imageUrl} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 4 }} />}
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-      <span>{animal?.gender === 'Male' ? <Mars size={14} /> : animal?.gender === 'Female' ? <Venus size={14} /> : null}</span>
+      <span style={{ color: animal?.gender === 'Male' ? '#3b82f6' : animal?.gender === 'Female' ? '#ec4899' : '#9ca3af' }}>
+        {animal?.gender === 'Male' ? <Mars size={14} /> : animal?.gender === 'Female' ? <Venus size={14} /> : null}
+      </span>
       <span style={{ fontWeight: 600 }}>{[animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ')}</span>
     </div>
-    <div style={{ height: 6, borderRadius: 3, marginTop: 6, background: animal?.status === 'Alive' ? '#22c55e' : '#94a3b8' }} />
+    <div style={{ height: 18, borderRadius: 3, marginTop: 6, background: animal?.status === 'Alive' ? '#22c55e' : '#94a3b8', color: 'white', fontSize: 11, display: 'flex', alignItems: 'center', paddingLeft: 6 }}>
+      {animal?.status || 'Unknown'}
+    </div>
   </button>
 );
 
 const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal }) => {
   const [nodes, setNodes] = useState({});
   const [loading, setLoading] = useState(true);
+  const [zoom, setZoom] = useState(100);
 
   useEffect(() => {
     if (!focusAnimalId) return;
@@ -62,7 +67,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
     if (!id || depth > 4) return null;
     const animal = nodes[id];
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         {depth < 4 && (
           <div style={{ display: 'flex', gap: 16, position: 'relative' }}>
             <div style={{ position:'absolute', bottom:-8, left:'25%', right:'25%', height:2, background:'#999' }} />
@@ -76,7 +81,16 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
     );
   };
 
-  return <div style={{ padding: 16, overflow: 'auto' }}>{renderLevel(focusAnimalId)}</div>;
+  return (
+    <div>
+      <div style={{ marginBottom: 8 }}>
+        <button onClick={() => setZoom(z => Math.max(50, z - 10))}>Zoom Out</button>
+      </div>
+      <div style={{ transform: `scale(${zoom/100})`, transformOrigin: 'top left', padding: 16, overflow: 'auto' }}>
+        {renderLevel(focusAnimalId)}
+      </div>
+    </div>
+  );
 };
 
 export default DirectParentTree;
