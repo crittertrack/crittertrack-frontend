@@ -287,17 +287,18 @@ const DirectParentTree = ({
               animal,
               label: (
                 <div
-                  style={{
-                    boxSizing: 'border-box',
-                    width: NODE_WIDTH,
-                    border: '1px solid #ccc',
-                    padding: 8,
-                    borderRadius: 8,
-                    background: '#fff',
-                    textAlign: 'left',
-                    overflow: 'hidden',
-                  }}
-                >
+  style={{
+    boxSizing: 'border-box',
+    width: NODE_WIDTH,
+    minHeight: 175,
+    border: '1px solid #ccc',
+    padding: 8,
+    borderRadius: 8,
+    background: '#fff',
+    textAlign: 'left',
+    overflow: 'visible',
+  }}
+>
                   {animal?.birthDate && (
                     <div
                       style={{
