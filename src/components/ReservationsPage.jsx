@@ -1120,7 +1120,6 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     </span>
                                                 )}
                                             </div>
-                                        </div>
                                             <div className="bg-gray-50 dark:bg-dark-surface rounded-lg p-2.5 border border-gray-100 dark:border-dark-border">
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     {ful.isFulfilled && (
@@ -1202,10 +1201,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     </div>
                                                 )}
                                             </div>
-                                                )}
-                                            </div>
                                         </div>
-                                    </div>
                                     );
                                 })}
                             </div>
