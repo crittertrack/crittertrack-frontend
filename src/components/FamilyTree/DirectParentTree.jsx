@@ -40,7 +40,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
               </span>
               <span style={{ fontWeight: 600 }}>{[animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ')}</span>
             </div>
-            <div style={{ height: 18, borderRadius: 3, marginTop: 6, background: animal?.status === 'Alive' ? '#22c55e' : '#94a3b8', color: 'white', fontSize: 11, display: 'flex', alignItems: 'center', paddingLeft: 6 }}>
+            <div style={{ height: 18, borderRadius: 3, marginTop: 6, background: animal?.status === 'Alive' ? '#22c55e' : '#94a3b8', color: 'white', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {animal?.status || 'Unknown'}
             </div>
           </div>
