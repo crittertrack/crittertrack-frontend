@@ -597,17 +597,21 @@ useEffect(() => {
                                                     <InfoItem compact label="Variety">
                                                         {[animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
                                                     </InfoItem>
-                                                    <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
-                                                    <InfoItem compact label="Genetics">
-                                                        {animal.geneticCode && (
-                                                            animal.species === 'Ball Python'
-                                                                ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
-                                                                : <code className="font-mono">{animal.geneticCode}</code>
-                                                        )}
-                                                    </InfoItem>
+                                                    {animal.carrierTraits && (
+  <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
+)}
+                                                    {animal.geneticCode && (
+  <InfoItem compact label="Genetics">
+    {animal.species === 'Ball Python'
+      ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
+      : <code className="font-mono">{animal.geneticCode}</code>}
+  </InfoItem>
+)}
 
                                                     {/* Row 2 */}
-                                                    <InfoItem compact label="Weight" value={getLatestWeightValue(animal)} />
+                                                    {getLatestWeightValue(animal) && (
+  <InfoItem compact label="Weight" value={getLatestWeightValue(animal)} />
+)}
                                                     <InfoItem compact label="Birthdate">
                                                         {animal.birthDate ? (
                                                             <>
@@ -628,10 +632,14 @@ useEffect(() => {
                                                             </>
                                                         ) : null}
                                                     </InfoItem>
-                                                    <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+                                                    {animal.purchaseDate && (
+  <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+)}
 
                                                     {/* Row 3 */}
-                                                    <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
+                                                    {enclosureInfo?.name && (
+  <InfoItem compact label="Enclosure" value={enclosureInfo?.name} />
+)} 
                                                     {/* Owner and Breeder link to the linked user's public
                                                         profile whenever breederId_public/ownerId_public
                                                         is set. The *_id_public field is the link target,
