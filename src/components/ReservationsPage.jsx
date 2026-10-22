@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
+import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from 'lucide-react';
 import apiClient from '../utils/apiClient';
 import AnimalImage from './shared/AnimalImage';
 import InfoButton from './shared/InfoButton';
@@ -81,6 +81,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const [wlSaving, setWlSaving] = useState(false);
     // Contact picker for the waitlist form (assign an existing Contacts record).
     const [wlContactModalOpen, setWlContactModalOpen] = useState(false);
+    const [expandedSpecGroups, setExpandedSpecGroups] = useState({});
 
     const fetchAnimals = useCallback(async () => {
         if (!authToken) return;
@@ -1088,7 +1089,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 <p className="text-xs sm:text-sm mt-1">{waitlistView === 'active' ? 'Add interested buyers so you can assign them to animals' : 'Finalized entries will show here with their assigned animals'}</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                                 {sortedWaitlist.map((entry, idx) => {
                                     const ful = computeEntryFulfillment(entry);
                                     return (
@@ -1137,34 +1138,55 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                 </div>
                                             </div>
 
-                                            {ful.progress.map((p, pi) => (
-                                                <div key={pi} className="flex justify-between gap-2 py-1 border-b border-gray-100 dark:border-dark-border last:border-0">
-                                                    <span className="text-xs text-gray-600 dark:text-dark-text-secondary flex items-center gap-1">
-                                                        <Tag size={9} className="shrink-0" />
-                                                        {p.species}
-                                                    </span>
-                                                    <span className={`text-xs ${p.matched > p.requested ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-dark-text-secondary'}`}>
-                                                        {p.breakdown.map(b => `${b.count} ${b.gender}`).join(' / ')}{` • ${p.matched}/${p.requested}`}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                            {waitlistView === 'active' && ful.assigned.length > 0 && (
-                                                <div className="space-y-1.5 border-t border-gray-100 dark:border-dark-border pt-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Assigned</span>
-                                                        <span className="text-[10px] text-gray-400 dark:text-dark-text-muted">{ful.assigned.length} animals</span>
+                                            {(() => {
+                                                const groups = [];
+                                                ful.progress.forEach(p => {
+                                                    (p.breakdown || []).forEach(b => {
+                                                        const gender = b.gender;
+                                                        const requested = b.count;
+                                                        const assignedForGroup = ful.assigned.filter(a => (a.species || '').toLowerCase() === (p.species || '').toLowerCase() && (gender === 'Any' || (a.gender || '') === gender));
+                                                        groups.push({ key: `${entry._id}::${p.species}::${gender}`, species: p.species, gender, requested, assigned: assignedForGroup, matched: Math.min(assignedForGroup.length, requested) });
+                                                    });
+                                                });
+                                                if (groups.length === 0) return null;
+                                                return (
+                                                    <div className="space-y-1.5">
+                                                        {groups.map(g => {
+                                                            const isOpen = !!expandedSpecGroups[g.key];
+                                                            const symbol = g.gender === 'Male' ? '♂' : g.gender === 'Female' ? '♀' : '';
+                                                            const symbolCls = g.gender === 'Male' ? 'text-blue-600 dark:text-blue-400' : g.gender === 'Female' ? 'text-pink-600 dark:text-pink-400' : 'text-gray-500';
+                                                            const toggle = () => setExpandedSpecGroups(prev => ({ ...prev, [g.key]: !prev[g.key] }));
+                                                            return (
+                                                                <div key={g.key} className="rounded-lg border border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-surface">
+                                                                    <button type="button" onClick={toggle} className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 text-left">
+                                                                        <span className="flex items-center gap-1.5 min-w-0">
+                                                                            {isOpen ? <ChevronDown size={12} className="shrink-0 text-gray-400" /> : <ChevronRight size={12} className="shrink-0 text-gray-400" />}
+                                                                            {symbol && <span className={`text-sm font-bold shrink-0 ${symbolCls}`}>{symbol}</span>}
+                                                                            <span className="text-xs text-gray-700 dark:text-dark-text truncate">{g.species}{g.gender !== 'Any' ? ` (${g.gender.charAt(0)})` : ''}</span>
+                                                                        </span>
+                                                                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md shrink-0 ${g.matched > g.requested ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : g.matched >= g.requested && g.requested > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'}`}>
+                                                                            {g.matched}/{g.requested}
+                                                                        </span>
+                                                                    </button>
+                                                                    {isOpen && (
+                                                                        <div className="px-2.5 pb-2 space-y-1">
+                                                                            {g.assigned.length === 0 ? (
+                                                                                <div className="text-[10px] text-gray-400 dark:text-dark-text-muted pl-5">No assigned animals</div>
+                                                                            ) : g.assigned.map(a => (
+                                                                                <div key={a.id_public} className="flex items-center gap-1.5 pl-5 py-0.5">
+                                                                                    <Check size={9} className="text-green-600 dark:text-green-400 shrink-0" />
+                                                                                    <span className="text-xs text-gray-700 dark:text-dark-text truncate flex-1">{a.name || a.id_public}</span>
+                                                                                    <span className="text-[10px] text-gray-400 dark:text-dark-text-muted shrink-0">{a.id_public}</span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                                        {ful.assigned.map(a => (
-                                                            <div key={a.id_public} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
-                                                                <Check size={9} className="text-green-600 dark:text-green-400 shrink-0" />
-                                                                <span className="text-xs text-gray-700 dark:text-dark-text truncate flex-1">{a.name || a.id_public}</span>
-                                                                <span className="text-[10px] text-gray-400 dark:text-dark-text-muted shrink-0">({a.id_public})</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
+                                                );
+                                            })()}
 
                                             {entry.notes && <div className="text-xs text-gray-600 dark:text-dark-text-secondary pt-1 text-[11px]">{entry.notes}</div>}
 
