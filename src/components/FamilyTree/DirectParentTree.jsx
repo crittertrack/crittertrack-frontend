@@ -19,18 +19,19 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
     };
     const run = async () => {
       const dataMap = {};
-      const queue = [{ id: focusAnimalId, depth: 0, x: 0, y: 0 }];
+      let counter = 0;
+      const queue = [{ id: focusAnimalId, nodeId: `node-${counter++}`, depth: 0, x: 0, y: 0 }];
       const visited = new Set();
       const ns = [];
       const es = [];
       while (queue.length) {
-        const { id, depth, x, y } = queue.shift();
-        if (!id || visited.has(id) || depth > 4) continue;
+        const { id, nodeId, depth, x, y } = queue.shift();
+        if (!id || depth > 4) continue;
         visited.add(id);
         const animal = await fetchOne(id);
         if (!animal) continue;
         dataMap[id] = animal;
-        ns.push({ id, type: 'default', position: { x, y }, data: { label: (
+        ns.push({ id: nodeId, type: 'default', position: { x, y }, data: { label: (
           <div style={{ border: '1px solid #ccc', padding: 8, borderRadius: 8, minWidth: 140, textAlign: 'left' }}>
             {animal?.birthDate && <div style={{ fontSize: 11, color: '#666', marginBottom: 4, textAlign: 'center' }}>{String(animal.birthDate).slice(0,10)}</div>}
             {animal?.imageUrl && <img src={animal.imageUrl} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 4 }} />}
@@ -44,12 +45,12 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
               {animal?.status || 'Unknown'}
             </div>
           </div>
-        ), animal } });
+        ), animal, id } });
         if (depth < 4) {
           const sire = animal?.sireId_public;
           const dam = animal?.damId_public;
-          if (sire) { queue.push({ id: sire, depth: depth + 1, x: x - 220, y: y - 200 }); es.push({ id: `${id}-${sire}`, source: id, target: sire }); }
-          if (dam) { queue.push({ id: dam, depth: depth + 1, x: x + 220, y: y - 200 }); es.push({ id: `${id}-${dam}`, source: id, target: dam }); }
+          if (sire) { queue.push({ id: sire, nodeId: `node-${counter++}`, depth: depth + 1, x: x - 220, y: y - 200 }); es.push({ id: `${nodeId}-${sire}-${counter}`, source: nodeId, target: `node-${counter-1}` }); }
+          if (dam) { queue.push({ id: dam, nodeId: `node-${counter++}`, depth: depth + 1, x: x + 220, y: y - 200 }); es.push({ id: `${nodeId}-${dam}-${counter}`, source: nodeId, target: `node-${counter-1}` }); }
         }
       }
       if (!cancelled) { setNodes(ns); setEdges(es); setLoading(false); }
@@ -62,7 +63,7 @@ const DirectParentTree = ({ focusAnimalId, authToken, onNodeClick, onViewAnimal 
 
   return (
     <div style={{ width: '100%', height: '90%' }}>
-      <ReactFlow nodes={nodes} edges={edges} fitView onNodeClick={(_, node) => { onNodeClick?.(node.id); onViewAnimal?.(node.data.animal); }}>
+      <ReactFlow nodes={nodes} edges={edges} fitView onNodeClick={(_, node) => { onNodeClick?.(node.data.id); onViewAnimal?.(node.data.animal); }}>
         <Background />
         <Controls />
       </ReactFlow>
