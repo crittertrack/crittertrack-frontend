@@ -66,7 +66,10 @@ const BETWEEN_BRANCH_GAP = 28;
 const GENERATION_HEIGHT = 300;
 
 // Number of ancestor generations to display.
-const MAX_DEPTH = 4;
+const MAX_DEPTH = 6;
+
+// Cache timeout in milliseconds (24 hours)
+const CACHE_TTL = 86400000;
 
 // ============================================================
 // COMPONENT
@@ -90,26 +93,50 @@ const DirectParentTree = ({
       return;
     }
 
-    let cancelled = false;
+    // Check for cached tree data in localStorage
+    const cacheKey = `treeCache_${focusAnimalId}`;
+    const cached = localStorage.getItem(cacheKey);
+    const now = Date.now();
 
-    const fetchOne = async (id) => {
-      if (!id) return null;
+    let useCache = false;
+    let cachedData = null;
 
+    if (cached) {
       try {
-        const response = await apiClient.get(
-          `/animals/any/${encodeURIComponent(id)}`,
-          authToken
-            ? { headers: { Authorization: `Bearer ${authToken}` } }
-            : undefined
-        );
-
-        return response.data;
+        const parsed = JSON.parse(cached);
+        // Use cache if within TTL and animal ID matches
+        if (now - parsed.timestamp < CACHE_TTL && parsed.focusAnimalId === focusAnimalId) {
+          useCache = true;
+          cachedData = parsed.nodes;
+          setEdges(parsed.edges);
+          setLoading(false);
+        }
       } catch {
-        return { id_public: id, name: 'Unknown' };
+        // Invalid cache, proceed to fetch fresh data
       }
-    };
+    }
 
-    const getParentId = (animal, fields) => {
+    if (!useCache) {
+      let cancelled = false;
+
+      const fetchOne = async (id) => {
+        if (!id) return null;
+
+        try {
+          const response = await apiClient.get(
+            `/animals/any/${encodeURIComponent(id)}`,
+            authToken
+              ? { headers: { Authorization: `Bearer ${authToken}` } }
+              : undefined
+          );
+
+          return response.data;
+        } catch {
+          return { id_public: id, name: 'Unknown' };
+        }
+      };
+
+      const getParentId = (animal, fields) => {
       for (const field of fields) {
         const value = animal?.[field];
 
@@ -585,6 +612,19 @@ const DirectParentTree = ({
           setNodes(ns);
           setEdges(es);
           setLoading(false);
+
+          // Cache the fetched data in localStorage for quicker loading
+          try {
+            const cacheData = {
+              focusAnimalId,
+              timestamp: Date.now(),
+              nodes: ns,
+              edges: es
+            };
+            localStorage.setItem(`treeCache_${focusAnimalId}`, JSON.stringify(cacheData));
+          } catch {
+            // localStorage full or disabled, ignore
+          }
         }
       } catch (error) {
         console.error('Failed to build pedigree tree:', error);
