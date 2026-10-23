@@ -86,6 +86,8 @@ const DirectParentTree = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!focusAnimalId) {
       setNodes([]);
       setEdges([]);
@@ -108,6 +110,7 @@ const DirectParentTree = ({
         if (now - parsed.timestamp < CACHE_TTL && parsed.focusAnimalId === focusAnimalId) {
           useCache = true;
           cachedData = parsed.nodes;
+          setNodes(parsed.nodes);
           setEdges(parsed.edges);
           setLoading(false);
         }
@@ -117,8 +120,6 @@ const DirectParentTree = ({
     }
 
     if (!useCache) {
-      let cancelled = false;
-
       const fetchOne = async (id) => {
         if (!id) return null;
 
@@ -637,7 +638,13 @@ const DirectParentTree = ({
       }
     };
 
-    }, [focusAnimalId, authToken]);
+    run();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [focusAnimalId, authToken]);
 
   if (loading) {
     return (
