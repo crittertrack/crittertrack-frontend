@@ -637,12 +637,7 @@ const DirectParentTree = ({
       }
     };
 
-    run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [focusAnimalId, authToken]);
+    }, [focusAnimalId, authToken]);
 
   if (loading) {
     return (
