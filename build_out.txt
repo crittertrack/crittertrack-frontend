@@ -1,0 +1,1083 @@
+
+> crittertrack-frontend-app@0.1.0 build
+> react-scripts build
+
+Creating an optimized production build...
+Compiled with warnings.
+
+Critical dependency: the request of a dependency is an expression
+
+[eslint] 
+src\AppRoutes.jsx
+  Line 15:7:   'BreederDirectory' is assigned a value but never used        no-unused-vars
+  Line 219:9:  'handleViewPublicAnimal' is assigned a value but never used  no-unused-vars
+
+src\PublicPages.jsx
+  Line 1:38:    'useCallback' is defined but never used                                                                       no-unused-vars
+  Line 46:11:   'inModeratorMode' is assigned a value but never used                                                          no-unused-vars
+  Line 122:8:   React Hook useEffect has a missing dependency: 'authToken'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 263:12:  'modCurrentContext' is assigned a value but never used                                                        no-unused-vars
+
+src\app.jsx
+  Line 1:1:      Unexpected Unicode BOM (Byte Order Mark)                                                                                                                                                                                                                             unicode-bom
+  Line 2:59:     'useMemo' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 2:68:     'useImperativeHandle' is defined but never used                                                                                                                                                                                                                      no-unused-vars
+  Line 3:10:     'useParams' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 3:47:     'useSearchParams' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 6:23:     'UserPlus' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:40:     'ChevronLeft' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 6:53:     'ChevronRight' is defined but never used                                                                                                                                                                                                                             no-unused-vars
+  Line 6:67:     'ChevronUp' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 6:78:     'ChevronDown' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 6:99:     'Edit' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:123:    'Plus' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:149:    'RefreshCw' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 6:173:    'ClipboardList' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 6:198:    'Settings' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:214:    'Globe' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:232:    'Mars' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:238:    'Venus' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:275:    'HeartHandshake' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 6:291:    'HeartPulse' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 6:309:    'XCircle' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 6:318:    'CheckCircle' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 6:341:    'Upload' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:349:    'FileText' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:359:    'Link' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:365:    'Unlink' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:373:    'AlertCircle' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 6:398:    'Archive' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 6:407:    'ArrowLeftRight' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 6:434:    'Info' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:466:    'Ban' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:471:    'Flag' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:477:    'Scissors' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:487:    'VenusAndMars' is defined but never used                                                                                                                                                                                                                             no-unused-vars
+  Line 6:501:    'Circle' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:517:    'Lock' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:523:    'AlertTriangle' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 6:551:    'Check' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:558:    'Star' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:564:    'Moon' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:570:    'MoonStar' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:592:    'Network' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 6:601:    'TableOfContents' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 6:618:    'LayoutGrid' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 6:630:    'Home' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:636:    'Utensils' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:654:    'Activity' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:664:    'ScrollText' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 6:676:    'Package' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 6:695:    'Sparkles' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:705:    'QrCode' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:713:    'Images' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:721:    'Share2' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:729:    'Hash' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:735:    'Dna' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:740:    'TreeDeciduous' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 6:755:    'Tag' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:760:    'Egg' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:765:    'Brain' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:772:    'Trophy' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:780:    'Scale' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:787:    'FileCheck' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 6:798:    'Palette' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 6:807:    'Sprout' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:815:    'Ruler' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:822:    'FolderOpen' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 6:834:    'Leaf' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:840:    'Microscope' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 6:852:    'Stethoscope' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 6:865:    'UtensilsCrossed' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 6:882:    'Droplets' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:901:    'Thermometer' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 6:914:    'Feather' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 6:923:    'Medal' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:930:    'Target' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:938:    'Key' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:943:    'Dumbbell' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:953:    'Gem' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:958:    'Flame' is defined but never used                                                                                                                                                                                                                                    no-unused-vars
+  Line 6:965:    'PawPrint' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:975:    'ArrowRight' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 6:987:    'LockOpen' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 6:997:    'Camera' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:1005:   'BarChart2' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 6:1016:   'Bird' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:1022:   'Fish' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:1028:   'Bug' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 6:1033:   'Worm' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 6:1039:   'Turtle' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 6:1047:   'SlidersHorizontal' is defined but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 7:10:     'QRCodeSVG' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 9:10:     'formatDate' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 9:22:     'formatDateShort' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 9:39:     'formatDateDisplay' is defined but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 9:58:     'litterAge' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 9:69:     'formatTimeAgo' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 10:42:    'DEFAULT_SPECIES_OPTIONS' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 11:10:    'getSpeciesDisplayName' is defined but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 11:33:    'getSpeciesLatinName' is defined but never used                                                                                                                                                                                                                      no-unused-vars
+  Line 12:10:    'getCountryFlag' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 12:26:    'getCountryName' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 12:42:    'US_STATES' is defined but never used                                                                                                                                                                                                                                no-unused-vars
+  Line 12:53:    'getStateName' is defined but never used                                                                                                                                                                                                                             no-unused-vars
+  Line 12:67:    'getCurrencySymbol' is defined but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 14:10:    'getDonationBadge' is defined but never used                                                                                                                                                                                                                         no-unused-vars
+  Line 14:28:    'DonationBadge' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 15:10:    'getActionLabel' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 15:26:    'getActionColor' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 23:10:    'BroadcastPoll' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 23:25:    'BroadcastBanner' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 25:8:     'NotificationsHub' is defined but never used                                                                                                                                                                                                                         no-unused-vars
+  Line 38:10:    'compressImageFile' is defined but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 38:29:    'compressImageToMaxSize' is defined but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 38:53:    'compressImageWithWorker' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 45:8:     'LiteViewAnimalModal' is defined but never used                                                                                                                                                                                                                      no-unused-vars
+  Line 52:10:    'ConflictResolutionModal' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 52:35:    'LitterSyncConflictModal' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 53:10:    'ParentSearchModal' is defined but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 53:29:    'LocalAnimalSearchModal' is defined but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 54:10:    'SpeciesPickerModal' is defined but never used                                                                                                                                                                                                                       no-unused-vars
+  Line 54:30:    'SpeciesManager' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 54:46:    'SpeciesSelector' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 96:7:     'IDLE_TIMEOUT_MS' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 99:7:     'ParentCard' is assigned a value but never used                                                                                                                                                                                                                      no-unused-vars
+  Line 461:12:   'isMobile' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 478:58:   'publicAnimalViewHistory' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 478:111:  'publicAnimalInitialTab' is assigned a value but never used                                                                                                                                                                                                          no-unused-vars
+  Line 478:214:  'handleCloseAllPublicAnimals' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 479:58:   'setAnimalToEdit' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 479:75:   'animalViewHistory' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 479:119:  'setPrivateAnimalInitialTab' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 479:164:  'setPrivateBetaView' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 479:234:  'viewReturnPathRef' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 479:436:  'handleRestoreViewOnlyAnimal' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 480:54:   'budgetModalOpen' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 480:242:  'transferUserQuery' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 480:261:  'setTransferUserQuery' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 480:283:  'transferUserResults' is assigned a value but never used                                                                                                                                                                                                             no-unused-vars
+  Line 480:304:  'setTransferUserResults' is assigned a value but never used                                                                                                                                                                                                          no-unused-vars
+  Line 480:328:  'transferSelectedUser' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 480:350:  'setTransferSelectedUser' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 480:375:  'transferSearching' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 480:394:  'setTransferSearching' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 480:416:  'transferSearchPerformed' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 480:441:  'setTransferSearchPerformed' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 480:469:  'transferPrice' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 480:484:  'setTransferPrice' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 480:502:  'transferNotes' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 480:517:  'setTransferNotes' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 480:535:  'handleSearchTransferUser' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 480:561:  'handleSelectTransferUser' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 482:138:  'modCurrentContext' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 482:179:  'handleToggleModerationMode' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 482:207:  'handleModerationAuth' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 483:13:   'setAnimalViewHistory' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 487:12:   'viewAnimalBreederInfo' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 502:8:    React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                       react-hooks/exhaustive-deps
+  Line 613:8:    React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 632:8:    React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 651:8:    React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 665:12:   'conversations' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 665:27:   'setConversations' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 667:12:   'messages' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 667:22:   'setMessages' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 668:12:   'newMessage' is assigned a value but never used                                                                                                                                                                                                                      no-unused-vars
+  Line 668:24:   'setNewMessage' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 669:12:   'sendingMessage' is assigned a value but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 669:28:   'setSendingMessage' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 677:12:   'parentCardKey' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 682:12:   'showTabs' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 682:22:   'setShowTabs' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 683:12:   'sireData' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 684:12:   'damData' is assigned a value but never used                                                                                                                                                                                                                         no-unused-vars
+  Line 685:12:   'offspringData' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 720:8:    React Hook React.useCallback has a missing dependency: 'setAnimalToView'. Either include it or remove the dependency array                                                                                                                                           react-hooks/exhaustive-deps
+  Line 723:11:   'handleToggleAnimalOwned' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 738:8:    React Hook React.useCallback has a missing dependency: 'setAnimalToView'. Either include it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                   react-hooks/exhaustive-deps
+  Line 753:8:    React Hook React.useEffect has a missing dependency: 'setPublicAnimalViewHistory'. Either include it or remove the dependency array                                                                                                                                  react-hooks/exhaustive-deps
+  Line 896:8:    React Hook React.useEffect has a missing dependency: 'setAnimalToView'. Either include it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                     react-hooks/exhaustive-deps
+  Line 933:8:    React Hook React.useEffect has a missing dependency: 'setAnimalToView'. Either include it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                     react-hooks/exhaustive-deps
+  Line 947:8:    React Hook React.useEffect has a missing dependency: 'setAnimalToView'. Either include it or remove the dependency array                                                                                                                                             react-hooks/exhaustive-deps
+  Line 949:12:   'showPedigreeChart' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 949:31:   'setShowPedigreeChart' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 950:12:   'copySuccessAnimal' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 950:31:   'setCopySuccessAnimal' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 951:12:   'showQRAnimal' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 951:26:   'setShowQRAnimal' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 964:37:   'setExpandedBreedingRecords' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 965:12:   'showCreateLitterModal' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 965:35:   'setShowCreateLitterModal' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 966:12:   'showLinkLitterModal' is assigned a value but never used                                                                                                                                                                                                             no-unused-vars
+  Line 966:33:   'setShowLinkLitterModal' is assigned a value but never used                                                                                                                                                                                                          no-unused-vars
+  Line 967:12:   'breedingRecordForLitter' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 967:37:   'setBreedingRecordForLitter' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 984:8:    React Hook React.useEffect has a missing dependency: 'breedingRecordLitters'. Either include it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component               react-hooks/exhaustive-deps
+  Line 992:12:   'hasSeenWelcomeGuide' is assigned a value but never used                                                                                                                                                                                                             no-unused-vars
+  Line 1007:12:  'availableAnimals' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 1007:30:  'setAvailableAnimals' is assigned a value but never used                                                                                                                                                                                                             no-unused-vars
+  Line 1008:12:  'currentAvailableIndex' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 1008:35:  'setCurrentAvailableIndex' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 1034:12:  'maintenanceMessage' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 1035:12:  'showUrgentNotification' is assigned a value but never used                                                                                                                                                                                                          no-unused-vars
+  Line 1036:12:  'urgentNotificationData' is assigned a value but never used                                                                                                                                                                                                          no-unused-vars
+  Line 1068:8:   React Hook useCallback has missing dependencies: 'BL_PRESETS_APP', 'navigate', 'setAnimalBreedingLines', 'setAuthToken', 'setBreedingLineDefs', 'setInModeratorMode', 'setShowAdminPanel', and 'setUserProfile'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 1145:8:   React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 1227:8:   React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 1239:8:   React Hook useEffect has missing dependencies: 'setPreSelectedTransactionType' and 'setPreSelectedTransferAnimal'. Either include them or remove the dependency array                                                                                                react-hooks/exhaustive-deps
+  Line 1255:8:   React Hook useEffect has a missing dependency: 'setUserProfile'. Either include it or remove the dependency array                                                                                                                                                    react-hooks/exhaustive-deps
+  Line 1333:8:   React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 1356:8:   React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+  Line 1366:8:   React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                       react-hooks/exhaustive-deps
+  Line 1382:8:   React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                       react-hooks/exhaustive-deps
+  Line 1437:8:   React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component                         react-hooks/exhaustive-deps
+
+src\components\AnimalDetail\AnimalModalV2.jsx
+  Line 4:65:    'Ruler' is defined but never used                                                                             no-unused-vars
+  Line 4:87:    'FolderOpen' is defined but never used                                                                        no-unused-vars
+  Line 4:99:    'Globe' is defined but never used                                                                             no-unused-vars
+  Line 5:5:     'Shield' is defined but never used                                                                            no-unused-vars
+  Line 5:13:    'Stethoscope' is defined but never used                                                                       no-unused-vars
+  Line 5:26:    'UtensilsCrossed' is defined but never used                                                                   no-unused-vars
+  Line 5:53:    'Thermometer' is defined but never used                                                                       no-unused-vars
+  Line 5:66:    'Scissors' is defined but never used                                                                          no-unused-vars
+  Line 5:76:    'MessageSquare' is defined but never used                                                                     no-unused-vars
+  Line 5:110:   'Feather' is defined but never used                                                                           no-unused-vars
+  Line 6:5:     'Activity' is defined but never used                                                                          no-unused-vars
+  Line 6:15:    'AlertTriangle' is defined but never used                                                                     no-unused-vars
+  Line 6:30:    'Medal' is defined but never used                                                                             no-unused-vars
+  Line 6:37:    'Target' is defined but never used                                                                            no-unused-vars
+  Line 6:45:    'Key' is defined but never used                                                                               no-unused-vars
+  Line 6:50:    'Ban' is defined but never used                                                                               no-unused-vars
+  Line 6:62:    'RefreshCw' is defined but never used                                                                         no-unused-vars
+  Line 6:73:    'Leaf' is defined but never used                                                                              no-unused-vars
+  Line 6:79:    'BookOpen' is defined but never used                                                                          no-unused-vars
+  Line 6:109:   'Trophy' is defined but never used                                                                            no-unused-vars
+  Line 7:12:    'User' is defined but never used                                                                              no-unused-vars
+  Line 7:18:    'Camera' is defined but never used                                                                            no-unused-vars
+  Line 7:84:    'FileJson' is defined but never used                                                                          no-unused-vars
+  Line 7:132:   'Star' is defined but never used                                                                              no-unused-vars
+  Line 8:5:     'Scale' is defined but never used                                                                             no-unused-vars
+  Line 8:46:    'PlusCircle' is defined but never used                                                                        no-unused-vars
+  Line 8:58:    'Trash2' is defined but never used                                                                            no-unused-vars
+  Line 8:66:    'Hospital' is defined but never used                                                                          no-unused-vars
+  Line 8:96:    'Cake' is defined but never used                                                                              no-unused-vars
+  Line 8:102:   'Baby' is defined but never used                                                                              no-unused-vars
+  Line 8:108:   'Dumbbell' is defined but never used                                                                          no-unused-vars
+  Line 28:55:   'getEventIcon' is defined but never used                                                                      no-unused-vars
+  Line 28:69:   'renderBoldText' is defined but never used                                                                    no-unused-vars
+  Line 31:30:   'TimelineItem' is defined but never used                                                                      no-unused-vars
+  Line 32:10:   'EnclosureCard' is defined but never used                                                                     no-unused-vars
+  Line 35:10:   'ANIMAL_VIEW_TAB_INFO' is defined but never used                                                              no-unused-vars
+  Line 142:12:  'offspringOpen' is assigned a value but never used                                                            no-unused-vars
+  Line 142:27:  'setOffspringOpen' is assigned a value but never used                                                         no-unused-vars
+  Line 149:11:  'animalTimelineEvents' is assigned a value but never used                                                     no-unused-vars
+  Line 154:8:   React Hook useEffect has a missing dependency: 'animal'. Either include it or remove the dependency array     react-hooks/exhaustive-deps
+  Line 419:8:   React Hook useMemo has a missing dependency: 'getRelLabel'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\AnimalDetail\BehaviorTabContent.jsx
+  Line 25:11:  'hasAnyData' is assigned a value but never used  no-unused-vars
+
+src\components\AnimalDetail\CareTabContent.jsx
+  Line 2:66:   'CheckSquare' is defined but never used           no-unused-vars
+  Line 47:11:  'hasGrooming' is assigned a value but never used  no-unused-vars
+
+src\components\AnimalDetail\LiteAnimalModal.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\AnimalDetail\LiteRecordsTabContent.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\AnimalDetail\LiteViewAnimalModal.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\AnimalDetail\PedigreeTabContent.jsx
+  Line 10:12:  'generations' is assigned a value but never used        no-unused-vars
+  Line 10:25:  'setGenerations' is assigned a value but never used     no-unused-vars
+  Line 11:12:  'isVerticalView' is assigned a value but never used     no-unused-vars
+  Line 11:28:  'setIsVerticalView' is assigned a value but never used  no-unused-vars
+  Line 19:12:  'navigateAnimalId' is assigned a value but never used   no-unused-vars
+
+src\components\AnimalDetail\RecordsTabContent.jsx
+  Line 2:36:  'Home' is defined but never used    no-unused-vars
+  Line 2:49:  'Trophy' is defined but never used  no-unused-vars
+
+src\components\AnimalDetail\TimelineTabContent.jsx
+  Line 3:78:   'Shield' is defined but never used  no-unused-vars
+  Line 3:86:   'Users' is defined but never used   no-unused-vars
+  Line 3:107:  'Trash2' is defined but never used  no-unused-vars
+
+src\components\AnimalDetail\ViewAnimalModalV2.jsx
+  Line 4:43:    'Ruler' is defined but never used                                                                             no-unused-vars
+  Line 4:65:    'FolderOpen' is defined but never used                                                                        no-unused-vars
+  Line 4:77:    'Globe' is defined but never used                                                                             no-unused-vars
+  Line 5:5:     'Shield' is defined but never used                                                                            no-unused-vars
+  Line 5:13:    'Stethoscope' is defined but never used                                                                       no-unused-vars
+  Line 5:26:    'UtensilsCrossed' is defined but never used                                                                   no-unused-vars
+  Line 5:53:    'Thermometer' is defined but never used                                                                       no-unused-vars
+  Line 5:66:    'Scissors' is defined but never used                                                                          no-unused-vars
+  Line 5:76:    'MessageSquare' is defined but never used                                                                     no-unused-vars
+  Line 5:110:   'Feather' is defined but never used                                                                           no-unused-vars
+  Line 6:5:     'Activity' is defined but never used                                                                          no-unused-vars
+  Line 6:15:    'AlertTriangle' is defined but never used                                                                     no-unused-vars
+  Line 6:30:    'Medal' is defined but never used                                                                             no-unused-vars
+  Line 6:37:    'Target' is defined but never used                                                                            no-unused-vars
+  Line 6:45:    'Key' is defined but never used                                                                               no-unused-vars
+  Line 6:50:    'Ban' is defined but never used                                                                               no-unused-vars
+  Line 6:55:    'RefreshCw' is defined but never used                                                                         no-unused-vars
+  Line 6:66:    'Leaf' is defined but never used                                                                              no-unused-vars
+  Line 6:72:    'BookOpen' is defined but never used                                                                          no-unused-vars
+  Line 6:102:   'Trophy' is defined but never used                                                                            no-unused-vars
+  Line 7:12:    'User' is defined but never used                                                                              no-unused-vars
+  Line 7:18:    'Camera' is defined but never used                                                                            no-unused-vars
+  Line 7:84:    'FileJson' is defined but never used                                                                          no-unused-vars
+  Line 8:5:     'Scale' is defined but never used                                                                             no-unused-vars
+  Line 8:25:    'TableOfContents' is defined but never used                                                                   no-unused-vars
+  Line 8:59:    'Hospital' is defined but never used                                                                          no-unused-vars
+  Line 8:69:    'CheckCircle' is defined but never used                                                                       no-unused-vars
+  Line 8:108:   'Cake' is defined but never used                                                                              no-unused-vars
+  Line 8:114:   'Baby' is defined but never used                                                                              no-unused-vars
+  Line 8:120:   'Dumbbell' is defined but never used                                                                          no-unused-vars
+  Line 28:55:   'getEventIcon' is defined but never used                                                                      no-unused-vars
+  Line 28:69:   'renderBoldText' is defined but never used                                                                    no-unused-vars
+  Line 31:30:   'TimelineItem' is defined but never used                                                                      no-unused-vars
+  Line 32:10:   'EnclosureCard' is defined but never used                                                                     no-unused-vars
+  Line 36:10:   'ANIMAL_VIEW_TAB_INFO' is defined but never used                                                              no-unused-vars
+  Line 136:12:  'offspringOpen' is assigned a value but never used                                                            no-unused-vars
+  Line 136:27:  'setOffspringOpen' is assigned a value but never used                                                         no-unused-vars
+  Line 143:11:  'animalTimelineEvents' is assigned a value but never used                                                     no-unused-vars
+  Line 444:8:   React Hook useMemo has a missing dependency: 'getRelLabel'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\AnimalDetail\utils.js
+  Line 1:51:   'useRef' is defined but never used                                                                                      no-unused-vars
+  Line 3:75:   'ChevronDown' is defined but never used                                                                                 no-unused-vars
+  Line 3:88:   'ChevronRight' is defined but never used                                                                                no-unused-vars
+  Line 3:115:  'VenusAndMars' is defined but never used                                                                                no-unused-vars
+  Line 3:129:  'Circle' is defined but never used                                                                                      no-unused-vars
+  Line 4:22:   'formatDateShort' is defined but never used                                                                             no-unused-vars
+  Line 4:39:   'litterAge' is defined but never used                                                                                   no-unused-vars
+  Line 5:10:   'getCurrencySymbol' is defined but never used                                                                           no-unused-vars
+  Line 5:29:   'getCountryFlag' is defined but never used                                                                              no-unused-vars
+  Line 5:45:   'getCountryName' is defined but never used                                                                              no-unused-vars
+  Line 6:10:   'getSpeciesLatinName' is defined but never used                                                                         no-unused-vars
+  Line 373:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\AnimalForm\AnimalFormModalV2.jsx
+  Line 4:16:     'ClipboardList' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 5:5:      'Lock' is defined but never used                                                                                                                                                                                                                                            no-unused-vars
+  Line 5:51:     'TreeDeciduous' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 5:125:    'EyeOff' is defined but never used                                                                                                                                                                                                                                          no-unused-vars
+  Line 6:36:     'Key' is defined but never used                                                                                                                                                                                                                                             no-unused-vars
+  Line 7:18:     'Feather' is defined but never used                                                                                                                                                                                                                                         no-unused-vars
+  Line 7:27:     'Medal' is defined but never used                                                                                                                                                                                                                                           no-unused-vars
+  Line 7:42:     'Ban' is defined but never used                                                                                                                                                                                                                                             no-unused-vars
+  Line 7:56:     'ScrollText' is defined but never used                                                                                                                                                                                                                                      no-unused-vars
+  Line 7:68:     'Link' is defined but never used                                                                                                                                                                                                                                            no-unused-vars
+  Line 7:82:     'Baby' is defined but never used                                                                                                                                                                                                                                            no-unused-vars
+  Line 7:88:     'Bell' is defined but never used                                                                                                                                                                                                                                            no-unused-vars
+  Line 8:58:     'AlertCircle' is defined but never used                                                                                                                                                                                                                                     no-unused-vars
+  Line 12:22:    'formatDateShort' is defined but never used                                                                                                                                                                                                                                 no-unused-vars
+  Line 12:39:    'parseLocalDate' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 15:8:     'AnimalImageUpload' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 30:48:    'decodeErrorMessage' is defined but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 31:30:    'getContactDisplayName' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 31:53:    'getContactInfoString' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 147:7:    'getCountryName' is assigned a value but never used                                                                                                                                                                                                                         no-unused-vars
+  Line 391:12:   'processedImages' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 524:8:    React Hook useEffect has missing dependencies: 'handleCropDragEnd' and 'handleCropDragMove'. Either include them or remove the dependency array                                                                                                                             react-hooks/exhaustive-deps
+  Line 916:11:   'getEnclosureLocationName' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 1576:12:  'purchaseDate' is assigned a value but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 1576:26:  'setPurchaseDate' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 1577:12:  'purchasePrice' is assigned a value but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 1577:27:  'setPurchasePrice' is assigned a value but never used                                                                                                                                                                                                                       no-unused-vars
+  Line 1578:12:  'sellerName' is assigned a value but never used                                                                                                                                                                                                                             no-unused-vars
+  Line 1578:24:  'setSellerName' is assigned a value but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 1579:12:  'sellerContact' is assigned a value but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 1579:27:  'setSellerContact' is assigned a value but never used                                                                                                                                                                                                                       no-unused-vars
+  Line 1580:12:  'saleDate' is assigned a value but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 1580:22:  'setSaleDate' is assigned a value but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 1581:12:  'salePrice' is assigned a value but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 1581:23:  'setSalePrice' is assigned a value but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 1582:12:  'buyerName' is assigned a value but never used                                                                                                                                                                                                                              no-unused-vars
+  Line 1582:23:  'setBuyerName' is assigned a value but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 1583:12:  'buyerContact' is assigned a value but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 1583:26:  'setBuyerContact' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 1584:12:  'breedingRightsPurchased' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 1584:37:  'setBreedingRightsPurchased' is assigned a value but never used                                                                                                                                                                                                             no-unused-vars
+  Line 1585:12:  'showRightsPurchased' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 1585:33:  'setShowRightsPurchased' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 1586:12:  'exportRightsPurchased' is assigned a value but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 1586:35:  'setExportRightsPurchased' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 1587:12:  'studServicesAllowed' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 1587:33:  'setStudServicesAllowed' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 1588:12:  'resaleRestrictions' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 1588:32:  'setResaleRestrictions' is assigned a value but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 1589:12:  'breederBuybackClause' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 1589:34:  'setBreederBuybackClause' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 1600:12:  'selectedDietSupply' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 1608:12:  'selectedSupplementSupply' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 1636:12:  'newEnclosureTag' is assigned a value but never used                                                                                                                                                                                                                        no-unused-vars
+  Line 1636:29:  'setNewEnclosureTag' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 1637:12:  'newCleaningTaskName' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 1637:33:  'setNewCleaningTaskName' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 1638:12:  'newCleaningTaskFreq' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 1638:33:  'setNewCleaningTaskFreq' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 1671:5:   React Hook useEffect contains a call to 'setSelectedEnclosure'. Without a list of dependencies, this can lead to an infinite chain of updates. To fix this, pass [formData.enclosureId, availableEnclosures, selectedEnclosure] as a second argument to the useEffect Hook  react-hooks/exhaustive-deps
+  Line 1792:8:   React Hook useCallback has an unnecessary dependency: 'authToken'. Either exclude it or remove the dependency array                                                                                                                                                         react-hooks/exhaustive-deps
+  Line 1878:11:  'speciesOptionsForEnclosureModal' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 2208:11:  'addMilestone' is assigned a value but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 2477:13:  Duplicate key 'deceasedDate'                                                                                                                                                                                                                                                no-dupe-keys
+  Line 2631:13:  Duplicate key 'pregnancyHistory'                                                                                                                                                                                                                                            no-dupe-keys
+  Line 2655:13:  Duplicate key 'deceasedDate'                                                                                                                                                                                                                                                no-dupe-keys
+  Line 2860:8:   React Hook useEffect has a missing dependency: 'lastOwnerId'. Either include it or remove the dependency array                                                                                                                                                              react-hooks/exhaustive-deps
+  Line 3037:11:  'animalToEditIdRef' is assigned a value but never used                                                                                                                                                                                                                      no-unused-vars
+  Line 3470:8:   React Hook useEffect has missing dependencies: 'MP_SLOT_CHILDREN', 'animalToEdit?.damId_public', and 'animalToEdit?.sireId_public'. Either include them or remove the dependency array                                                                                      react-hooks/exhaustive-deps
+  Line 3615:19:  'existingImageUrls' is assigned a value but never used                                                                                                                                                                                                                      no-unused-vars
+
+src\components\AnimalForm\LiteAnimalFormModal.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\AnimalForm\index.jsx
+  Line 1:1:      Unexpected Unicode BOM (Byte Order Mark)                                                                                                                                                                 unicode-bom
+  Line 1:38:     'useCallback' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 12:22:    'formatDateShort' is defined but never used                                                                                                                                                              no-unused-vars
+  Line 13:8:     'DatePicker' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 14:8:     'AnimalImageUpload' is defined but never used                                                                                                                                                            no-unused-vars
+  Line 15:8:     'GeneticCodeBuilder' is defined but never used                                                                                                                                                           no-unused-vars
+  Line 19:5:     'ArrowLeft' is defined but never used                                                                                                                                                                    no-unused-vars
+  Line 19:16:    'ClipboardList' is defined but never used                                                                                                                                                                no-unused-vars
+  Line 19:31:    'Dna' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 19:36:    'FileText' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 19:46:    'Home' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 19:52:    'Hospital' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 19:70:    'Clock' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 20:5:     'Lock' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 20:20:    'PlusCircle' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 20:32:    'Save' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 20:38:    'Tag' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 20:43:    'Trash2' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 20:51:    'TreeDeciduous' is defined but never used                                                                                                                                                                no-unused-vars
+  Line 20:66:    'Egg' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 20:71:    'Brain' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 20:78:    'Trophy' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 20:86:    'FileCheck' is defined but never used                                                                                                                                                                    no-unused-vars
+  Line 20:97:    'Scale' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 20:107:   'User' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 20:113:   'Heart' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 20:120:   'Eye' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 20:125:   'EyeOff' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 20:133:   'Edit' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 20:139:   'Users' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 20:146:   'HeartPulse' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 21:5:     'Hash' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 21:11:    'Sparkles' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 21:21:    'Ruler' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 21:28:    'Sprout' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 21:36:    'Key' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 21:41:    'FolderOpen' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 21:53:    'Globe' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 21:60:    'Leaf' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 21:66:    'Microscope' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 21:78:    'Stethoscope' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 21:91:    'UtensilsCrossed' is defined but never used                                                                                                                                                              no-unused-vars
+  Line 21:108:   'Droplets' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 22:5:     'Thermometer' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 22:18:    'Feather' is defined but never used                                                                                                                                                                      no-unused-vars
+  Line 22:27:    'Medal' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 22:34:    'Target' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 22:42:    'Ban' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 22:47:    'Package' is defined but never used                                                                                                                                                                      no-unused-vars
+  Line 22:68:    'Link' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 22:74:    'Unlink' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 22:82:    'Baby' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 22:88:    'Bell' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 22:94:    'Plus' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 22:100:   'RotateCcw' is defined but never used                                                                                                                                                                    no-unused-vars
+  Line 22:111:   'Camera' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 22:119:   'Upload' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 22:127:   'Search' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 22:135:   'Star' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 22:141:   'ArrowRight' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 23:14:    'ChevronDown' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 23:27:    'ChevronUp' is defined but never used                                                                                                                                                                    no-unused-vars
+  Line 23:38:    'ChevronRight' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 23:52:    'Info' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 24:5:     'Activity' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 24:15:    'AlertCircle' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 24:28:    'AlertTriangle' is defined but never used                                                                                                                                                                no-unused-vars
+  Line 24:53:    'Flame' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 24:60:    'Gem' is defined but never used                                                                                                                                                                          no-unused-vars
+  Line 25:11:    'MessageSquare' is defined but never used                                                                                                                                                                no-unused-vars
+  Line 25:26:    'Pill' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 26:5:     'RefreshCw' is defined but never used                                                                                                                                                                    no-unused-vars
+  Line 26:16:    'Scissors' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 26:26:    'Shield' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 27:12:    'Check' is defined but never used                                                                                                                                                                        no-unused-vars
+  Line 28:5:     'Circle' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 28:13:    'Hourglass' is defined but never used                                                                                                                                                                    no-unused-vars
+  Line 28:33:    'Bean' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 28:39:    'Milk' is defined but never used                                                                                                                                                                         no-unused-vars
+  Line 28:45:    'VenusAndMars' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 28:59:    'BookOpen' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 29:5:     'Calculator' is defined but never used                                                                                                                                                                   no-unused-vars
+  Line 29:17:    'Calendar' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 29:27:    'CheckCircle' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 29:40:    'Dumbbell' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 29:50:    'Wrench' is defined but never used                                                                                                                                                                       no-unused-vars
+  Line 29:58:    'Utensils' is defined but never used                                                                                                                                                                     no-unused-vars
+  Line 32:7:     'parseJsonArrayField' is assigned a value but never used                                                                                                                                                 no-unused-vars
+  Line 180:58:   Function declared in a loop contains unsafe references to variable(s) 'remainingFetchBudget', 'remainingFetchBudget'                                                                                     no-loop-func
+  Line 457:33:   'foundViaOwned' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 689:25:   'foundViaOwned' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 876:11:   The 'downloadPDF' function makes the dependencies of useImperativeHandle Hook (at line 936) change on every render. To fix this, wrap the definition of 'downloadPDF' in its own useCallback() Hook      react-hooks/exhaustive-deps
+  Line 900:11:   The 'downloadImage' function makes the dependencies of useImperativeHandle Hook (at line 936) change on every render. To fix this, wrap the definition of 'downloadImage' in its own useCallback() Hook  react-hooks/exhaustive-deps
+  Line 1015:15:  'fullName' is assigned a value but never used                                                                                                                                                            no-unused-vars
+  Line 1306:15:  'fullName' is assigned a value but never used                                                                                                                                                            no-unused-vars
+  Line 1364:11:  'renderInlineSubjectCard' is assigned a value but never used                                                                                                                                             no-unused-vars
+  Line 1368:15:  'fullName' is assigned a value but never used                                                                                                                                                            no-unused-vars
+  Line 1678:8:   React Hook useEffect has a missing dependency: 'inlineZoomPct'. Either include it or remove the dependency array                                                                                         react-hooks/exhaustive-deps
+  Line 1695:8:   React Hook useEffect has a missing dependency: 'enlargedZoomPct'. Either include it or remove the dependency array                                                                                       react-hooks/exhaustive-deps
+
+src\components\AnimalList\LiteAnimalRow.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\AnimalList\index.jsx
+  Line 3:10:     'Capacitor' is defined but never used                                                                                                                                                                                                                             no-unused-vars
+  Line 16:15:    'AlertCircle' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 16:68:    'Ban' is defined but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 17:22:    'Bean' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 17:86:    'ChevronRight' is defined but never used                                                                                                                                                                                                                          no-unused-vars
+  Line 19:56:    'MessageSquare' is defined but never used                                                                                                                                                                                                                         no-unused-vars
+  Line 19:76:    'Network' is defined but never used                                                                                                                                                                                                                               no-unused-vars
+  Line 19:142:   'Worm' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 20:50:    'Save' is defined but never used                                                                                                                                                                                                                                  no-unused-vars
+  Line 33:10:    'prefetchPedigreeTree' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 42:8:     'AnimalModalV2' is defined but never used                                                                                                                                                                                                                         no-unused-vars
+  Line 239:5:    '_familyTreePrefetchCacheByUser' is assigned a value but never used                                                                                                                                                                                               no-unused-vars
+  Line 240:5:    '_familyTreePrefetchLoadingByUser' is assigned a value but never used                                                                                                                                                                                             no-unused-vars
+  Line 286:11:   'coiCacheRef' is assigned a value but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 299:12:   'returningAnimal' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 299:29:   'setReturningAnimal' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 301:11:   'handleWithdrawTransfer' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 336:12:   'showMessages' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 336:26:   'setShowMessages' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 353:12:   'allAnimalsFetched' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 451:12:   'filtersExpanded' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 451:29:   'setFiltersExpanded' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 461:33:   'setIsFamilyTreeEnabled' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 658:12:   'supplyForm' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 658:24:   'setSupplyForm' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 659:12:   'supplyFormVisible' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
+  Line 660:12:   'editingSupplyId' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 660:29:   'setEditingSupplyId' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 661:12:   'supplySaving' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+  Line 661:26:   'setSupplySaving' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 663:12:   'suppliesLoading' is assigned a value but never used                                                                                                                                                                                                              no-unused-vars
+  Line 665:12:   'supplyCategoryFilter' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 665:34:   'setSupplyCategoryFilter' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 666:12:   'restockingSupplyId' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 666:32:   'setRestockingSupplyId' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 667:12:   'restockForm' is assigned a value but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 667:25:   'setRestockForm' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 668:12:   'restockSaving' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 668:27:   'setRestockSaving' is assigned a value but never used                                                                                                                                                                                                             no-unused-vars
+  Line 669:12:   'openActionMenu' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 800:11:   'isMgmtTab' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 858:12:   'enclosureFormVisible' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 859:12:   'reproEncFormVisible' is assigned a value but never used                                                                                                                                                                                                          no-unused-vars
+  Line 859:33:   'setReproEncFormVisible' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 860:12:   'healthEncFormVisible' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 860:34:   'setHealthEncFormVisible' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 883:33:   'setEnclosureTypeFilter' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 927:8:    React Hook useCallback has an unnecessary dependency: 'authToken'. Either exclude it or remove the dependency array                                                                                                                                               react-hooks/exhaustive-deps
+  Line 1094:8:   React Hook useCallback has missing dependencies: 'enclosureImagePreview', 'getLocationPath', 'locations', 'originalEnclosureForEdit', and 'userProfile'. Either include them or remove the dependency array                                                       react-hooks/exhaustive-deps
+  Line 1460:8:   React Hook useEffect has a missing dependency: 'setAnimals'. Either include it or remove the dependency array                                                                                                                                                     react-hooks/exhaustive-deps
+  Line 1835:8:   React Hook useMemo has an unnecessary dependency: 'userProfile'. Either exclude it or remove the dependency array                                                                                                                                                 react-hooks/exhaustive-deps
+  Line 1890:8:   React Hook useMemo has an unnecessary dependency: 'userProfile'. Either exclude it or remove the dependency array                                                                                                                                                 react-hooks/exhaustive-deps
+  Line 2053:11:  'availableDashboardList' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 2077:8:   React Hook useMemo has missing dependencies: 'isDue' and 'isFeedingDue'. Either include them or remove the dependency array                                                                                                                                       react-hooks/exhaustive-deps
+  Line 2081:11:  The 'inReproEnclosure' function makes the dependencies of useMemo Hook (at line 2273) change on every render. To fix this, wrap the definition of 'inReproEnclosure' in its own useCallback() Hook                                                                react-hooks/exhaustive-deps
+  Line 2081:11:  The 'inReproEnclosure' function makes the dependencies of useMemo Hook (at line 2274) change on every render. To fix this, wrap the definition of 'inReproEnclosure' in its own useCallback() Hook                                                                react-hooks/exhaustive-deps
+  Line 2081:11:  The 'inReproEnclosure' function makes the dependencies of useMemo Hook (at line 2280) change on every render. To fix this, wrap the definition of 'inReproEnclosure' in its own useCallback() Hook                                                                react-hooks/exhaustive-deps
+  Line 2081:11:  The 'inReproEnclosure' function makes the dependencies of useMemo Hook (at line 2283) change on every render. To fix this, wrap the definition of 'inReproEnclosure' in its own useCallback() Hook                                                                react-hooks/exhaustive-deps
+  Line 2086:11:  The 'healthEnclosureIds' object construction makes the dependencies of useCallback Hook (at line 2087) change on every render. Move it inside the useCallback callback. Alternatively, wrap the initialization of 'healthEnclosureIds' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  Line 2157:11:  'dueEnclosureTasksByType' is assigned a value but never used                                                                                                                                                                                                      no-unused-vars
+  Line 2181:11:  The 'generalCareTasksList' logical expression could make the dependencies of useMemo Hook (at line 2182) change on every render. To fix this, wrap the initialization of 'generalCareTasksList' in its own useMemo() Hook                                         react-hooks/exhaustive-deps
+  Line 2181:11:  The 'generalCareTasksList' logical expression could make the dependencies of useMemo Hook (at line 2183) change on every render. To fix this, wrap the initialization of 'generalCareTasksList' in its own useMemo() Hook                                         react-hooks/exhaustive-deps
+  Line 2286:11:  'animalCareDue' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 2335:8:   React Hook useMemo has a missing dependency: 'daysSince'. Either include it or remove the dependency array                                                                                                                                                        react-hooks/exhaustive-deps
+  Line 2372:11:  'soldList' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 3061:11:  'getActionColor' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 3074:11:  'getActionLabel' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 3116:11:  'formatTimeAgo' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 4069:11:  'handleEnclosureImageChange' is assigned a value but never used                                                                                                                                                                                                   no-unused-vars
+  Line 4095:13:  'dueOrBornDate' is assigned a value but never used                                                                                                                                                                                                                no-unused-vars
+  Line 4440:15:  'MgmtGroup' is assigned a value but never used                                                                                                                                                                                                                    no-unused-vars
+  Line 4472:19:  'encToDelete' is assigned a value but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 4679:19:  'taskName' is assigned a value but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 5720:53:  Unexpected whitespace before property map                                                                                                                                                                                                                         no-whitespace-before-property
+  Line 5720:53:  Unexpected whitespace before property filter                                                                                                                                                                                                                      no-whitespace-before-property
+  Line 6197:71:  React Hook useMemo has a missing dependency: 'LITE_HIDDEN_TABS'. Either include it or remove the dependency array                                                                                                                                                 react-hooks/exhaustive-deps
+  Line 6208:11:  'pinDefaultView' is assigned a value but never used                                                                                                                                                                                                               no-unused-vars
+  Line 6669:43:  'birthDateObj' is assigned a value but never used                                                                                                                                                                                                                 no-unused-vars
+
+src\components\ArchiveScreen.jsx
+  Line 50:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Auth\AuthView.jsx
+  Line 4:23:  'Bean' is defined but never used                                                                                                                                                                                                           no-unused-vars
+  Line 4:29:  'Cat' is defined but never used                                                                                                                                                                                                            no-unused-vars
+  Line 4:47:  'Eye' is defined but never used                                                                                                                                                                                                            no-unused-vars
+  Line 4:52:  'EyeOff' is defined but never used                                                                                                                                                                                                         no-unused-vars
+  Line 5:5:   'Heart' is defined but never used                                                                                                                                                                                                          no-unused-vars
+  Line 5:12:  'HeartOff' is defined but never used                                                                                                                                                                                                       no-unused-vars
+  Line 5:22:  'Hourglass' is defined but never used                                                                                                                                                                                                      no-unused-vars
+  Line 5:55:  'Milk' is defined but never used                                                                                                                                                                                                           no-unused-vars
+  Line 72:8:  React Hook useEffect has a missing dependency: 'setIsRegister'. Either include it or remove the dependency array. If 'setIsRegister' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src\components\BudgetingTab.jsx
+  Line 13:12:  'searchResults' is assigned a value but never used                                                                    no-unused-vars
+  Line 13:27:  'setSearchResults' is assigned a value but never used                                                                 no-unused-vars
+  Line 22:12:  'userSearchQuery' is assigned a value but never used                                                                  no-unused-vars
+  Line 82:8:   React Hook useEffect has a missing dependency: 'fetchTransactions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\CalendarPage\index.jsx
+  Line 129:11:  'getAgeShort' is assigned a value but never used  no-unused-vars
+
+src\components\Community\Banners.jsx
+  Line 3:10:  'Check' is defined but never used  no-unused-vars
+
+src\components\Community\CommunityBreedersPage.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\Community\CommunityFavoritesPage.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\Community\CommunityNewsPage.jsx
+  Line 1:1:   Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+  Line 2:10:  'Rss' is defined but never used           no-unused-vars
+
+src\components\Community\MyFeed.jsx
+  Line 4:10:  'Users' is defined but never used              no-unused-vars
+  Line 4:23:  'Edit' is defined but never used               no-unused-vars
+  Line 4:29:  'ShoppingBag' is defined but never used        no-unused-vars
+  Line 4:42:  'UserPlus' is defined but never used           no-unused-vars
+  Line 5:10:  'getCurrencySymbol' is defined but never used  no-unused-vars
+
+src\components\Contacts\AddContactPage.jsx
+  Line 4:44:  'Search' is defined but never used  no-unused-vars
+
+src\components\Contacts\ContactsListPage.jsx
+  Line 21:8:  React Hook useEffect has a missing dependency: 'fetchContacts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 25:8:  React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array   react-hooks/exhaustive-deps
+
+src\components\Contacts\EditContactPage.jsx
+  Line 4:34:  'Search' is defined but never used  no-unused-vars
+
+src\components\EnclosureDetailModal.jsx
+  Line 4:19:    'MapPin' is defined but never used             no-unused-vars
+  Line 4:50:    'Calendar' is defined but never used           no-unused-vars
+  Line 5:5:     'AlertCircle' is defined but never used        no-unused-vars
+  Line 6:22:    'ChevronDown' is defined but never used        no-unused-vars
+  Line 6:35:    'ChevronUp' is defined but never used          no-unused-vars
+  Line 6:56:    'BarChart2' is defined but never used          no-unused-vars
+  Line 7:27:    'Star' is defined but never used               no-unused-vars
+  Line 168:34:  'userName' is assigned a value but never used  no-unused-vars
+
+src\components\EnclosureModal.jsx
+  Line 1:25:  'useEffect' is defined but never used  no-unused-vars
+
+src\components\EnhancedAdminPanel.jsx
+  Line 4:14:    'Save' is defined but never used                                                                                        no-unused-vars
+  Line 4:20:    'Plus' is defined but never used                                                                                        no-unused-vars
+  Line 4:26:    'Trash2' is defined but never used                                                                                      no-unused-vars
+  Line 4:34:    'Edit' is defined but never used                                                                                        no-unused-vars
+  Line 4:40:    'Eye' is defined but never used                                                                                         no-unused-vars
+  Line 4:45:    'Search' is defined but never used                                                                                      no-unused-vars
+  Line 4:53:    'Download' is defined but never used                                                                                    no-unused-vars
+  Line 4:63:    'Upload' is defined but never used                                                                                      no-unused-vars
+  Line 5:32:    'ChevronLeft' is defined but never used                                                                                 no-unused-vars
+  Line 5:58:    'Clock' is defined but never used                                                                                       no-unused-vars
+  Line 5:65:    'Flag' is defined but never used                                                                                        no-unused-vars
+  Line 185:12:  'show2FA' is assigned a value but never used                                                                            no-unused-vars
+  Line 201:12:  'loading' is assigned a value but never used                                                                            no-unused-vars
+  Line 201:21:  'setLoading' is assigned a value but never used                                                                         no-unused-vars
+  Line 220:8:   React Hook useEffect has a missing dependency: 'fetchDashboardStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 332:11:  'handle2FASuccess' is assigned a value but never used                                                                   no-unused-vars
+  Line 343:11:  'handle2FAClose' is assigned a value but never used                                                                     no-unused-vars
+
+src\components\FamilyTree\DirectParentTree.jsx
+  Line 112:11:  'cachedData' is assigned a value but never used  no-unused-vars
+
+src\components\FamilyTree\FamilyTreeView.jsx
+  Line 5:10:    'formatDate' is defined but never used                                                                                                                                                                                              no-unused-vars
+  Line 47:7:    'keepAwayFromNode' is assigned a value but never used                                                                                                                                                                               no-unused-vars
+  Line 58:7:    'getVarietyLabel' is assigned a value but never used                                                                                                                                                                                no-unused-vars
+  Line 628:19:  'laneOffset' is assigned a value but never used                                                                                                                                                                                     no-unused-vars
+  Line 788:9:   React Hook useLayoutEffect has a missing dependency: 'clampPanToViewport'. Either include it or remove the dependency array                                                                                                         react-hooks/exhaustive-deps
+  Line 800:11:  The 'handleWheel' function makes the dependencies of useEffect Hook (at line 837) change on every render. Move it inside the useEffect callback. Alternatively, wrap the definition of 'handleWheel' in its own useCallback() Hook  react-hooks/exhaustive-deps
+
+src\components\GeneticCodeBuilder.jsx
+  Line 2:10:    'ChevronDown' is defined but never used               no-unused-vars
+  Line 2:23:    'ChevronUp' is defined but never used                 no-unused-vars
+  Line 255:10:  'showAdvanced' is assigned a value but never used     no-unused-vars
+  Line 255:24:  'setShowAdvanced' is assigned a value but never used  no-unused-vars
+
+src\components\GeneticsCalculator.jsx
+  Line 5:39:     'getSyrianHamsterCarriers' is defined but never used          no-unused-vars
+  Line 6:47:     'getCampbellsDwarfHamsterCarriers' is defined but never used  no-unused-vars
+  Line 7:45:     'getRussianDwarfHamsterCarriers' is defined but never used    no-unused-vars
+  Line 8:36:     'getBallPythonCarriers' is defined but never used             no-unused-vars
+  Line 1728:9:   'hasAt' is assigned a value but never used                    no-unused-vars
+  Line 1730:9:   'withNote' is assigned a value but never used                 no-unused-vars
+  Line 1904:9:   'isAdminOrMod' is assigned a value but never used             no-unused-vars
+  Line 2071:18:  'allele1' is assigned a value but never used                  no-unused-vars
+  Line 2071:27:  'allele2' is assigned a value but never used                  no-unused-vars
+
+src\components\LitterManagement\index.jsx
+  Line 1:38:     'useCallback' is defined but never used                                                                                                                                                          no-unused-vars
+  Line 6:11:     'Bird' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 6:27:     'Bug' is defined but never used                                                                                                                                                                  no-unused-vars
+  Line 8:47:     'Fish' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 8:53:     'Hash' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 9:34:     'PawPrint' is defined but never used                                                                                                                                                             no-unused-vars
+  Line 9:81:     'Star' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 10:13:    'Turtle' is defined but never used                                                                                                                                                               no-unused-vars
+  Line 10:50:    'Worm' is defined but never used                                                                                                                                                                 no-unused-vars
+  Line 10:90:    'AlertTriangle' is defined but never used                                                                                                                                                        no-unused-vars
+  Line 10:105:   'FileText' is defined but never used                                                                                                                                                             no-unused-vars
+  Line 10:115:   'FilePlus' is defined but never used                                                                                                                                                             no-unused-vars
+  Line 10:125:   'FileMinus' is defined but never used                                                                                                                                                            no-unused-vars
+  Line 10:136:   'FileX' is defined but never used                                                                                                                                                                no-unused-vars
+  Line 10:143:   'FileCheck' is defined but never used                                                                                                                                                            no-unused-vars
+  Line 12:22:    'formatDateShort' is defined but never used                                                                                                                                                      no-unused-vars
+  Line 12:39:    'parseLocalDate' is defined but never used                                                                                                                                                       no-unused-vars
+  Line 17:10:    'calculatePhenotype' is defined but never used                                                                                                                                                   no-unused-vars
+  Line 18:10:    'matchFancyRatPhenotype' is defined but never used                                                                                                                                               no-unused-vars
+  Line 373:12:   'extractLosses' is assigned a value but never used                                                                                                                                               no-unused-vars
+  Line 373:27:   'setExtractLosses' is assigned a value but never used                                                                                                                                            no-unused-vars
+  Line 378:12:   'excludeLossesFromCreation' is assigned a value but never used                                                                                                                                   no-unused-vars
+  Line 378:39:   'setExcludeLossesFromCreation' is assigned a value but never used                                                                                                                                no-unused-vars
+  Line 430:12:   'myAnimalsLoaded' is assigned a value but never used                                                                                                                                             no-unused-vars
+  Line 651:27:   'linkedMales' is assigned a value but never used                                                                                                                                                 no-unused-vars
+  Line 652:27:   'linkedFemales' is assigned a value but never used                                                                                                                                               no-unused-vars
+  Line 653:27:   'linkedUnknown' is assigned a value but never used                                                                                                                                               no-unused-vars
+  Line 655:27:   'storedMales' is assigned a value but never used                                                                                                                                                 no-unused-vars
+  Line 656:27:   'storedFemales' is assigned a value but never used                                                                                                                                               no-unused-vars
+  Line 657:27:   'storedUnknown' is assigned a value but never used                                                                                                                                               no-unused-vars
+  Line 1763:15:  'sire' is assigned a value but never used                                                                                                                                                        no-unused-vars
+  Line 1839:11:  'maleAnimals' is assigned a value but never used                                                                                                                                                 no-unused-vars
+  Line 1840:11:  'femaleAnimals' is assigned a value but never used                                                                                                                                               no-unused-vars
+  Line 3807:61:  Redundant alt attribute. Screen-readers already announce `img` tags as an image. You don’t need to use the words `image`, `photo,` or `picture` (or any specified custom words) in the alt prop  jsx-a11y/img-redundant-alt
+  Line 4294:25:  Redundant alt attribute. Screen-readers already announce `img` tags as an image. You don’t need to use the words `image`, `photo,` or `picture` (or any specified custom words) in the alt prop  jsx-a11y/img-redundant-alt
+
+src\components\Marketplace.jsx
+  Line 2:56:   'DollarSign' is defined but never used                                                                           no-unused-vars
+  Line 2:75:   'Mail' is defined but never used                                                                                 no-unused-vars
+  Line 152:8:  React Hook useEffect has a missing dependency: 'fetchAnimals'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Messages\MessagesView.jsx
+  Line 40:8:    React Hook useEffect has a missing dependency: 'fetchMessages'. Either include it or remove the dependency array                                                                                 react-hooks/exhaustive-deps
+  Line 51:8:    React Hook useEffect has a missing dependency: 'fetchMessages'. Either include it or remove the dependency array                                                                                 react-hooks/exhaustive-deps
+  Line 441:73:  Redundant alt attribute. Screen-readers already announce `img` tags as an image. You don’t need to use the words `image`, `photo,` or `picture` (or any specified custom words) in the alt prop  jsx-a11y/img-redundant-alt
+
+src\components\Modals\SpeciesModals.jsx
+  Line 4:10:  'formatDate' is defined but never used  no-unused-vars
+
+src\components\Modals\TransferAnimalModal.jsx
+  Line 2:21:  'Loader2' is defined but never used  no-unused-vars
+
+src\components\NewsTickerBanner.jsx
+  Line 1:38:   'useCallback' is defined but never used     no-unused-vars
+  Line 11:10:  'error' is assigned a value but never used  no-unused-vars
+
+src\components\Notifications\Banners.jsx
+  Line 1:38:    'useCallback' is defined but never used         no-unused-vars
+  Line 4:33:    'Baby' is defined but never used                no-unused-vars
+  Line 4:46:    'CheckCircle' is defined but never used         no-unused-vars
+  Line 5:11:    'Loader2' is defined but never used             no-unused-vars
+  Line 5:20:    'PawPrint' is defined but never used            no-unused-vars
+  Line 5:30:    'Shield' is defined but never used              no-unused-vars
+  Line 5:38:    'XCircle' is defined but never used             no-unused-vars
+  Line 186:12:  'pollVotes' is assigned a value but never used  no-unused-vars
+
+src\components\Notifications\LiteNotificationsPage.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\Notifications\NotificationBar.jsx
+  Line 2:10:   'Capacitor' is defined but never used                                                                                   no-unused-vars
+  Line 146:6:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 171:6:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 222:6:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Notifications\NotificationPanel.jsx
+  Line 1:38:  'useCallback' is defined but never used  no-unused-vars
+  Line 1:51:  'useRef' is defined but never used       no-unused-vars
+  Line 4:39:  'Bell' is defined but never used         no-unused-vars
+  Line 4:45:  'Check' is defined but never used        no-unused-vars
+  Line 4:65:  'ChevronDown' is defined but never used  no-unused-vars
+  Line 4:78:  'ChevronUp' is defined but never used    no-unused-vars
+  Line 5:32:  'Sparkles' is defined but never used     no-unused-vars
+  Line 7:10:  'formatDate' is defined but never used   no-unused-vars
+
+src\components\Notifications\NotificationsHub.jsx
+  Line 1:38:  'useCallback' is defined but never used  no-unused-vars
+  Line 4:20:  'Baby' is defined but never used         no-unused-vars
+  Line 4:45:  'ChevronDown' is defined but never used  no-unused-vars
+  Line 4:58:  'ChevronUp' is defined but never used    no-unused-vars
+  Line 5:27:  'Loader2' is defined but never used      no-unused-vars
+  Line 5:51:  'PawPrint' is defined but never used     no-unused-vars
+  Line 5:61:  'Shield' is defined but never used       no-unused-vars
+  Line 6:33:  'XCircle' is defined but never used      no-unused-vars
+  Line 8:10:  'formatDate' is defined but never used   no-unused-vars
+
+src\components\Profile\LiteProfileSettings.jsx
+  Line 1:1:  Unexpected Unicode BOM (Byte Order Mark)  unicode-bom
+
+src\components\Profile\ProfileEditForm.jsx
+  Line 12:27:    'getPushPermission' is defined but never used                                                                                                                                                                                                 no-unused-vars
+  Line 31:7:     'STATUS_OPTIONS' is assigned a value but never used                                                                                                                                                                                           no-unused-vars
+  Line 35:7:     'getCountryFlag' is assigned a value but never used                                                                                                                                                                                           no-unused-vars
+  Line 41:7:     'getCountryName' is assigned a value but never used                                                                                                                                                                                           no-unused-vars
+  Line 70:7:     'getStateName' is assigned a value but never used                                                                                                                                                                                             no-unused-vars
+  Line 77:7:     'getCurrencySymbol' is assigned a value but never used                                                                                                                                                                                        no-unused-vars
+  Line 126:7:    'DonationBadge' is assigned a value but never used                                                                                                                                                                                            no-unused-vars
+  Line 223:35:   'setShowGeneticCodePublic' is assigned a value but never used                                                                                                                                                                                 no-unused-vars
+  Line 224:31:   'setShowRemarksPublic' is assigned a value but never used                                                                                                                                                                                     no-unused-vars
+  Line 238:12:   'breederInfoOpen' is assigned a value but never used                                                                                                                                                                                          no-unused-vars
+  Line 238:29:   'setBreederInfoOpen' is assigned a value but never used                                                                                                                                                                                       no-unused-vars
+  Line 408:8:    React Hook useEffect has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array. Outer scope values like 'API_BASE_URL' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+  Line 589:25:   'uploadData' is assigned a value but never used                                                                                                                                                                                               no-unused-vars
+  Line 2961:31:  'isDuplicateOrMapped' is assigned a value but never used                                                                                                                                                                                      no-unused-vars
+
+src\components\Profile\ProfileView.jsx
+  Line 1:17:  'useState' is defined but never used         no-unused-vars
+  Line 4:10:  'QRModal' is defined but never used          no-unused-vars
+  Line 6:8:   'UserProfileCard' is defined but never used  no-unused-vars
+
+src\components\Profile\UserProfileCard.jsx
+  Line 4:10:  'API_BASE_URL' is defined but never used  no-unused-vars
+
+src\components\PublicProfile\BreederDirectory.jsx
+  Line 282:8:  React Hook useEffect has a missing dependency: 'setSearchParams'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\PublicProfile\GlobalSearchBar.jsx
+  Line 1:38:  'useRef' is defined but never used  no-unused-vars
+
+src\components\PublicProfile\PublicProfileView.jsx
+  Line 1:38:     'useCallback' is defined but never used                no-unused-vars
+  Line 203:7:    'AnimalImage' is assigned a value but never used       no-unused-vars
+  Line 298:12:   'copySuccess' is assigned a value but never used       no-unused-vars
+  Line 516:11:   'handleShare' is assigned a value but never used       no-unused-vars
+  Line 1581:23:  'availableForSale' is assigned a value but never used  no-unused-vars
+  Line 1582:23:  'availableForStud' is assigned a value but never used  no-unused-vars
+
+src\components\ReportButton.jsx
+  Line 14:12:  'currentUserId' is assigned a value but never used  no-unused-vars
+
+src\components\ReservationsPage.jsx
+  Line 2:119:  'Phone' is defined but never used  no-unused-vars
+  Line 2:126:  'Tag' is defined but never used    no-unused-vars
+
+src\components\SuppliesPage.jsx
+  Line 2:39:   'Search' is defined but never used                                                                                      no-unused-vars
+  Line 2:47:   'X' is defined but never used                                                                                           no-unused-vars
+  Line 2:60:   'Filter' is defined but never used                                                                                      no-unused-vars
+  Line 2:68:   'Download' is defined but never used                                                                                    no-unused-vars
+  Line 2:78:   'TrendingUp' is defined but never used                                                                                  no-unused-vars
+  Line 2:90:   'TrendingDown' is defined but never used                                                                                no-unused-vars
+  Line 2:104:  'Info' is defined but never used                                                                                        no-unused-vars
+  Line 2:164:  'Check' is defined but never used                                                                                       no-unused-vars
+  Line 2:171:  'ChevronDown' is defined but never used                                                                                 no-unused-vars
+  Line 2:184:  'ChevronUp' is defined but never used                                                                                   no-unused-vars
+  Line 4:8:    'DatePicker' is defined but never used                                                                                  no-unused-vars
+  Line 60:8:   React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\ThemeToggle\index.jsx
+  Line 6:30:  'isDark' is assigned a value but never used  no-unused-vars
+
+src\components\admin\AnalyticsTab.jsx
+  Line 8:5:   'LineChart' is defined but never used  no-unused-vars
+  Line 8:16:  'Line' is defined but never used       no-unused-vars
+
+src\components\admin\AnimalManagementPanel.jsx
+  Line 3:13:   'Filter' is defined but never used                                                                             no-unused-vars
+  Line 3:48:   'AlertTriangle' is defined but never used                                                                      no-unused-vars
+  Line 4:35:   'ExternalLink' is defined but never used                                                                       no-unused-vars
+  Line 4:49:   'Image' is defined but never used                                                                              no-unused-vars
+  Line 4:56:   'User' is defined but never used                                                                               no-unused-vars
+  Line 5:16:   'FileText' is defined but never used                                                                           no-unused-vars
+  Line 111:8:  React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\BackupManagementTab.jsx
+  Line 30:8:  React Hook useEffect has a missing dependency: 'fetchBackups'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\BetaSurveyTab.jsx
+  Line 131:8:  React Hook useCallback has a missing dependency: 'headers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 149:8:  React Hook useCallback has a missing dependency: 'headers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\CommunicationTab.jsx
+  Line 15:12:  'recipientType' is assigned a value but never used                                                                                                                           no-unused-vars
+  Line 15:27:  'setRecipientType' is assigned a value but never used                                                                                                                        no-unused-vars
+  Line 16:12:  'country' is assigned a value but never used                                                                                                                                 no-unused-vars
+  Line 16:21:  'setCountry' is assigned a value but never used                                                                                                                              no-unused-vars
+  Line 40:12:  'selectedPoll' is assigned a value but never used                                                                                                                            no-unused-vars
+  Line 40:26:  'setSelectedPoll' is assigned a value but never used                                                                                                                         no-unused-vars
+  Line 44:12:  'targetUserEmail' is assigned a value but never used                                                                                                                         no-unused-vars
+  Line 61:8:   React Hook useEffect has missing dependencies: 'fetchBroadcastHistory', 'fetchModConversations', and 'fetchPollResults'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 72:8:   React Hook useEffect has a missing dependency: 'fetchModConversationsQuiet'. Either include it or remove the dependency array                                                react-hooks/exhaustive-deps
+  Line 83:8:   React Hook useEffect has a missing dependency: 'fetchConversationMessagesQuiet'. Either include it or remove the dependency array                                            react-hooks/exhaustive-deps
+
+src\components\admin\FeedbackTab.jsx
+  Line 3:5:   'MessageCircle' is defined but never used                                                                         no-unused-vars
+  Line 5:5:   'ChevronDown' is defined but never used                                                                           no-unused-vars
+  Line 5:18:  'Tag' is defined but never used                                                                                   no-unused-vars
+  Line 63:8:  React Hook useEffect has a missing dependency: 'fetchFeedback'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\SpeciesManagementTab.jsx
+  Line 53:8:  React Hook useEffect has a missing dependency: 'fetchSpecies'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\SystemSettingsTab.jsx
+  Line 14:8:  React Hook useEffect has a missing dependency: 'fetchSettings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\moderation\ModOversightPanel.jsx
+  Line 1:1:     Unexpected Unicode BOM (Byte Order Mark)                                                                                                  unicode-bom
+  Line 157:15:  'breederName' is assigned a value but never used                                                                                          no-unused-vars
+  Line 306:11:  'handleSort' is assigned a value but never used                                                                                           no-unused-vars
+  Line 313:11:  'getSortIcon' is assigned a value but never used                                                                                          no-unused-vars
+  Line 326:8:   React Hook useEffect has missing dependencies: 'fetchGlobalStats' and 'fetchReports'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 548:8:   React Hook useMemo has a missing dependency: 'getDateFilter'. Either include it or remove the dependency array                            react-hooks/exhaustive-deps
+
+src\components\moderation\UserManagementPanel.jsx
+  Line 4:36:  'Calendar' is defined but never used  no-unused-vars
+
+src\components\tools\COICalculatorPage.jsx
+  Line 1:27:  'useEffect' is defined but never used  no-unused-vars
+
+src\components\tools\TargetOutcomePage.jsx
+  Line 2:59:  'PlusCircle' is defined but never used  no-unused-vars
+  Line 2:71:  'X' is defined but never used           no-unused-vars
+
+src\data\tutorialLessonsNew.js
+  Line 1381:96:   Unnecessary escape character: \"  no-useless-escape
+  Line 1381:108:  Unnecessary escape character: \"  no-useless-escape
+  Line 1391:440:  Unnecessary escape character: \"  no-useless-escape
+  Line 1391:452:  Unnecessary escape character: \"  no-useless-escape
+  Line 1589:96:   Unnecessary escape character: \"  no-useless-escape
+  Line 1589:105:  Unnecessary escape character: \"  no-useless-escape
+
+src\hooks\useAppAuth.ts
+  Line 199:9:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useAppModals.ts
+  Line 3:11:    'Animal' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  Line 8:11:    'User' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  Line 108:15:  'setters' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  Line 164:8:   React Hook useCallback has missing dependencies: 'maintenanceMode', 'showAdminPanel', 'showArchiveScreen', 'showBugReportModal', 'showCreateLitterModal', 'showFeedbackModal', 'showImageModal', 'showInfoTab', 'showLinkLitterModal', 'showMessages', 'showModReportQueue', 'showModal', 'showModerationAuthModal', 'showNotifications', 'showPedigreeChart', 'showPrivacyModal', 'showProfileMenu', 'showQRAnimal', 'showTermsModal', 'showUrgentNotification', 'showUserSearchModal', and 'showWelcomeGuide'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useBreedingLines.ts
+  Line 92:8:   React Hook useEffect has a missing dependency: 'BL_PRESETS_APP'. Either include it or remove the dependency array       react-hooks/exhaustive-deps
+  Line 124:9:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 159:9:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 204:9:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 236:9:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useGeneralTasks.ts
+  Line 33:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useModerationMode.ts
+  Line 110:9:  React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'authToken'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\usePrivateAnimalNavigation.ts
+  Line 18:11:  'UserProfile' is defined but never used                                                                                                         @typescript-eslint/no-unused-vars
+  Line 98:9:   React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 122:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 212:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 283:8:  React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'showModalMessage'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 311:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 339:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 360:8:  React Hook useCallback has an unnecessary dependency: 'API_BASE_URL'. Either exclude it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 476:8:  React Hook useEffect has a missing dependency: 'animalToView'. Either include it or remove the dependency array                                 react-hooks/exhaustive-deps
+
+src\hooks\useTransferWorkflow.ts
+  Line 111:10:  React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'authToken'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 205:9:   React Hook useCallback has a missing dependency: 'handleCloseTransferWorkflow'. Either include it or remove the dependency array         react-hooks/exhaustive-deps
+  Line 265:8:   React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'authToken'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 288:8:   React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'authToken'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 311:8:   React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'authToken'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 339:8:   React Hook useCallback has unnecessary dependencies: 'API_BASE_URL' and 'authToken'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\utils\errorHandler.js
+  Line 131:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\nativePush.js
+  Line 10:7:  'authHeaders' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  674.04 kB  build\static\js\main.5ad68f11.js
+  116.61 kB  build\static\js\461.faa2276e.chunk.js
+  67.24 kB   build\static\js\195.3970fd14.chunk.js
+  50.42 kB   build\static\js\877.69c8de4b.chunk.js
+  46.5 kB    build\static\js\626.7b9b8439.chunk.js
+  43.74 kB   build\static\js\455.c4370f5d.chunk.js
+  41.01 kB   build\static\css\main.d69b5a94.css
+  28.44 kB   build\static\js\469.6744812b.chunk.js
+  26.4 kB    build\static\js\332.a5ad4d1a.chunk.js
+  25.78 kB   build\static\js\555.daec3129.chunk.js
+  14.19 kB   build\static\css\626.61e05bb4.chunk.css
+  13.11 kB   build\static\js\575.6f03bf1b.chunk.js
+  10.17 kB   build\static\js\680.84b2e653.chunk.js
+  8.92 kB    build\static\js\183.73a2ae11.chunk.js
+  8.7 kB     build\static\js\977.03f4ab27.chunk.js
+  7.66 kB    build\static\js\654.3920ba58.chunk.js
+  6.34 kB    build\static\js\343.d1f1d7af.chunk.js
+  6.22 kB    build\static\js\6.ea8f1e10.chunk.js
+  5.82 kB    build\static\js\655.df1b17e6.chunk.js
+  5.63 kB    build\static\js\292.e29473f6.chunk.js
+  5.19 kB    build\static\js\278.5242137a.chunk.js
+  4.12 kB    build\static\js\689.07bf6799.chunk.js
+  3.43 kB    build\static\js\101.cfe2faf0.chunk.js
+  3.29 kB    build\static\js\768.1999cc99.chunk.js
+  3.01 kB    build\static\js\457.e1de20bd.chunk.js
+  2.9 kB     build\static\js\520.8ef89ed2.chunk.js
+  2.89 kB    build\static\js\587.25dcf3a2.chunk.js
+  2.63 kB    build\static\js\795.3196f9f8.chunk.js
+  2.5 kB     build\static\js\5.267960c7.chunk.js
+  2.35 kB    build\static\js\527.cabbbb96.chunk.js
+  2.12 kB    build\static\js\462.0dce608c.chunk.js
+  1.62 kB    build\static\js\75.aef8ef87.chunk.js
+  1.37 kB    build\static\js\968.47af60b8.chunk.js
+  1.32 kB    build\static\js\835.6f895f5e.chunk.js
+  963 B      build\static\js\848.9cd60092.chunk.js
+  824 B      build\static\js\511.ed1dc8af.chunk.js
+  815 B      build\static\js\491.ab5f1194.chunk.js
+  644 B      build\static\js\268.e6a97fb9.chunk.js
+  495 B      build\static\js\551.56c6992f.chunk.js
+  364 B      build\static\js\851.0decad5d.chunk.js
+  364 B      build\static\js\513.6a93e947.chunk.js
+  343 B      build\static\js\842.03f65ecc.chunk.js
+  338 B      build\static\js\843.a5400f2a.chunk.js
+  247 B      build\static\js\733.b0e0aa6d.chunk.js
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
