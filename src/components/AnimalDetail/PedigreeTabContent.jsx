@@ -23,6 +23,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     const handleViewAnimal = (clickedAnimal) => {
         // Open AnimalModalV2 for the clicked animal and ensure Pedigree tab is selected
         // Pass true as second argument to indicate this is from DirectParentTree navigation
+        // This sets animalToView in the hook, which AnimalModalV2 reads
         onViewAnimal?.(clickedAnimal, true);
         // Update DirectParentTree focus to the clicked animal ID
         // This causes the tree to re-fetch with the new focusAnimalId, keeping it in sync
@@ -30,6 +31,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
         // Store the navigated animal ID for tracking
         setNavigateAnimalId(clickedAnimal.id_public);
         // Ensure the DirectParentTree modal is shown with the new focus animal as root
+        // and AnimalModalV2 stays open showing the new root animal
         setShowFamilyTree(true);
     };
 
