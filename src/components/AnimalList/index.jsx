@@ -5166,6 +5166,10 @@ useEffect(() => {
                                         )
                                     }
                             <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
+
+                                </div>
+                            </div>
+                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
                                 <input
                                     type="checkbox"
                                     checked={hideReproMales}
@@ -5174,9 +5178,6 @@ useEffect(() => {
                                 />
                                 Hide males from reproduction sections
                             </label>
-
-                                </div>
-                            </div>
                             <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
                                 <input
                                     type="checkbox"
