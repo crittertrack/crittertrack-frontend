@@ -5165,20 +5165,17 @@ useEffect(() => {
                                             </div>
                                         )
                                     }
-                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
-
-                                </div>
                             </div>
-                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
-                                <input
-                                    type="checkbox"
-                                    checked={hideReproMales}
-                                    onChange={toggleHideReproMales}
-                                    className="rounded border-gray-300 dark:border-dark-text-muted text-pink-600 focus:ring-pink-500"
-                                />
-                                Hide males from reproduction sections
-                            </label>
-                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
+                        </div>
+                        <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
+                            <input
+                                type="checkbox"
+                                checked={hideReproMales}
+                                onChange={toggleHideReproMales}
+                                className="rounded border-gray-300 dark:border-dark-text-muted text-pink-600 focus:ring-pink-500"
+                            /> Hide males from reproduction sections
+                        </label>
+                        <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
                                 <input
                                     type="checkbox"
                                     checked={showReproEnclosureAnimalsInLists}
