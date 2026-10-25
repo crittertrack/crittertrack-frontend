@@ -429,6 +429,17 @@ const AnimalList = ({
             return next;
         });
     }, []);
+    const [hideReproMales, setHideReproMales] = useState(() => {
+        try { return localStorage.getItem('animalList_hideReproMales') === 'true'; } catch { return false; }
+    });
+    const toggleHideReproMales = useCallback(() => {
+        setHideReproMales(prev => {
+            const next = !prev;
+            try { localStorage.setItem('animalList_hideReproMales', String(next)); } catch {}
+            return next;
+        });
+    }, []);
+
     // When true, animals housed in a Medical/Quarantine enclosure still appear in the
     // Quarantine / In Treatment lists below (in addition to the enclosure card) instead of being hidden there.
     const [showHealthEnclosureAnimalsInLists, setShowHealthEnclosureAnimalsInLists] = useState(() => {
@@ -4845,15 +4856,16 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             let litterPatch = null;
-            if (animal.isPlannedMating && patch.isPlannedMating === false && !patch.isInMating) {
+            const _skipLitterSync = animal.gender === 'Male';
+            if (!_skipLitterSync && animal.isPlannedMating && patch.isPlannedMating === false && !patch.isInMating) {
                 litterPatch = { isPlanned: false };
-            } else if (animal.isPlannedMating && patch.isInMating) {
+            } else if (!_skipLitterSync && animal.isPlannedMating && patch.isInMating) {
                 litterPatch = { isPlanned: false, matingDate: patch.matingDate };
-            } else if (animal.isInMating && patch.isPregnant) {
+            } else if (!_skipLitterSync && animal.isInMating && patch.isPregnant) {
                 litterPatch = { pregnancyDate: patch.pregnancyDate };
-            } else if (animal.isPregnant && patch.isNursing) {
+            } else if (!_skipLitterSync && animal.isPregnant && patch.isNursing) {
                 litterPatch = { birthDate: patch.birthDate };
-            } else if (animal.isNursing && patch.isNursing === false) {
+            } else if (!_skipLitterSync && animal.isNursing && patch.isNursing === false) {
                 litterPatch = { weaningDate: patch.weaningDate };
             }
 
@@ -5153,6 +5165,16 @@ useEffect(() => {
                                             </div>
                                         )
                                     }
+                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
+                                <input
+                                    type="checkbox"
+                                    checked={hideReproMales}
+                                    onChange={toggleHideReproMales}
+                                    className="rounded border-gray-300 dark:border-dark-text-muted text-pink-600 focus:ring-pink-500"
+                                />
+                                Hide males from reproduction sections
+                            </label>
+
                                 </div>
                             </div>
                             <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
@@ -5166,10 +5188,10 @@ useEffect(() => {
                             </label>
                             {(() => {
                                 const reproSections = [
-                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700 dark:text-indigo-300" />, headerClass: 'bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-900/40', emptyText: 'No planned matings yet.' },
-                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Hourglass size={16} className="text-sky-700 dark:text-sky-300" />, headerClass: 'bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-900/40', emptyText: 'No animals currently mating.' },
-                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700 dark:text-pink-300" />, headerClass: 'bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-900/40', emptyText: 'No pregnant animals.' },
-                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Droplet size={16} className="text-violet-700 dark:text-violet-300" />, headerClass: 'bg-violet-50 dark:bg-violet-900/20 border-b border-violet-100 dark:border-violet-900/40', emptyText: 'No nursing animals.' }
+                                    { key: 'planned', title: 'Planned Matings', list: hideReproMales ? plannedMatingList.filter(a => a.gender !== 'Male') : plannedMatingList, icon: <Calendar size={16} className="text-indigo-700 dark:text-indigo-300" />, headerClass: 'bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-900/40', emptyText: 'No planned matings yet.' },
+                                    { key: 'mating', title: 'Currently In Mating', list: hideReproMales ? matingList.filter(a => a.gender !== 'Male') : matingList, icon: <Hourglass size={16} className="text-sky-700 dark:text-sky-300" />, headerClass: 'bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-900/40', emptyText: 'No animals currently mating.' },
+                                    { key: 'pregnant', title: 'Pregnant', list: hideReproMales ? pregnantList.filter(a => a.gender !== 'Male') : pregnantList, icon: <ScanHeart size={16} className="text-pink-700 dark:text-pink-300" />, headerClass: 'bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-900/40', emptyText: 'No pregnant animals.' },
+                                    { key: 'nursing', title: 'Nursing', list: hideReproMales ? nursingList.filter(a => a.gender !== 'Male') : nursingList, icon: <Droplet size={16} className="text-violet-700 dark:text-violet-300" />, headerClass: 'bg-violet-50 dark:bg-violet-900/20 border-b border-violet-100 dark:border-violet-900/40', emptyText: 'No nursing animals.' }
                                 ];
 
                                 return (
