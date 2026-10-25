@@ -2872,7 +2872,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                 const v = e.target.value ? parseInt(e.target.value) : null;
                                                                 const m = formData.maleLosses || 0;
                                                                 const f = formData.femaleLosses || 0;
-                                                                setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
+                                                                setFormData(prev => {
+                                                                 const newLossesCount = (m + f + (v || 0)) || null;
+                                                                 if (prev.extractLossesFromTotal) {
+                                                                     const newUnknown = Math.max(0, (prev.unknownCount || 0) + ((prev.unknownLosses || 0) - (v || 0)));
+                                                                     const newMale = prev.maleCount || 0;
+                                                                     const newFemale = prev.femaleCount || 0;
+                                                                     return {
+                                                                         ...prev,
+                                                                         unknownLosses: v,
+                                                                         lossesCount: newLossesCount,
+                                                                         unknownCount: newUnknown || null,
+                                                                         litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                     };
+                                                                 }
+                                                                 return { ...prev, unknownLosses: v, lossesCount: newLossesCount };
+                                                             });
                                                             }}
                                                             className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                             placeholder="0"
