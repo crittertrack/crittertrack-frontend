@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Info, X, BookOpen } from 'lucide-react';
 
-// Small page-header "info" button — click to reveal a short contextual hint popover,
+// Small page-header "info" button click to reveal a short contextual hint popover,
 // click outside (or the X) to close it. Reused across page headers app-wide.
 // Default align="left" expands the popover rightward from the trigger, since triggers
-// sit near the start of a header row — right-aligning it would push it off-screen.
+// sit near the start of a header row right-aligning it would push it off-screen.
 // variant="light" is for use on colored/gradient headers (e.g. white text) where the
 // default muted-gray trigger icon wouldn't have enough contrast.
-// lessonId (optional) links to a matching legacy lesson id — shows a related Help Center
+// lessonId (optional) links to a matching legacy lesson id shows a related Help Center
 // action that resolves to its canonical article.
 const InfoButton = ({ children, title, align = 'left', variant = 'default', className = '', lessonId }) => {
     const [open, setOpen] = useState(false);
@@ -45,7 +45,7 @@ const InfoButton = ({ children, title, align = 'left', variant = 'default', clas
                 <Info size={18} />
             </button>
             {open && (
-                // Centered under the trigger below `sm` — a fixed-width popover anchored with
+                // Centered under the trigger below `sm` a fixed-width popover anchored with
                 // left-0/right-0 can run off-screen when the trigger sits mid-header (not at the
                 // row's edge) on narrow viewports. sm+ keeps the original edge-anchored behavior.
                 <div className={`absolute z-50 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-3 font-normal normal-case left-1/2 -translate-x-1/2 sm:translate-x-0 ${align === 'right' ? 'sm:right-0 sm:left-auto' : 'sm:left-0'}`}>

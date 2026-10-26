@@ -10,7 +10,7 @@ import { renderRichText } from '../../utils/richText';
 import { BroadcastPoll } from './Banners';
 
 // Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
-// ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
+// ({ lastDoneDate, frequencyDays }) see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
 const SCHEDULE_FIELD_KEYS = [
     'groomingSchedule', 'brushingSchedule', 'bathingSchedule', 'specializedCareSchedule', 'specialCareSchedule',
     'nailCareSchedule', 'beakHoofScaleSchedule', 'skinEarCareSchedule', 'dentalCareSchedule', 'healthMonitoringSchedule',
@@ -79,7 +79,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     useEffect(() => {
         if (!authToken) return;
         Promise.all([
-            // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
+            // No isOwned filter matches the Dashboard's Needs Attention widgets, which include
             // every non-archived, non-view-only animal regardless of ownership.
             apiClient.get(`/animals`),
             apiClient.get(`/enclosures`),
@@ -129,7 +129,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const breedingItems = [];
     if (breedingEnabled && !littersLoading) {
-        // Latest born litter per dam — the weaning reminder only belongs to the dam's
+        // Latest born litter per dam the weaning reminder only belongs to the dam's
         // most recent litter (mirrors AnimalList's reproNeedsAttentionList).
         const latestBirthByDam = new Map();
         litters.forEach(l => {
@@ -145,7 +145,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const sireDam = `${sn} \u00d7 ${dn}`;
             const callId = l.litter_id_public;
             // isPlanned is the actual source of truth for "still needs to be marked mated" (it
-            // only clears via the explicit Mated Today action — see reproStatusSync.js). Without
+            // only clears via the explicit Mated Today action see reproStatusSync.js). Without
             // this check, marking a planned mating done from ANY client (e.g. the Lite app, which
             // has no access to this browser's localStorage dismissal) would leave a phantom
             // "mated today" reminder here forever, since matingDate now equals today.
@@ -210,7 +210,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const ds = daysSince(lastDate);
             return ds !== null && ds >= Number(freqDays);
         };
-        // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
+        // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays convert so isTaskDue works.
         const cleaningTaskFreqDays = (t) => {
             if (t.frequencyDays) return t.frequencyDays;
             if (!t.frequency) return null;
@@ -388,7 +388,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                             {item.type === 'weaned' ? (
                                                 <div className="flex items-center gap-1.5 flex-shrink-0">
                                                     <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
-                                                    <button onClick={() => dismissWeaningPermanently(item.litterId, item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 flex-shrink-0" title="Mark weaning complete — stops this reminder permanently">Done</button>
+                                                    <button onClick={() => dismissWeaningPermanently(item.litterId, item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 flex-shrink-0" title="Mark weaning complete • stops this reminder permanently">Done</button>
                                                 </div>
                                             ) : (
                                                 <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
@@ -514,6 +514,6 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     );
 };
 
-// Urgency Alerts Banner — shows due-today/overdue litter events on every page (can be disabled per user)
+// Urgency Alerts Banner shows due-today/overdue litter events on every page (can be disabled per user)
 
 export default NotificationsHub;

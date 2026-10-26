@@ -108,7 +108,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                             <Users size={28} className="text-primary" />
                             Contacts
                             <InfoButton title="Contacts" lessonId="contacts-overview">
-                                <p>Keep records of keepers and breeders you deal with — separate from your own animal records.</p>
+                                <p>Keep records of keepers and breeders you deal with • separate from your own animal records.</p>
                                 <p>Mark a contact as a Keeper or Breeder, and view the animals you've bought from or bred with them.</p>
                             </InfoButton>
                         </h1>

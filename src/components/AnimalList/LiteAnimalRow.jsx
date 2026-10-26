@@ -6,7 +6,7 @@ import { formatLocalDate } from '../../utils/dateFormatter';
 import { AnimalNameWithFlag } from '../../utils/animalDisplayName';
 
 // Lite's "My Animals" list is a flat set of horizontal rows rather than the Full frontend's
-// species-grouped card grid — see the isLite branch in AnimalList/index.jsx.
+// species-grouped card grid see the isLite branch in AnimalList/index.jsx.
 //
 // Row shape: identity + image on the left, status/ID in the middle, the two quick toggles on
 // the right. Only the fields a breeder scans for at a glance live here; everything else is on
@@ -77,7 +77,7 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
             onClick={() => onViewAnimal(animal)}
             className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-3 py-2 bg-white dark:bg-dark-card-bg border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition cursor-pointer"
         >
-            {/* LEFT — unchanged from the Full layout: the image with name / variety / birthdate
+            {/* LEFT unchanged from the Full layout: the image with name / variety / birthdate
                 stacked beside it. Only the MIDDLE and RIGHT columns are re-flowed on mobile.
                 min-w-0 + truncate keeps a long name/variety from pushing things out of line. */}
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -105,7 +105,7 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                 </div>
             </div>
 
-            {/* MIDDLE, mobile only — the status pills + CTC ID as a single row beneath the identity
+            {/* MIDDLE, mobile only the status pills + CTC ID as a single row beneath the identity
                 block. The middle column below is sm:flex, so on phones this is the only place they
                 render; without it the reproductive state, status and ID were absent in Lite. */}
             <div className="sm:hidden flex flex-wrap items-center gap-1 pl-[3.75rem]">
@@ -115,12 +115,12 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                     </span>
                 )}
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary">
-                    {animal.status || '—'}
+                    {animal.status || '•'}
                 </span>
                 <span className="text-[10px] font-mono text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
             </div>
 
-            {/* MIDDLE — reproductive status, general status, CTC ID. Fixed-width and rigid, with
+            {/* MIDDLE reproductive status, general status, CTC ID. Fixed-width and rigid, with
                 the LEFT and RIGHT columns both set to flex-1 below so they absorb equal slack.
                 That's what actually centres this block: whichever way the name/variety text
                 stretches, it grows both sides by the same amount and the status/ID pills stay
@@ -132,12 +132,12 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                     </span>
                 )}
                 <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary">
-                    {animal.status || '—'}
+                    {animal.status || '•'}
                 </span>
                 <span className="text-[10px] font-mono text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
             </div>
 
-            {/* RIGHT — owned + public toggles. On mobile these get their own full-width row at the
+            {/* RIGHT owned + public toggles. On mobile these get their own full-width row at the
                 bottom of the card; from sm up they sit in a column beside the identity block and
                 share flex-1 with it so the MIDDLE block lands at the horizontal centre. The inner
                 box is a fixed width with the buttons right-aligned, so "Unowned" vs "Owned" doesn't

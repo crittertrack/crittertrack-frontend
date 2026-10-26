@@ -1,5 +1,5 @@
 // Resolve a friendly phenotype/carrier summary for an animal's geneticCode, across all species.
-// Used for read-only "view" displays (e.g. the Appearance tab) — never mutates or replaces the raw geneticCode.
+// Used for read-only "view" displays (e.g. the Appearance tab) never mutates or replaces the raw geneticCode.
 import { calculatePhenotype, MOUSE_POSSIBLE_HET_LOCI } from '../components/GeneticsCalculator';
 import { parseMouseGeneticCode, parseRatGeneticCode, parseHamsterGeneticCode, parseCampbellsGeneticCode, parseRussianDwarfGeneticCode } from '../components/GeneticCodeBuilder';
 import { matchFancyRatPhenotype, RAT_POSSIBLE_HET_LOCI } from '../data/fancyRatPhenotypeRules';
@@ -11,7 +11,7 @@ import { parseBallPythonGeneticCode, matchBallPythonPhenotype, getBallPythonDisp
 const EMPTY = { phenotype: '', carriers: [], possibleCarriers: [] };
 
 // Formats a rodent's "possible het" entries as plain trait names (no "Het" wording or percentage),
-// kept separate from the computed phenotype string — e.g. "Fuzz" for a "Possible carrier of: Fuzz" note.
+// kept separate from the computed phenotype string e.g. "Fuzz" for a "Possible carrier of: Fuzz" note.
 function possibleHetLabels(possibleHets, hetLociList) {
   return (possibleHets || [])
     .filter(h => h && h.locus && h.percent)

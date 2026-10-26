@@ -433,7 +433,7 @@ export default function ModOversightPanel({
             } else if (type === 'profile' && selectedReport.reportedUserId) {
                 const u = selectedReport.reportedUserId;
                 const name = u.breederName || u.personalName || u.email || '';
-                subject = u.id_public ? `${name} (${u.id_public}) — profile` : `${name} — profile`;
+                subject = u.id_public ? `${name} (${u.id_public}) • profile` : `${name} • profile`;
             } else if (type === 'rating') {
                 subject = 'Your breeder rating';
             } else if (type === 'message') {

@@ -281,7 +281,7 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                                 <div key={q} className="bg-gray-50 dark:bg-dark-surface rounded-lg p-3">
                                     <div className="text-xs text-gray-500 dark:text-dark-text-secondary mb-1">{QUESTION_LABELS[q]}</div>
                                     <div className="text-lg font-bold text-gray-800 dark:text-dark-text">
-                                        {stats.starAverages[q] != null ? `${stats.starAverages[q].toFixed(1)} / 5` : '—'}
+                                        {stats.starAverages[q] != null ? `${stats.starAverages[q].toFixed(1)} / 5` : '•'}
                                     </div>
                                 </div>
                             ))}

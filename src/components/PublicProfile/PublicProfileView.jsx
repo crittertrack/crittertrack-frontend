@@ -271,7 +271,7 @@ const renderBreederInfoMarkdown = (text) => {
         .replace(/\n/g, '<br>');
 };
 
-// Reusable star row — defined at module level so React never unmounts/remounts it between renders
+// Reusable star row defined at module level so React never unmounts/remounts it between renders
 
 const RatingStarRow = ({ score, interactive, onSelect }) => (
     <div className="flex gap-1">
@@ -317,7 +317,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [publicLitters, setPublicLitters] = useState([]);
     const [litterYearFilter, setLitterYearFilter] = useState(''); // filter pairings by year
     const [litterStatusFilter, setLitterStatusFilter] = useState(''); // '' | planned | mated | pregnant | born
-    // The owner's custom species order — the same list "My Animals" uses (PublicProfile.speciesOrder).
+    // The owner's custom species order the same list "My Animals" uses (PublicProfile.speciesOrder).
     const [speciesOrder, setSpeciesOrder] = useState(Array.isArray(profile?.speciesOrder) ? profile.speciesOrder : []);
     const [ratingData, setRatingData] = useState({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
     const [myRating, setMyRating] = useState(null);         // own existing rating object or null
@@ -581,7 +581,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         setRatingForm({ score: resp.data.score, comment: resp.data.comment || '' });
                     }
                 } catch (err) {
-                    // 401/403/network — ignore, canRate already set above
+                    // 401/403/network ignore, canRate already set above
                 }
             }
         };

@@ -83,7 +83,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             setAnimalToEdit(null);
             setViewAnimalBreederInfo(null);
 
-            // Some entry points (e.g. Archive) pass a slim projection that omits most fields —
+            // Some entry points (e.g. Archive) pass a slim projection that omits most fields 
             // fetch the full record in the background so the detail view isn't missing data.
             // Use /any/ since this is also the entry point for viewing pedigree ancestors
             // and other public animals the current user doesn't own.
@@ -233,7 +233,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             }
 
             // Make the API request
-            // `url` here is a relative path built by the caller (AnimalFormModalV2) — apiClient's
+            // `url` here is a relative path built by the caller (AnimalFormModalV2) apiClient's
             // own baseURL already includes API_BASE_URL, so the caller must NOT prefix it again
             // (doing so previously caused a double /api/api/... 404).
             const response = await apiClient({
@@ -391,11 +391,11 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (lastFetchedIdRef.current === animalToView.id_public) return;
         const fetchedId = animalToView.id_public;
         lastFetchedIdRef.current = fetchedId; // Update ref before fetch
-        // Use /any/ since animalToView is often a pedigree ancestor owned by someone else —
+        // Use /any/ since animalToView is often a pedigree ancestor owned by someone else 
         // the ownership-only endpoint would 404 for those and skip the refresh entirely.
         apiClient.get(`/animals/any/${fetchedId}`).then(res => {
             // If the user already clicked Edit (or navigated away) while this was in flight,
-            // animalToView will have moved on (or been cleared) — don't clobber it with stale data.
+            // animalToView will have moved on (or been cleared)  don't clobber it with stale data.
             setAnimalToView(prev => (prev && prev.id_public === fetchedId) ? res.data : prev);
         }).catch(err => {
             console.warn('[usePrivateAnimalNavigation] Failed to fetch full animal data:', err.message);

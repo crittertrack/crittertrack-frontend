@@ -1442,7 +1442,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'From a direct APK file',
-        content: 'If you\'d rather not use the Play Store, download the signed APK directly from this guide\'s URL/file and install it on your device. Only the .apk linked directly here is safe — do not download APKs from third-party offers, mirror sites, or unofficial websites. It\'s the same app with the same features and the same account; it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Updates for a sideloaded app are manual, so return here to download and install a newer APK when one is published.',
+        content: 'If you\'d rather not use the Play Store, download the signed APK directly from this guide\'s URL/file and install it on your device. Only the .apk linked directly here is safe • do not download APKs from third-party offers, mirror sites, or unofficial websites. It\'s the same app with the same features and the same account; it just skips the store. Choose this if the Play Store isn\'t available in your country, or if you prefer to sideload. Updates for a sideloaded app are manual, so return here to download and install a newer APK when one is published.',
         link: {
           label: 'Download the Android APK',
           url: ANDROID_APK_URL,

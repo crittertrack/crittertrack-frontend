@@ -231,7 +231,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
                 <div className="flex items-start gap-2 text-sm px-3 py-2 mb-6 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
                   <Info size={16} className="flex-shrink-0 mt-0.5" />
                   <span>
-                    Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>. No shared lines detected.
+                    Sire and dam are from different breeding lines • Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>. No shared lines detected.
                   </span>
                 </div>
               );
@@ -350,7 +350,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-dark-text flex-shrink-0">
               <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2 truncate">
                 <Network size={18} className="flex-shrink-0" />
-                <span className="truncate">Expected Family Tree — {getFullName(sire)} &times; {getFullName(dam)}</span>
+                <span className="truncate">Expected Family Tree • {getFullName(sire)} &times; {getFullName(dam)}</span>
               </h3>
               <button onClick={() => setShowFamilyTree(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg flex-shrink-0" aria-label="Close">
                 <X size={20} className="text-gray-600 dark:text-dark-text-secondary" />

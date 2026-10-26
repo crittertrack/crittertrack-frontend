@@ -5,7 +5,7 @@ import apiClient from '../utils/apiClient';
  * useGeneralTasks - Manages standalone Feeding & Care tasks that are NOT tied to any single
  * animal or enclosure (e.g. "Feed the mouse colony"), so a user with 100+ animals gets ONE
  * recurring reminder instead of maintaining/receiving 100 separate per-animal schedules.
- * Tasks may optionally reference a set of animals purely for display context — that list does
+ * Tasks may optionally reference a set of animals purely for display context that list does
  * NOT create per-animal due-dates/notifications, the task itself has exactly one due date.
  *
  * @param authToken - Current auth token for API calls

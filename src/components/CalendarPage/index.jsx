@@ -65,7 +65,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         setLoading(true);
         Promise.all([
             apiClient.get(`/litters`),
-            // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
+            // No isOwned filter matches the Dashboard's Needs Attention widgets, which include
             // every non-archived, non-view-only animal regardless of ownership.
             apiClient.get(`/animals`),
             apiClient.get(`/supplies`),
@@ -184,7 +184,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (Array.isArray(val)) return val;
         try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
     };
-    // Mirrors AnimalList/index.jsx's calcNextDose — anchors to the most recent administration
+    // Mirrors AnimalList/index.jsx's calcNextDose anchors to the most recent administration
     // (falling back to the medication's start date) and projects the next dose from there.
     const calcNextDose = (med) => {
         if (!med.intervalValue || !med.intervalUnit) return null;
@@ -237,7 +237,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             if (isNaN(d.getTime())) return;
             // For birthdays, show the anniversary in the current viewed year/month
             if (type === 'birthday') {
-                // A birthday is only celebrated from the first anniversary onward —
+                // A birthday is only celebrated from the first anniversary onward
                 // never on (or before) the birth year itself.
                 if (year <= d.getFullYear()) return;
                 d = new Date(year, d.getMonth(), d.getDate());
@@ -249,7 +249,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         } catch(e) {}
     };
 
-    // Litter events — planned litters get their own 'planned' type
+    // Litter events planned litters get their own 'planned' type
     const filteredLitters = litters.filter(l => {
         if (!q) return true;
         return [l.breedingPairCodeName, l.litter_id_public,
@@ -276,7 +276,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
     });
 
-    // Animal events — also searchable via the filter box, not just litters
+    // Animal events also searchable via the filter box, not just litters
     const filteredAnimals = animals.filter(a => {
         if (!q) return true;
         return [a.prefix, a.name, a.suffix, a.id_public].filter(Boolean).join(' ').toLowerCase().includes(q);
@@ -340,7 +340,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
     });
 
-    // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so nextDueDate works.
+    // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays convert so nextDueDate works.
     const cleaningTaskFreqDays = (t) => {
         if (t.frequencyDays) return t.frequencyDays;
         if (!t.frequency) return null;
@@ -348,7 +348,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         return t.frequency * mult;
     };
 
-    // Enclosure cleaning/maintenance tasks — filterable by enclosure name
+    // Enclosure cleaning/maintenance tasks filterable by enclosure name
     const filteredEnclosures = enclosures.filter(enc => {
         if (!q) return true;
         return (enc.name || '').toLowerCase().includes(q);
@@ -373,7 +373,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         });
     });
 
-    // Supplies — filterable by item name/category
+    // Supplies filterable by item name/category
     const filteredSupplies = supplies.filter(s => {
         if (!q) return true;
         return [s.name, s.category].filter(Boolean).join(' ').toLowerCase().includes(q);
@@ -475,7 +475,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     for (let d = 1; d <= daysInMonth; d++) cells.push(d);
     while (cells.length % 7 !== 0) cells.push(null);
 
-    // Returns { bold, rest } — bold is the primary name, rest is the descriptor
+    // Returns { bold, rest } bold is the primary name, rest is the descriptor
     const getPillParts = (ev) => {
         if (ev.animal) {
             const a = ev.animal;

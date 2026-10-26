@@ -18,12 +18,12 @@ import { downloadBlob } from '../../utils/nativeDownload';
 
 // Short contextual hints for the Settings page-header info button, keyed by tab id.
 const SETTINGS_TAB_INFO = {
-    'profile': { lessonId: 'settings-profile', body: <p>Edit your name, avatar, bio, and location. Toggle which name (breeder or personal) is shown publicly. You can also enable <strong>push notifications</strong> here to get real device alerts for messages, requests, and daily animal care/feeding/health reminders — even when the app isn't open.</p> },
+    'profile': { lessonId: 'settings-profile', body: <p>Edit your name, avatar, bio, and location. Toggle which name (breeder or personal) is shown publicly. You can also enable <strong>push notifications</strong> here to get real device alerts for messages, requests, and daily animal care/feeding/health reminders • even when the app isn't open.</p> },
     'info-adoption': { lessonId: 'settings-info-adoption', body: <p>Add species-specific care info and adoption/rehoming policies shown on your public profile.</p> },
     'directory': { lessonId: 'settings-directory', body: <p>Control whether you're listed in the public Breeder Directory and how you appear there.</p> },
     'ratings': { lessonId: 'settings-ratings', body: <p>See ratings and reviews other users have left after transactions with you.</p> },
     'breeding-lines': { lessonId: 'settings-breeding-lines', body: <p>Define and color-code your own breeding line names, used to tag and filter animals across the app.</p> },
-    'appearance-options': { lessonId: 'settings-appearance-options', body: <p>Manage the values you've typed into dropdown fields (like Color) on the Animal form — remove typos or ones you no longer use.</p> },
+    'appearance-options': { lessonId: 'settings-appearance-options', body: <p>Manage the values you've typed into dropdown fields (like Color) on the Animal form • remove typos or ones you no longer use.</p> },
     'data': { lessonId: 'settings-data-portability', body: <p>Export or import your CritterTrack data for backup or migration.</p> },
     'account': { lessonId: 'settings-account', body: <p>Manage your login email, password, and account security settings.</p> },
 };
@@ -309,7 +309,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
-    // Appearance dropdown options (e.g. Color) — user-added values, viewable/removable here
+    // Appearance dropdown options (e.g. Color) user-added values, viewable/removable here
     const [appearanceOptions, setAppearanceOptions] = useState([]);
     const [appearanceOptionsLoading, setAppearanceOptionsLoading] = useState(false);
     const [appearanceOptionDeletingId, setAppearanceOptionDeletingId] = useState(null);
@@ -320,7 +320,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [editingOptionId, setEditingOptionId] = useState(null);
     const [editingValue, setEditingValue] = useState('');
 
-    // Breeding lines — local draft state (not saved until user clicks Save)
+    // Breeding lines local draft state (not saved until user clicks Save)
     const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
     const [blSaving, setBlSaving] = useState(false);
     const [blSaved, setBlSaved] = useState(false);
@@ -411,7 +411,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         setPushBusy(true);
         try {
             if (isNativePlatform) {
-                // OS permission can't be revoked in-app once granted — only offer the enable path here.
+                // OS permission can't be revoked in-app once granted only offer the enable path here.
                 if (!pushSubscribed) {
                     await registerNativePush();
                     setPushSubscribed(await isNativePushGranted());
@@ -440,7 +440,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
-    // Data Portability — Export
+    // Data Portability Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
     const [exportFormat, setExportFormat] = useState('json');
     const [exportIncludeArchived, setExportIncludeArchived] = useState(false);
@@ -448,7 +448,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [exportEmbedImages, setExportEmbedImages] = useState(false);
     const [exportLoading, setExportLoading] = useState(false);
 
-    // Data Portability — Import
+    // Data Portability Import
     const [importFile, setImportFile] = useState(null);
 
     // ZooEasy Import
@@ -599,7 +599,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     }
                 } catch (uploadErr) {
                     console.error('Profile image upload failed:', uploadErr?.response?.data || uploadErr.message);
-                    showModalMessage('Image Upload', 'Upload endpoint failed — will attempt fallback save (file included in profile PUT).');
+                    showModalMessage('Image Upload', 'Upload endpoint failed • will attempt fallback save (file included in profile PUT).');
                 }
             }
 
@@ -836,7 +836,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         });
     };
 
-    // Derived filters for the "Dropdown Lists" management tab — keeps the list to one
+    // Derived filters for the "Dropdown Lists" management tab keeps the list to one
     // species/field at a time (plus optional text search) instead of showing everything at once.
     const aoSpeciesList = [...new Set(appearanceOptions.map(o => o.species))].sort();
     const aoFieldList = [...new Set(appearanceOptions.filter(o => !aoSpecies || o.species === aoSpecies).map(o => o.field))].sort();
@@ -1085,7 +1085,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 <input type="checkbox" checked={pushPreferences[cat.id] !== false}
                                                     onChange={(e) => handleTogglePushCategory(cat.id, e.target.checked)}
                                                     className="rounded text-primary-dark focus:ring-primary-dark" />
-                                                <span>{cat.label}{cat.description ? ` — ${cat.description}` : ''}</span>
+                                                <span>{cat.label}{cat.description ? ` • ${cat.description}` : ''}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -1665,7 +1665,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {Object.entries(importPreview).some(([_s, info]) => info.conflicts?.length > 0) && (
                                 <div className="space-y-3">
                                     <p className="text-sm font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                                        <AlertTriangle size={15} /> Duplicate records found — choose how to handle each section:
+                                        <AlertTriangle size={15} /> Duplicate records found • choose how to handle each section:
                                     </p>
                                     {Object.entries(importPreview).map(([section, info]) => {
                                         if (!info.conflicts?.length) return null;
@@ -1776,11 +1776,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-lg p-3 mb-5 flex gap-2.5">
                         <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
                         <div className="text-xs text-amber-800 dark:text-amber-300 space-y-1">
-                            <p className="font-semibold">Important — please read before importing</p>
+                            <p className="font-semibold">Important • please read before importing</p>
                             <ul className="list-disc list-inside space-y-0.5">
-                                <li><strong>Images are not imported</strong> — ZooEasy, Kintraks, and SimpleBreed imports do not transfer any animal photos. You will need to upload images manually after importing.</li>
-                                <li><strong>Use at your own risk</strong> — importing may overwrite existing animal records, parent links, and other data. Always export a backup first.</li>
-                                <li><strong>Parent links may be inaccurate</strong> — parent names and relationships are matched by name and date; mismatches or missing links can occur and should be reviewed after import.</li>
+                                <li><strong>Images are not imported</strong> • ZooEasy, Kintraks, and SimpleBreed imports do not transfer any animal photos. You will need to upload images manually after importing.</li>
+                                <li><strong>Use at your own risk</strong> • importing may overwrite existing animal records, parent links, and other data. Always export a backup first.</li>
+                                <li><strong>Parent links may be inaccurate</strong> • parent names and relationships are matched by name and date; mismatches or missing links can occur and should be reviewed after import.</li>
                             </ul>
                         </div>
                     </div>
@@ -1841,7 +1841,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             setZeNewSpeciesName('');
                                         } catch (err) {
                                             if (err.response?.status === 409) {
-                                                // Already exists — just select it
+                                                // Already exists just select it
                                                 const existing = err.response.data.existing?.name || name;
                                                 setZeSpecies(existing);
                                                 setZeAddingSpecies(false);
@@ -2108,7 +2108,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                     {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                    {' — matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                    {' • matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
                                                                                 </span>
                                                                                 <select
                                                                                     value={resolution}
@@ -2587,7 +2587,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                     {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                    {' — matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                    {' • matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
                                                                                 </span>
                                                                                 <select
                                                                                     value={resolution}
@@ -2899,7 +2899,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <Globe size={18} className="text-sky-600 dark:text-sky-400 flex-shrink-0" />
                     <div>
                         <h3 className="font-semibold text-sky-800 dark:text-sky-300 text-sm">Import from SimpleBreed</h3>
-                        <p className="text-xs text-sky-600 dark:text-sky-400">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one — the dropdown shows <span className="font-medium">only your starred species</span> (star them via the species selector when adding an animal).</p>
+                        <p className="text-xs text-sky-600 dark:text-sky-400">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one • the dropdown shows <span className="font-medium">only your starred species</span> (star them via the species selector when adding an animal).</p>
                     </div>
                 </div>
                 <div className="p-4 space-y-3">
@@ -3007,7 +3007,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             }}
                                             className="border border-orange-300 dark:border-orange-700/60 rounded px-2 py-0.5 bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text font-medium"
                                         >
-                                            <option value="">— pick species —</option>
+                                            <option value="">• pick species •</option>
                                             {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
                                         {Object.keys(sbSpeciesOverrides).length > 0 && (
@@ -3062,7 +3062,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             onChange={e => setSbSpeciesOverrides(prev => ({ ...prev, [a.sbId]: e.target.value }))}
                                                                             className={`border rounded px-1 py-0.5 text-xs font-medium ${sbSpeciesOverrides[a.sbId] ? 'bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text border-gray-300 dark:border-dark-text' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700/60'}`}
                                                                           >
-                                                                            <option value="">— pick —</option>
+                                                                            <option value="">• pick •</option>
                                                                             {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
                                                                           </select>
                                                                         : <span className="text-gray-500 dark:text-dark-text-muted">{a.species}</span>}
@@ -3089,7 +3089,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 {conflict.existingName && conflict.existingName !== a.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                 {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                 {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                {' — matched by '}
+                                                                                {' • matched by '}
                                                                                 <span className="font-semibold">{conflict.matchType === 'id' ? 'SB ID' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}</span>
                                                                             </span>
                                                                             <select

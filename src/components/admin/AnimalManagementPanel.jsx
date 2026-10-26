@@ -39,7 +39,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [showHideConfirm, setShowHideConfirm] = useState(false);
     const [actionReason, setActionReason] = useState('');
 
-    // Read-only detail view (Eye icon) image lightbox — AnimalModalV2 expects these as props.
+    // Read-only detail view (Eye icon) image lightbox AnimalModalV2 expects these as props.
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState('');
 

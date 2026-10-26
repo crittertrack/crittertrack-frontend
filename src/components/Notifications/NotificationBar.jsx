@@ -36,7 +36,7 @@ const isFeedingDue = (lastDate, intervalHours) => {
   return (Date.now() - d.getTime()) / 3600000 >= Number(intervalHours);
 };
 
-// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
+// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays convert so isTaskDue works.
 const cleaningTaskFreqDays = (t) => {
   if (t.frequencyDays) return t.frequencyDays;
   if (!t.frequency) return null;
@@ -78,7 +78,7 @@ const describeNotification = (n) => {
 // Matches AnimalList's own [prefix, name, suffix] display convention.
 const animalDisplayName = (a) => formatAnimalDisplayName({ ...a, name: a?.name || 'Unnamed' });
 
-// "(Name1, Name2 +N more)" — keeps the ticker text from growing unbounded.
+// "(Name1, Name2 +N more)" keeps the ticker text from growing unbounded.
 const formatNameList = (names, max = 2) => {
   if (!names.length) return '';
   if (names.length <= max) return `(${names.join(', ')})`;
@@ -91,12 +91,12 @@ const defaultAlertSettings = () =>
 // Single global banner shown on every page: unread messages/notifications, moderator
 // warnings/notices, and the user's optional care/breeding alert categories. Auto-scrolls
 // (ticker-style, matching NewsTickerBanner's motion) when there's more than one item.
-// Ids of ticker items covered by the Lite web Notifications quick-actions page — in Lite mode
+// Ids of ticker items covered by the Lite web Notifications quick-actions page in Lite mode
 // these route there instead of their normal onClick (mostly navigate('/', {state:{animalView}})
 // calls that Lite's defensive animalView guard just bounces back to 'list', making them no-ops).
 
 const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifications, setShowMessages }) => {
-  // Lite renders identically to Full — see utils/liteMode.js.
+  // Lite renders identically to Full see utils/liteMode.js.
   const navigate = useNavigate();
   const userKey = useMemo(() => getUserKey(authToken), [authToken]);
 
@@ -136,7 +136,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       const response = await apiClient.get(`/notifications`);
       const all = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
       setModMessages(all.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
-      // Backend already sorts newest-first — grab the most recent unread, non-admin notification
+      // Backend already sorts newest-first grab the most recent unread, non-admin notification
       // so the ticker can say what it's actually about (e.g. "regarding <animal name>").
       const unread = all.filter(n => !n.read && n.status === 'pending' && !['broadcast', 'announcement', 'moderator_message'].includes(n.type));
       setLatestNotification(unread[0] || null);
@@ -161,7 +161,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         .filter(c => c.unreadCount > 0)
         .sort((a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate));
       // Prefer a non-staff sender, but a conversation that once had a mod message (flagged
-      // "isStaff") can still carry an unread regular reply counted in regularMessageCount —
+      // "isStaff") can still carry an unread regular reply counted in regularMessageCount
       // fall back to it rather than leaving the preview blank.
       const preview = unreadConvos.find(c => !c.otherUser?.isStaff) || unreadConvos[0] || null;
       setLatestMessageSender(preview?.otherUser || null);
@@ -197,7 +197,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const fetchCareData = useCallback(async () => {
     if (!authToken) return;
     try {
-      // Deliberately NOT passing isOwned=true — the Dashboard's own "Needs Attention" widgets
+      // Deliberately NOT passing isOwned=true the Dashboard's own "Needs Attention" widgets
       // (AnimalList's activeAnimalsForDashboard) include every non-archived, non-view-only animal
       // regardless of ownership, so restricting to owned-only here silently hid alerts for
       // animals not marked "owned" and made the ticker disagree with the Dashboard.
@@ -261,7 +261,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
           .filter(Boolean)
           .map(animalDisplayName);
         const taskName = task.taskName || 'Custom task';
-        return assignedNames.length ? `${taskName} — ${formatNameList(assignedNames)}` : taskName;
+        return assignedNames.length ? `${taskName} • ${formatNameList(assignedNames)}` : taskName;
       });
       if (due.length > 0) items.push({ id: 'careTasks', icon: ClipboardList, iconColor: 'text-blue-300', text: `Custom Tasks: ${due.length} task${due.length !== 1 ? 's' : ''} due ${formatNameList(taskNames)}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
     }
@@ -276,7 +276,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         return animal ? animalDisplayName(animal) : id;
       };
       const litterName = litter => litter.litter_id_public || litter.breedingPairCodeName || 'Litter';
-      // Latest born litter per dam — the weaning reminder only belongs to the dam's most
+      // Latest born litter per dam the weaning reminder only belongs to the dam's most
       // recent litter (mirrors AnimalList's reproNeedsAttentionList).
       const latestBirthByDam = new Map();
       litters.forEach(l => {
@@ -305,7 +305,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
           const dam = l.damId_public ? animals.find(a => a.id_public === l.damId_public) : null;
           // Same safety-net as AnimalList: only while the dam is still flagged nursing
           // (the backend auto-clears that past Species.maxNursingDays) and only for the
-          // dam's latest birth — so never-confirmed historical litters stop showing as
+          // dam's latest birth so never-confirmed historical litters stop showing as
           // "weaning due" forever after a weaning-date backfill.
           const isLatestBirthForDam = l.damId_public && latestBirthByDam.get(l.damId_public)?._id === l._id;
           // Species nursing window (sent by the server) applies even when the dam isn't in
@@ -479,7 +479,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
               </div>
               {expandedWarnings.length >= 3 && (
                 <p className="text-xs mt-2 text-red-600 font-semibold">
-                  You have reached 3 warnings — your account is suspended. Contact moderators for appeal.
+                  You have reached 3 warnings • your account is suspended. Contact moderators for appeal.
                 </p>
               )}
             </div>

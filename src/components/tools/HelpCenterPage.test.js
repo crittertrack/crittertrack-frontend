@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import HelpCenterPage from './HelpCenterPage';
 
 // react-router-dom (v7) doesn't resolve under this jest setup, so like other suites we
-// mock it virtually — just the two pieces HelpCenterPage uses: Link and useSearchParams.
+// mock it virtually just the two pieces HelpCenterPage uses: Link and useSearchParams.
 const mockSetSearchParams = jest.fn();
 let mockSearchParams = new URLSearchParams();
 jest.mock('react-router-dom', () => ({
@@ -12,7 +12,7 @@ jest.mock('react-router-dom', () => ({
     useSearchParams: () => [mockSearchParams, mockSetSearchParams],
 }), { virtual: true });
 
-// HelpCenterPage pulls in SpeciesValuesSuggestion, which imports apiClient — mock it so
+// HelpCenterPage pulls in SpeciesValuesSuggestion, which imports apiClient mock it so
 // no network layer is loaded during these render tests.
 jest.mock('../../utils/apiClient', () => ({
     __esModule: true,

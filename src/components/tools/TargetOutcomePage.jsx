@@ -5,11 +5,11 @@ import { matchFancyRatPhenotype, RAT_GENE_LOCI as SHARED_RAT_GENE_LOCI } from '.
 import InfoButton from '../shared/InfoButton';
 
 // ---------------------------------------------------------------------------
-// Fancy Rat trait chips — generated directly from fancyRatPhenotypeRules.js so
+// Fancy Rat trait chips generated directly from fancyRatPhenotypeRules.js so
 // this page can never drift out of sync with the real genetics rules again.
 // Multiple genotype combinations that produce the *same* phenotype label
 // (e.g. "Badger" from both White Spot and Headspot) are automatically merged
-// into a single dropdown entry backed by all matching alternatives — the
+// into a single dropdown entry backed by all matching alternatives the
 // probability calculation considers every alternative, not just one.
 // ---------------------------------------------------------------------------
 const RAT_BASE_GENOTYPE = { A: 'a/a', C: 'C/C' };
@@ -48,7 +48,7 @@ function groupRatPatchesByLabel(patches, groups, { includeEmpty = false } = {}) 
 
 // Drop alternatives that are a strict superset of a simpler alternative already
 // producing the same label (e.g. an unrelated locus tagging along for the ride
-// without actually affecting the phenotype) — keeps the probability calculation
+// without actually affecting the phenotype) keeps the probability calculation
 // honest and avoids flagging pairings as "unconfirmed" over irrelevant loci.
 function pruneRedundantRatAlternatives(groups) {
   for (const label of Object.keys(groups)) {
@@ -92,7 +92,7 @@ function buildRatMarkingTraitDefs() {
   // Split single-locus results (own dropdown per trait) from compounds. A
   // compound goes into its own locus-named dropdown (Dalmatian/Whiteside/Roan/
   // White Spot/Headspot/Downunder) unless its alternatives genuinely span more
-  // than one of those extra loci (e.g. "Badger" from both Ws and Hs) — those
+  // than one of those extra loci (e.g. "Badger" from both Ws and Hs) those
   // stay in the shared "Marking Combinations" dropdown since they're not
   // reducible to a single locus.
   const EXTRA_LOCUS_GROUP_NAMES = { Dal: 'Dalmatian', Wh: 'Whiteside', Ro: 'Roan', Ws: 'White Spot', Hs: 'Headspot', Dw: 'Downunder' };
@@ -190,7 +190,7 @@ function buildRatModifierTraitDefs() {
   groupRatPatchesByLabel([{ M: 'm/m', Me: 'Me/me' }, { M: 'm/m', Me: 'Me/Me' }], groups);
   const defs = ratDefsFromGroups(groups, 'Modifiers', 'rat-modifier');
   // Be is dominant and hypostatic to the C-locus, so it prefixes ANY base color
-  // with "Black Eyed" (e.g. a/a Be/be = "Black Eyed Black") — except over
+  // with "Black Eyed" (e.g. a/a Be/be = "Black Eyed Black") except over
   // Albino, where it derives "Ivory" instead. Labeled directly here rather
   // than via matchFancyRatPhenotype since the generic stripRatColorPrefix
   // helper would otherwise mangle "Black Eyed Black" into "Eyed Black".
@@ -286,12 +286,12 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'dove',               label: 'Dove',              code: 'p/p',            group: 'Pink Eye Dilute' },
         { id: 'argente',            label: 'Argente',           code: 'A/- p/p',        group: 'Pink Eye Dilute' },
 
-        // Dilutes — Double/Triple
-        { id: 'lilac',              label: 'Lilac',             code: 'b/b d/d',        group: 'Dilutes — Double/Triple' },
-        { id: 'champagne',          label: 'Champagne',         code: 'b/b p/p',        group: 'Dilutes — Double/Triple' },
-        { id: 'silver',             label: 'Silver',            code: 'd/d p/p',        group: 'Dilutes — Double/Triple' },
-        { id: 'lavender',           label: 'Lavender',          code: 'b/b d/d p/p',    group: 'Dilutes — Double/Triple' },
-        { id: 'cinnamon-argente',   label: 'Cinnamon Argente',  code: 'A/- b/b p/p',   group: 'Dilutes — Double/Triple' },
+        // Dilutes Double/Triple
+        { id: 'lilac',              label: 'Lilac',             code: 'b/b d/d',        group: 'Dilutes • Double/Triple' },
+        { id: 'champagne',          label: 'Champagne',         code: 'b/b p/p',        group: 'Dilutes • Double/Triple' },
+        { id: 'silver',             label: 'Silver',            code: 'd/d p/p',        group: 'Dilutes • Double/Triple' },
+        { id: 'lavender',           label: 'Lavender',          code: 'b/b d/d p/p',    group: 'Dilutes • Double/Triple' },
+        { id: 'cinnamon-argente',   label: 'Cinnamon Argente',  code: 'A/- b/b p/p',   group: 'Dilutes • Double/Triple' },
     
         // Pied
         { id: 'pied',               label: 'Pied',              code: 's/s',            group: 'Pied' },
@@ -299,7 +299,7 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'Dutch',              label: 'Dutch',             code: 's/s+',           group: 'Pied' },
         { id: 'Berkshire',          label: 'Berkshire',         code: 's/s+',           group: 'Pied' },
 
-        // Belted — recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied)
+        // Belted recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied)
         { id: 'belted',             label: 'Belted',            code: 'bt/bt',          group: 'Belted' },
 
         // Dominant Spotting
@@ -422,7 +422,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             const def = RAT_TRAIT_DEFS.find(d => d.id === id);
             if (!def) return;
             selectedAlternatives.push({ id, label: def.label, alternatives: def.alternatives });
-            // Merge the first alternative into the flat genotype — used only as a representative
+            // Merge the first alternative into the flat genotype used only as a representative
             // example (e.g. for anything that just wants "a" matching genotype), never for the
             // actual probability calculation, which considers every alternative via
             // `selectedAlternatives` instead.
@@ -433,7 +433,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
 
     selectedTraits.forEach((id) => {
         switch (id) {
-            // Base Color — Black series
+            // Base Color Black series
             // "black" is only the default base for a black-based dilute (and "agouti" below is only the
             // default for an agouti-based one). Dilutes therefore set their A-locus default only if
             // nothing has set the A locus yet, so a pattern chip such as Am. Brindle or Sable survives:
@@ -447,14 +447,14 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             case 'champagne':        if (!genotype.A) genotype.A = 'a/a';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
             case 'silver':           if (!genotype.A) genotype.A = 'a/a';  genotype.D = 'd/d'; genotype.P = 'p/p'; break;
             case 'lavender':         if (!genotype.A) genotype.A = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
-            // Base Color — Agouti series
+            // Base Color Agouti series
             case 'agouti':           genotype.A  = 'A/A';     break;
             case 'white-bellied':    genotype.A  = 'Aw/A';    break;
             case 'cinnamon':         if (!genotype.A) genotype.A = 'A/A';  genotype.B = 'b/b'; break;
             case 'blue-agouti':      if (!genotype.A) genotype.A = 'A/A';  genotype.D = 'd/d'; break;
             case 'argente':          if (!genotype.A) genotype.A = 'A/A';  genotype.P = 'p/p'; break;
             case 'cinnamon-argente': if (!genotype.A) genotype.A = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
-            // Base Color — Other
+            // Base Color Other
             // Sable is Ay/at + umbrous (U comes from the Umbrous chip that Sable selects). Dominant Red
             // is also selected as a dependency, so it must not overwrite Ay/at with Ay/a.
             case 'sable':            genotype.A  = 'Ay/at';   break;
@@ -473,7 +473,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
             // which this chip would auto-select, so the two together give Avy/a d/d = Blue Brindle.
             case 'blue-brindle':     genotype.D  = 'd/d';     break;
             case 'Leaden':          genotype.Ln = 'ln/ln';   break;
-            // Albino & Dilution — C locus
+            // Albino & Dilution C locus
             case 'albino':           genotype.C  = 'c/c';     break;
             case 'himalayan':        genotype.C  = 'c/ch';    break;
             case 'bone':             genotype.C  = 'c/ce';    break;
@@ -537,7 +537,7 @@ const findRatTraitPairings = (allAnimals, selectedAlternatives) => {
     return Promise.resolve({ pairings: [], unconfirmedPairings: [], targetLoci: {} });
   }
 
-  // Flat union of every locus referenced by any alternative of any selected trait — used only by
+  // Flat union of every locus referenced by any alternative of any selected trait used only by
   // ResultCard to decide which loci to bold in the displayed genotype, not for probability math.
   const targetLoci = {};
   selectedAlternatives.forEach(({ alternatives }) => {
@@ -674,7 +674,7 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
     }
   };
 
-  // Requiring a fully-specified geneticCode excluded most animals in practice — genetic codes are
+  // Requiring a fully-specified geneticCode excluded most animals in practice genetic codes are
   // an optional, manually-entered field, so plenty of eligible sires/dams simply don't have one.
   const sires = allAnimals.filter(a => a.gender === 'Male');
   const dams = allAnimals.filter(a => a.gender === 'Female');
@@ -692,7 +692,7 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
         const sireAlleles = sireLoci[locus];
         const damAlleles = damLoci[locus];
         // Locus not recorded at all, or recorded with a '-' placeholder (dominant allele known,
-        // other allele unspecified, e.g. "Ay/-") for either parent — we can't rule this pairing out,
+        // other allele unspecified, e.g. "Ay/-") for either parent we can't rule this pairing out,
         // but we also can't honestly score it, so it goes to the "needs confirmation" bucket instead
         // of being silently dropped (previous behavior: any unresolved locus = flat 0% = excluded).
         if (!sireAlleles || !damAlleles || sireAlleles.includes('-') || damAlleles.includes('-')) {
@@ -1112,7 +1112,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
               {results.unconfirmedPairings?.length > 0 && (
                 <div className="mt-6">
                   <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 text-center">
-                    These pairs have at least one parent whose genetic code doesn't fully specify a trait needed for this outcome (e.g. "Ay/-"), so a percentage can't be calculated — but the outcome may still be possible.
+                    These pairs have at least one parent whose genetic code doesn't fully specify a trait needed for this outcome (e.g. "Ay/-"), so a percentage can't be calculated • but the outcome may still be possible.
                   </p>
                   <CollapsibleGroup title="Needs Genotype Confirmation" count={results.unconfirmedPairings.length} isOpen={expandedGroups.unconfirmed} onToggle={() => toggleGroup('unconfirmed')}>
                     {results.unconfirmedPairings.map(r => <UnconfirmedPairingCard key={r.sire.id_public + r.dam.id_public} {...r} />)}

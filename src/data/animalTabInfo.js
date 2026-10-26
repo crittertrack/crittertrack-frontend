@@ -1,5 +1,5 @@
 // Per-tab InfoButton content shared by the animal edit form (AnimalFormModalV2) and the two
-// read-only view modals (AnimalModalV2, ViewAnimalModalV2) — keeps their "?" hint text and
+// read-only view modals (AnimalModalV2, ViewAnimalModalV2) keeps their "?" hint text and
 // linked tutorial lesson in sync instead of duplicating it three times.
 export const ANIMAL_FORM_TAB_INFO = {
     dashboard: { title: 'Dashboard', lessonId: 'animal-tab-dashboard', body: 'Photos, identity, Breeder/Owner assignment, and Marketplace availability.' },

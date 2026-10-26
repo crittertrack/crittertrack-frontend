@@ -215,7 +215,7 @@ const FamilyTreeView = ({
                 }
             }
 
-            // Phase 3: Fetch offspring for the identified set of animals (concurrently — this set is small)
+            // Phase 3: Fetch offspring for the identified set of animals (concurrently this set is small)
             await Promise.all(Array.from(idsToFetchOffspringFor).map(async (animalId) => {
                 try {
                     // includeManaged: siblings/offspring recorded via Litter Management would
@@ -1080,7 +1080,7 @@ const FamilyTreeView = ({
                                 <div className="flex items-center gap-2">
                                     <Loader2 size={16} className="animate-spin flex-shrink-0" />
                                     <span>
-                                        Loading lineage{loadProgress.found > 0 ? ` — ${loadProgress.found} animal${loadProgress.found === 1 ? '' : 's'} found` : '...'}
+                                        Loading lineage{loadProgress.found > 0 ? ` • ${loadProgress.found} animal${loadProgress.found === 1 ? '' : 's'} found` : '...'}
                                         {loadProgress.pending > 0 ? ` (${loadProgress.pending} queued)` : ''}
                                     </span>
                                 </div>

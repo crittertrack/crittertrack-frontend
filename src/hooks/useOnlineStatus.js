@@ -1,7 +1,7 @@
 // Tracks whether the app currently has a working connection to the API.
 // On native (Capacitor Android), `navigator.onLine`/`online`/`offline` events are known to be
 // unreliable in some Android WebView versions (can report "online" while on Wi-Fi with no real
-// internet, or fail to fire at all), so we prefer the Capacitor Network plugin there — it talks
+// internet, or fail to fire at all), so we prefer the Capacitor Network plugin there it talks
 // to the OS's actual connectivity manager. On web/PWA we fall back to the browser APIs, combined
 // with live signal from actual API calls via apiClient's response interceptor (a much more
 // reliable indicator of "can we actually reach the backend" than either navigator.onLine or
@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Network } from '@capacitor/network';
 
-// A momentary blip (one failed request, a Wi-Fi handoff) shouldn't flash the offline banner —
+// A momentary blip (one failed request, a Wi-Fi handoff) shouldn't flash the offline banner
 // only treat the connection as actually down if it stays down this long. Coming back online is
 // still reported instantly, no debounce needed for that direction.
 // 2 seconds was too short for real-world Wi-Fi handoffs; keep the banner hidden for brief blips.

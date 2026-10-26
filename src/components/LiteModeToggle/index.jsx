@@ -5,9 +5,9 @@ import { setCachedUiMode } from '../../utils/uiModeCache';
 
 // Compact header toggle for switching the account's uiMode between 'full' and 'lite'.
 // Mirrors PushToggleButton's layout/style so it slots in alongside the other header icons.
-// NOTE: this only persists the preference for now — the actual Lite-mode simplified nav/UI
+// NOTE: this only persists the preference for now the actual Lite-mode simplified nav/UI
 // (bottom bar, logo swap, tab consolidation) is not wired up to this flag yet.
-// Available on web AND in the native Android app — the app renders the same components, so
+// Available on web AND in the native Android app the app renders the same components, so
 // Lite works there too.
 const LiteModeToggle = ({ userProfile, setUserProfile, showModalMessage }) => {
     const [busy, setBusy] = useState(false);
@@ -17,7 +17,7 @@ const LiteModeToggle = ({ userProfile, setUserProfile, showModalMessage }) => {
         const next = isLite ? 'full' : 'lite';
         const confirmMsg = isLite
             ? 'Switch back to Full mode? This restores the complete feature set and navigation.'
-            : 'Switch to Lite mode? This simplifies the app to a smaller, more focused feature set — you can switch back anytime.';
+            : 'Switch to Lite mode? This simplifies the app to a smaller, more focused feature set • you can switch back anytime.';
         if (!window.confirm(confirmMsg)) return;
 
         setBusy(true);

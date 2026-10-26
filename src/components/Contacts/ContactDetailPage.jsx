@@ -76,7 +76,7 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
                     <h1 className="text-2xl font-bold flex items-center gap-2">
                         {contactData.details.breederName || contactData.details.personalName}
                         <InfoButton title="Contact Profile" lessonId="contacts-detail">
-                            <p>Overview shows this contact's saved details. Owned Animals lists animals recorded as owned by them; Bred Animals lists ones recorded as bred by them — matched either through their linked CritterTrack account or by manually setting them as the Owner/Breeder on an animal's Contacts fields.</p>
+                            <p>Overview shows this contact's saved details. Owned Animals lists animals recorded as owned by them; Bred Animals lists ones recorded as bred by them • matched either through their linked CritterTrack account or by manually setting them as the Owner/Breeder on an animal's Contacts fields.</p>
                         </InfoButton>
                     </h1>
                     <p className="text-gray-500">Contact Profile</p>

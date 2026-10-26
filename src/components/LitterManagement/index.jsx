@@ -610,7 +610,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 if (l.inbreedingCoefficient != null) return false; // already stored in DB
                 const cacheKey = `${l.sireId_public}:${l.damId_public}`;
                 if (coiCacheRef.current[cacheKey] != null) {
-                    // Already computed this session — patch state immediately, no API call
+                    // Already computed this session patch state immediately, no API call
                     setLitters(prev => prev.map(x => x._id === l._id ? { ...x, inbreedingCoefficient: coiCacheRef.current[cacheKey] } : x));
                     return false;
                 }
@@ -684,7 +684,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             setMyAnimalsLoaded(true);
             
             // Start COI calculations in background without blocking.
-            // Guarded on having a token AND on not having already fetched this exact set —
+            // Guarded on having a token AND on not having already fetched this exact set
             // fetchMyAnimals is called from 8 places, so without this every call re-issued
             // one COI request per animal, producing an N+1 request storm (and a burst of
             // pointless 401s once the session/token was gone).
@@ -750,7 +750,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             // Small delay to allow React to process state updates
             await new Promise(resolve => setTimeout(resolve, 100));
             // Other mounted components (e.g. AnimalList's reproNeedsAttentionList) keep their own
-            // stale litters snapshot until told to refetch — without this, the "mating due today"
+            // stale litters snapshot until told to refetch without this, the "mating due today"
             // reminder there would keep showing since it only re-fetches on 'animals-changed'.
             window.dispatchEvent(new Event('animals-changed'));
         } catch (err) {
@@ -809,7 +809,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         }
     };
 
-    // Explicit "Wean Today" action — weaningConfirmed is only ever set here, so recording/
+    // Explicit "Wean Today" action weaningConfirmed is only ever set here, so recording/
     // correcting a plain weaningDate elsewhere never ends nursing on its own.
     const handleMarkAsWeaned = async (litter) => {
         const today = new Date().toISOString().split('T')[0];
@@ -834,13 +834,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
-    // Rule 1: gender sum > total — bump total (silent)
-    // Rule 2: stillborn, losses, or weaned > total — warn, do NOT auto-correct
+    // Rule 1: gender sum > total bump total (silent)
+    // Rule 2: stillborn, losses, or weaned > total warn, do NOT auto-correct
     const reconcileLitterFormCounts = (fd, linkedAnimals = []) => {
         const linkedMales   = linkedAnimals.filter(a => a.gender === 'Male').length;
         const linkedFemales = linkedAnimals.filter(a => a.gender === 'Female').length;
         const linkedUnknown = linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
-        // Always keep manual entries — only enforce minimum equal to linked count
+        // Always keep manual entries only enforce minimum equal to linked count
         const maleCount    = Math.max(parseInt(fd.maleCount)    || 0, linkedMales);
         const femaleCount  = Math.max(parseInt(fd.femaleCount)  || 0, linkedFemales);
         const unknownCount = Math.max(parseInt(fd.unknownCount) || 0, linkedUnknown);
@@ -880,7 +880,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         }
 
         try {
-            // Get parent details — fall back to cached selected animals for global (non-owned) ones
+            // Get parent details fall back to cached selected animals for global (non-owned) ones
             const sire = myAnimals.find(a => a.id_public === formData.sireId_public) || selectedSireAnimal;
             const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
 
@@ -922,7 +922,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 damId_public: formData.damId_public,
                 birthDate: formData.birthDate || null,
                 birthDateUnknown: !!formData.birthDateUnknown,
-                // Status follows the dates (planned / mated / born) — see utils/litterStatus.js
+                // Status follows the dates (planned / mated / born) see utils/litterStatus.js
                 ...litterStatusPatch(formData, null),
                 notes: formData.notes || '',
                 offspringIds_public: formData.linkedOffspringIds || [],
@@ -986,8 +986,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
             const litterId = litterResponse.data.litterId_backend;
 
-            // Litter was created with a birth date already recorded — dam transitions to nursing
-            // Only a real birth date starts nursing — "born, birth date unknown" never does.
+            // Litter was created with a birth date already recorded dam transitions to nursing
+            // Only a real birth date starts nursing "born, birth date unknown" never does.
             if (formData.birthDate) {
                 syncDamPostBirth(formData.damId_public);
             }
@@ -1008,7 +1008,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 setPendingLitterImages([]);
             }
 
-            // Optimistic update — add new litter to state immediately so it shows without waiting for refetch
+            // Optimistic update add new litter to state immediately so it shows without waiting for refetch
             setLitters(prev => [litterResponse.data, ...prev]);
 
             // Calculate inbreeding coefficient in the background (non-blocking)
@@ -1137,7 +1137,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         }
 
         try {
-            // Use already-loaded myAnimals — no network call needed
+            // Use already-loaded myAnimals no network call needed
             const linkedIds = litter.offspringIds_public || [];
             
             const matching = myAnimals.filter(animal => {
@@ -1165,7 +1165,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             const addedAnimal = availableToLink.animals.find(a => a.id_public === animalId);
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...(addedAnimal ? [addedAnimal] : [])];
-            // Only bump total born if linked count exceeds stored value — never touch gender counts
+            // Only bump total born if linked count exceeds stored value never touch gender counts
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             // Update the litter's offspring list
@@ -1220,7 +1220,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             const updatedOffspringIds = [...(litter.offspringIds_public || []), ...animalIdsToAdd];
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...availableToLink.animals];
-            // Only bump total born if linked count exceeds stored value — never touch gender counts
+            // Only bump total born if linked count exceeds stored value never touch gender counts
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             await apiClient.put(`/litters/${litter._id}`, {
@@ -1253,11 +1253,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
     };
 
     const handleUnlinkOffspring = async (litter, animalId_public) => {
-        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted — only the link to this litter will be removed.')) return;
+        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted • only the link to this litter will be removed.')) return;
         try {
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
-            // Only update the link list — never modify gender counts or total born on unlink
+            // Only update the link list never modify gender counts or total born on unlink
             await apiClient.put(`/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
             });
@@ -1357,7 +1357,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         </InfoButton>
     );
 
-    // (birth-date / "born, date unknown" helpers were inlined — photos no longer gate on them,
+    // (birth-date / "born, date unknown" helpers were inlined photos no longer gate on them,
     // so the formIsBorn flag was removed.)
     const editingOriginal = editingLitter ? (litters.find((l) => l._id === editingLitter) || null) : null;
 
@@ -1530,10 +1530,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             maleLosses: litter.maleLossesCount || null,
             femaleLosses: litter.femaleLossesCount || null,
             unknownLosses: litter.unknownLossesCount || null,
-            // Cull tracking — restore the flag and amount so the checkbox and field persist
+            // Cull tracking restore the flag and amount so the checkbox and field persist
             hasCulls: !!litter.hasCulls,
             cullsCount: (litter.hasCulls ? (litter.cullsCount ?? null) : null),
-            // Extraction flags — restore so the checkboxes persist across edits and
+            // Extraction flags restore so the checkboxes persist across edits and
             // reflect how the stored M/F/U counts were derived.
             extractStillbornFromTotal: !!litter.extractStillbornFromTotal,
             extractLossesFromTotal: !!litter.extractLossesFromTotal,
@@ -1616,7 +1616,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         }
 
         try {
-            // Get parent details — fall back to cached selected animals for global (non-owned) ones
+            // Get parent details fall back to cached selected animals for global (non-owned) ones
             const sire = myAnimals.find(a => a.id_public === formData.sireId_public) || selectedSireAnimal;
             const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
             const offspringSpecies = sire?.species || dam?.species || formData.species || '';
@@ -1664,7 +1664,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 if (!proceed) return;
             }
 
-            // Detect a first-time birth recording (no birthDate previously — one now) so we
+            // Detect a first-time birth recording (no birthDate previously one now) so we
             // can auto-transition the dam from Pregnant -> Nursing after the litter save succeeds.
             const originalLitter = litters.find(l => l._id === editingLitter);
             const isNewBirth = !!formData.birthDate && !originalLitter?.birthDate;
@@ -1715,17 +1715,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 pregnancyLostNotes: formData.pregnancyLost ? (formData.pregnancyLostNotes || null) : null
             });
 
-            // First-time birth recorded on this litter — dam transitions Pregnant -> Nursing
+            // First-time birth recorded on this litter dam transitions Pregnant -> Nursing
             if (isNewBirth) {
                 syncDamPostBirth(formData.damId_public);
             }
-            // Backend recomputes isNursing from weaningConfirmed on every litter save — let other
+            // Backend recomputes isNursing from weaningConfirmed on every litter save let other
             // mounted components (Reproduction tab, dashboards) refresh their own stale copies too.
             window.dispatchEvent(new Event('animals-changed'));
 
             // Update all linked offspring to have the correct parents.
             // Use allSettled so that offspring the user no longer owns (transferred/sold)
-            // don't abort the litter save — those animals are skipped silently.
+            // don't abort the litter save those animals are skipped silently.
             const linkedOffspringIds = formData.linkedOffspringIds || [];
             if (linkedOffspringIds.length > 0) {
                 const parentPatch = { sireId_public: formData.sireId_public || null, damId_public: formData.damId_public || null };
@@ -1802,7 +1802,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
             const newAnimalId = response.data.id_public;
 
-            // Calculate inbreeding coefficient in the background — don't block the save
+            // Calculate inbreeding coefficient in the background don't block the save
             apiClient.get(`/animals/${newAnimalId}/inbreeding`, {
                 params: { generations: 50 }
             }).catch(() => {});
@@ -1851,7 +1851,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         uniqueYears.sort((a, b) => b - a);
         return uniqueYears;
     }, [litters]);
-    // Species actually present among current litters (via sire, falling back to dam) — keeps the
+    // Species actually present among current litters (via sire, falling back to dam) keeps the
     // filter dropdown from listing species the user has no litters for.
     const availableSpeciesInLitters = useMemo(() => {
         const speciesSet = new Set();
@@ -1969,7 +1969,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                     </InfoButton>
                 </h2>
                 <div className="flex gap-2 flex-nowrap items-center shrink-0">
-                    {/* Auto-calculation switches — desktop: left of the refresh / + Mating / + Litter buttons
+                    {/* Auto-calculation switches desktop: left of the refresh / + Mating / + Litter buttons
                         (on mobile they stay in the stats row below) */}
                     {autoCalcAvailable && (
                         <div className="hidden sm:flex flex-row items-center gap-4 mr-2 text-sm">
@@ -1980,7 +1980,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                 <label
                                     key={key}
                                     className="flex items-center gap-1.5 cursor-pointer select-none whitespace-nowrap"
-                                    title={`${hint} ${on ? 'On' : 'Off'} — dates you type yourself are never overwritten.`}
+                                    title={`${hint} ${on ? 'On' : 'Off'} • dates you type yourself are never overwritten.`}
                                 >
                                     <input
                                         type="checkbox"
@@ -2002,7 +2002,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
-                    {/* Single + Add button — one form covers planned, mated and born entries */}
+                    {/* Single + Add button one form covers planned, mated and born entries */}
                     <button
                         onClick={() => {
                             if (showAddForm) { setShowAddForm(false); setEditingLitter(null); }
@@ -2033,7 +2033,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> <span className="sm:hidden" title="Females">F</span><span className="hidden sm:inline">Females</span></span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-2 sm:pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> <span className="sm:hidden" title="Unknown">U</span><span className="hidden sm:inline">Unknown</span></span>
                 {autoCalcAvailable && (
-                    <div className="sm:hidden basis-full flex flex-wrap items-center gap-x-4 gap-y-1 mt-1"> {/* mobile only — desktop uses the header copy beside the buttons */}
+                    <div className="sm:hidden basis-full flex flex-wrap items-center gap-x-4 gap-y-1 mt-1"> {/* mobile only • desktop uses the header copy beside the buttons */}
                         {[
                             { key: 'autoCalcDueDate', label: 'Auto due date', on: autoCalcDueDate, hint: 'Fills the expected due date from the mating date and species.' },
                             { key: 'autoCalcWeaningDate', label: 'Auto weaning date', on: autoCalcWeaningDate, hint: 'Fills the weaning date from the birth date and species.' },
@@ -2041,7 +2041,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                             <label
                                 key={key}
                                 className="flex items-center gap-1.5 cursor-pointer select-none"
-                                title={`${hint} ${on ? 'On' : 'Off'} — dates you type yourself are never overwritten.`}
+                                title={`${hint} ${on ? 'On' : 'Off'} • dates you type yourself are never overwritten.`}
                             >
                                 <input
                                     type="checkbox"
@@ -2252,7 +2252,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                             <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
                                                                                 <Info size={14} className="flex-shrink-0 mt-0.5" />
                                                                                 <span>
-                                                                                    Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
+                                                                                    Sire and dam are from different breeding lines • Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
                                                                                 </span>
                                                                             </div>
                                                                         );
@@ -2270,7 +2270,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                     </p>
                                 )}
 
-                                {/* Dates — planned/actual mating, due, birth, weaning. Status follows these dates. */}
+                                {/* Dates planned/actual mating, due, birth, weaning. Status follows these dates. */}
                                 <div className="p-4 border border-indigo-200 dark:border-indigo-800/40 rounded-lg bg-indigo-50 dark:bg-indigo-900/20" data-tutorial-target="litter-dates-counts">
                                     <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-1 flex items-center">
                                         <Calendar size={18} className="inline-block align-middle text-indigo-600 mr-2 flex-shrink-0" />Dates
@@ -2294,7 +2294,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                         {/* Expected due date */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Expected Due Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional — shows on calendar)</span>
+                                                Expected Due Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional • shows on calendar)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.expectedDueDate || ''}
@@ -2328,14 +2328,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                 Born, but I don't know the birth date
                                             </label>
                                             {formData.birthDateUnknown && (
-                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Saved as born today — nursing and reminders count from the day you save.</p>
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Saved as born today • nursing and reminders count from the day you save.</p>
                                             )}
                                         </div>
 
                                         {/* Weaning date + confirm weaning */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
-                                                Weaning Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional — shows on calendar)</span>
+                                                Weaning Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional • shows on calendar)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.weaningDate || ''}
@@ -2433,7 +2433,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                     </select>
                                                 </div>
                                             </div>
-                                            {/* Pregnancy lost — only for mated entries that have no birth yet */}
+                                            {/* Pregnancy lost only for mated entries that have no birth yet */}
                                                                 {formData.matingDate && !formData.birthDate && !formData.birthDateUnknown && (
                                                                     <div className="mt-4">
                                                                         <label className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition">
@@ -2588,7 +2588,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                     placeholder="0"
                                                     min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
                                                 />
-                                                {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
+                                                {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked • can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
                                             </div>
     
                                             {/* Female Count */}
@@ -2607,7 +2607,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                     placeholder="0"
                                                     min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
                                                 />
-                                                {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
+                                                {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked • can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
                                             </div>
     
                                             {/* Unknown/Intersex Count */}
@@ -2626,7 +2626,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                     placeholder="0"
                                                     min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length || 0}
                                                 />
-                                                {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lu} unknown linked</p>) : null; })()}
+                                                {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked • can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lu} unknown linked</p>) : null; })()}
                                             </div>
                                         </div>
     
@@ -3169,7 +3169,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                             <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
                                                                             <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
                                                                         </h4>
-                                                                        {/* Photos can be attached at any stage — planned, mated or born. */}
+                                                                        {/* Photos can be attached at any stage planned, mated or born. */}
 
                                                                         {/* Thumbnail grid */}
                                                                         {editingLitter ? (
@@ -3393,8 +3393,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                         const isPregnant = hasPregnancy && !hasBirth && !isBornUnknown;
                         const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth && !isBornUnknown;
                         // Mirror the Reproduction tab: rely on the dam's isNursing flag, which the backend
-                        // already recomputes using each species' maxNursingDays safety-net cutoff — not just
-                        // weaningConfirmed — so a litter past that window stops showing as nursing here too.
+                        // already recomputes using each species' maxNursingDays safety-net cutoff not just
+                        // weaningConfirmed so a litter past that window stops showing as nursing here too.
                         const isNursing = hasBirth && (dam ? !!dam.isNursing : !litter.weaningConfirmed);
                         
                         return (
@@ -3404,11 +3404,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80 dark:hover:bg-dark-surface-hover/60"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
-                                    {/* Public profile toggle — before litter name */}
+                                    {/* Public profile toggle before litter name */}
                                     <button
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
-                                        title={litter.isDisplayLitter ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
+                                        title={litter.isDisplayLitter ? 'Shown on public profile • click to hide' : 'Hidden from public profile • click to show'}
                                         className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.isDisplayLitter ? 'text-green-500 hover:text-green-600' : 'text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary'}`}
                                     >
                                         {litter.isDisplayLitter ? <Eye size={15} /> : <EyeOff size={15} />}
@@ -3460,7 +3460,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                         <div className="min-w-0">
                                             {litter.litter_id_public
                                                 ? <span className="text-xs font-mono bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded text-purple-700 dark:text-purple-300 block mb-0.5 w-fit">{litter.litter_id_public}</span>
-                                                : <span className="text-xs text-gray-400 dark:text-dark-text-muted">—</span>}
+                                                : <span className="text-xs text-gray-400 dark:text-dark-text-muted">•</span>}
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
@@ -3469,17 +3469,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                 ? <span className="text-xs font-semibold text-pink-600 dark:text-pink-400"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
                                                 : isBornUnknown
                                                 ? <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Born · date unknown</span>
-                                                : <span className="text-xs text-gray-500 dark:text-dark-text-muted">{formatDate(litter.birthDate) || '—'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}</span>}
+                                                : <span className="text-xs text-gray-500 dark:text-dark-text-muted">{formatDate(litter.birthDate) || '•'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
                                         <div className="min-w-0">
                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Sire</span>
-                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (litter.sireId_public || '—')}</span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (litter.sireId_public || '•')}</span>
                                         </div>
                                         {/* Col 4: Dam */}
                                         <div className="min-w-0">
                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Dam</span>
-                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (litter.damId_public || '—')}</span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (litter.damId_public || '•')}</span>
                                         </div>
                                         {/* Col 5: COI */}
                                         <div>
@@ -3487,7 +3487,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                             {coiCalculating.has(litter._id)
                                                 ? <span className="inline-block w-10 h-3 bg-gray-200 dark:bg-dark-card-bg rounded animate-pulse mt-0.5" />
                                                 : <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
-                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}
+                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '•'}
                                                   </span>}
                                         </div>
                                         {/* Col 6: Born with M/F/U */}
@@ -3661,7 +3661,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                             ? <div className="w-14 h-5 bg-gray-200 dark:bg-dark-card-bg rounded animate-pulse" />
                                                             : litter.inbreedingCoefficient != null
                                                                 ? <div className="text-base font-medium text-gray-800 dark:text-dark-text">{litter.inbreedingCoefficient.toFixed(2)}%</div>
-                                                                : <div className="text-base font-medium text-gray-300 dark:text-dark-text-muted">—</div>}
+                                                                : <div className="text-base font-medium text-gray-300 dark:text-dark-text-muted">•</div>}
                                                     </div>
                                                     {/* Dam */}
                                                     {dam ? (

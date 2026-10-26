@@ -89,7 +89,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             showModalMessage('Rejected', 'Request rejected and link removed');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
-            // Reject clears breederId_public/sireId_public/damId_public on the animal —
+            // Reject clears breederId_public/sireId_public/damId_public on the animal
             // bust cached animal lists/open modals so they stop showing the stale assignment.
             window.dispatchEvent(new Event('animals-changed'));
         } catch (error) {
@@ -309,7 +309,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         <button
                                                             onClick={() => handleApprove(notification._id)}
                                                             disabled={processing === notification._id}
-                                                            title="The link is already in effect — this just clears it from your pending list."
+                                                            title="The link is already in effect • this just clears it from your pending list."
                                                             className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
                                                         >
                                                             <CheckCircle size={14} />
@@ -416,6 +416,6 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     );
 };
 
-// ParentCard component — used in animal detail view
+// ParentCard component used in animal detail view
 
 export default NotificationPanel;

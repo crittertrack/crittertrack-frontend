@@ -200,7 +200,7 @@ const ResourcesPage = ({ API_BASE_URL, authToken }) => {
                 />
             </div>
 
-            {/* Species typeahead filter — a plain dropdown doesn't scale to 100+ species */}
+            {/* Species typeahead filter a plain dropdown doesn't scale to 100+ species */}
             <div className="relative mb-3">
                 <input
                     type="text"

@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 
 // Text input + dropdown hybrid ("combobox"): lets the user pick an existing option OR type a
 // brand-new value that isn't in the list yet (ZooEasy-style appearance field pattern). The
-// caller is responsible for persisting new values (e.g. on animal save) — this component only
+// caller is responsible for persisting new values (e.g. on animal save) this component only
 // handles the picking/typing UI, it never calls any API itself.
 const ComboBoxField = ({ value, onChange, options = [], placeholder = '', className = '', id, name }) => {
     const [open, setOpen] = useState(false);
