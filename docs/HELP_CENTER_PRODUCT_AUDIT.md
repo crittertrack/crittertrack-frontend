@@ -79,7 +79,7 @@ Capacitor-based Android app.
 | Surface | User-facing capabilities and actions/options |
 |---|---|
 | Own profile/settings | Edit name, image, website/social links, bio, country/location and public profile information; save/cancel. Profile data and account preferences are separate from animal visibility. |
-| Settings tabs | Profile; Info & Adoption; Directory; Ratings; Breeding Lines; Dropdown Lists; Data Portability; Account. Options include directory participation, editable breeding-line definitions/assignments, custom dropdown values, import/export, and account/security/notification preferences, subject to each tab's actual controls. |
+| Settings tabs | Profile; Info & Adoption; Breeder Settings; Ratings; Breeding Lines; Dropdown Lists; Data Portability; Account. Options include directory participation, editable breeding-line definitions/assignments, custom dropdown values, import/export, and account/security/notification preferences, subject to each tab's actual controls. |
 | Public profile | Browse public breeder information, animals, ratings, breeding lines, and available contact/profile actions. Only fields shared by the owner are public. |
 | Breeder directory | Find/browse breeders and open their public profile. Availability depends on profile/directory visibility. |
 | Contacts | List/search contacts; add, open, edit contacts; inspect overview and owned/bred animal groupings; preserve contacts as records distinct from the user's own animals. |

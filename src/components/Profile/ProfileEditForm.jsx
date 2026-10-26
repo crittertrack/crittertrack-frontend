@@ -888,7 +888,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 {[
                     { id: 'profile',         label: 'Profile' },
                     { id: 'info-adoption',   label: 'Info & Adoption' },
-                    { id: 'directory',       label: 'Directory' },
+                    { id: 'directory',       label: 'Breeder Settings' },
                     { id: 'ratings',         label: 'Ratings' },
                     { id: 'breeding-lines',  label: 'Breeding Lines' },
                     { id: 'appearance-options', label: 'Dropdown Lists' },
