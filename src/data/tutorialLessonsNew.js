@@ -6,7 +6,7 @@ import { LITTER_MANAGEMENT_LESSONS } from './lessons/litter_management_lessons';
 import { MORE_PAGES_LESSONS } from './lessons/more_pages_lessons';
 
 const TUTORIAL_SECTIONS = [
-  { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS },
+  { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS }, // updated
   { id: 'animal-record-tour', label: '🐾 The Animal Record: A Tab-by-Tab Tour', lessons: ANIMAL_RECORD_TAB_LESSONS },
   { id: 'animal-list-tour', label: '📋 The Animal List: A Tab-by-Tab Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
   { id: 'settings-tour', label: '⚙️ Profile & Settings: A Tab-by-Tab Tour', lessons: SETTINGS_TAB_LESSONS },
