@@ -184,7 +184,7 @@ const aggregateAnimalTimelineEvents = (animal, animalLogs) => {
                     type: 'health',
                     date: med.startDate,
                     title: `Medication Started: ${med.name || 'Medication'}`,
-                    description: [med.reason, med.dose ? `Dose: ${med.dose}` : null].filter(Boolean).join(' — ') || 'Medication started'
+                    description: [med.reason, med.dose ? `Dose: ${med.dose}` : null].filter(Boolean).join(' ✗ ') || 'Medication started'
                 });
             }
             (med.administrations || []).forEach((admin, aIdx) => {
@@ -476,7 +476,7 @@ export const useAnimalTimelineEvents = (animal, API_BASE_URL, authToken) => {
     const [animalLogs, setAnimalLogs] = useState([]);
 
     useEffect(() => {
-        // Skip entirely for guest/unauthenticated views (public marketplace pages) — the
+        // Skip entirely for guest/unauthenticated views (public marketplace pages) the
         // endpoint requires a valid token anyway, so this avoids a guaranteed 401 on every load.
         if (!animal?.id_public || !API_BASE_URL || !authToken) return;
         let cancelled = false;

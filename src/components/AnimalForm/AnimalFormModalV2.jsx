@@ -412,7 +412,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
         setPreviewError(false);
         if (files.length > currentIndex && imgRef.current) {
             // createObjectURL avoids base64-encoding the whole file (readAsDataURL adds ~33%
-            // overhead) — matters a lot for the large multi-MB photos modern phone cameras produce.
+            // overhead) matters a lot for the large multi-MB photos modern phone cameras produce.
             const objectUrl = URL.createObjectURL(files[currentIndex]);
             imgRef.current.src = objectUrl;
             setRotation(0);
@@ -574,7 +574,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             }
         } catch (error) {
             console.error('Image processing error:', error);
-            setFileSizeWarning("Couldn't process this photo (unsupported or corrupted file) — try Skip or pick a different photo.");
+            setFileSizeWarning("Couldn't process this photo (unsupported or corrupted file) • try Skip or pick a different photo.");
         } finally {
             setProcessing(false);
         }
@@ -721,7 +721,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                             <div className="text-center px-4">
                                 <AlertTriangle size={28} className="mx-auto text-amber-500 mb-2" />
                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
-                                    Couldn't load a preview for this photo — it may be too large or an unsupported format. Try Skip or pick a different photo.
+                                    Couldn't load a preview for this photo • it may be too large or an unsupported format. Try Skip or pick a different photo.
                                 </p>
                             </div>
                         )}
@@ -1337,13 +1337,13 @@ const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
     );
 };
 
-// Suggestions only (datalist) — task name stays free-text since this app supports any species.
+// Suggestions only (datalist) task name stays free-text since this app supports any species.
 // Note: Nail/Hoof/Beak/Claw Trim, Bathing, Coat Brushing, Shedding/Molt Check, Shell Care/Scrubbing,
 // and Dental/Incisor Check are now covered by dedicated Grooming/Bathing/Brushing/Specialized Care schedules above.
 const CARE_TASK_SUGGESTIONS = ['Feather Care', 'Ear Cleaning', 'Weigh-In / Body Condition Check', 'Litter Box / Bedding Spot-Change', 'Handling / Socialization Session'];
 
 // Optional recurring schedule control for a single, dedicated (individually-tracked) care/training item.
-// value shape: { lastDoneDate, frequencyDays }. Only frequencyDays is editable here — lastDoneDate is
+// value shape: { lastDoneDate, frequencyDays }. Only frequencyDays is editable here lastDoneDate is
 // set via "Mark Done" actions in the Feeding & Care management view.
 const ScheduleFieldControl = ({ label, value, onChange }) => {
     const frequencyDays = value?.frequencyDays ?? '';
@@ -1358,7 +1358,7 @@ const ScheduleFieldControl = ({ label, value, onChange }) => {
                 className="w-28 py-1 px-2 text-xs border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
             />
             <span className="text-xs text-gray-400 dark:text-dark-text-muted">
-                {lastDoneDate ? `Last done ${formatDate(lastDoneDate)}` : 'Not started — mark done in Feeding & Care'}
+                {lastDoneDate ? `Last done ${formatDate(lastDoneDate)}` : 'Not started ✗ mark done in Feeding & Care'}
             </span>
         </div>
     );
@@ -1385,7 +1385,7 @@ const AnimalFormModalV2 = ({
     submitIcon,
     // Optional: when provided, shows a second submit button that saves the current
     // animal but keeps the (blank, re-templated) form open for adding another instead
-    // of closing — used by the "Add Sibling" flow to add a whole litter at once.
+    // of closing used by the "Add Sibling" flow to add a whole litter at once.
     onSaveAndAddAnother,
     addAnotherLabel = 'Save & Add Another',
     // Optional: called with (species, { tabs, sections }) right after a Customize-tab hidden
@@ -1400,7 +1400,7 @@ const AnimalFormModalV2 = ({
     const [loading, setLoading] = useState(false);
     // Tracks which footer submit button triggered this submission ('close' | 'addAnother').
     const submitModeRef = useRef('close');
-    // Per-species hidden tabs/sections (Customize tab) — declutters this form only, never the read-only view.
+    // Per-species hidden tabs/sections (Customize tab) declutters this form only, never the read-only view.
     const [hiddenFormSections, setHiddenFormSections] = useState(() => {
         const stored = userProfile?.uiPreferences?.hiddenFormSections?.[species];
         return { tabs: stored?.tabs || [], sections: stored?.sections || [] };
@@ -1456,7 +1456,7 @@ const AnimalFormModalV2 = ({
     }, [activeTab]);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
-    // Contact _id behind a breeder/owner selection with no linked CTUID — a manual contact can't be
+    // Contact _id behind a breeder/owner selection with no linked CTUID a manual contact can't be
     // matched automatically by CTUID, so this is used to record the assignment on the Contact itself.
     const [breederContactId, setBreederContactId] = useState(null);
     const [ownerContactId, setOwnerContactId] = useState(null);
@@ -2053,7 +2053,7 @@ const AnimalFormModalV2 = ({
         }
     };
 
-    // Live preview of the health status pill while editing — mirrors the same formula the
+    // Live preview of the health status pill while editing mirrors the same formula the
     // backend persists on save (see utils/healthStatusSync.js's computeHealthStatus).
     const calculateHealthStatus = () => calculateHealthStatusShared({ ...formData, healthStatusOverride });
 
@@ -2768,7 +2768,7 @@ const AnimalFormModalV2 = ({
     );
 
     // Snapshot of formData as it was built at mount time (before any user edits), run through the
-    // exact same defaulting/normalization above the animalToEdit raw doc did — used by the admin
+    // exact same defaulting/normalization above the animalToEdit raw doc did used by the admin
     // "Confirm Changes" diff so it compares like-for-like instead of transformed-payload-vs-raw-doc
     // (which produced dozens of false-positive "changes" from date/shape reformatting alone).
     const initialFormDataRef = useRef(formData);
@@ -2946,7 +2946,7 @@ const AnimalFormModalV2 = ({
         const input = e.target;
         if (input.files && input.files.length > 0) {
             // Copy the picked files into memory while the picker's permission grant is still
-            // live — see utils/pickedFiles.js. Keeping the raw handles is what made most phone
+            // live see utils/pickedFiles.js. Keeping the raw handles is what made most phone
             // photos unreadable in the editor ("Couldn't load a preview for this photo...")
             // even though they were perfectly normal, small .jpg files.
             const filesArray = await readFilesIntoMemory(Array.from(input.files));
@@ -2989,7 +2989,7 @@ const AnimalFormModalV2 = ({
         setFormData(prev => {
             const updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
             if (name === 'deceasedDate' && value && !isDeadStatus(prev.status)) {
-                // Don't clobber 'Culled' — the same deceasedDate field backs both dead statuses.
+                // Don't clobber 'Culled' the same deceasedDate field backs both dead statuses.
                 updated.status = 'Deceased';
             }
             return updated;
@@ -3005,7 +3005,7 @@ const AnimalFormModalV2 = ({
         }
     };
 
-    // "Seed to Appearance" — copies the genetics-derived phenotype breakdown (color/markings/
+    // "Seed to Appearance" copies the genetics-derived phenotype breakdown (color/markings/
     // coat/body/earset/carrierTraits) from GeneticCodeBuilder into the Appearance tab's fields.
     // Only fields with an actual derived value are touched (never blanks out a field the
     // genetics engine has no opinion on). Confirms once if any target field already has a value.
@@ -3178,7 +3178,7 @@ const AnimalFormModalV2 = ({
             // treatmentDetails period.
             (parseJsonArrayField(formData.medications) || []).forEach((med, idx) => {
                 if (!med) return;
-                if (med.startDate) addEvent('health', med.startDate, `Medication Started: ${med.name || 'Medication'}`, [med.reason, med.dose ? `Dose: ${med.dose}` : null].filter(Boolean).join(' — ') || 'Medication started', `med-start-${med.id || idx}-${med.startDate}`);
+                if (med.startDate) addEvent('health', med.startDate, `Medication Started: ${med.name || 'Medication'}`, [med.reason, med.dose ? `Dose: ${med.dose}` : null].filter(Boolean).join(' ✗ ') || 'Medication started', `med-start-${med.id || idx}-${med.startDate}`);
                 (med.administrations || []).forEach((admin, aIdx) => {
                     if (admin?.date) addEvent('health', admin.date, `Treatment Performed: ${med.name || 'Medication'}`, med.dose ? `Dose administered: ${med.dose}` : 'Scheduled dose administered', `med-admin-${med.id || idx}-${aIdx}-${admin.date}`);
                 });
@@ -3373,8 +3373,8 @@ const AnimalFormModalV2 = ({
     const mpCapitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
     const mpHasSlotValue = (entry) => !!entry && (entry.ctcId || Object.entries(entry).some(([k, v]) => k !== 'mode' && v && String(v).trim()));
     // When the registered-link (CTC) chain runs out at `cur` (occupying `curSlotKey` in the
-    // offspring's tree), fall back to `cur`'s own manually-typed (unregistered) ancestors —
-    // stored in cur.manualPedigree — remapped one generation down onto the offspring's tree.
+    // offspring's tree), fall back to `cur`'s own manually-typed (unregistered) ancestors
+    // stored in cur.manualPedigree remapped one generation down onto the offspring's tree.
     // e.g. cur.manualPedigree.sire (cur's father) -> offspring's `${curSlotKey}Sire` slot.
     const mpMergeManualDescendants = (cur, curSlotKey, updates) => {
         const curMP = cur?.manualPedigree;
@@ -3398,12 +3398,12 @@ const AnimalFormModalV2 = ({
             const motherId = cur.damId_public;
             if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
             if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
-            // Registered link missing for one/both sides — inherit any manually-typed ancestors
+            // Registered link missing for one/both sides inherit any manually-typed ancestors
             // `cur` already has recorded on its own Pedigree tab, so they aren't lost on offspring.
             mpMergeManualDescendants(cur, slot, updates);
         }
         setMpEditForm(f => ({ ...f, ...updates }));
-        // Gen-1 sire/dam slots are the real parent relationship, not just pedigree-display data —
+        // Gen-1 sire/dam slots are the real parent relationship, not just pedigree-display data
         // keep sireId_public/damId_public in sync so the Dashboard parent cards reflect it too.
         if (slotKey === 'sire') setFormData(f => ({ ...f, sireId_public: a.id_public }));
         if (slotKey === 'dam') setFormData(f => ({ ...f, damId_public: a.id_public }));
@@ -3606,7 +3606,7 @@ const AnimalFormModalV2 = ({
         }
 
         const method = animalToEdit ? 'put' : 'post';
-        // Relative path only — onSave (handleSaveAnimal) calls apiClient, whose baseURL already
+        // Relative path only onSave (handleSaveAnimal) calls apiClient, whose baseURL already
         // includes API_BASE_URL, so prefixing it here too caused a double /api/api/... 404.
         const url = animalToEdit ? `/animals/${animalToEdit.id_public}` : `/animals`;
 
@@ -3643,7 +3643,7 @@ const AnimalFormModalV2 = ({
 
             // isPlannedMating/isInMating/isPregnant/isNursing are auto-computed from Litter records
             // (see reproStatusSync.js) and must not be resent from this form's stale load-time
-            // snapshot on every unrelated save — that silently clobbers the litter-synced truth.
+            // snapshot on every unrelated save that silently clobbers the litter-synced truth.
             // Only send them when the user explicitly enabled the Manual Override in the Breeding tab.
             if (!reproductiveStateOverride) {
                 delete payloadToSave.isPlannedMating;
@@ -3653,12 +3653,12 @@ const AnimalFormModalV2 = ({
             }
 
             // isQuarantine is derived from quarantineDetails' status + start/end dates; isInTreatment
-            // is derived from active medications/critical conditions (see medicalStatus.js) — neither
+            // is derived from active medications/critical conditions (see medicalStatus.js) neither
             // is set directly. The backend recomputes both authoritatively on save regardless, but we
             // send them here too so the Health tab and AnimalList dashboards reflect the change immediately.
             payloadToSave.isQuarantine = isStatusPeriodActive(payloadToSave.quarantineDetails);
             payloadToSave.isInTreatment = computeIsInTreatment({ medications: payloadToSave.medications, medicalConditions: payloadToSave.medicalConditions });
-            // healthStatus is likewise derived (see calculateHealthStatus/computeHealthStatus) — the
+            // healthStatus is likewise derived (see calculateHealthStatus/computeHealthStatus) the
             // backend recomputes it on save, but sending it keeps the optimistic UI in sync too.
             payloadToSave.healthStatus = calculateHealthStatusShared({ ...payloadToSave, healthStatusOverride }).calculatedStatus;
 
@@ -3702,7 +3702,7 @@ const AnimalFormModalV2 = ({
             const saveResponse = await onSave(method, url, payloadForRequest, initialFormDataRef.current);
 
             // Persist any brand-new appearance values into the user's per-species dropdown
-            // lists, so they're offered as suggestions next time (fire-and-forget — never
+            // lists, so they're offered as suggestions next time (fire-and-forget never
             // blocks the save).
             APPEARANCE_DROPDOWN_FIELDS.forEach(field => {
                 const trimmedValue = formData[field]?.trim();
@@ -3717,7 +3717,7 @@ const AnimalFormModalV2 = ({
 
             // Manually-picked Contacts with no linked CTUID aren't matched automatically by CTUID,
             // so record the assignment directly on the Contact so the animal shows under their
-            // Owned/Bred Animals tabs — and fully unassign a contact that no longer holds either role.
+            // Owned/Bred Animals tabs and fully unassign a contact that no longer holds either role.
             const savedAnimalIdPublic = animalToEdit?.id_public
                 || saveResponse?.data?.animal?.id_public
                 || saveResponse?.data?.data?.id_public
@@ -3740,7 +3740,7 @@ const AnimalFormModalV2 = ({
                     } else if (isOwner) {
                         return apiClient.post(`/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'keeper' });
                     }
-                    // No longer breeder or owner for this contact — remove the assignment entirely.
+                    // No longer breeder or owner for this contact remove the assignment entirely.
                     return apiClient.delete(`/contacts/${contactId}/assign-animal/${savedAnimalIdPublic}`);
                 });
                 await Promise.all(ops.map(p => p.catch(err => console.error('[assign-animal] Failed to sync contact assignment:', err))));
@@ -3785,7 +3785,7 @@ const AnimalFormModalV2 = ({
     const isLiteForm = Array.isArray(tabsOverride);
 
     // `tabs` (optional) trims further and may relabel. Lite passes Dashboard/Gallery/Pedigree
-    // plus the health tab relabelled 'Records' — that's where the vet-visit/medication/
+    // plus the health tab relabelled 'Records' that's where the vet-visit/medication/
     // vaccination/deworming/condition/allergy editors already live, so Lite reuses them rather
     // than duplicating the UI. See LiteAnimalFormModal.jsx.
     const tabOverrides = (tabsOverride || []).map(t => (typeof t === 'string' ? { id: t } : t));
@@ -3824,7 +3824,7 @@ const AnimalFormModalV2 = ({
                             <PlusCircle size={20} className="inline mr-2 text-primary" />
                             {formTitle}
                             {ANIMAL_FORM_TAB_INFO[activeTab] && (
-                                // No lessonId here on purpose — this is an open, unsaved edit form, and the
+                                // No lessonId here on purpose this is an open, unsaved edit form, and the
                                 // Help Center link would navigate away via react-router and abandon in-progress edits.
                                 // The read-only view modals can link to the related article instead.
                                 <InfoButton title={ANIMAL_FORM_TAB_INFO[activeTab].title} className="ml-2">
@@ -4816,7 +4816,7 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
 
-                                    {/* Treatment is defined entirely by medications — an active one is what drives the "In Treatment" flag/health score. */}
+                                    {/* Treatment is defined entirely by medications an active one is what drives the "In Treatment" flag/health score. */}
                                     <div className="space-y-2 pt-3 border-t">
                                         <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Treatment</h4>
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
@@ -4937,7 +4937,7 @@ const AnimalFormModalV2 = ({
                                         {(formData.medications || []).filter(Boolean).map((rec, i) => (
                                             <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border">
                                                 <span className="flex-1 min-w-0 break-words">
-                                                    {rec.name} {rec.dose} {rec.source === 'supply' && <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">(from supply)</span>} {rec.reason && `— ${rec.reason}`} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})
+                                                    {rec.name} {rec.dose} {rec.source === 'supply' && <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">(from supply)</span>} {rec.reason && `• ${rec.reason}`} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})
                                                 </span>
                                                 <button type="button" onClick={() => removeArrayItem('medications', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
@@ -5253,7 +5253,7 @@ const AnimalFormModalV2 = ({
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Last Fed</label>
-                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500 dark:text-dark-text-muted">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
+                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500 dark:text-dark-text-muted">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never ✗ use "Fed" in the Feeding & Care tab'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -5320,7 +5320,7 @@ const AnimalFormModalV2 = ({
                                                             <div className="space-y-1">
                                                                 {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
                                                                     <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded text-xs">
-                                                                        <span>{s.name}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                        <span>{s.name}{s.quantity != null && ` • ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
                                                                         <input
                                                                             type="number"
                                                                             min="0.01"
@@ -5385,7 +5385,7 @@ const AnimalFormModalV2 = ({
                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                                             {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
                                                                 <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1 bg-blue-50 dark:bg-blue-900/20 rounded mt-1">
-                                                                    <span>{s.name}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                    <span>{s.name}{s.quantity != null && ` • ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
                                                                     <input
                                                                         type="number"
                                                                         min="0.01"
@@ -5470,7 +5470,7 @@ const AnimalFormModalV2 = ({
                                                             <div className="space-y-1">
                                                                 {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
                                                                     <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1.5 bg-purple-50 dark:bg-purple-900/20 rounded text-xs">
-                                                                        <span>{s.name} {s.dosage && `(${s.dosage})`}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                        <span>{s.name} {s.dosage && `(${s.dosage})`}{s.quantity != null && ` • ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
                                                                         <input type="number" min="0.01" step="any" aria-label={`${s.name} quantity`} value={s.quantity ?? ''} onChange={e => {
                                                                             const updated = parseJsonArrayField(formData.supplementSupplies).map((item, idx) => idx === i ? { ...item, quantity: e.target.value === '' ? undefined : Number(e.target.value) } : item);
                                                                             setFormData(prev => ({ ...prev, supplementSupplies: updated }));
@@ -5520,7 +5520,7 @@ const AnimalFormModalV2 = ({
                                                         <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                                             {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
                                                                 <div key={i} className="flex flex-wrap justify-between items-center gap-1 p-1 bg-purple-50 dark:bg-purple-900/20 rounded mt-1">
-                                                                    <span>{s.name} {s.dosage && `(${s.dosage})`}{s.quantity != null && ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
+                                                                    <span>{s.name} {s.dosage && `(${s.dosage})`}{s.quantity != null && ` • ${s.quantity}${s.unit ? ` ${s.unit}` : ''}`}</span>
                                                                     <input type="number" min="0.01" step="any" aria-label={`${s.name} quantity`} value={s.quantity ?? ''} onChange={e => {
                                                                         const updated = parseJsonArrayField(formData.supplementSupplies).map((item, idx) => idx === i ? { ...item, quantity: e.target.value === '' ? undefined : Number(e.target.value) } : item);
                                                                         setFormData(prev => ({ ...prev, supplementSupplies: updated }));
@@ -5769,7 +5769,7 @@ const AnimalFormModalV2 = ({
                                 </FormSection>
                                 )}
 
-                                {/* Animal Care Tasks (direct, hands-on animal upkeep — shown in Scheduled Care section of the management view) */}
+                                {/* Animal Care Tasks (direct, hands-on animal upkeep shown in Scheduled Care section of the management view) */}
                                 {!isSectionHidden('care', 'animalCareTasks') && (
                                 <FormSection title="Animal Care Tasks" icon={<CheckSquare size={16} />}>
                                     <div className="space-y-3">
@@ -5780,7 +5780,7 @@ const AnimalFormModalV2 = ({
                                         {/* Add New Animal-Specific Care Task */}
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Add Animal Care Task</h4>
-                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">Direct, hands-on care done to the animal (not feeding, not medical) — shown in the "Scheduled Care" section of the Feeding & Care management view.</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">Direct, hands-on care done to the animal (not feeding, not medical) • shown in the "Scheduled Care" section of the Feeding & Care management view.</p>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 <input type="text" list="care-task-suggestions" value={newAnimalCareTaskName} onChange={e => setNewAnimalCareTaskName(e.target.value)} placeholder="Task name (e.g., Nail trim, Weigh-in)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                 <input type="number" min="1" value={newAnimalCareTaskFreq} onChange={e => setNewAnimalCareTaskFreq(e.target.value)} placeholder="Frequency (days)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
@@ -5918,7 +5918,7 @@ const AnimalFormModalV2 = ({
 
                                 {!isSectionHidden('behavior', 'trainingSchedules') && (
                                 <FormSection title="Training Schedules" icon={<Brain size={16} />}>
-                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted -mt-1">Optional recurring schedules for training/exercise activities — each tracked independently and shown clustered in the Feeding & Care management view.</p>
+                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted -mt-1">Optional recurring schedules for training/exercise activities • each tracked independently and shown clustered in the Feeding & Care management view.</p>
                                     <div className="space-y-3">
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Daily Exercise</h4>
@@ -6321,7 +6321,7 @@ const AnimalFormModalV2 = ({
                                     <div className="p-2 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
                                         <AlertTriangle size={16} className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                                         <p className="text-xs text-red-800 dark:text-red-300 leading-snug">
-                                            <span className="font-bold uppercase">Manual note only</span> — does <b>NOT</b> create a Litter, link offspring, or affect pedigree/COI. Use <b>Litter Management</b> to record a real litter.
+                                            <span className="font-bold uppercase">Manual note only</span> • does <b>NOT</b> create a Litter, link offspring, or affect pedigree/COI. Use <b>Litter Management</b> to record a real litter.
                                         </p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -6374,7 +6374,7 @@ const AnimalFormModalV2 = ({
                             </div>
                         )}
                         {activeTab === 'pedigree' && (() => {
-                            // CTC selector modal — always rendered so it works regardless of activeTab
+                            // CTC selector modal always rendered so it works regardless of activeTab
                             const ctcModal = mpCTCOpenSlot ? (
                                 <ParentSearchModal
                                     title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
@@ -6435,7 +6435,7 @@ const AnimalFormModalV2 = ({
                                                         {d.genCode && <p className="text-[10px] font-mono text-gray-500 dark:text-dark-text-muted truncate">{d.genCode}</p>}
                                                     </div>
                                                 </div>
-                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted">Previously entered by hand. Kept for reference — no longer editable. Create a CritterTrack animal to link a real ancestor.</p>
+                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted">Previously entered by hand. Kept for reference • no longer editable. Create a CritterTrack animal to link a real ancestor.</p>
                                             </div>
                                         ) : isCTC ? (
                                             d.ctcId ? (
@@ -6489,7 +6489,7 @@ const AnimalFormModalV2 = ({
                                                             if (!file) return;
                                                             setMpSlotUploading(p => ({ ...p, [slotKey]: true }));
                                                             try {
-                                                                // Copy into memory first — phone pickers hand back one-shot content://
+                                                                // Copy into memory first phone pickers hand back one-shot content://
                                                                 // streams that can die before the upload reads them (see utils/pickedFiles.js).
                                                                 const [pickedFile] = await readFilesIntoMemory([file]);
                                                                 // Simplified image compression - using standard fetch
@@ -6517,13 +6517,13 @@ const AnimalFormModalV2 = ({
                                         <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary">Pedigree</h3>
                                     </div>
                                     {MANUAL_PEDIGREE_ENABLED ? (
-                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only — they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
+                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only • they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
                                     ) : (
                                         <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">Every ancestor here is a real CritterTrack animal. That means their names, photos, genetics and parents are shared across your whole herd, and they count toward COI and the pedigree chart. If an ancestor isn't in CritterTrack yet, create them as an animal first, then link them here.</p>
                                     )}
 
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 1 • Parents</p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {renderEditSlot('sire', 'Sire', 'sire')}
                                             {renderEditSlot('dam', 'Dam', 'dam')}
@@ -6531,7 +6531,7 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 2 • Grandparents</p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
@@ -6547,7 +6547,7 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 3 • Great-Grandparents</p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
@@ -7079,7 +7079,7 @@ const AnimalFormModalV2 = ({
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeding Restrictions</label><textarea name="breedingRestrictions" value={formData.breedingRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Export Restrictions</label><textarea name="exportRestrictions" value={formData.exportRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
 
-                                    {/* Document uploads (PDF, DOC, DOCX, Pages — max 10MB) */}
+                                    {/* Document uploads (PDF, DOC, DOCX, Pages max 10MB) */}
                                     <div className="md:col-span-2">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Documents (Registration papers, contracts, health certificates, etc.)</label>
                                         {(formData.legalDocuments || []).length > 0 && (
@@ -7205,7 +7205,7 @@ const AnimalFormModalV2 = ({
                                 <span>Cancel</span>
                             </button>
                             {animalToEdit && (() => {
-                                // Transferred-to-me animals must never be deletable by the new owner —
+                                // Transferred-to-me animals must never be deletable by the new owner
                                 // only the original breeder can (via Return), matching AnimalModalV2's header logic.
                                 const isOriginalCreator = animalToEdit.originalCreatorId && userProfile?._id && animalToEdit.originalCreatorId === userProfile._id;
                                 const isCurrentOwner = userProfile?._id && animalToEdit.creatorId_public === userProfile?.id_public;

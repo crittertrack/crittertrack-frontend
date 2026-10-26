@@ -218,7 +218,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 );
                 showModalMessage('Success', 'Transaction added successfully');
 
-                // Logging a sale doesn't change the animal's own status/list visibility —
+                // Logging a sale doesn't change the animal's own status/list visibility 
                 // offer to do that explicitly, since users often assume it happens automatically.
                 if (transactionData.type === 'sale' && formData.animalId) {
                     if (window.confirm(`You've logged a sale for ${formData.animalName || formData.animalId}. Would you also like to mark it as Rehomed and archive it so it moves out of your main animal list?`)) {
@@ -737,7 +737,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         {/* Animal search + selection */}
                                         {formData.animalId ? (
                                             <div className="flex items-center justify-between w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-gray-50 dark:bg-dark-surface">
-                                                <span className="text-gray-700 dark:text-dark-text-secondary text-sm">{formData.animalId} — {formData.animalName}</span>
+                                                <span className="text-gray-700 dark:text-dark-text-secondary text-sm">{formData.animalId} • {formData.animalName}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -777,7 +777,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                                     className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover border-b border-gray-50 dark:border-dark-border last:border-b-0"
                                                                 >
                                                                     <span className="font-medium text-sm dark:text-dark-text">{animal.id_public}</span>
-                                                                    <span className="text-gray-600 dark:text-dark-text-secondary text-sm"> — {animal.name}</span>
+                                                                    <span className="text-gray-600 dark:text-dark-text-secondary text-sm"> • {animal.name}</span>
                                                                     {animal.species && <span className="text-xs text-gray-400 dark:text-dark-text-muted ml-1">({animal.species})</span>}
                                                                 </button>
                                                             ))}
@@ -795,7 +795,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         {!animalsLoading && (
                                             selectedSpecies
                                                 ? `${animals.filter(a => a.species === selectedSpecies && a.soldStatus !== 'sold').length} ${selectedSpecies} available`
-                                                : `${animals.filter(a => a.soldStatus !== 'sold').length} animals — filter by species or search by name/ID`
+                                                : `${animals.filter(a => a.soldStatus !== 'sold').length} animals • filter by species or search by name/ID`
                                         )}
                                     </p>
                                 </div>

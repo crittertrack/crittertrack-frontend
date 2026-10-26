@@ -51,7 +51,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                     {/* Intro */}
                     <div className="bg-blue-50 dark:bg-dark-info-blue/20 border-l-4 border-blue-500 dark:border-dark-info-blue p-2.5 sm:p-3 rounded">
                         <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary">
-                            A few essentials worth knowing right away — each links to the related Help Center article.
+                            A few essentials worth knowing right away • each links to the related Help Center article.
                         </p>
                     </div>
 
@@ -127,7 +127,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-0.5 sm:mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                                    Help articles are available anytime — open the profile menu and select <strong>Help Center</strong>.
+                                    Help articles are available anytime • open the profile menu and select <strong>Help Center</strong>.
                                 </p>
                                 <HelpArticleLink>Browse all help articles</HelpArticleLink>
                             </div>

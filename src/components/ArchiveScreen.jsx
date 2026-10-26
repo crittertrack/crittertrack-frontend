@@ -19,7 +19,7 @@ const ArchiveScreen = ({
     SectionHeader,
     userProfile
 }) => {
-    // Temporary, single-user request — show the animal's own owner field on archived cards.
+    // Temporary, single-user request  show the animal's own owner field on archived cards.
     const showOwnerField = userProfile?.id_public === 'CTU2';
     const [archivedAnimals, setArchivedAnimals] = useState([]);
     const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);

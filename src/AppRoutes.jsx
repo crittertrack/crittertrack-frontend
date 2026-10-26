@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 
-// Lazy-loaded views — each page is only downloaded when first visited
+// Lazy-loaded views  each page is only downloaded when first visited
 const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
@@ -49,7 +49,7 @@ const PageLoader = () => (
 
 // Catches errors thrown while rendering/lazy-loading a route (e.g. a page component
 // failing to download after a new deployment shipped a fresh chunk hash). Without this,
-// a failed chunk load throws uncaught and the page just hangs/stays blank forever —
+// a failed chunk load throws uncaught and the page just hangs/stays blank forever 
 // the user has to know to manually refresh. Most of these errors are a stale cached
 // bundle referencing an old chunk that no longer exists on the server, so we try one
 // automatic reload first (guarded by sessionStorage so we don't reload-loop), then fall
@@ -283,7 +283,7 @@ export function AppRoutes({
         />
       } />
 
-      {/* Collections / Enclosures — standalone routes for Lite mode's bottom nav (same
+      {/* Collections / Enclosures  standalone routes for Lite mode's bottom nav (same
           AnimalList component/tabs, just deep-linked straight to that internal tab). */}
       <Route path="/collections" element={
         <AnimalList 
@@ -382,7 +382,7 @@ export function AppRoutes({
         />
       } />
 
-      {/* Lite mode's own trimmed settings page — avatar-click destination there instead of /settings */}
+      {/* Lite mode's own trimmed settings page  avatar-click destination there instead of /settings */}
       <Route path="/lite-settings" element={
         <LiteProfileSettings
           userProfile={userProfile}
@@ -469,7 +469,7 @@ export function AppRoutes({
         />
       } />
 
-      {/* Calendar — standalone calendar page */}
+      {/* Calendar  standalone calendar page */}
       <Route path="/calendar" element={
         <CalendarPage
           authToken={authToken}
@@ -660,7 +660,7 @@ export function AppRoutes({
         />
       } />
 
-      {/* Resources Page — public, unauthenticated route */}
+      {/* Resources Page  public, unauthenticated route */}
       <Route path="/resources" element={<ResourcesPage API_BASE_URL={API_BASE_URL} authToken={authToken} />} />
 
     </Routes>

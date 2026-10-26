@@ -72,7 +72,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     const [rehomingId, setRehomingId] = useState(null);
     // Spinner lock for the card's quick "Paid" action.
     const [paidSavingId, setPaidSavingId] = useState(null);
-    // Contacts book — used to spot buyers whose contact is linked to a CritterTrack
+    // Contacts book used to spot buyers whose contact is linked to a CritterTrack
     // account (linkedCTUID), so rehoming can offer a true ownership transfer.
     const [contacts, setContacts] = useState([]);
 
@@ -125,7 +125,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     useEffect(() => { fetchAnimals(); }, [fetchAnimals]);
 
     // The full animal modal (opened from the card image) edits animals outside this page and
-    // broadcasts 'animal-updated' / 'animals-changed' — mirror those so status, species etc.
+    // broadcasts 'animal-updated' / 'animals-changed' mirror those so status, species etc.
     // changed there show up here immediately (an animal that is no longer Available/Booked
     // simply drops out of the list via the sale filter).
     useEffect(() => {
@@ -361,7 +361,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     // with the chevrons on each card.
     //
     // In the custom order, entries that have never been positioned (sortOrder 0) go
-    // LAST — otherwise every newly added entry jumped to the top and scrambled the
+    // LAST otherwise every newly added entry jumped to the top and scrambled the
     // order the user had set.
     const sortedWaitlist = useMemo(() => {
         const entries = [...shownWaitlist];
@@ -497,7 +497,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     // Find the Contacts record behind a reservation's buyer, so rehoming can offer a true
     // transfer when that contact is linked to a CritterTrack account (linkedCTUID).
     // Sources: the waitlist entry the reservation came from (only while the buyer name still
-    // matches that entry — a manually overridden buyer disqualifies it), then an exact
+    // matches that entry a manually overridden buyer disqualifies it), then an exact
     // name match against the contacts book. Returns the contact's linkedCTUID or null.
     const findLinkedBuyerCtuid = (animal, buyer) => {
         if (!buyer) return null;
@@ -538,14 +538,14 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 notes: `Recorded via Reservations (rehome sale to ${buyer})`,
                 transferType: 'sale',
             });
-            showModalMessage?.('Success', `Transfer of ${animal.name || animal.id_public} to ${buyer} (${ctuid}) requested — they must accept to take ownership`);
+            showModalMessage?.('Success', `Transfer of ${animal.name || animal.id_public} to ${buyer} (${ctuid}) requested • they must accept to take ownership`);
         } catch (err) {
             console.error('[rehomeTransfer]', err);
             showModalMessage?.('Error', `Rehomed, but the transfer to ${buyer} failed: ${err.response?.data?.message || err.message}`);
         }
     };
 
-    // Quick action: promote the reservation into the animal's Sale info (date, price, buyer —
+    // Quick action: promote the reservation into the animal's Sale info (date, price, buyer 
     // which auto-creates the Budget sale transaction server-side) and mark Rehomed + archived.
     const handleRehome = async (animal) => {
         const resForm = getResForm(animal);
@@ -566,7 +566,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 buyerName: buyer,
                 buyerContact: resForm.buyerContact?.trim() || animal.reservedBuyerContact || null,
                 ...(linkedCtuid ? { ownerId_public: linkedCtuid } : { manualownerName: buyer }),
-                // Clear the pending reservation — it has been fulfilled.
+                // Clear the pending reservation it has been fulfilled.
                 reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
                 reservedPrice: null, reservedDeposit: null, reservedDate: null,
                 reservedDepositStatus: null, reservedPaymentStatus: null,
@@ -579,7 +579,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             setEditingAnimalId(null);
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed', archived: true } }));
             window.dispatchEvent(new Event('animals-changed'));
-            showModalMessage?.('Success', `${animal.name || animal.id_public} marked as Rehomed — sale logged to Budget`);
+            showModalMessage?.('Success', `${animal.name || animal.id_public} marked as Rehomed • sale logged to Budget`);
             if (linkedCtuid) await maybeSendTrueTransfer(animal, buyer, linkedCtuid, price);
         } catch (err) {
             console.error('[rehomeAnimal]', err);
@@ -717,7 +717,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             }
 
             const msg = animalsToRehome.length > 0
-                ? `${entry.name} moved to history — ${rehomedCount}/${animalsToRehome.length} animal(s) rehomed.`
+                ? `${entry.name} moved to history • ${rehomedCount}/${animalsToRehome.length} animal(s) rehomed.`
                 : `${entry.name} moved to history`;
             showModalMessage?.('Success', msg);
         } catch (err) {
@@ -756,7 +756,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     };
 
     // Persist the new order. The active list is sent first (in its new order) and the
-    // remaining entries follow, so every entry ends up with a unique position — otherwise
+    // remaining entries follow, so every entry ends up with a unique position otherwise
     // two entries could share the same sortOrder and their relative order would flicker.
     const reorderWaitlist = async (orderedActive) => {
         try {
@@ -911,15 +911,15 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <div className="flex justify-between gap-2 items-start">
                                                             <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1 shrink-0"><User size={11} /> Buyer</span>
                                                             {/* A long buyer name wraps onto a second line inside its own
-                                                                column — the label stays put instead of the row jumping. */}
+                                                                column the label stays put instead of the row jumping. */}
                                                             <span className="font-medium text-gray-800 dark:text-dark-text text-right min-w-0 break-words">{animal.reservedBuyerName || <span className="text-gray-400 dark:text-dark-text-muted font-normal">Unassigned</span>}</span>
                                                         </div>
                                                         {showWlName && <div className="flex justify-between gap-2 items-start"><span className="text-gray-500 dark:text-dark-text-muted shrink-0">via Waitlist</span><span className="font-medium text-gray-800 dark:text-dark-text text-right min-w-0 break-words">{wlName}</span></div>}
                                                         <div className="flex justify-between gap-2">
-                                                            {/* "Full price" is the total price of the animal — the deposit is
+                                                            {/* "Full price" is the total price of the animal the deposit is
                                                                 part of it, not on top of it. */}
                                                             <span className="text-gray-500 dark:text-dark-text-muted flex items-center gap-1"><DollarSign size={11} /> Full price</span>
-                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>}</span>
+                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{animal.reservedPrice != null ? `${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedPrice}` : <span className="text-gray-400 dark:text-dark-text-muted font-normal">•</span>}</span>
                                                         </div>
                                                         <div className="flex justify-between gap-2 items-center">
                                                             <span className="text-gray-500 dark:text-dark-text-muted">Deposit{depositAmt > 0 ? ` (${getCurrencySymbol(animal.reservedPriceCurrency || currency)}${animal.reservedDeposit})` : ''}</span>
@@ -927,7 +927,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                             {depositAmt > 0 ? (
                                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${DUE_DONE(animal.reservedDepositStatus)}`}>{animal.reservedDepositStatus === 'done' ? 'Done' : 'Due'}</span>
                                                             ) : (
-                                                                <span className="text-gray-400 dark:text-dark-text-muted font-normal">—</span>
+                                                                <span className="text-gray-400 dark:text-dark-text-muted font-normal">•</span>
                                                             )}
                                                         </div>
                                                         <div className="flex justify-between gap-2 items-center">
@@ -958,7 +958,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                                 const entryLabel = (e) => {
                                                                     const reqs = e.speciesRequests || (e.species ? [{ species: e.species, genders: e.genders || [] }] : []);
                                                                     const spec = reqs.map(r => r.species + ' (' + getGenderCounts(r).map(c => c.count + ' ' + c.gender).join('/') + ')').join(' + ');
-                                                                    return `${e.name}${spec ? ` — ${spec}` : ''}`;
+                                                                    return `${e.name}${spec ? ` • ${spec}` : ''}`;
                                                                 };
                                                                 return (
                                                                     <select id={`wlBuyerPicker-${animal.id_public}`} value={f.waitlistEntryId} onChange={e => setResField(animal, 'waitlistEntryId', e.target.value)} className={inputCls}>
@@ -983,7 +983,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
 
                                                         {/* Payment status sits under Price, Deposit status under Deposit so each
                                                             status pairs with its own amount. Deposit status is only shown when a
-                                                            deposit is actually charged (> 0) — "Due" means nothing without one. */}
+                                                            deposit is actually charged (> 0) "Due" means nothing without one. */}
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <div>
                                                                 <label htmlFor={`payStatus-${animal.id_public}`} className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Payment status</label>
@@ -1030,7 +1030,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     {hasReservation && !isEditing && (
                                                         <button onClick={() => handleClearReservation(animal)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Undo2 size={11} /> Clear</button>
                                                     )}
-                                                    {/* Quick "Paid" — only while the payment is still outstanding. */}
+                                                    {/* Quick "Paid" only while the payment is still outstanding. */}
                                                     {hasReservation && !isEditing && animal.reservedPaymentStatus !== 'done' && (
                                                         <button onClick={() => handleMarkPaid(animal)} disabled={paidSavingId === animal.id_public} title="Mark payment as done"
                                                             className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 border border-green-500/60 hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-lg transition font-medium disabled:opacity-50">
@@ -1266,7 +1266,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                     <div className="flex flex-wrap items-center gap-1.5">
                                                         <span className="text-xs font-medium text-gray-700 dark:text-dark-text">Species:</span>
                                                         <span className="text-xs text-gray-600 dark:text-dark-text-muted">
-                                                            {entry.speciesRequests?.map(r => r.species).filter(Boolean).join(', ') || '—'}
+                                                            {entry.speciesRequests?.map(r => r.species).filter(Boolean).join(', ') || 'No species requested'}
                                                         </span>
                                                     </div>
                                                 </div>

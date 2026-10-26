@@ -154,7 +154,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                         <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-text-muted p-3 space-y-3">
                             <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
                                 <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-                                <span>Treatment is defined by an active medication — it's what marks the animal as "In Treatment" and factors into its health status.</span>
+                                <span>Treatment is defined by an active medication • it's what marks the animal as "In Treatment" and factors into its health status.</span>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>

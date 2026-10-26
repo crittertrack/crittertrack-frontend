@@ -416,17 +416,17 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             setLoading(true);
             try {
                 // Enhanced recursive function to fetch animal, ancestors, and descendants
-                // resultCache: Map<id, {fetchedAtDepth, data}> — caches results but only reuses
+                // resultCache: Map<id, {fetchedAtDepth, data}> caches results but only reuses
                 //   them when the cached version was fetched at the same or shallower depth
                 //   (shallower = more ancestors available). This prevents offspring-fetching
                 //   from poisoning the cache with depth=4 entries that have null parents,
                 //   which would then be reused when the ancestor chain needs them at depth=3.
-                // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
+                // pathIds: Set of IDs in the current call-chain detects true circular loops only.
                 const resultCache = new Map();
                 let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
                 const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
                     if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
-                    if (pathIds.has(id)) return null; // circular reference — stop this branch
+                    if (pathIds.has(id)) return null; // circular reference stop this branch
 
                     // Return cached result only if it was fetched at the same or shallower depth
                     // (cached.fetchedAtDepth <= depth means the cache has at least as many
@@ -434,7 +434,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     if (resultCache.has(id)) {
                         const cached = resultCache.get(id);
                         if (cached.fetchedAtDepth <= depth) return cached.data;
-                        // else: cache was built at a deeper position — fewer ancestors stored.
+                        // else: cache was built at a deeper position fewer ancestors stored.
                         // Fall through and re-fetch so we get the full ancestor chain.
                     }
 
@@ -465,7 +465,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             try {
                                 const response = await apiClient.get(`/animals/any/${id}`);
                                 animalInfo = response.data;
-                                // Do NOT set foundViaOwned = true here — animal is accessible but not owned.
+                                // Do NOT set foundViaOwned = true here animal is accessible but not owned.
                                 // This ensures the isDisplay check below still applies,
                                 // consistent with how ViewOnlyParentCard handles the same case.
                             } catch (error2) {
@@ -531,7 +531,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         }
                     }
 
-                    // Recursively fetch parents — each branch gets its own path copy so that
+                    // Recursively fetch parents each branch gets its own path copy so that
                     // an ancestor appearing on BOTH sides (inbreeding) isn't blocked.
                     const fatherId = animalInfo.sireId_public;
                     const motherId = animalInfo.damId_public;
@@ -546,7 +546,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         father,
                         mother,
                     };
-                    // Cache — always overwrite with the shallowest-depth version (most ancestors available)
+                    // Cache always overwrite with the shallowest-depth version (most ancestors available)
                     if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
                         resultCache.set(id, { fetchedAtDepth: depth, data: result });
                     }
@@ -585,7 +585,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         species: sireTree?.species || damTree?.species || null,
                         father: sireTree,
                         mother: damTree,
-                        // Litters have no separate breeder concept — the account that owns the litter is the breeder
+                        // Litters have no separate breeder concept the account that owns the litter is the breeder
                         breederId_public: currentUserIdPublic || null,
                     };
                 } else {
@@ -610,12 +610,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         console.error('Failed to fetch owner profile:', error);
                     }
                 } else if (data?.manualBreederName) {
-                    // No linked account — show the free-text breeder name instead
+                    // No linked account show the free-text breeder name instead
                     fetchedOwnerProfile = { personalName: data.manualBreederName, showPersonalName: true };
                     setOwnerProfile(fetchedOwnerProfile);
                 }
 
-                // Fetch current owner profile (creatorId_public) — the person who currently has the
+                // Fetch current owner profile (creatorId_public) the person who currently has the
                 // animal, which may differ from the original breeder if it was ever transferred/sold.
                 let fetchedCurrentOwnerProfile = null;
                 if (data?.creatorId_public && data.creatorId_public !== data?.breederId_public) {
@@ -763,7 +763,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         console.error('Error fetching breeder profile:', error);
                     }
                 } else if (data?.manualBreederName) {
-                    // No linked account — show the free-text breeder name instead
+                    // No linked account show the free-text breeder name instead
                     fetchedOwnerProfile = { personalName: data.manualBreederName, showPersonalName: true };
                     setOwnerProfile(fetchedOwnerProfile);
                 }
@@ -828,7 +828,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         if (!el) return null;
 
         // Clone and mount directly on body so html2canvas sees no ancestor
-        // overflow/scroll clipping — the only reliable way to capture content
+        // overflow/scroll clipping the only reliable way to capture content
         // that lives inside a scrollable modal.
         const clone = el.cloneNode(true);
         const captureW = vertical ? Math.max(el.scrollWidth, 860) : Math.max(el.scrollWidth, 1400);
@@ -1020,7 +1020,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         return (
             <div style={baseStyle} onClick={handleClick}>
                 <div style={{ display: 'flex', flexDirection: isRowLayout ? 'row' : 'column', gap: imgSize > 0 ? 6 : 0, alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-                    {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
+                    {/* Thumbnail hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
                             <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={Math.round(imgSize * 0.4)} />
@@ -1208,7 +1208,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             <tbody>
                                 <tr>
                                     <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Predicted COI:</td>
-                                    <td style={{ color: certFontColor }}>{info.inbreedingCoefficient != null ? `${info.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
+                                    <td style={{ color: certFontColor }}>{info.inbreedingCoefficient != null ? `${info.inbreedingCoefficient.toFixed(2)}%` : '✗'}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1242,7 +1242,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             <tbody>
                                 <tr>
                                     <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
-                                    <td style={{ color: certFontColor }}>{litter.birthDate ? formatDate(litter.birthDate) : '—'}</td>
+                                    <td style={{ color: certFontColor }}>{litter.birthDate ? formatDate(litter.birthDate) : '✗'}</td>
                                 </tr>
                                 {litter.birthMethod && litter.birthMethod !== 'Unknown' && (
                                     <tr>
@@ -1258,12 +1258,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 )}
                                 <tr>
                                     <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
-                                    <td style={{ color: certFontColor }}>{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
+                                    <td style={{ color: certFontColor }}>{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '✗'}</td>
                                 </tr>
                                 <tr>
                                     <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
                                     <td style={{ color: certFontColor }}>
-                                        {totalBorn != null ? totalBorn : '—'}
+                                        {totalBorn != null ? totalBorn : '✗'}
                                         {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                             <span style={{ marginLeft: 6 }}>
                                                 <span style={{ color: themeColors['info-blue'], fontWeight: 700 }}>{litter.maleCount ?? 0}M</span>
@@ -1279,7 +1279,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                     <tr>
                                         <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Weaned:</td>
                                         <td style={{ color: certFontColor }}>
-                                            {litter.litterSizeWeaned ?? '—'}
+                                            {litter.litterSizeWeaned ?? '✗'}
                                             {litter.stillbornCount != null && (
                                                 <span style={{ marginLeft: 6, color: '#6b7280' }}>{litter.stillbornCount} stillborn</span>
                                             )}
@@ -1331,7 +1331,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         <tbody>
                             <tr>
                                 <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Variation:</td>
-                                <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{variety || '—'}</td>
+                                <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{variety || '✗'}</td>
                             </tr>
                             {animal.geneticCode && (
                                 <tr>
@@ -1341,7 +1341,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             )}
                             <tr>
                                 <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
-                                <td style={{ color: certFontColor }}>{animal.birthDate ? formatDate(animal.birthDate) : '—'}</td>
+                                <td style={{ color: certFontColor }}>{animal.birthDate ? formatDate(animal.birthDate) : '✗'}</td>
                             </tr>
                             {animal.deceasedDate && (
                                 <tr>
@@ -1351,7 +1351,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             )}
                             <tr>
                                 <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Breeder:</td>
-                                <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{(animal.breederName && animal.breederName !== 'Anonymous Breeder') ? animal.breederName : '—'}</td>
+                                <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{(animal.breederName && animal.breederName !== 'Anonymous Breeder') ? animal.breederName : '✗'}</td>
                             </tr>
                         </tbody>
                     </table>

@@ -93,19 +93,19 @@ const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
 
 // Short contextual hints for the page-header info button, keyed by animalView.
-const PIN_TAB_HINT = <p>Tip: hover a tab above and click its pin icon to set that tab as your default view — it'll open automatically next time.</p>;
+const PIN_TAB_HINT = <p>Tip: hover a tab above and click its pin icon to set that tab as your default view • it'll open automatically next time.</p>;
 const ANIMAL_VIEW_INFO = {
     list: {
         title: 'My Animals', lessonId: 'animal-list-overview', body: <>
             <p>All animals you own or manage. Use the search and filters to narrow the list, and switch between card/table layouts.</p>
             <p><strong>Owned vs. Unowned:</strong> the Ownership filter shows "Owned" animals currently in your care vs. "Unowned" ones you created but are only tracking (e.g. co-owned, borrowed, or animals created for pedigrees.).</p>
-            <p><strong>Public vs. Private:</strong> the Public/Private filter is based on each animal's public-profile visibility toggle — "Public" animals appear on your public breeder profile and pedigrees, "Private" ones are completely hidden from other users.</p>
+            <p><strong>Public vs. Private:</strong> the Public/Private filter is based on each animal's public-profile visibility toggle • "Public" animals appear on your public breeder profile and pedigrees, "Private" ones are completely hidden from other users.</p>
             {PIN_TAB_HINT}
         </>
     },
     collections: {
         title: 'Collections', lessonId: 'animal-collections', body: <>
-            <p>Group animals into custom folders for quick access — separate from enclosures, useful for breeding groups, sale lists, or any grouping you choose.</p>
+            <p>Group animals into custom folders for quick access • separate from enclosures, useful for breeding groups, sale lists, or any grouping you choose.</p>
             <p>The same Ownership (owned/unowned) and Public/Private profile filters from My Animals apply here too, so you can narrow a collection down further.</p>
             {PIN_TAB_HINT}
         </>
@@ -119,7 +119,7 @@ const ANIMAL_VIEW_INFO = {
     },
     reproduction: { title: 'Reproduction', lessonId: 'reproduction-tracking', body: <>
         <p>Track planned matings, active pairings, pregnancies, and nursing litters in one place.</p>
-        <p>This tab tracks the animals themselves (mating/pregnant/nursing status) — the actual litters, offspring counts, and birth records are tracked in Litter Management.</p>
+        <p>This tab tracks the animals themselves (mating/pregnant/nursing status) • the actual litters, offspring counts, and birth records are tracked in Litter Management.</p>
         {PIN_TAB_HINT}
     </> },
     health: { title: 'Health', lessonId: 'health-tracking', body: <>
@@ -293,7 +293,7 @@ const AnimalList = ({
     };
 
 
-    // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
+    // Per-user localStorage key prefix scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
     const [returningAnimal, setReturningAnimal] = useState(false);
@@ -382,7 +382,7 @@ const AnimalList = ({
     const [categoryFilter, setCategoryFilter] = useState(() => {
         try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
     });
-    // Master species list — all species the user has ANY animal for, never filtered
+    // Master species list all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
@@ -476,7 +476,7 @@ const AnimalList = ({
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: false }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     // Session-only "Revert last action" support for Feeding & Care task rows: { [rowKey]: () => Promise<void> }.
-    // Cleared on refresh — intentionally not persisted anywhere.
+    // Cleared on refresh intentionally not persisted anywhere.
     const [taskUndoStack, setTaskUndoStack] = useState({});
     const handleRevertTask = async (e, key) => {
         e.stopPropagation();
@@ -525,7 +525,7 @@ const AnimalList = ({
             setLoading(false);
 
             // Phase 2: background-fetch ALL animals so unowned toggle works instantly
-            // slim=true strips heavy fields (breedingRecords, health, etc.) — list cards don't need them
+            // slim=true strips heavy fields (breedingRecords, health, etc.) list cards don't need them
             try {
                 const allRes = await apiClient.get(`/animals?slim=true`);
                 let allData = (allRes.data || []).filter(a => !a.isViewOnly);
@@ -559,7 +559,7 @@ const AnimalList = ({
         // Kept for compatibility with the animals-changed event handler
     }, []);
 
-    // Fetch ALL user animals (no client-side filters) — used by Management View and Collections
+    // Fetch ALL user animals (no client-side filters) used by Management View and Collections
     const fetchAllAnimals = useCallback(async () => {
         if (!authToken) return;
         try {
@@ -579,7 +579,7 @@ const AnimalList = ({
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken]);
 
-    // Fetch view-only/transferred animals — these are animals the user sold/transferred but retains view-only access to
+    // Fetch view-only/transferred animals these are animals the user sold/transferred but retains view-only access to
     const fetchSoldTransferred = useCallback(async () => {
         if (!authToken) return;
         try {
@@ -813,7 +813,7 @@ const AnimalList = ({
 
     // Lite (web-only, see docs/lite-web-toggle-brainstorm.md) drops the Reproduction, Health
     // and Feeding & Care tabs from the management bar. Everything else on this page is the
-    // Full frontend — see app.jsx for the matching main-nav trimming.
+    // Full frontend see app.jsx for the matching main-nav trimming.
     const isLite = resolveLiteMode(userProfile);
     const LITE_HIDDEN_TABS = ['reproduction', 'health', 'feeding'];
 
@@ -831,7 +831,7 @@ const AnimalList = ({
             }
             return;
         }
-        // Subsequent changes are real in-app navigation (e.g. switching animal view tabs) —
+        // Subsequent changes are real in-app navigation (e.g. switching animal view tabs)
         // always sync, otherwise navigating back to "Animals" gets stuck showing the previous
         // tab until refresh.
         setAnimalView(normalizeAnimalView(initialAnimalView));
@@ -839,7 +839,7 @@ const AnimalList = ({
 
     // In Lite mode the Reproduction / Health / Feeding & Care tabs are hidden from the tab bar
     // (LITE_HIDDEN_TABS above), but a stale deep-link or a router state can still land on one of
-    // them — bounce those back to the main list. MUST be scoped to isLite: in Full mode these are
+    // them bounce those back to the main list. MUST be scoped to isLite: in Full mode these are
     // real, working tabs, and without this guard every click on them snapped straight back to
     // 'list' (the effect below was unconditional, so it fired in Full too).
     useEffect(() => {
@@ -851,7 +851,7 @@ const AnimalList = ({
 
     // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })). The browser
     // keeps history.state for an entry across reloads/remounts, so the state must be explicitly cleared
-    // here once consumed — otherwise it keeps re-forcing this view (e.g. after a Lite/full mode switch
+    // here once consumed otherwise it keeps re-forcing this view (e.g. after a Lite/full mode switch
     // or a page refresh), fighting the user's pinned default view.
     const routerLocation = useLocation();
     const routerNavigate = useNavigate();
@@ -1484,7 +1484,7 @@ useEffect(() => {
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
-    // Load collections from API on auth change — always overwrite state from server to prevent cross-user leakage
+    // Load collections from API on auth change always overwrite state from server to prevent cross-user leakage
     useEffect(() => {
         if (!authToken) return;
         // Reset to empty immediately so a user with no collections doesn't see a previous user's data
@@ -2065,7 +2065,7 @@ useEffect(() => {
         return activeAnimalsForDashboard.filter(a => a.status === 'Available');
     }, [activeAnimalsForDashboard]);
 
-    // "Feeding & Care" needs-attention entries for the main dashboard — one entry per animal with the
+    // "Feeding & Care" needs-attention entries for the main dashboard one entry per animal with the
     // list of reasons (feeding, custom animal care tasks, and/or Grooming/Special Care/Training
     // schedules) so the breakdown dropdown can show which animal(s) and why, not just a bare count.
     const feedingCareDueDashboard = useMemo(() => {
@@ -2180,7 +2180,7 @@ useEffect(() => {
             .filter(item => item.count > 0);
     }, [enclosuresNeedingAttention]);
 
-    // Flattened enclosure tasks for the Feeding & Care management tab — same `enclosures`
+    // Flattened enclosure tasks for the Feeding & Care management tab same `enclosures`
     // state and `isTaskDue` used by the enclosure cards/detail modal, just a 2nd display surface.
     const enclosureCleaningFlat = useMemo(() => {
         return enclosures.flatMap(enc => (enc.cleaningTasks || []).map(task => ({ enclosure: enc, task })));
@@ -2194,7 +2194,7 @@ useEffect(() => {
     const generalTaskOk = useMemo(() => generalCareTasksList.filter(t => !isTaskDue(t)), [generalCareTasksList, isTaskDue]);
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
-    // Must exclude view-only animals (e.g. transferred away, kept only for pedigree/history access) —
+    // Must exclude view-only animals (e.g. transferred away, kept only for pedigree/history access)
     // otherwise a transferred animal with stale isQuarantine/isInTreatment flags keeps showing up here
     // for the previous owner even though it's no longer theirs to manage.
     const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !a.isViewOnly && (!inHealthEnclosure(a) || showHealthEnclosureAnimalsInLists));
@@ -2227,9 +2227,9 @@ useEffect(() => {
 
         sortedLitters.forEach(litter => {
             const hasBirth = !!litter.birthDate;
-            // Born with an unknown birth date: its own class — not nursing, mated, pregnant or planned
+            // Born with an unknown birth date: its own class not nursing, mated, pregnant or planned
             const isBornUnknown = !!litter.birthDateUnknown && !hasBirth;
-            // Nursing only ends once weaning is explicitly confirmed via the "Wean Today" action —
+            // Nursing only ends once weaning is explicitly confirmed via the "Wean Today" action
             // recording/correcting a weaningDate value alone shouldn't close the litter.
             const isWeaned = !!litter.weaningConfirmed;
             const hasPregnancy = !!litter.pregnancyDate;
@@ -2237,7 +2237,7 @@ useEffect(() => {
             const isNursing = hasBirth && !isWeaned && !isClosed;
             const isPregnant = hasPregnancy && !hasBirth && !isClosed && !isBornUnknown;
             // A planned mating only advances to "mating" via the explicit "Mated Today" action
-            // (which clears isPlanned) — a matingDate arriving on its own doesn't advance it.
+            // (which clears isPlanned) a matingDate arriving on its own doesn't advance it.
             const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth && !isClosed && !isBornUnknown;
             const isPlanned = litter.isPlanned && !hasPregnancy && !hasBirth && !isClosed && !isBornUnknown;
 
@@ -2284,7 +2284,7 @@ useEffect(() => {
     const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a))).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
     const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a))).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
     // Membership relies solely on the backend-authoritative flags (which apply the per-species
-    // nursing cutoff) — the locally-derived litterStatus above has no cutoff and would otherwise
+    // nursing cutoff) the locally-derived litterStatus above has no cutoff and would otherwise
     // keep long-past litters showing here forever, out of sync with the flag used for the status pill.
     const pregnantList = useMemo(() => allAnimals
         .filter(a => a.gender !== 'Male' && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a)) && !!a.isPregnant)
@@ -2298,7 +2298,7 @@ useEffect(() => {
     const reproTotal = matingList.length + pregnantList.length + nursingList.length;
     // Entries whose planned mating / due / weaning date lands on today. Checked directly against the
     // litter records rather than the derived isPlannedMating/isPregnant/isNursing flags, because those
-    // flags auto-advance to the next stage (mating/closed) as soon as that same date is reached — which
+    // flags auto-advance to the next stage (mating/closed) as soon as that same date is reached which
     // would otherwise make the animal disappear from plannedMatingList/nursingList before this alert fires.
     const reproNeedsAttentionList = useMemo(() => {
         const items = [];
@@ -2308,7 +2308,7 @@ useEffect(() => {
         const dueLabel = (days, label) => days > 0 ? `${label} (${days}d overdue)` : label;
         // dam.isNursing reflects only her most recent litter, so an older already-weaned litter
         // with a stale weaningDate must not be treated as "still nursing" just because she's
-        // currently nursing a newer one — track each dam's latest birth litter to gate on that.
+        // currently nursing a newer one track each dam's latest birth litter to gate on that.
         const latestBirthLitterIdByDam = new Map();
         (litters || []).forEach(litter => {
             if (!litter.birthDate || !litter.damId_public) return;
@@ -2332,7 +2332,7 @@ useEffect(() => {
                 if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Due date is today'), view: 'pregnant' });
             }
             // Skip litters already weaned/closed, and rely on the dam's isNursing flag when
-            // available — the backend auto-closes it past the species' maxNursingDays safety-net
+            // available the backend auto-closes it past the species' maxNursingDays safety-net
             // cutoff (see utils/reproStatusSync.js), so a litter nobody marked "Wean Today" for
             // doesn't alert forever once it's well past any realistic nursing window.
             const isLatestBirthForDam = litter.damId_public && latestBirthLitterIdByDam.get(litter.damId_public)?._id === litter._id;
@@ -2345,7 +2345,7 @@ useEffect(() => {
         return items;
     }, [litters, allAnimals]);
     const feedOk = allAnimals.filter(a => a.feedingIntervalHours && !isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
-    // Flatten Grooming/Special Care and Training schedules to one entry per assigned task per animal —
+    // Flatten Grooming/Special Care and Training schedules to one entry per assigned task per animal
     // each schedule is tracked/displayed completely separately (never merged), only shown when assigned.
     const groomingScheduleEntries = allAnimals.flatMap(a =>
         GROOMING_SCHEDULE_DEFS.filter(def => a[def.key]?.frequencyDays).map(def => ({ animal: a, ...def }))
@@ -2364,7 +2364,7 @@ useEffect(() => {
     const animalCareTaskDue = animalCareTaskEntries.filter(entry => isDue(entry.task.lastDoneDate, entry.task.frequencyDays));
     const animalCareTaskOk = animalCareTaskEntries.filter(entry => !isDue(entry.task.lastDoneDate, entry.task.frequencyDays));
     const scheduledCareDueCount = animalCareTaskDue.length;
-    // Unique-animal totals for the Feeding & Care StatCards (entries assigned, not due counts — Needs Attention covers due).
+    // Unique-animal totals for the Feeding & Care StatCards (entries assigned, not due counts Needs Attention covers due).
     const feedingAssignedCount = feedDue.length + feedOk.length;
     const groomingAssignedCount = new Set(groomingScheduleEntries.map(entry => entry.animal.id_public)).size;
     const trainingAssignedCount = new Set(trainingScheduleEntries.map(entry => entry.animal.id_public)).size;
@@ -2377,7 +2377,7 @@ useEffect(() => {
             .filter(t => isDue(t.lastDoneDate, t.frequencyDays))
             .map(t => ({ animal: a, reason: `${t.taskName} due` }))
         ),
-        // Standalone (not animal-linked) custom tasks — no `animal`, keyed/clicked by task id instead.
+        // Standalone (not animal-linked) custom tasks no `animal`, keyed/clicked by task id instead.
         ...generalTaskDue.map(t => ({ animal: null, task: t, reason: `${t.taskName} due` })),
     ];
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
@@ -2393,7 +2393,7 @@ useEffect(() => {
     const unassignedAnimals = enclosureAnimalMap['unassigned'] || [];
 
 
-    // Check if any filters are active (different from defaults) — uses appliedFilters for panel filters
+    // Check if any filters are active (different from defaults) uses appliedFilters for panel filters
     const hasActiveFilters = (
         statusFilter !== '' ||
         appliedNameFilter !== '' ||
@@ -2506,7 +2506,7 @@ useEffect(() => {
         const failures = results.filter(r => r.status === 'rejected');
         if (failures.length > 0) {
             console.error('Failed to assign health status to some animals:', failures);
-            showModalMessage('Partial Failure', `Assigned to ${selectedIds.length - failures.length} of ${selectedIds.length} animal(s). ${failures.length} failed — please refresh and try again.`);
+            showModalMessage('Partial Failure', `Assigned to ${selectedIds.length - failures.length} of ${selectedIds.length} animal(s). ${failures.length} failed ✗ please refresh and try again.`);
             fetchAllAnimals();
         }
     };
@@ -2798,7 +2798,7 @@ useEffect(() => {
             setLoading(true);
             for (const id of selectedIds) {
                 // Archive endpoint is a RESTful PUT with { archived: true } on the animal resource
-                // itself — there is no separate POST /:id/archive command endpoint on the backend.
+                // itself there is no separate POST /:id/archive command endpoint on the backend.
                 await apiClient.put(`/animals/${id}`, { archived: true });
             }
             window.dispatchEvent(new Event('animals-changed'));
@@ -3003,7 +3003,7 @@ useEffect(() => {
                         {(isSelectable || hideControls) && <div></div>}
                         {/* DNA icon (CTU2 only, ongoing check): rendered on every pass, so it
                             appears the moment an animal gains a Genetic Code and disappears when
-                            it's cleared — no extra wiring needed. As the middle child of this
+                            it's cleared no extra wiring needed. As the middle child of this
                             justify-between row, it sits centred between the action toggles and
                             the CTC ID. */}
                         {userProfile?.id_public === 'CTU2' && !!(animal.geneticCode && animal.geneticCode.trim()) && (
@@ -3374,7 +3374,7 @@ useEffect(() => {
     };
 
     // -- Shared Management Components ------------------------------------------
-    // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
+    // All appearance fields that make up "Variety" same set as Tab 3 / Appearance section
     const VARIETY_KEYS = ['color', 'markings', 'earset', 'coat', 'eyeColor', 'carrierTraits', 'body'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
@@ -3656,21 +3656,21 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                                                             {colAnimals.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '✗';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '•'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '•'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '•'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '•'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">•</span>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '•'}</td>
                                                                         <td className="px-3 py-1.5 text-right">
                                                                             <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white dark:bg-dark-card-bg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 hover:text-red-600 rounded-full p-1.5 shadow-sm border border-gray-200 dark:border-dark-text-muted" title="Remove from this collection" aria-label="Remove from this collection"><X size={16} /></button>
                                                                         </td>
@@ -3760,21 +3760,21 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                                                             {uncategorized.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '•';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><AnimalNameWithFlag animal={animal} wrapperClassName="inline-flex max-w-full items-center gap-1.5" textClassName="truncate" flagClassName="inline-block h-4 w-6 shrink-0 align-middle rounded-sm border border-slate-200 dark:border-slate-700 overflow-hidden" />{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '•'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '•'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '•'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '•'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">•</span>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '•'}</td>
                                                                         <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black dark:ring-dark-text-muted ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover flex items-center gap-1.5 text-gray-700 dark:text-dark-text">{React.createElement(getCollectionIcon(col.icon), { size: 11, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })} {col.name}</button>))}</div></div>)}</div></td>
                                                                     </tr>
                                                                 );
@@ -3796,7 +3796,7 @@ useEffect(() => {
 
     const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle, hideOnMobile = false }) => {
         // Icon is passed in pre-sized (size={32}); strip that so the responsive w/h classes below can take over on mobile.
-        // Both modes get the same compact treatment on a phone (value over label, 48px tall) —
+        // Both modes get the same compact treatment on a phone (value over label, 48px tall)
         // the old Full card was 72px there and ate the screen. From sm up they diverge: Lite
         // stays a 36px single-line pill, Full keeps its larger card.
         const isInlinePill = isLite;                // compact layout from sm up, Lite only
@@ -4094,12 +4094,12 @@ useEffect(() => {
     };
 
     const ReproductiveAnimalBar = ({ animal, onViewAnimal, onEditAnimal, onTransfer, handleReproStatusUpdate }) => {
-        const matingDate = animal.matingDate ? formatDateShort(animal.matingDate) : '—';
-        const dueDate = animal.dueDate ? formatDateShort(animal.dueDate) : '—';
-        const birthDate = animal.birthDate ? formatDateShort(animal.birthDate) : '—';
-        const weaningDate = animal.weaningDate ? formatDateShort(animal.weaningDate) : '—';
+        const matingDate = animal.matingDate ? formatDateShort(animal.matingDate) : '✗';
+        const dueDate = animal.dueDate ? formatDateShort(animal.dueDate) : '✗';
+        const birthDate = animal.birthDate ? formatDateShort(animal.birthDate) : '✗';
+        const weaningDate = animal.weaningDate ? formatDateShort(animal.weaningDate) : '✗';
 
-        let dueOrBornDate = '—';
+        let dueOrBornDate = '✗';
         if (animal.isPlannedMating || animal.isPregnant) {
             dueOrBornDate = dueDate;
         } else if (animal.isNursing) {
@@ -4174,9 +4174,9 @@ useEffect(() => {
 
                 {isQuarantine ? (
                     <>
-                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary truncate"><span className="sm:hidden font-semibold">Type/Reason: </span>{[details.type, details.reason].filter(Boolean).join(' — ') || '—'}</div>
-                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Start: </span>{details.startDate ? formatDateShort(details.startDate) : '—'}</div>
-                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">End: </span>{details.endDate ? formatDateShort(details.endDate) : '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary truncate"><span className="sm:hidden font-semibold">Type/Reason: </span>{[details.type, details.reason].filter(Boolean).join(' ✗ ') || '✗'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Start: </span>{details.startDate ? formatDateShort(details.startDate) : '✗'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">End: </span>{details.endDate ? formatDateShort(details.endDate) : '✗'}</div>
                     </>
                 ) : (
                     <>
@@ -4184,7 +4184,7 @@ useEffect(() => {
                             const reasons = [...new Set(meds.map(m => m.reason).filter(Boolean))];
                             if (reasons.length > 0) return reasons.join(', ');
                             if (conds.length > 0) return conds.map(c => c.condition || c.name).filter(Boolean).join(', ');
-                            return '—';
+                            return '✗';
                         })()}</div>
                         <div className="sm:col-span-2 text-xs space-y-0.5">
                             <span className="sm:hidden font-semibold">Medications: </span>
@@ -4277,7 +4277,7 @@ useEffect(() => {
     };
 
     // Generic bar row for a single dedicated schedule task (Grooming/Special Care/Training).
-    // Each row represents ONE schedule field on ONE animal — tasks are never merged/shared.
+    // Each row represents ONE schedule field on ONE animal tasks are never merged/shared.
     const ScheduleAnimalBar = ({ animal, label, fieldName, onViewAnimal, onEditAnimal, handleMarkScheduleDone, handleSkipScheduleTask, handleDeleteScheduleTask }) => {
         const sched = animal[fieldName] || {};
         const due = isDue(sched.lastDoneDate, sched.frequencyDays);
@@ -4326,9 +4326,9 @@ useEffect(() => {
                     </div>
                 </div>
 
-                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{task.frequencyDays ? `Every ${task.frequencyDays}d` : '✗'}</div>
 
-                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{task.frequencyDays ? `Every ${task.frequencyDays}d` : '—'}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{task.frequencyDays ? `Every ${task.frequencyDays}d` : '✗'}</div>
 
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.taskName}</div>
 
@@ -4347,11 +4347,11 @@ useEffect(() => {
         );
     };
 
-    // Enclosure task row for the Feeding & Care tab — separate UI surface from the
+    // Enclosure task row for the Feeding & Care tab separate UI surface from the
     // enclosure cards/detail modal, but reads/writes the exact same Enclosure.cleaningTasks data.
     const EnclosureCleaningTaskBar = ({ enclosure, task, onViewEnclosure, handleMarkEnclosureCleaningTaskDone, handleDeleteEnclosureCleaningTask }) => {
         const due = isTaskDue(task);
-        const freqLabel = task.frequencyDays ? `Every ${task.frequencyDays}d` : (task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—');
+        const freqLabel = task.frequencyDays ? `Every ${task.frequencyDays}d` : (task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '✗');
         return (
             <div className="grid grid-cols-1 sm:grid-cols-[repeat(6,minmax(0,1fr))_7.5rem_15rem] items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <button
@@ -4398,12 +4398,12 @@ useEffect(() => {
         );
     };
 
-    // Standalone (not animal/enclosure-linked) custom task row for the Feeding & Care tab —
+    // Standalone (not animal/enclosure-linked) custom task row for the Feeding & Care tab
     // e.g. "Feed the mouse colony". Optional assignedAnimals is display-only context, not a
     // per-animal schedule (the task itself has exactly one due date/one reminder).
     const GeneralTaskBar = ({ task, onEdit, onMarkDone, onSkip, onDelete }) => {
         const due = isTaskDue(task);
-        const freqLabel = task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—';
+        const freqLabel = task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '✗';
         const nextDueDate = getTaskNextDueDate(task);
         const assignedNames = (task.assignedAnimals || []).map(id => allAnimalsRaw.find(a => a.id_public === id)?.name || id);
         return (
@@ -4422,11 +4422,11 @@ useEffect(() => {
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
 
-                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Next Due: </span>{nextDueDate ? formatDateShort(nextDueDate) : '—'}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Next Due: </span>{nextDueDate ? formatDateShort(nextDueDate) : '✗'}</div>
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{freqLabel}</div>
 
-                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.notes || '—'}</div>
+                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.notes || '✗'}</div>
 
                 <div className="text-center">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-block ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
@@ -4610,7 +4610,7 @@ useEffect(() => {
             }
         };
 
-        // Removes the feeding schedule entirely (not just a single instance) — mirrors clearing it in the Routine Care tab.
+        // Removes the feeding schedule entirely (not just a single instance) mirrors clearing it in the Routine Care tab.
         const handleDeleteFeedingSchedule = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Delete the feeding schedule for ${animal.name || 'this animal'}?`)) return;
@@ -4759,7 +4759,7 @@ useEffect(() => {
             } }));
         };
 
-        // Removes the schedule entirely (not just a single instance) — mirrors clearing it in the animal's edit form.
+        // Removes the schedule entirely (not just a single instance) mirrors clearing it in the animal's edit form.
         const handleDeleteScheduleTask = (e, animal, fieldName, label) => {
             e.stopPropagation();
             if (!window.confirm(`Delete the ${label || 'schedule'} for ${animal.name || 'this animal'}?`)) return;
@@ -4840,7 +4840,7 @@ useEffect(() => {
 
             const updatedMeds = [...meds];
             updatedMeds[idx] = updatedMed;
-            // isInTreatment is derived from active medications/critical conditions — recompute it
+            // isInTreatment is derived from active medications/critical conditions recompute it
             // optimistically here too, so the badge updates immediately (backend recomputes on save).
             const newIsInTreatment = computeIsInTreatment({ medications: updatedMeds, medicalConditions: animal.medicalConditions });
             const patch = { medications: updatedMeds, isInTreatment: newIsInTreatment };
@@ -5054,7 +5054,7 @@ useEffect(() => {
                                     {
                                         key: 'general', title: 'Custom Tasks', icon: <ClipboardList size={16} className="text-blue-700 dark:text-blue-300" />, headerClass: 'bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-900/40',
                                         list: [...generalTaskDue, ...generalTaskOk], dueCount: generalTaskDue.length, colLabels: ['Last Done', 'Notes'], entityLabel: 'Task',
-                                        emptyText: "No custom tasks yet — use the \"Add Custom Task\" button above to create one not tied to a specific animal or enclosure.",
+                                        emptyText: "No custom tasks yet • use the \"Add Custom Task\" button above to create one not tied to a specific animal or enclosure.",
                                         renderRow: task => <GeneralTaskBar key={task.id} task={task}
                                             onEdit={t => { setEditingGeneralTask(t); setShowGeneralTaskModal(true); }}
                                             onMarkDone={t => generalTasksState?.markGeneralTaskDone(t.id)}
@@ -5064,19 +5064,19 @@ useEffect(() => {
                                     {
                                         key: 'feeding', title: 'Feeding', icon: <Utensils size={16} className="text-green-700 dark:text-green-300" />, headerClass: 'bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-900/40',
                                         list: [...feedDue, ...feedOk], dueCount: feedDue.length, colLabels: ['Last Fed', 'Diet'],
-                                        emptyText: "No animals with a feeding schedule set yet — set one up in the animal's Routine Care tab.",
+                                        emptyText: "No animals with a feeding schedule set yet • set one up in the animal's Routine Care tab.",
                                         renderRow: a => <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} handleDeleteFeedingSchedule={handleDeleteFeedingSchedule} />,
                                     },
                                     {
                                         key: 'grooming', title: 'Grooming & Special Care', icon: <Scissors size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...groomingScheduleDue, ...groomingScheduleOk], dueCount: groomingScheduleDue.length, colLabels: ['Last Done', 'Task'],
-                                        emptyText: "No assigned schedules yet — set one up in the animal's Routine Care tab.",
+                                        emptyText: "No assigned schedules yet • set one up in the animal's Routine Care tab.",
                                         renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} handleDeleteScheduleTask={handleDeleteScheduleTask} />,
                                     },
                                     {
                                         key: 'training', title: 'Training', icon: <Dumbbell size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...trainingScheduleDue, ...trainingScheduleOk], dueCount: trainingScheduleDue.length, colLabels: ['Last Done', 'Task'],
-                                        emptyText: "No assigned schedules yet — set one up in the animal's Behavior tab.",
+                                        emptyText: "No assigned schedules yet • set one up in the animal's Behavior tab.",
                                         renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} handleDeleteScheduleTask={handleDeleteScheduleTask} />,
                                     },
                                     {
@@ -5386,7 +5386,7 @@ useEffect(() => {
                                         </option>
                                     ))}
                                     {supplies.filter(s => s.category === 'Food').length === 0 && (
-                                        <option disabled>No food items in supply — add some in Supplies & Inventory</option>
+                                        <option disabled>No food items in supply • add some in Supplies & Inventory</option>
                                     )}
                                 </select>
                             </div>
@@ -5509,7 +5509,7 @@ useEffect(() => {
                                     </p>
                                 </div>
                                 {/* Opens the same EnclosureDetailModal the Full enclosure view uses, which is
-                                    already wired for assign/unassign — Lite gets it without a second
+                                    already wired for assign/unassign Lite gets it without a second
                                     implementation. */}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); handleOpenDetail(enc); }}
@@ -5604,7 +5604,7 @@ useEffect(() => {
                                                 return (
                                                     <>
                                                         {colAnimals.length > 0 && (
-                                                            <p className="text-[11px] font-semibold text-gray-500 dark:text-dark-text-secondary px-1 pb-0.5">In this collection — click to remove</p>
+                                                            <p className="text-[11px] font-semibold text-gray-500 dark:text-dark-text-secondary px-1 pb-0.5">In this collection • click to remove</p>
                                                         )}
                                                         {colAnimals.map(a => (
                                                             <button
@@ -5927,7 +5927,7 @@ useEffect(() => {
                         </div>
                     </div>
 
-                    {/* Column 2: Owned — bulk owned/unowned setter, not shown in Lite mode */}
+                    {/* Column 2: Owned bulk owned/unowned setter, not shown in Lite mode */}
                     {!isLite && (
                     <div className="flex flex-col gap-2 order-3 sm:order-none">
                         <StatCard
@@ -5953,7 +5953,7 @@ useEffect(() => {
                     </div>
                     )}
 
-                    {/* Column 3: Public — bulk public/private setter, not shown in Lite mode */}
+                    {/* Column 3: Public bulk public/private setter, not shown in Lite mode */}
                     {!isLite && (
                     <div className="flex flex-col gap-2 order-4 sm:order-none">
                         <StatCard
@@ -5979,7 +5979,7 @@ useEffect(() => {
                     </div>
                     )}
 
-                    {/* Column 4: Sold/Archived. order-2 on mobile — second position, right after
+                    {/* Column 4: Sold/Archived. order-2 on mobile second position, right after
                         Total Animals, since it's the one a keeper checks often. From sm up the
                         natural document order is restored. */}
                     <div className="flex flex-col gap-2 order-2 sm:order-none">
@@ -6001,9 +6001,9 @@ useEffect(() => {
                         )}
                     </div>
 
-                    {/* Column 5: Needs Attention — mostly Feeding/Health/Reproduction alerts, dropped tabs in Lite mode.
+                    {/* Column 5: Needs Attention mostly Feeding/Health/Reproduction alerts, dropped tabs in Lite mode.
                         The whole column (not just its StatCard) is hidden on mobile: an empty wrapper div
-                        is still a grid item, and with no order class it defaulted to 0 — sorting ahead of
+                        is still a grid item, and with no order class it defaulted to 0 sorting ahead of
                         Total Animals' order-1 and taking the first grid cell on mobile. */}
                     {!isLite && (
                     <div className="hidden sm:flex flex-col gap-2 order-5 sm:order-none">
@@ -6204,7 +6204,7 @@ useEffect(() => {
     const liteViewTitle = animalView === 'list' ? 'My Animals' : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : 'My Animals';
 
     // The one and only definition of the animal-view tab bar. Both the mobile (sm:hidden) and
-    // desktop (hidden sm:flex) bars below map over this — they previously had their own hardcoded
+    // desktop (hidden sm:flex) bars below map over this they previously had their own hardcoded
     // copies of the list, which is how the Lite filter ended up applied to one but not the other.
     // LITE_HIDDEN_TABS is applied here, once, so both bars and both modes stay in sync.
     const viewTabs = useMemo(() => ([
@@ -6233,7 +6233,7 @@ useEffect(() => {
 
     return (
         <>
-            {/* Animal List section — Lite mode drops the white card shell entirely so content
+            {/* Animal List section Lite mode drops the white card shell entirely so content
                 sits directly on the pink page background, matching crittertrack-lite's pages. */}
             <div className={'w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200'}>
                 {/* Lite mode: header row itself becomes the gradient bar mirroring crittertrack-lite's
@@ -6241,7 +6241,7 @@ useEffect(() => {
                 {/* One row at every width: the identity group takes the slack (flex-1 min-w-0) and
                     the action group stays at its natural width (shrink-0). Previously this was
                     flex-col below sm with w-full on both children, which stacked the action
-                    group onto a second row by construction — so Add Animal could never share the
+                    group onto a second row by construction so Add Animal could never share the
                     title's row on mobile no matter how many other controls were removed. */}
                 <div className="flex flex-row items-center w-full gap-2 min-w-0 mb-4">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -6309,7 +6309,7 @@ useEffect(() => {
                                 <X size={12} strokeWidth={3} />
                             </button>
                         )}
-                        {/* Find Duplicates — administrative tool. Hidden in Lite, and hidden on
+                        {/* Find Duplicates administrative tool. Hidden in Lite, and hidden on
                             mobile generally: it's icon-only there, but it still occupies a slot in
                             the wrapping header row and was pushing Add Animal onto its own line. */}
                         {!showArchiveScreen && (
@@ -6375,7 +6375,7 @@ useEffect(() => {
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span><span className="hidden sm:inline">Add </span>Enclosure</span>
                             </button>
                         ) : null}
-                        {/* Add Animal (only on list/collections views, or just list in Lite mode) — desktop only, mobile is in title row */}
+                        {/* Add Animal (only on list/collections views, or just list in Lite mode) desktop only, mobile is in title row */}
                         {isListLikeView && !showArchiveScreen && (
                             <button
                                 onClick={() => navigate('/select-species')}
@@ -6385,7 +6385,7 @@ useEffect(() => {
                                 <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
                             </button>
                         )}
-                        {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
+                        {/* Mobile Add Animal button icon-only on mobile, hidden on sm+ */}
                         {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
@@ -6413,10 +6413,10 @@ useEffect(() => {
                 )}
 
                 {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies
-                    — shown in both modes, trimmed to 3 tabs in Lite and 6 in Full. */}
+                    shown in both modes, trimmed to 3 tabs in Lite and 6 in Full. */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 dark:border-dark-text-muted rounded-xl overflow-hidden shadow-sm">
-                {/* 3 tabs in Lite (My Animals / Collections / Enclosures), 6 in Full — both fit
+                {/* 3 tabs in Lite (My Animals / Collections / Enclosures), 6 in Full both fit
                     3 columns cleanly, so the grid stays grid-cols-3 either way. */}
                 <div className="grid grid-cols-3 sm:hidden">
                                 {viewTabs.map(tab => (
@@ -6469,7 +6469,7 @@ useEffect(() => {
                 // Filter bar
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg">
                     <div className="flex flex-wrap items-center gap-2">
-                        {/* Cards/List toggle has no effect in Lite mode — it always renders its own
+                        {/* Cards/List toggle has no effect in Lite mode it always renders its own
                             horizontal row layout (LiteAnimalRow), so showing it there would just be
                             a dead control. Hidden entirely in Lite. */}
                         {!isLite && (
@@ -6688,7 +6688,7 @@ useEffect(() => {
                                 return displayedAnimalsForList.map(animal => {
                                     const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                    const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
+                                    const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '✗';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
                                     const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
 
@@ -6721,11 +6721,11 @@ useEffect(() => {
                                                 </div>
                                             </td>
                                         )}
-                                        {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text">{getSpeciesLatinName(animal.species)}</div>}</td>}
+                                        {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '•'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text">{getSpeciesLatinName(animal.species)}</div>}</td>}
                                         {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>}
-                                        {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
-                                        {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>}
-                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>}
+                                        {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '•'}</td>}
+                                        {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '•'}</td>}
+                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '•'}</td>}
                                         {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text-secondary text-xs">{renderHealthColumnCell(animal)}</td>}
                                         {listViewColumns.birthdateAge && (
                                             <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap">
@@ -6741,12 +6741,12 @@ useEffect(() => {
                                                             <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>
                                                         ))}
                                                     </div>
-                                                ) : '—'}
+                                                ) : '•'}
                                             </td>
                                         )}
                                         {listViewColumns.tags && (
                                             <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">
-                                                {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}
+                                                {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '•'}
                                             </td>
                                         )}
                                         <td className="px-3 py-1.5 text-right">

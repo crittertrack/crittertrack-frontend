@@ -1,4 +1,4 @@
-﻿// Lite's "Records" tab — READ-ONLY, matching how the Full frontend treats RecordsTabContent.
+﻿// Lite's "Records" tab READ-ONLY, matching how the Full frontend treats RecordsTabContent.
 //
 // This lives in the view modal (LiteAnimalModal). Editing these records belongs in the edit
 // form, not here: the modal's Edit button opens the form, whose Health tab is where vet
@@ -30,7 +30,7 @@ const parseRecords = (data) => {
 
 const str = (v) => (v !== null && v !== undefined && String(v).trim() ? String(v).trim() : null);
 const fmtDate = (v) => (v ? String(v).slice(0, 10) : null);
-const join = (...parts) => parts.filter(Boolean).join(' — ') || null;
+const join = (...parts) => parts.filter(Boolean).join(' • ') || null;
 
 // Field names mirror the add-handlers in AnimalFormModalV2 so anything written from the edit
 // form displays correctly here.

@@ -56,7 +56,7 @@ const EnclosureDetailsModal = ({ enclosureInfo, onClose }) => {
                             <Detail label="Humidity">{`${enclosureInfo.humidityMin ?? '?'}%–${enclosureInfo.humidityMax ?? '?'}%`}</Detail>
                         )}
                         {enclosureInfo.lightingType && <Detail label="Lighting Type">{enclosureInfo.lightingType}</Detail>}
-                        {(enclosureInfo.lightsOnTime || enclosureInfo.lightsOffTime) && <Detail label="Lighting Schedule">{`${enclosureInfo.lightsOnTime || '—'} – ${enclosureInfo.lightsOffTime || '—'}`}</Detail>}
+                        {(enclosureInfo.lightsOnTime || enclosureInfo.lightsOffTime) && <Detail label="Lighting Schedule">{`${enclosureInfo.lightsOnTime || '✗'} • ${enclosureInfo.lightsOffTime || '✗'}`}</Detail>}
                         {enclosureInfo.bedding && <Detail label="Bedding / Substrate">{enclosureInfo.bedding}</Detail>}
                         {enclosureInfo.enrichment && <Detail label="Enrichment">{enclosureInfo.enrichment}</Detail>}
                         {enclosureInfo.notes && <Detail label="Notes">{enclosureInfo.notes}</Detail>}

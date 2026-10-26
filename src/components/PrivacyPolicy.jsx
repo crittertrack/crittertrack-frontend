@@ -127,14 +127,14 @@ const PrivacyPolicy = ({ onClose }) => {
             <h2 className="text-xl font-semibold text-gray-800 mb-3">11. Mobile App (Android / Google Play)</h2>
             <p className="mb-2">
               CritterTrack is also available as an Android app on Google Play. The Android app requests only the
-              Internet permission — it does not request access to your camera, photo library, contacts, location,
+              Internet permission • it does not request access to your camera, photo library, contacts, location,
               or any other device data. Photo uploads use the standard Android file/photo picker, which runs outside
               the app and does not grant the app broad storage access.
             </p>
             <ul className="list-disc ml-6 space-y-2">
               <li>The Android app does not use advertising, an Advertising ID, or any third-party analytics or tracking SDKs</li>
-              <li>If you enable push notifications, we store a device push subscription (endpoint and keys) so we can deliver notifications you've opted into — this is never sold or shared with third parties</li>
-              <li>Data collected through the Android app is the same account data described elsewhere in this Privacy Policy — the app connects to the same CritterTrack account and servers as the website</li>
+              <li>If you enable push notifications, we store a device push subscription (endpoint and keys) so we can deliver notifications you've opted into • this is never sold or shared with third parties</li>
+              <li>Data collected through the Android app is the same account data described elsewhere in this Privacy Policy • the app connects to the same CritterTrack account and servers as the website</li>
               <li>You can delete your account and associated data from within the app the same way as on the website (Profile settings)</li>
             </ul>
           </section>

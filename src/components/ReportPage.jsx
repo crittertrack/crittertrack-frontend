@@ -430,7 +430,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             Description *
                         </label>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                            Please write your report in English — our team can only review reports written in English.
+                            Please write your report in English • our team can only review reports written in English.
                         </p>
                         <textarea
                             value={description}
@@ -473,7 +473,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">
                             Reference ID
-                            <span className="text-gray-400 font-normal ml-1">(optional — include the code from a previous report if this is a follow-up)</span>
+                            <span className="text-gray-400 font-normal ml-1">(optional • include the code from a previous report if this is a follow-up)</span>
                         </label>
                         <input
                             type="text"

@@ -242,7 +242,7 @@ export default function ReportModal({
                                     Additional details ({description.length}/2000) *
                                 </label>
                                 <p className="report-language-hint">
-                                    Please write in English — our team can only review reports written in English.
+                                    Please write in English • our team can only review reports written in English.
                                 </p>
                                 <textarea
                                     id="description"

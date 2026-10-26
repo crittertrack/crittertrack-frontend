@@ -74,7 +74,7 @@ export const CareTabContent = ({ animal, enclosureInfo, isPublic = false }) => {
                         {(dietSupplies.length > 0 || supplementSupplies.length > 0) && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
                                 {dietSupplies.length > 0 && <DetailJsonList label="Diet Supplies" data={dietSupplies} renderItem={d => d.name ? `${d.name}${d.quantity != null ? ` (${d.quantity}${d.unit ? ` ${d.unit}` : ''})` : ''}` : 'Diet supply'} />}
-                                {supplementSupplies.length > 0 && <DetailJsonList label="Supplement Supplies" data={supplementSupplies} renderItem={s => s.name ? `${s.name}${s.dosage ? ` (${s.dosage})` : ''}${s.quantity != null ? ` — ${s.quantity}${s.unit ? ` ${s.unit}` : ''}` : ''}` : 'Supplement'} />}
+                                {supplementSupplies.length > 0 && <DetailJsonList label="Supplement Supplies" data={supplementSupplies} renderItem={s => s.name ? `${s.name}${s.dosage ? ` (${s.dosage})` : ''}${s.quantity != null ? ` • ${s.quantity}${s.unit ? ` ${s.unit}` : ''}` : ''}` : 'Supplement'} />}
                             </div>
                         )}
                         {animal.feedingBehaviorNotes && <div className="md:col-span-2 lg:col-span-3 pt-2 border-t"><InfoItem label="Feeding Behavior Notes"><p className="whitespace-pre-wrap text-sm">{animal.feedingBehaviorNotes}</p></InfoItem></div>}

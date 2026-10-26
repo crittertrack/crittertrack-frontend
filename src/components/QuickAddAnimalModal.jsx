@@ -7,7 +7,7 @@ const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Culled', 'Rehomed', 'Unknown'];
 const FALLBACK_CATEGORIES = ['Mammal', 'Reptile', 'Bird', 'Fish', 'Amphibian', 'Invertebrate', 'Other'];
 
-// Lite mode's "Add Animal" flow — ported from crittertrack-lite's own QuickAddAnimalModal so
+// Lite mode's "Add Animal" flow ported from crittertrack-lite's own QuickAddAnimalModal so
 // the web Lite experience matches native exactly, instead of the full site's multi-page
 // select-species -> add-animal form. Multi-step: quick-pick an already-owned species -> or
 // browse by category -> species, then fill in the animal's details.

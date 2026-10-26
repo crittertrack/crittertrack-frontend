@@ -24,7 +24,7 @@ function PossibleHetsEditor({ possibleHets, lociList, onAdd, onChange, onRemove,
         </button>
       </div>
       <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">
-        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) — not a confirmed genotype, just a breeding-record note like "Het. Blue".
+        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) • not a confirmed genotype, just a breeding-record note like "Het. Blue".
       </p>
       {possibleHets.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-dark-text-muted">None added.</p>
@@ -297,7 +297,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
       ? geneData.maleCombinations
       : geneData.combinations;
 
-    // Hide the '/-' wildcard option everywhere — old saved genotypes with '/-' still parse/display
+    // Hide the '/-' wildcard option everywhere  old saved genotypes with '/-' still parse/display
     // fine, it's just no longer offered here.
     return combos.filter(combo => !combo.endsWith('/-'));
   };
@@ -641,7 +641,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
               {/* Header */}
               <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Fancy Rat</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder • Fancy Rat</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -737,7 +737,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                                 onChange={(e) => handleRatGeneChange(locus, e.target.value)}
                                 className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                               >
-                                <option value="">—</option>
+                                <option value="">•</option>
                                 {RAT_GENE_LOCI[locus].combinations.map(combo => (
                                   <option key={combo} value={combo}>{combo}</option>
                                 ))}
@@ -878,7 +878,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
               {/* Header */}
               <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Syrian Hamster</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder • Syrian Hamster</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -969,7 +969,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                                 onChange={(e) => handleHamsterGeneChange(locus, e.target.value)}
                                 className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                               >
-                                <option value="">—</option>
+                                <option value="">•</option>
                                 {getValidHamsterCombinations(locus).map(combo => (
                                   <option key={combo} value={combo}>{combo}</option>
                                 ))}
@@ -1099,7 +1099,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
               {/* Header */}
               <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Campbell's Dwarf Hamster</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder • Campbell's Dwarf Hamster</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -1187,7 +1187,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                                 onChange={(e) => handleCampbellsGeneChange(locus, e.target.value)}
                                 className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                               >
-                                <option value="">—</option>
+                                <option value="">•</option>
                                 {CAMPBELLS_DWARF_HAMSTER_GENE_LOCI[locus].combinations.map(combo => (
                                   <option key={combo} value={combo}>{combo}</option>
                                 ))}
@@ -1317,7 +1317,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
               {/* Header */}
               <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Russian Dwarf Hamster</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder • Russian Dwarf Hamster</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -1405,7 +1405,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                                 onChange={(e) => handleRussianDwarfGeneChange(locus, e.target.value)}
                                 className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                               >
-                                <option value="">—</option>
+                                <option value="">•</option>
                                 {RUSSIAN_DWARF_HAMSTER_GENE_LOCI[locus].combinations.map(combo => (
                                   <option key={combo} value={combo}>{combo}</option>
                                 ))}
@@ -1549,7 +1549,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
               {/* Header */}
               <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Ball Python</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder • Ball Python</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -1625,7 +1625,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         </button>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">
-                        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) — not a confirmed genotype, just a breeding-record note like "66% Het. Clown".
+                        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) • not a confirmed genotype, just a breeding-record note like "66% Het. Clown".
                       </p>
                       {ballPythonPossibleHets.length === 0 ? (
                         <p className="text-sm text-gray-400 dark:text-dark-text-muted">None added.</p>
@@ -1684,7 +1684,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                                 onChange={(e) => handleBallPythonGeneChange(locus, e.target.value)}
                                 className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                               >
-                                <option value="">—</option>
+                                <option value="">•</option>
                                 {BALL_PYTHON_GENE_LOCI[locus].combinations.map(combo => (
                                   <option key={combo} value={combo}>{getBallPythonComboLabel(locus, combo)}</option>
                                 ))}

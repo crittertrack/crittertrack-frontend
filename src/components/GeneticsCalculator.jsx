@@ -87,7 +87,7 @@ const GENE_LOCI = {
   },
   Bt: {
     name: 'Belted',
-    description: 'Recessive. White belt of spotting across the back, often joining the belly spot to circle the body. e.g. Belted (bt/bt). Separate gene from Pied (S locus) — Adamts20, chr15. Het Bt/bt is usually solid, occasionally a belly spot.',
+    description: 'Recessive. White belt of spotting across the back, often joining the belly spot to circle the body. e.g. Belted (bt/bt). Separate gene from Pied (S locus) • Adamts20, chr15. Het Bt/bt is usually solid, occasionally a belly spot.',
     combinations: [
       'bt/bt',
       'Bt/bt', 'Bt/Bt'
@@ -140,7 +140,7 @@ const GENE_LOCI = {
   },
   Mobr: {
     name: 'xbrindle',
-    description: 'Sex-linked brindle — X-linked dominant gene. Females (Mobr/mobr) express brindling due to mosaic X-inactivation; Mobr/Mobr does not occur (always lethal). Males (Mobr/Y) also express it with copper deficiency but only survive ~2 weeks, so they can never sire offspring.',
+    description: 'Sex-linked brindle • X-linked dominant gene. Females (Mobr/mobr) express brindling due to mosaic X-inactivation; Mobr/Mobr does not occur (always lethal). Males (Mobr/Y) also express it with copper deficiency but only survive ~2 weeks, so they can never sire offspring.',
     combinations: [
       'mobr/mobr',
       'Mobr/mobr'
@@ -201,23 +201,23 @@ const GENE_LOCI = {
 };
 
 // Simple single-mutant recessive loci eligible for "possible het" (unconfirmed/probability-based
-// carrier) notes — the same concept as the '/-' wildcard combos above (a wildtype-phenotype animal
+// carrier) notes  the same concept as the '/-' wildcard combos above (a wildtype-phenotype animal
 // whose second allele is unconfirmed), just expressed as a breeding-record percentage instead of a
 // dropdown option. Excludes multi-allelic loci (A, W) and dominant-trait loci (Re, Nu, U) whose
 // '/-' ambiguity is about dosage of a *visible* trait with no way to be masked, not a hidden carrier.
 //
 // C-locus is multi-allelic (C > cch > ch > ce > c), so instead of one generic entry it gets 4
-// distinct "locus:allele" pseudo-entries below — one per recessive mutant a C/- animal could be
+// distinct "locus:allele" pseudo-entries below  one per recessive mutant a C/- animal could be
 // hiding a single copy of: C/c = possible Albino carrier, C/ch = possible Siamese carrier,
 // C/ce = possible Beige carrier, C/cch = possible Chinchilla carrier. getPossibleHetRealLocus()
 // resolves these back to the real 'C' genotype key wherever the generic single-mutant logic
 // assumed a 1:1 locus:allele mapping.
 //
-// S (Pied) is included as a plain recessive entry — S/s carries one copy of s without expressing
+// S (Pied) is included as a plain recessive entry  S/s carries one copy of s without expressing
 // Pied, same as any other simple recessive.
 //
 // Spl (Splashed) is unusual: it's Dominant (a single Spl/spl copy normally shows visually), BUT its
-// visibility is gated on C-locus dilution (see `hasVisibleCLocus`/`shouldUseSplashed` above) — an
+// visibility is gated on C-locus dilution (see `hasVisibleCLocus`/`shouldUseSplashed` above)  an
 // animal that is C/C or C/c (full-color/Albino-carrier) will NOT show Splashed even if it carries
 // Spl/spl, so it's a genuinely hidden trait in that case and worth tracking here too. MOUSE_
 // POSSIBLE_HET_OVERRIDES below supplies its wildtype/het combos explicitly since Spl's wildtype
@@ -252,7 +252,7 @@ const getPossibleHetRealLocus = (locusKey) => (locusKey && locusKey.includes(':'
 // (below, in the cross-calculation branch loop) can't handle correctly on its own:
 //  - The 4 C-locus "locus:allele" pseudo-entries, since there are 4 distinct recessive alleles and
 //    no single "the" het combo to find by case alone.
-//  - Spl (Splashed), whose wildtype allele is lowercase ('spl/spl') — the generic detection assumes
+//  - Spl (Splashed), whose wildtype allele is lowercase ('spl/spl')  the generic detection assumes
 //    the uppercase allele is always the wildtype, which is backwards for this dominant-trait locus.
 const MOUSE_POSSIBLE_HET_OVERRIDES = {
   'C:c': { wildtype: 'C/C', het: 'C/c' },
@@ -298,7 +298,7 @@ const calculatePhenotypeDynamic = (genotype, geneLociData) => {
 };
 
 // Categorized breakdown (color/markings/coat) for the last calculatePhenotype()
-// call — used by the "Seed to Appearance" feature. Mouse's phenotype string is
+// call used by the "Seed to Appearance" feature. Mouse's phenotype string is
 // built via ~50 early-return branches that all funnel through
 // addMarkingsAndTexture(), so rather than touching every return site, that
 // function stashes its computed fragments here as a side effect. Safe in
@@ -497,7 +497,7 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
       result += ' Pied';
     }
 
-    // Add Belted — recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied).
+    // Add Belted  recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied).
     // s/s and bt/bt can occur together, so Belted stacks instead of replacing Pied.
     if (genotype.Bt === 'bt/bt' && !result.includes('Belted')) {
       result += ' Belted';
@@ -1034,7 +1034,7 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
-    // Handle pink-eye modifier — named "Dominant Fawn" (not bare "Fawn") to distinguish it from
+    // Handle pink-eye modifier  named "Dominant Fawn" (not bare "Fawn") to distinguish it from
     // the e/e-based "Recessive Fawn" combo, which shares the same visible look via a different route.
     if (isPinkEye) {
       color = isTanVariant ? 'Dominant Fawn Tan' : 'Dominant Fawn';
@@ -1440,12 +1440,12 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
     else if (color === 'Agouti') color = 'Blue Agouti';
     else if (color === 'Agouti Tan') color = 'Blue Agouti Tan';
     // Brown + blue agouti = Lilac Agouti (hiiret: "blue cinnamon or lilac agouti"). NOT "Cinnamon
-    // Argente" — Argente means pink-eyed (p/p), which this mouse is not.
+    // Argente"  Argente means pink-eyed (p/p), which this mouse is not.
     else if (color === 'Cinnamon') color = 'Lilac Agouti';
     else if (color === 'Cinnamon Tan') color = 'Lilac Agouti Tan';
     else if (color === 'Agouti Fox') color = 'Blue Agouti Fox';
     else if (color === 'Cinnamon Fox') color = 'Lilac Agouti Fox';
-    // Blue + pink-eyed agouti (hiiret: unnamed/unstandardized) — calculator's own name
+    // Blue + pink-eyed agouti (hiiret: unnamed/unstandardized)  calculator's own name
     else if (color === 'Argente') color = 'Blue Argente';
     else if (color === 'Argente Tan') color = 'Blue Argente Tan';
     else if (color === 'Argente Fox') color = 'Blue Argente Fox';
@@ -1457,7 +1457,7 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
     else if (color === 'Champagne Tan') color = 'Lavender Tan';
   }
 
-  // Leaden dilution (ln/ln) — independent of D locus, dilutes black to blue-grey
+  // Leaden dilution (ln/ln)  independent of D locus, dilutes black to blue-grey
   if (genotype.Ln === 'ln/ln') {
     if (color === 'Black')           color = 'Leaden';
     else if (color === 'Extreme Black') color = 'Leaden';
@@ -1504,7 +1504,7 @@ const calculatePhenotypeCore = (genotype, originalGenotype = null) => {
     notes.push('s+ indicates polygenic modifiers affecting the spotting pattern (e.g., Hereford, Dutch).');
   }
 
-  // Belted — recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied);
+  // Belted  recessive Bt locus (Adamts20, chr15), independent of the S locus (Pied);
   // stacks with Pied rather than replacing it (s/s + bt/bt is both).
   if (genotype.Bt === 'bt/bt' && !color.includes('Belted')) {
     markings.push('Belted');
@@ -1975,7 +1975,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
   const [parent1, setParent1] = useState(defaultGenotype);
   const [parent2, setParent2] = useState(defaultGenotype);
-  // Unconfirmed carrier notes (Ball Python only): [{ locus, percent }] — blended into the cross as a weighted probability, not a fixed genotype.
+  // Unconfirmed carrier notes (Ball Python only): [{ locus, percent }]  blended into the cross as a weighted probability, not a fixed genotype.
   const [parent1PossibleHets, setParent1PossibleHets] = useState([]);
   const [parent2PossibleHets, setParent2PossibleHets] = useState([]);
   const [showExamples, setShowExamples] = useState(false);
@@ -2296,7 +2296,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     return cleaned.split('/');
   };
 
-  // A parent left this locus blank while the other parent selected it — fall back to the locus's
+  // A parent left this locus blank while the other parent selected it  fall back to the locus's
   // wildtype (homozygous dominant) combo rather than an empty string, e.g. treating an unselected
   // 'B' as 'B/B' so the cross math has real alleles to work with.
   const resolveLocusValue = (value, locus) => {
@@ -2421,7 +2421,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
   // Function to calculate offspring outcomes
   const calculateOffspring = () => {
-    // Apply defaults to both parents before calculating (mouse only — other species use genotype as-is)
+    // Apply defaults to both parents before calculating (mouse only  other species use genotype as-is)
     const p1 = selectedSpecies === 'Fancy Mouse' ? applyDefaults(parent1) : parent1;
     const p2 = selectedSpecies === 'Fancy Mouse' ? applyDefaults(parent2) : parent2;
 
@@ -2472,7 +2472,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       }
     });
 
-    // Probability-weighted map approach — see computeWeightedMap. When there are no active
+    // Probability-weighted map approach  see computeWeightedMap. When there are no active
     // possible-het entries this is a single pass; otherwise we run one pass per het
     // carrier/non-carrier branch combination and blend the results by branch probability.
     let weightedMap;
@@ -2490,7 +2490,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           const realLocus = getPossibleHetRealLocus(entry.locus);
           const combos = geneLoci[realLocus]?.combinations || [];
           const override = MOUSE_POSSIBLE_HET_OVERRIDES[entry.locus];
-          // Find wildtype (homozygous dominant) combo by allele case — different species order
+          // Find wildtype (homozygous dominant) combo by allele case  different species order
           // their combinations arrays differently (e.g. Ball Python lists wildtype first, Fancy
           // Mouse lists the recessive mutant first). Explicit overrides (C-locus pseudo-entries,
           // Spl) skip this since their wildtype can't be reliably found by case alone.
@@ -2554,7 +2554,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       totalWeight += weight;
 
       // Ball Python: two genotypes can share a visible phenotype name (e.g. "Bumblebee") while
-      // carrying different invisible recessive hets — group those separately so each carrier
+      // carrying different invisible recessive hets  group those separately so each carrier
       // combination gets its own outcome entry instead of being silently merged into one.
       const carriersKey = selectedSpecies === 'Ball Python' ? [...(result.carriers || [])].sort().join(',') : '';
       const groupKey = selectedSpecies === 'Ball Python' ? `${phenotype}::${carriersKey}` : phenotype;
@@ -2923,7 +2923,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         { name: 'Chinchilla', image: '/images/phenotypes/chinchilla.png', genotypes: [
           { A: 'A/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' },
           { A: 'Aw/Aw', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' }
-        ], note: 'Some lines are white-bellied agouti (Aw) instead of agouti tan (A/at) — Aw/Aw chinchillas breed true.' },
+        ], note: 'Some lines are white-bellied agouti (Aw) instead of agouti tan (A/at) • Aw/Aw chinchillas breed true.' },
         { name: 'Agouti Fox', genotype: { A: 'Aw/Aw', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, note: 'White-bellied agouti (Aw): agouti top with a white/cream/tan belly. Unstandardized; Aw/A, Aw/at, Aw/a and Aw/ae look the same.' },
         { name: 'Colorpoint Beige Fox', image: '/images/phenotypes/colorpointbeigefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Cream Fox', image: '/images/phenotypes/creamfox.png', genotype: { A: 'Ay/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
@@ -3109,12 +3109,12 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   href="https://ratvarietyguide.weebly.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Rat Variety Guide (ratvarietyguide.weebly.com) — used as a reference"
+                  title="Rat Variety Guide (ratvarietyguide.weebly.com) • used as a reference"
                   className="flex items-center gap-1.5"
                 >
                   <img
                     src="/images/rvg-logo-dec23-2.png"
-                    alt="Rat Variety Guide — reference used for Fancy Rat phenotypes"
+                    alt="Rat Variety Guide • reference used for Fancy Rat phenotypes"
                     className="h-10 sm:h-14 w-auto rounded"
                   />
                   <span className="text-xs text-gray-600 dark:text-dark-text-muted">as a reference</span>
@@ -3154,9 +3154,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(geneLoci).map(([locus, data]) => {
               // A Mobr/Y male only survives ~2 weeks (copper deficiency) and can never reach
-              // breeding age, so he's excluded as a Sire option here — still valid on an
+              // breeding age, so he's excluded as a Sire option here  still valid on an
               // individual animal's own record, just not selectable as a cross parent. Also hide
-              // the '/-' wildcard option everywhere — old saved genotypes with '/-' still
+              // the '/-' wildcard option everywhere  old saved genotypes with '/-' still
               // parse/display fine, it's just no longer offered here.
               const validCombinations = (data.maleCombinations || data.combinations)
                 .filter(combo => !combo.endsWith('/-') && combo !== 'Mobr/Y');
@@ -3220,7 +3220,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                       <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
                       <button type="button" onClick={() => removePossibleHet(setParent1PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
                       {parent1[getPossibleHetRealLocus(entry.locus)] && (
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored — confirmed above)</span>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored • confirmed above)</span>
                       )}
                     </div>
                   ))}
@@ -3283,7 +3283,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(geneLoci).map(([locus, data]) => {
-              // Hide the '/-' wildcard option everywhere — old saved genotypes with '/-' still
+              // Hide the '/-' wildcard option everywhere  old saved genotypes with '/-' still
               // parse/display fine, just not offered here.
               const validCombinations = data.combinations.filter(combo => !combo.endsWith('/-'));
               return (
@@ -3346,7 +3346,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                       <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
                       <button type="button" onClick={() => removePossibleHet(setParent2PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
                       {parent2[getPossibleHetRealLocus(entry.locus)] && (
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored — confirmed above)</span>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored • confirmed above)</span>
                       )}
                     </div>
                   ))}
@@ -3484,7 +3484,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                     
                     {expandedPhenotypes[idx] && (
                       <div className="mt-3 pt-3 border-t border-purple-100 dark:border-dark-accent-purple/30">
-                        {/* Carrier explanation for beginners — generateCarrierExplanation only understands
+                        {/* Carrier explanation for beginners  generateCarrierExplanation only understands
                             Fancy Mouse loci, so every other species falls back to the already-correct
                             per-genotype carriers list from its own phenotype match instead. Ball Python
                             skips this box entirely since it already surfaces carriers via result.carriers

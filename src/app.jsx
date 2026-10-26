@@ -79,14 +79,14 @@ import { openExternalLink } from './utils/externalLink';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 
-// Lazy-loaded — these are only reachable from rarely-hit branches (logged-out
+// Lazy-loaded  these are only reachable from rarely-hit branches (logged-out
 // marketing views, non-owner edit fallback), so keep them out of the main bundle.
 const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SupportersPage = lazy(() => import('./components/Donation/SupportersPage'));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
-// Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
+// Admin/moderator-only panel  pulls in recharts + ~10 admin tab components, so it
 // must never be part of the main bundle every visitor downloads.
 const AdminPanel = lazy(() => import('./components/EnhancedAdminPanel'));
 
@@ -470,7 +470,7 @@ const App = () => {
     // deliberately smaller surface:
     //   - main nav drops Contacts, Marketplace, Calendar, Community, Tools, Finance
     //   - management drops the Reproduction, Health and Feeding & Care tabs
-    // Every other surface is the Full frontend — the old per-branch Lite conditionals have
+    // Every other surface is the Full frontend  the old per-branch Lite conditionals have
     // all been removed, and the Lite* components are thin wrappers over the Full ones.
     const isLite = resolveLiteMode(userProfile);
     
@@ -505,7 +505,7 @@ const App = () => {
         if (authToken) fetchLocations();
     }, [authToken, fetchLocations]);
 
-    // Native (Capacitor) FCM push registration — no-op on web, where Web Push (PushToggleButton) is used instead.
+    // Native (Capacitor) FCM push registration  no-op on web, where Web Push (PushToggleButton) is used instead.
     useEffect(() => {
         if (!authToken) return;
         let cleanup = () => {};
@@ -517,7 +517,7 @@ const App = () => {
     }, [authToken]);
 
     // Load the core app datasets (and their photos) into the offline cache as soon as the user
-    // is signed in — up front, not lazily whenever a screen happens to be opened — so the app
+    // is signed in  up front, not lazily whenever a screen happens to be opened  so the app
     // still works offline even for screens never visited yet. Re-runs on reconnect so the
     // cache stays fresh. See utils/prefetchOfflineData.js.
     const wasOnlineRef = useRef(true);
@@ -578,7 +578,7 @@ const App = () => {
             if (!authToken) return;
             
             try {
-                // Distinguish "never set on this device" from "explicitly set to empty" — only the
+                // Distinguish "never set on this device" from "explicitly set to empty"  only the
                 // former should adopt the backend's list wholesale.
                 const hasLocalFavorites = localStorage.getItem('speciesFavorites') !== null;
                 const localFavorites = JSON.parse(localStorage.getItem('speciesFavorites') || '[]');
@@ -589,14 +589,14 @@ const App = () => {
                 const backendFavorites = response.data?.speciesFavorites || [];
                 
                 if (!hasLocalFavorites) {
-                    // First time on this device — adopt whatever the backend already has.
+                    // First time on this device  adopt whatever the backend already has.
                     localStorage.setItem('speciesFavorites', JSON.stringify(backendFavorites));
                     return;
                 }
                 
                 // localStorage is the source of truth once initialized (every toggle already pushes
                 // its full list to the backend immediately via the 'speciesFavoritesChanged' listener
-                // below) — union-merging backend favorites back in here would resurrect species the
+                // below)  union-merging backend favorites back in here would resurrect species the
                 // user had just unfavorited. Only push local -> backend to repair any drift.
                 if (JSON.stringify(localFavorites) !== JSON.stringify(backendFavorites)) {
                     await apiClient.post(`/users/species-favorites`, 
@@ -1210,7 +1210,7 @@ const App = () => {
                         handleLogout();
                     }
                 } else {
-                    // Network error or 5xx — transient, reset counter and stay silent
+                    // Network error or 5xx transient, reset counter and stay silent
                     consecutiveAuthErrors.current = 0;
                 }
                 // Other errors are non-critical (network, server errors) - don't logout
@@ -1289,7 +1289,7 @@ const App = () => {
         }
     }, [authToken, userProfile, showModalMessage]);
 
-    // Check if user has seen welcome guide — backend flag is authoritative, localStorage is a fast-path cache
+    // Check if user has seen welcome guide  backend flag is authoritative, localStorage is a fast-path cache
     useEffect(() => {
         if (!authToken || !userProfile) return;
         
@@ -2254,7 +2254,7 @@ const App = () => {
                         </div>
                     </div>
 
-                    {/* Third & Fourth rows: legacy nav — Contacts/Marketplace hidden in Lite mode,
+                    {/* Third & Fourth rows: legacy nav  Contacts/Marketplace hidden in Lite mode,
                         and the Calendar/Community row is skipped entirely (the conditional below
                         already unwraps this block when isLite). */}
                     {true && (
@@ -2318,7 +2318,7 @@ const App = () => {
                 </div>
             </header>
 
-            {/* Unified alerts/notifications banner — unread messages/notifications, moderator
+            {/* Unified alerts/notifications banner unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}
             <NotificationBar
                 authToken={authToken}
@@ -2754,7 +2754,7 @@ const AppRouter = () => {
         setShowModal(true);
     }, []);
 
-    // Native Android only: route target="_blank" link clicks through the system browser —
+    // Native Android only: route target="_blank" link clicks through the system browser 
     // the WebView used by Capacitor has no browser chrome, so target="_blank" is otherwise a no-op.
     useEffect(() => {
         if (!Capacitor.isNativePlatform()) return;

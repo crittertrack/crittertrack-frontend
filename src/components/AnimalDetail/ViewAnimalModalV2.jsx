@@ -113,7 +113,7 @@ const ViewAnimalModalV2 = ({
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal?.imageUrl || animal?.photoUrl);
     const [showQR, setShowQR] = useState(false);
-    // Absolute public link, resolved against the real site origin (see utils/publicUrl.js —
+    // Absolute public link, resolved against the real site origin (see utils/publicUrl.js
     // the native WebView's own origin is "https://localhost", which is not shareable).
     const shareUrl = animalShareUrl(animal.id_public);
     const [isFavorited, setIsFavorited] = useState(false);
@@ -139,7 +139,7 @@ const ViewAnimalModalV2 = ({
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
-    // Same aggregated event list as the Timeline tab — Recent Activity is just its top 5.
+    // Same aggregated event list as the Timeline tab Recent Activity is just its top 5.
     const animalTimelineEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
 
     useEffect(() => {
@@ -306,7 +306,7 @@ const ViewAnimalModalV2 = ({
         run();
     }, [authToken, API_BASE_URL, animal?.id_public]);
 
-    // Fetch litters where this animal is sire or dam — includes litters registered by
+    // Fetch litters where this animal is sire or dam includes litters registered by
     // OTHER users using this animal, not just ones this user created themselves.
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
@@ -777,7 +777,7 @@ useEffect(() => {
                     </div>
                 </div>
 
-                {/* Tabs — sticky so it's still reachable when the header (image/info) is taller than the viewport */}
+                {/* Tabs sticky so it's still reachable when the header (image/info) is taller than the viewport */}
                 <div className="sticky top-0 z-10 bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-border">
                     <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-4 -mb-px px-2 sm:px-4">
                         <button
@@ -800,7 +800,7 @@ useEffect(() => {
                     </nav>
                 </div>
 
-                {/* Content — the modal box itself scrolls now, so this no longer needs its own scroll region */}
+                {/* Content the modal box itself scrolls now, so this no longer needs its own scroll region */}
                 <div className="p-3 sm:p-6 rounded-b-xl flex-1">
                     {activeTab === 'dashboard' && (
                         <div className="space-y-6">
@@ -841,7 +841,7 @@ useEffect(() => {
                                             <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
                                                 <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
                                                 <InfoButton title="Average Kinship (AVK)">
-                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
+                                                    <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data • calculated purely from recorded pedigree relationships).</p>
                                                     <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
                                                 </InfoButton>
                                             </div>

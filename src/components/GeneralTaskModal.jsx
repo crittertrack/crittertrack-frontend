@@ -4,7 +4,7 @@ import { X, Search } from 'lucide-react';
 /**
  * GeneralTaskModal - Create/edit a standalone Feeding & Care task that isn't tied to any single
  * animal or enclosure (e.g. "Feed the mouse colony"). Optionally links a set of animals purely
- * for display context — this does NOT create per-animal due-dates/notifications, the task
+ * for display context  this does NOT create per-animal due-dates/notifications, the task
  * itself has exactly one due date/one reminder.
  */
 const GeneralTaskModal = ({ isOpen, onClose, onSave, task, animals = [] }) => {
@@ -97,7 +97,7 @@ const GeneralTaskModal = ({ isOpen, onClose, onSave, task, animals = [] }) => {
 
                     <div>
                         <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">
-                            Assign Animals (optional — for reference only, does not create separate reminders)
+                            Assign Animals (optional • for reference only, does not create separate reminders)
                         </label>
                         {assignedAnimals.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-1.5">
@@ -135,7 +135,7 @@ const GeneralTaskModal = ({ isOpen, onClose, onSave, task, animals = [] }) => {
                         </div>
                         {filteredAnimals.length > 50 && (
                             <div className="text-[11px] text-gray-400 dark:text-dark-text-muted text-center pt-1">
-                                Showing 50 of {filteredAnimals.length} — keep typing to narrow it down.
+                                Showing 50 of {filteredAnimals.length} • keep typing to narrow it down.
                             </div>
                         )}
                     </div>

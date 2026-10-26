@@ -7,7 +7,7 @@ const AdminAccountModeBanner = ({ session, onExit, exiting }) => (
       <Eye size={20} className="mt-0.5 shrink-0" />
       <div className="min-w-0">
         <p className="font-bold">
-          ADMIN ACCOUNT SESSION — viewing as {session.targetName} ({session.targetId})
+          ADMIN ACCOUNT SESSION • viewing as {session.targetName} ({session.targetId})
         </p>
         <p className="text-xs">
           Admin: {session.adminName}. Actions run as this user and are audited under your account.

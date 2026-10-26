@@ -65,7 +65,7 @@ export const BehaviorTabContent = ({ animal }) => {
                 </InfoCard>
             )}
 
-            {/* Training Schedules — dedicated, individually-tracked recurring training/exercise items */}
+            {/* Training Schedules dedicated, individually-tracked recurring training/exercise items */}
             {trainingSchedules.length > 0 && (
                 <InfoCard title="Training Schedules" icon={<Dumbbell size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

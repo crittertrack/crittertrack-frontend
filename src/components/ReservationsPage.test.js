@@ -27,7 +27,7 @@ const contacts = [
 
 const setup = async (overrides = {}) => {
     // Keep a mutable copy of the animals so a PUT (e.g. "Clear") is reflected in the
-    // next /animals refetch — the page refetches after every reservation change.
+    // next /animals refetch the page refetches after every reservation change.
     const animalState = (overrides.animals || animals).map(a => ({ ...a }));
     apiClient.get.mockImplementation((url) => {
         if (url === '/animals') return Promise.resolve({ data: animalState.map(a => ({ ...a })) });
@@ -162,7 +162,7 @@ test('shows extra assignments even when more animals are assigned than requested
     // Only 1 was requested but 2 are assigned: the "Any" counter must show the full 2/1.
     const count = screen.getByLabelText('Any 2 of 1');
     expect(count).toBeTruthy();
-    // Over-assignment is never flagged red — the request is still covered, so it
+    // Over-assignment is never flagged red the request is still covered, so it
     // keeps the green "done" colour.
     expect(count.className).not.toContain('text-red');
     expect(count.className).toContain('bg-green-100');
@@ -348,7 +348,7 @@ test('the payment filter separates due from done payments', async () => {
         { id_public: 'CTC13', name: 'Mochi', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Kim', reservedPrice: 30, reservedPaymentStatus: 'done' },
     ];
     await setup({ animals: mixed });
-    // Done: only Mochi — Butter is still due, and unassigned animals have no payment status.
+    // Done: only Mochi Butter is still due, and unassigned animals have no payment status.
     fireEvent.change(screen.getByLabelText('Payment filter'), { target: { value: 'done' } });
     expect(await screen.findByText('Mochi')).toBeTruthy();
     expect(screen.queryByText('Butter')).toBeNull();
