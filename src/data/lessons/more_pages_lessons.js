@@ -1,3 +1,5 @@
+import ANDROID_APK_URL from '../utils/appDownloads';
+
 export const MORE_PAGES_LESSONS = [
   {
     id: 'lite-mode',
