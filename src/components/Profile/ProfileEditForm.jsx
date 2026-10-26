@@ -1003,35 +1003,35 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={showPersonalName} onChange={(e) => setShowPersonalName(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                            <span>Display **Personal Name** on your public profile card.</span>
+                            <span>Display <strong>Personal Name</strong> on your public profile card.</span>
                         </label>
                         
                         {breederName && (
                             <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showBreederName} onChange={(e) => setShowBreederName(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                                <span>Display **Breeder Name** on your public profile card.</span>
+                                <span>Display <strong>Breeder Name</strong> on your public profile card.</span>
                             </label>
                         )}
                         
                         <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={showEmailPublic} onChange={(e) => setShowEmailPublic(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                            <span>Display **Email Address** on your public profile card.</span>
+                            <span>Display <strong>Email Address</strong> on your public profile card.</span>
                         </label>
                         
                         {websiteURL && (
                             <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showWebsiteURL} onChange={(e) => setShowWebsiteURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                                <span>Display **Website URL** on your public profile card.</span>
+                                <span>Display <strong>Website URL</strong> on your public profile card.</span>
                             </label>
                         )}
                         {socialMediaURL && (
                             <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showSocialMediaURL} onChange={(e) => setShowSocialMediaURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                                <span>Display **Social Media Link** on your public profile card.</span>
+                                <span>Display <strong>Social Media Link</strong> on your public profile card.</span>
                             </label>
                         )}
                         
@@ -1039,13 +1039,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showBio} onChange={(e) => setShowBio(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                                <span>Display **Bio** on your public profile card.</span>
+                                <span>Display <strong>Bio</strong> on your public profile card.</span>
                             </label>
                         )}
                         <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={showStatsTab} onChange={(e) => setShowStatsTab(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                            <span>Show **Stats** tab on your public profile.</span>
+                            <span>Show <strong>Stats</strong> tab on your public profile.</span>
                         </label>
                     </div>
 
