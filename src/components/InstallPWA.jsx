@@ -18,9 +18,19 @@ const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent
 let capturedInstallPrompt = null;
 const promptListeners = new Set();
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
+  // Capture the install prompt event for later use (e.g. showing the install prompt
+  // on user click). The browser may auto-show the prompt on some platforms, so we
+  // defer preventDefault() until the user actively triggers the install flow. If
+  // prompt() isn't called after ~30s the event is discarded to avoid the Chrome
+  // warning about preventDefault() without a subsequent prompt().
   capturedInstallPrompt = e;
-  promptListeners.forEach((listener) => listener(e));
+  const timeout = setTimeout(() => {
+    if (capturedInstallPrompt) {
+      capturedInstallPrompt = null;
+      promptListeners.forEach((listener) => listener(null));
+    }
+  }, 30000);
+  promptListeners.add(() => clearTimeout(timeout));
 });
 
 // compact=true renders just a small text link instead of the full button+info-toggle UI —

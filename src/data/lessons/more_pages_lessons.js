@@ -515,11 +515,3 @@ export const MORE_PAGES_LESSONS = [
 ];
 
 
-const TUTORIAL_SECTIONS = [
-  { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS },
-  { id: 'animal-record-tour', label: '🐾 The Animal Record: A Tab-by-Tab Tour', lessons: ANIMAL_RECORD_TAB_LESSONS },
-  { id: 'animal-list-tour', label: '📋 The Animal List: A Tab-by-Tab Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
-  { id: 'settings-tour', label: '⚙️ Profile & Settings: A Tab-by-Tab Tour', lessons: SETTINGS_TAB_LESSONS },
-  { id: 'litter-management-tour', label: '🐣 The Litter Management: A Feature-by-Feature Tour', lessons: LITTER_MANAGEMENT_LESSONS },
-  { id: 'more-pages-tour', label: '📚 More Pages & Tools', lessons: MORE_PAGES_LESSONS },
-];
