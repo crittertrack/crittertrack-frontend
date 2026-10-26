@@ -991,6 +991,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             if (formData.birthDate) {
                 syncDamPostBirth(formData.damId_public);
             }
+            if (formData.birthOutcome === 'All lost' && formData.damId_public) {
+                try {
+                    await apiClient.put(`/animals/${formData.damId_public}`, { isPregnant: false, isNursing: false, isInMating: false });
+                    await fetchMyAnimals();
+                } catch (e) { console.warn(e?.message); }
+            }
 
             // Upload any images that were staged during creation
             if (pendingLitterImages.length > 0) {
@@ -1718,6 +1724,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
             // First-time birth recorded on this litter dam transitions Pregnant -> Nursing
             if (isNewBirth) {
                 syncDamPostBirth(formData.damId_public);
+            }
+            // "All lost" outcome clears the dam's reproductive states
+            if (formData.birthOutcome === 'All lost' && formData.damId_public) {
+                try {
+                    await apiClient.put(`/animals/${formData.damId_public}`, { isPregnant: false, isNursing: false, isInMating: false });
+                    await fetchMyAnimals();
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: formData.damId_public, isPregnant: false, isNursing: false, isInMating: false } }));
+                } catch (e) {
+                    console.warn('Failed to clear dam reproductive state after All lost outcome:', e?.message);
+                }
             }
             // Backend recomputes isNursing from weaningConfirmed on every litter save let other
             // mounted components (Reproduction tab, dashboards) refresh their own stale copies too.
@@ -3728,6 +3744,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Birth Method</div>
                                                             <div className="font-semibold text-gray-800 dark:text-dark-text">{litter.birthMethod}</div>
+                                                        </div>
+                                                    )}
+                                                    {litter.birthOutcome && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Birth Outcome</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{litter.birthOutcome}</div>
                                                         </div>
                                                     )}
                                                     {litter.birthDate && (

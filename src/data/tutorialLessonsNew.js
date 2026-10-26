@@ -3,144 +3,145 @@ import ANDROID_APK_URL from '../utils/appDownloads';
 const GETTING_STARTED_LESSONS = [
   {
     id: 'getting-started-layout-tour',
-    title: 'App Layout Tour',
-    description: 'A quick tour of the main navigation bar and the icons/menus you\'ll use every day.',
-    steps: [
+    title: 'Getting Around CritterTrack',
+  description: 'Get familiar with the navigation, menus, and shortcuts you will use throughout CritterTrack.',
+  steps: [
       {
-        stepNumber: 1,
-        title: 'Main navigation',
-        content: 'Across the top: Animals, Litters, Contacts, Marketplace, Calendar, Community, Tools, and Finance. Most take you to a full page for that area of the app; Community, Tools, and Finance open a menu of pages.',
+       stepNumber: 1,
+      title: 'Main navigation',
+      content: 'The navigation bar at the top gives you access to Animals, Litters, Contacts, Marketplace, Calendar, Community, Tools, and Finance. Most open their own page, while Community, Tools, and Finance have dropdown menus with additional options.',
       },
       {
         stepNumber: 2,
-        title: 'The scrolling news ticker',
-        content: 'A scrolling banner above the nav bar links to Ko-fi support, Report a Bug, and Helpful Resources, plus the latest community announcements/polls - clicking any of those jumps to Community. This is separate from the alerts banner just below the nav bar, which covers unread messages/notifications and care alerts instead.',
+      title: 'News and alerts',
+      content: 'Above the navigation bar, you will find a scrolling banner with community announcements, polls, and useful links such as Ko-fi, Report a Bug, and Helpful Resources. Just below the navigation bar is a separate alerts banner for unread messages, notifications, and animal care reminders.',
       },
       {
-        stepNumber: 3,
-        title: 'Tools menu',
-        content: 'The Tools dropdown holds the Offspring Calculator, COI Calculator, Target Outcome Calculator, and Family Tree Explorer. Open the Help Center from your profile menu.',
+       stepNumber: 3,
+      title: 'Tools menu',
+      content: 'The Tools menu contains the Offspring Calculator, COI Calculator, Target Outcome Calculator, and Family Tree Explorer. You can find the Help Center in your profile menu.',
       },
       {
-        stepNumber: 4,
-        title: 'Finance menu',
-        content: 'The Finance dropdown holds: Budget Tracker and Supplies.',
-      },
-      {
-        stepNumber: 5,
-        title: 'Top-right icons',
-        content: 'From left to right: the theme toggle (light/dark/auto), a push notifications quick-toggle for this device, the Lite mode toggle (feather icon), the Notifications bell (purple badge = unread count), and the Messages icon (red badge = a message from CritterTrack staff, purple = a message from another user). The feather icon switches between Full and Lite mode - you\'ll get a confirmation prompt either way. It\'s tied to your account rather than your device, so it follows you between the website and the Android app. Lite is the same app with a smaller surface: the navigation drops Contacts, Marketplace, Calendar and Community, and each animal opens with just four tabs (Dashboard, Records, Gallery, Pedigree) instead of eleven. Nothing is lost when you switch - anything hidden in Lite is still saved and waiting in Full. See the "Lite Mode" lesson in More Pages & Tools for the full detail.',
-      },
-      {
-        stepNumber: 6,
-        title: 'Your profile avatar',
-        content: 'Click your avatar (top-right corner) to open a menu with Profile, Help Center, Report an Issue and Logout.',
-      },
-      {
-        stepNumber: 7,
-        title: 'Info buttons',
-        content: 'Look for a small ⓘ icon near a page\'s title for a quick contextual hint. When a related guide is available, follow its link to open that article in the Help Center.',
-      },
-      {
-        stepNumber: 8,
-        title: 'Search for animals and breeders',
-        content: 'Use the global search in the header to look up public animals or breeder profiles by name, species, or public ID. Enter at least two characters for a text search. A CTC ID searches for an animal, and a CTU ID searches for a breeder profile.',
-      },
-    ],
+      stepNumber: 4,
+      title: 'Finance menu',
+      content: 'The Finance menu gives you access to the Budget Tracker, Supplies, and Waitlist & Reservations. Use the Budget Tracker to keep track of income and expenses, Supplies to manage your inventory, and Waitlist & Reservations to organize interested buyers, track reservations, and manage waiting lists for your animals.',
+      },      
+ {
+      stepNumber: 5,
+      title: 'Top-right icons',
+      content: 'The icons in the top-right corner let you change your theme (light, dark, or automatic), toggle push notifications for your device, switch between Full and Lite mode using the feather icon, check your notifications, and open your messages. A purple badge shows unread notifications or messages from other users, while a red message badge indicates a message from CritterTrack staff. Lite mode keeps the essentials, including Animals and Litters, while hiding additional features until you switch back. Your Lite mode preference follows your account across the website and Android app, and switching modes never deletes your information. See the "Lite Mode" lesson under More Pages & Tools for details.',
+    },
+{
+      stepNumber: 6,
+      title: 'Your profile menu',
+      content: 'Click your profile picture in the top-right corner to open your account menu. From here, you can visit your profile, open the Help Center, report an issue, or log out.',
+    },
+{
+      stepNumber: 7,
+      title: 'Info buttons',
+      content: 'You will notice small ⓘ icons on different pages throughout CritterTrack. Click one for a quick explanation of that feature. Where a more detailed guide is available, you can follow the link directly to the relevant Help Center article.',
+    },
+{
+      stepNumber: 8,
+      title: 'Searching for animals and breeders',
+      content: 'Use the search bar in the header to find public animals and breeder profiles. You can search by name, species, or public ID. Text searches require at least two characters. Animal IDs begin with CTC, while breeder profile IDs begin with CTU.',
+    },
+      ],
   },
   {
-    id: 'getting-started-animals',
-    title: 'Creating and Editing Animals',
-    description: 'How to add a new animal, what the edit form covers, and a few things that trip people up early on.',
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Click "Add Animal"',
-        content: 'From the My Animals page, click the "Add Animal" button (top of the list on desktop, or the + icon in the title row on mobile).',
-      },
-      {
+id: 'getting-started-animals',
+  title: 'Creating and Editing Animals',
+  description: 'Learn how to add animals, update their information, link parents, and manage visibility and ownership.',
+  steps: [
+ {
+      stepNumber: 1,
+      title: 'Adding a new animal',
+      content: 'Click "⊕ Add Animal" at the top right of the page. On mobile this shows just "⊕ Animal" instead.',
+    },
+          {
         stepNumber: 2,
         title: 'Pick a species',
-        content: 'This opens the Select Species screen first. Search by name, filter by category, or star a species to favorite it for next time. Don\'t see your exact species? Click "Add New Species" to define a custom one.',
+        content: 'This opens the Select Species screen first. Start by selecting the species you want to add. You can search by name, browse by category, or mark frequently used species as favorites for quicker access next time. If your species is missing, click "Add New Species" to create a custom one.',
       },
       {
         stepNumber: 3,
         title: 'Fill out the new animal form',
-        content: 'Picking a species opens the "Add New [Species]" form. Name is the only field you truly have to fill in - everything else can be filled in now or left for later.',
+        content: 'Picking a species opens the "Add New [Species]" form. Name is the only field you truly have to fill in • everything else can be filled in now or left for later.',
       },
-      {
-        stepNumber: 4,
-        title: 'The form is organized into tabs',
-        content: 'Dashboard, Identification, Appearance, Health, Routine Care, Behavior, Breeding, Pedigree, Gallery, Timeline, and Records - plus a Customize tab at the end where you can hide any tabs or sections you don\'t use for that species. You don\'t need to fill out every tab right away - save with just the required field and come back later.',
-      },
-      {
-        stepNumber: 5,
-        title: 'Editing an existing animal',
-        content: 'Open the animal\'s detail view and click Edit in the header - that\'s the only way in.',
-      },
-      {
-        stepNumber: 6,
-        title: 'Linking a Sire/Dam',
-        content: 'On the Pedigree tab, every ancestor slot (Sire, Dam, and further generations) links to a real animal already on CritterTrack. Click a slot and search to connect the actual parent - it can be one of your own animals, or any other public animal on the site, and the search filters to the correct gender for that slot (e.g. only males for a Sire slot). The parent needs to already exist as an animal record on CritterTrack, so if an ancestor isn\'t tracked yet, add them as their own animal first, then come back and link them. Because these are real records, a linked parent feeds the pedigree tree everywhere it should: the full chart, the parent cards, and COI/AVK calculations.',
-      },
-      {
-        stepNumber: 7,
-        title: 'Public vs. Private',
-        content: 'Each animal has its own Eye (public, green) / Eye-off (private, gray) icon on its card in My Animals. Public animals can appear on your public breeder profile and pedigrees; Private animals are fully hidden from everyone else. This is set per-animal.',
-      },
-      {
-        stepNumber: 8,
-        title: 'Owned vs. Unowned',
-        content: 'Every animal you create defaults to "Owned." Use the Heart / Heart-off button on its card to flip this label - handy for animals you created but don\'t currently have in your possession (co-owned, borrowed, or only added for pedigree). The "Owned"/"All" buttons at the top of the list just filter by this same label, and bulk actions exist to mark many animals at once. Flipping this label never sells, transfers, or archives an animal - actually transferring ownership to another user is a separate process, covered in the next lesson.',
-      },
-      {
-        stepNumber: 9,
-        title: 'A few features live here but are managed elsewhere',
-        content: 'Enclosure assignment, Health/Quarantine & Treatment, Feeding/Grooming/Training schedules, Marketplace availability, Breeding Line assignment, and Seller/Buyer contact linkage can all be set from this same edit form, but you\'ll do the day-to-day work on their own dedicated pages - each covered in a later lesson.',
-      },
-    ],
+
+    {
+      stepNumber: 4,
+      title: 'Exploring the different tabs',
+      content: 'The form is divided into tabs: Dashboard, Identification, Appearance, Health, Routine Care, Behavior, Breeding, Pedigree, Gallery, Timeline, and Records. There is also a Customize tab where you can hide tabs or sections you don\'t use for that species. You don\'t have to complete everything at once. Save your animal and return whenever you want to add more information.',
+    },
+ {
+      stepNumber: 5,
+      title: 'Editing an existing animal',
+      content: 'To make changes to an animal you\'ve already added, open its record by clicking the animal card and click "Edit" in the header. This opens the same form, with all previously saved information ready to update.',
+    },
+ {
+      stepNumber: 6,
+      title: 'Linking parents and ancestors',
+      content: 'Open the Pedigree tab to connect an animal to its sire, dam, and earlier ancestors. Click an ancestor slot to search for an existing animal on CritterTrack. You can link your own animals or public animals belonging to other users. Search results are filtered by the appropriate gender for each slot. If an ancestor isn\'t on CritterTrack yet, you\'ll need to create a record for it first. Linked ancestors are used throughout the pedigree, including parent cards, family trees, and COI/AVK calculations.',
+    },
+{
+  stepNumber: 7,
+  title: 'Public and private animals',
+  content: 'Each animal has its own visibility setting, shown by the eye icon on its card in My Animals. A green eye means Public, while a gray crossed-out eye means Private. Public animals can be found through searches and viewed through other animals\' pedigrees, even if they are marked as Unowned. To appear on your public breeder profile, an animal must be both Public and Owned. Private animals are entirely hidden from other users, regardless of their ownership setting. You can change both settings individually for each animal.',
+},
+
+{
+  stepNumber: 8,
+  title: 'Owned, Unowned, and the Owned/All filter',
+  content: 'Every animal you create is marked as Owned by default and appears in the "Owned" view of My Animals. You can change this using the heart icon on its card. Mark an animal as Unowned if you want to keep its record without including it among the animals you currently own. The Owned/All toggle at the top of My Animals controls which records are displayed: "Owned" shows only animals marked as Owned, while "All" shows every animal you\'ve created, whether Owned or Unowned. Archived or transferred animals are excluded from the My Animals view and can be found separately under Archived. Changing the heart setting only affects the ownership label and does not archive, sell, or transfer an animal. You can also change the Owned status of multiple animals at once using bulk actions.',
+},
+{
+      stepNumber: 9,
+      title: 'Other features connected to animal records',
+      content: 'You can also manage enclosure assignments, health and quarantine information, treatments, feeding and care schedules, breeding lines, Marketplace availability, and seller or buyer details from the animal form. These features also have their own dedicated pages for day-to-day management, which are explained in other Help Center lessons.',
+    },
+      ],
   },
   {
     id: 'getting-started-transfers',
     title: 'Transferring Animal Ownership',
-    description: 'A closer look at the Transfer feature - this one trips people up, so it gets its own lesson.',
-    steps: [
+ description: 'Learn how to transfer an animal to another CritterTrack user, manage pending transfers, and understand what happens to its records.',
+     steps: [
       {
         stepNumber: 1,
         title: 'Starting a transfer',
-        content: 'The two-way-arrows "Transfer" button lives in the animal\'s detail view header, next to Edit. Click it and search for the recipient by name or CTU ID.',
-      },
+     content: 'Open the animal you want to transfer and click the two-way-arrows "Transfer" button in its header, next to Edit. This opens the Transfer Ownership window, where you can choose the user who will receive the animal.',      },
       {
         stepNumber: 2,
-        title: 'The Transfer Ownership modal',
-        content: 'Clicking Transfer opens a modal showing the animal\'s photo and info at the top, a recipient search (by name or CTU ID), an optional sale price, and a notes field for a message to include. Search results let you pick the right user before sending.',
+        title: 'Choosing the new owner',
+        content: 'Clicking Transfer opens a modal showing the animal\'s photo and info at the top, Search for the recipient by their name or CTU ID and select the correct user from the results. You can also enter an optional sale price and add a note for the recipient. Once everything looks correct, send the transfer request.',      
       },
-      {
-        stepNumber: 3,
-        title: 'Nothing changes until they accept',
-        content: 'Sending a transfer doesn\'t move ownership right away - the recipient gets a notification with Accept or Decline options, and the animal stays fully yours until they act on it.',
-      },
-      {
-        stepNumber: 4,
-        title: 'Withdrawing a pending transfer',
-        content: 'While a transfer is pending, that same header button becomes a "Withdraw" action (shown in red) so you can cancel it before the recipient responds.',
-      },
-      {
-        stepNumber: 5,
-        title: 'Returning an animal to its original breeder',
-        content: 'If you\'re ever on the receiving end of a transfer, a "Return to original breeder" button (amber) appears in that animal\'s header, letting you hand it straight back whenever you want.',
-      },
-      {
-        stepNumber: 6,
-        title: 'Where transferred animals end up on your list',
-        content: 'Once accepted, the recipient becomes the new owner with full edit access, while you\'re automatically kept on as the original breeder with permanent view-only access so pedigree and history stay intact. The animal is also pulled from your active My Animals list and counted under "Sold/Archived" instead - a dedicated lesson later covers that Archive section in full.',
-      },
-      {
-        stepNumber: 7,
-        title: 'Accepting a returned animal',
-        content: 'A return doesn\'t happen instantly either - the original breeder gets a Pending Requests notification (e.g. "X wants to return Tutorial (CTC1234) to you") with Accept or Decline options, and must accept it before ownership actually moves back.',
-      },
-    ],
+    {
+      stepNumber: 3,
+      title: 'Waiting for a response',
+      content: 'Sending a transfer request does not immediately change ownership. The recipient receives a notification and can choose to Accept or Decline. Until they accept, the animal remains in your account and you can continue managing its records.',
+    },      
+    {
+      stepNumber: 4,
+      title: 'Cancelling a pending transfer',
+      content: 'Changed your mind? While the recipient has not responded, the two-way-arrow Transfer button changes to a red button with a circular arrow. Click it to cancel the pending request and keep the animal in your account.',
+    },
+    {
+      stepNumber: 5,
+      title: 'What happens after acceptance?',
+      content: 'Once the recipient accepts, they become the new owner and receive full editing access to the animal. The animal is removed from your active My Animals list and can be found under Sold/Archived instead. You remain listed as the original breeder and keep permanent view-only access to the record, allowing its pedigree and history to remain connected.',
+    },
+{
+      stepNumber: 6,
+      title: 'Returning an animal to its original breeder',
+      content: 'If an animal was transferred to you, the transfer button turns into a return button with a yellow/red circular arrow. In edit the delete button also gets replaced with a "Return to Original Breeder" button. You can use this to request a transfer back to the original breeder. Just like a regular transfer, the animal does not change hands immediately.',
+    },
+ {
+      stepNumber: 7,
+      title: 'Accepting or declining a return',
+      content: 'When someone requests to return an animal to you, you will receive a notification under Pending Requests. You can Accept or Decline the return. Ownership only changes once you accept, and the animal will then become available in your active records again.',
+    },
+      ],
   },
   {
     id: 'getting-started-account-settings',
