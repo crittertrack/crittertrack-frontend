@@ -1,12 +1,12 @@
 // Canonical enclosure "purpose" options.
 //
 // This list used to be duplicated inline in every enclosure form and had drifted out of sync
-// with the backend's enum — the dropdowns offered "Medical" and "Quarantine" while the schema
+// with the backend's enum the dropdowns offered "Medical" and "Quarantine" while the schema
 // only accepted a single combined "health" value, so those choices failed to save. Keep this
 // in sync with the backend's utils/enclosurePurpose.js (the two are standalone apps and can't
 // share an import).
 //
-// Order matters — it drives the order of the dropdown.
+// Order matters it drives the order of the dropdown.
 export const ENCLOSURE_PURPOSE_OPTIONS = [
     { value: 'general', label: 'General' },
     { value: 'reproduction', label: 'Nursery / Breeding' },
