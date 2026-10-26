@@ -1,7 +1,29 @@
+
 {
   "buildCommand": "npm run build:ci",
   "outputDirectory": "build",
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+  "key": "Content-Security-Policy-Report-Only",
+  "value": "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://crittertrack-pedigree-production.up.railway.app; frame-src 'self' https://translate.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+}
+      ]
+    },
     {
       "source": "/index.html",
       "headers": [
