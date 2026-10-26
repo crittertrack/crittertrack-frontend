@@ -13,7 +13,7 @@ const TermsOfService = ({ onClose }) => {
         </div>
         
         <div className="p-6 space-y-6 text-gray-700 max-h-[70vh] overflow-y-auto">
-          <p className="text-sm text-gray-500">Last Updated: December 7, 2025</p>
+          <p className="text-sm text-gray-500">Last updated: October 26, 2026</p>
 
           <section className="space-y-3">
   <p className="text-base leading-relaxed">

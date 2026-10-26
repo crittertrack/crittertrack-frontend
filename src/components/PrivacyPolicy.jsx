@@ -396,8 +396,9 @@ const PrivacyPolicy = ({ onClose }) => {
     </a>.
   </p>
   <p className="mt-3">
-    We'll do our best to help and respond to your request
-    as soon as reasonably possible.
+    As CritterTrack is maintained independently, response
+    times may vary, but we'll do our best to help whenever
+    possible.
   </p>
 </section>
         </div>
