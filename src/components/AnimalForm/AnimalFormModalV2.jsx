@@ -2425,6 +2425,7 @@ const AnimalFormModalV2 = ({
             heightAtWithers: animalToEdit.heightAtWithers || '',
             bodyConditionScore: animalToEdit.bodyConditionScore || '',
             origin: animalToEdit.origin || 'Captive-bred',
+            conservationStatus: animalToEdit.conservationStatus || 'Not Evaluated',
             isNeutered: animalToEdit.isNeutered || false,
             isInfertile: animalToEdit.isInfertile || false,
             heatStatus: animalToEdit.heatStatus || '',
@@ -2600,6 +2601,7 @@ const AnimalFormModalV2 = ({
             heightAtWithers: '',
             bodyConditionScore: '',
             origin: 'Captive-bred',
+            conservationStatus: 'Not Evaluated',
             isNeutered: false,
             isInfertile: false,
             heatStatus: '',
@@ -4245,6 +4247,19 @@ const AnimalFormModalV2 = ({
                                                 <option value="Captive-bred">Captive-bred</option>
                                                 <option value="Wild-caught">Wild-caught</option>
                                                 <option value="Rescue">Rescue</option>
+                                            </select>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mt-2">Conservation Status</label>
+                                            <select name="conservationStatus" value={formData.conservationStatus || 'Not Evaluated'} onChange={handleChange}
+                                                className="block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="Not Evaluated">Not Evaluated</option>
+                                                <option value="Data Deficient">Data Deficient</option>
+                                                <option value="Least Concern">Least Concern</option>
+                                                <option value="Near Threatened">Near Threatened</option>
+                                                <option value="Vulnerable">Vulnerable</option>
+                                                <option value="Endangered">Endangered</option>
+                                                <option value="Critically Endangered">Critically Endangered</option>
+                                                <option value="Extinct in the Wild">Extinct in the Wild</option>
+                                                <option value="Extinct">Extinct</option>
                                             </select>
                                         </div>
                                     )}

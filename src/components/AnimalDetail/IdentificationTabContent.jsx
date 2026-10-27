@@ -67,6 +67,7 @@ export const IdentificationTabContent = ({
             <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Origin" value={animal.origin} />
+                        <InfoItem label="Conservation Status" value={animal.conservationStatus || 'Not Evaluated'} />
                     </dl>
             </InfoCard>
             )}

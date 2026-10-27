@@ -509,7 +509,7 @@ useEffect(() => {
                                     {!isHeaderCollapsed && (
                                         <>
                                             <p className="text-xs text-gray-700 dark:text-dark-text-secondary">
-                                                {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
+                                                {[animal.species, animal.strain, animal.breed, animal.origin, (animal.conservationStatus && animal.conservationStatus !== 'Not Evaluated' ? animal.conservationStatus : null)].filter(Boolean).join(' • ')}
                                             </p>
                                             <div className="flex items-center gap-2 mt-2 sm:mt-3 flex-wrap">
                                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text'}`}>
