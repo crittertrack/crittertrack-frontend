@@ -760,7 +760,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
+    const handleDownloadTemplate = async () => {
+        setExportLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/export/template`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            if (!response.ok) throw new Error(`Template download failed (${response.status})`);
+            const blob = await response.blob();
+            await downloadBlob(blob, 'crittertrack_template.xlsx');
+        } catch (err) {
+            showModalMessage('Template Download Failed', err.message);
+        } finally {
+            setExportLoading(false);
+        }
+    };
     const handleImportPreview = async () => {
+
         if (!importFile) return;
         setImportLoading(true);
         setImportPreview(null);
@@ -1604,6 +1620,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     >
                         {exportLoading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
                         Export Data
+                    </button>
+                    <button
+                        onClick={handleDownloadTemplate}
+                        disabled={exportLoading}
+                        className="ml-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                    >
+                        <Download size={16} /> Download Template
                     </button>
                 </div>
 
