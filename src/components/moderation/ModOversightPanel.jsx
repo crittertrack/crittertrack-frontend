@@ -364,7 +364,6 @@ export default function ModOversightPanel({
             }
 
             const url = `${baseUrl}/moderation/reports?${params.toString()}`;
-            console.log('[ModOversightPanel] Fetching reports from:', url, 'with reportType:', reportType, 'statusFilter:', statusFilter);
 
             const response = await fetch(url, {
                 headers: {
@@ -374,13 +373,11 @@ export default function ModOversightPanel({
 
             const data = await response.json();
 
-            console.log('[ModOversightPanel] Response status:', response.status, 'Data:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || data.error || 'Failed to fetch reports');
             }
 
-            console.log('[ModOversightPanel] Successfully fetched', (data.reports || []).length, 'reports');
             setReports(data.reports || []);
             if (selectedReport) {
                 const refreshedSelection = (data.reports || []).find((report) => report._id === selectedReport._id);
@@ -550,12 +547,6 @@ export default function ModOversightPanel({
     const handleUpdateStatus = async (nextStatus) => {
         if (!selectedReport || !nextStatus) return;
         
-        console.log('[ModOversightPanel] Updating status:', { 
-            nextStatus, 
-            type: typeof nextStatus,
-            reportId: selectedReport._id,
-            reportType 
-        });
         
         setActionLoading(true);
         setError('');
@@ -574,14 +565,6 @@ export default function ModOversightPanel({
                 adminNotes: adminNotes.trim() || undefined
             };
             
-            console.log('[ModOversightPanel] Request details:', {
-                url: `${baseUrl}/moderation/reports/${actualType}/${selectedReport._id}/status`,
-                body: requestBody,
-                statusValue: nextStatus,
-                statusType: typeof nextStatus,
-                statusLength: nextStatus?.length,
-                statusCharCodes: Array.from(nextStatus || '').map(c => c.charCodeAt(0))
-            });
 
             const response = await fetch(
                 `${baseUrl}/moderation/reports/${actualType}/${selectedReport._id}/status`,
@@ -597,11 +580,6 @@ export default function ModOversightPanel({
 
             const data = await response.json();
             
-            console.log('[ModOversightPanel] Response:', { 
-                ok: response.ok, 
-                status: response.status, 
-                data 
-            });
 
             if (!response.ok) {
                 console.error('[ModOversightPanel] Update failed:', data);

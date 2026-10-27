@@ -209,7 +209,6 @@ const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disa
 };
 
 const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, setAnimalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
-    console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
     const [personalName, setPersonalName] = useState(userProfile.personalName);
     const [breederName, setBreederName] = useState(userProfile.breederName || '');
@@ -284,7 +283,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     }, [userProfile]);
     
-    console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
     const [profileImageURL, setProfileImageURL] = useState(
@@ -561,17 +559,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             state: country === 'US' ? (usState || null) : null,
         };
         
-        console.log('[PROFILE UPDATE] allowMessages being sent:', allowMessages, 'Type:', typeof allowMessages);
-        console.log('[PROFILE UPDATE] Bio state:', bio, 'Type:', typeof bio, 'Length:', bio ? bio.length : 'null');
-        console.log('[PROFILE UPDATE] showBio state:', showBio, 'Type:', typeof showBio);
-        
-        console.log('[PROFILE UPDATE] Sending payload:', {
-            showBreederName: payload.showBreederName,
-            breederName: payload.breederName,
-            bio: payload.bio,
-            showBio: payload.showBio,
-            showBreederNameType: typeof payload.showBreederName
-        });
+
 
         try {
             let uploadSucceeded = false;
@@ -582,9 +570,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     const fd = new FormData();
                     fd.append('file', profileImageFile);
                     fd.append('type', 'profile');
-                    console.log('Profile: attempting upload to', `${API_BASE_URL}/upload`);
                     const uploadResp = await apiClient.post('/upload', fd);
-                    console.log('Profile upload response:', uploadResp.status, uploadResp.data);
                     if (uploadResp?.data) {
                         uploadData = uploadResp.data;
                         const returnedUrl = uploadResp.data.url || uploadResp.data.path || (uploadResp.data.data && (uploadResp.data.data.url || uploadResp.data.data.path));
@@ -604,7 +590,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             }
 
             if (uploadSucceeded) {
-                console.log('Profile: sending JSON profile update with image URL', payload.profileImageUrl);
                 const resp = await apiClient.put('/users/profile', payload);
                 // Try to obtain updated user object from response
                 const updatedUser = resp?.data?.user || resp?.data || null;
@@ -618,9 +603,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     Object.keys(payload).forEach(k => {
                         if (payload[k] !== undefined && payload[k] !== null) form.append(k, payload[k]);
                     });
-                    console.log('Profile: attempting multipart PUT to users/profile with form keys:', Array.from(form.keys()));
                     const profileResp = await apiClient.put('/users/profile', form);
-                    console.log('Profile multipart PUT response:', profileResp.status, profileResp.data);
                     const updatedUser = profileResp?.data?.user || profileResp?.data || null;
                     if (onSaveSuccess) await onSaveSuccess(updatedUser);
                 } catch (fmErr) {

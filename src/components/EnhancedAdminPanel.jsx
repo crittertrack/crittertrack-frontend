@@ -331,7 +331,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     const handle2FASuccess = async () => {
         // 2FA verification succeeded
-        console.log('✓ 2FA verification successful, setting authenticated=true');
         setShow2FA(false);
         setIsAuthenticated(true);
         setShowPasswordPrompt(false);
@@ -385,7 +384,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     // If not authenticated yet, show password/2FA screens
     if (!isAuthenticated) {
-        console.log('[EnhancedAdminPanel] Not authenticated yet, showing auth screens');
         // 2FA Modal
         // TwoFactorAuth component deleted - 2FA now handled by ModerationAuthModal
         // if (show2FA) {
@@ -394,7 +392,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
         // Code request screen (after password verification)
         if (showCodeRequestScreen) {
-            console.log('[EnhancedAdminPanel] Showing code request screen');
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -457,7 +454,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
         // Password prompt
         if (showPasswordPrompt) {
-            console.log('[EnhancedAdminPanel] Showing password prompt');
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -522,7 +518,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
     return (
         <ErrorBoundary onClose={onClose}>
             <div className="fixed inset-0 z-50 bg-gray-50 flex flex-col">
-            {console.log('[EnhancedAdminPanel] Rendering authenticated admin panel')}
             {/* Header */}
             <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between shadow-lg">
                 <div className="flex items-center gap-3">

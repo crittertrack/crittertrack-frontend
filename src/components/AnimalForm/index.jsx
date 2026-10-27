@@ -63,16 +63,13 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
     if (!cacheKey) return null;
 
     if (pedigreeTreeCache.has(cacheKey)) {
-        console.log(`[PEDIGREE PREFETCH] Cache hit for ${rootId}`);
         return pedigreeTreeCache.get(cacheKey);
     }
 
     if (pedigreePrefetchInFlight.has(cacheKey)) {
-        console.log(`[PEDIGREE PREFETCH] Already in flight for ${rootId}`);
         return pedigreePrefetchInFlight.get(cacheKey);
     }
 
-    console.log(`[PEDIGREE PREFETCH] Starting for ${rootId}`);
     const overallStartTime = Date.now();
 
     const task = (async () => {
@@ -173,7 +170,6 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             const animalsAtThisDepth = generationQueue.filter(item => item.depth === currentDepth);
             if (animalsAtThisDepth.length === 0) continue;
 
-            console.log(`[PEDIGREE PREFETCH] Fetching generation ${currentDepth} (${animalsAtThisDepth.length} animals)...`);
             const genStartTime = Date.now();
 
             // Fetch all animals in this generation in parallel
@@ -209,7 +205,6 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             await Promise.all(fetchPromises);
 
             const genElapsed = Date.now() - genStartTime;
-            console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
 
             // Update cache with partial data after each generation
             const partialTree = buildTreeFromResults(rootId, resultCache);
@@ -221,7 +216,6 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
                     fetchedDepth: currentDepth,
                     timestamp: Date.now()
                 });
-                console.log(`[PEDIGREE PREFETCH] Cache updated with ${currentDepth + 1} generation(s)`);
             }
         }
 
@@ -251,7 +245,6 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         pedigreeTreeCache.set(cacheKey, payload);
         
         const overallElapsed = Date.now() - overallStartTime;
-        console.log(`[PEDIGREE PREFETCH] Complete for ${rootId} (${overallElapsed}ms total, ${MAX_PEDIGREE_FETCH_DEPTH + 1} generations)`);
         
         return payload;
     })().catch((error) => {
@@ -469,7 +462,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 // This ensures the isDisplay check below still applies,
                                 // consistent with how ViewOnlyParentCard handles the same case.
                             } catch (error2) {
-                                console.log(`Animal ${id} not accessible via any endpoint:`, error2.message);
                             }
                         }
                     }
@@ -482,7 +474,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 animalInfo = publicResponse.data[0];
                             }
                         } catch (error) {
-                            console.log(`Animal ${id} not found in public database:`, error.message);
                             // Don't return null here - continue to check if we should show hidden marker
                         }
                     }
@@ -535,7 +526,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     // an ancestor appearing on BOTH sides (inbreeding) isn't blocked.
                     const fatherId = animalInfo.sireId_public;
                     const motherId = animalInfo.damId_public;
-                    console.log(`[PEDIGREE] depth=${depth} id=${id} name=${animalInfo.name} | fatherId=${fatherId} motherId=${motherId}`);
                     const childPath = new Set([...pathIds, id]);
 
                     const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;

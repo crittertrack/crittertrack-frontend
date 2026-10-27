@@ -236,7 +236,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 }
             }
 
-            console.log('API call successful');
             setShowAddModal(false);
             resetForm();
             fetchTransactions();
@@ -642,7 +641,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            console.log('[BudgetTab] Animal Sale button clicked');
                                             setFormData({ ...formData, type: 'animal-sale' });
                                             setShowTypeSelection(false);
                                         }}
@@ -655,7 +653,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            console.log('[BudgetTab] Animal Purchase button clicked');
                                             setFormData({ ...formData, type: 'animal-purchase', seller: userProfile?.breederName || userProfile?.personalName || '' });
                                             setShowTypeSelection(false);
                                         }}
@@ -668,7 +665,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            console.log('[BudgetTab] Expense button clicked');
                                             setFormData({ ...formData, type: 'expense' });
                                             setShowTypeSelection(false);
                                         }}
@@ -681,7 +677,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            console.log('[BudgetTab] Income button clicked');
                                             setFormData({ ...formData, type: 'income' });
                                             setShowTypeSelection(false);
                                         }}

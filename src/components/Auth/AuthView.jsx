@@ -258,7 +258,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     if (message.includes('Account suspended')) {
                         // Parse suspension message and extract expiry time
-                        console.log('[LOGIN] User account suspended:', message);
                         
                         // Check if suspension end time already exists in localStorage
                         const existingEndTime = localStorage.getItem('suspensionEndTime');
@@ -269,35 +268,28 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         
                         if (responseTimestamp) {
                             // Use the structured expiryTimestamp from response data - it's the source of truth
-                            console.log('[LOGIN] Using server expiryTimestamp:', responseTimestamp);
                             suspensionEndTime = responseTimestamp;
                         } else {
                             // PRIORITY 2: Try to extract from message string (fallback)
                             const timestampMatch = message.match(/ExpiryTimestamp:\s*(\d+)/);
                             
                             if (timestampMatch) {
-                                console.log('[LOGIN] Using expiryTimestamp from message');
                                 suspensionEndTime = parseInt(timestampMatch[1]);
                             } else if (existingEndTime) {
                                 // PRIORITY 3: Use existing stored time (don't reset timer on retry)
-                                console.log('[LOGIN] Using stored suspension end time');
                                 suspensionEndTime = parseInt(existingEndTime);
                             } else {
                                 // PRIORITY 4: Last resort - calculate from hours/minutes
-                                console.log('[LOGIN] Calculating from hours/minutes (fallback)');
                                 const hoursMatch = message.match(/(\d+)\s+hour/);
                                 const minutesMatch = message.match(/(\d+)\s+minute/);
                                 const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 0;
                                 const minutesRemaining = minutesMatch ? parseInt(minutesMatch[1]) : 0;
                                 
-                                console.log('[LOGIN] Parsed hours:', hoursRemaining, 'minutes:', minutesRemaining);
                                 
                                 const totalMilliseconds = (hoursRemaining * 60 * 60 * 1000) + (minutesRemaining * 60 * 1000);
-                                console.log('[LOGIN] Total milliseconds:', totalMilliseconds);
                                 
                                 if (totalMilliseconds > 0) {
                                     suspensionEndTime = new Date().getTime() + totalMilliseconds;
-                                    console.log('[LOGIN] Calculated end time:', suspensionEndTime);
                                 } else {
                                     console.error('[LOGIN] Could not extract suspension duration from message, defaulting to 24 hours');
                                     suspensionEndTime = new Date().getTime() + (24 * 60 * 60 * 1000);
@@ -333,7 +325,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             }
                         }
                         
-                        console.log('[LOGIN] Extracted suspension reason:', suspensionReason);
                         
                         // Store suspension info for display on login screen (always update with server timestamp)
                         localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
