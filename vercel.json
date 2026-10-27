@@ -18,10 +18,12 @@
           "key": "X-Frame-Options",
           "value": "SAMEORIGIN"
         },
-        {
+       
+{
   "key": "Content-Security-Policy-Report-Only",
-  "value": "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com 'sha256-DPmts3muVwhUl444WPF5/DJF2QQpxZjfLUEYEB8Dufk=' 'sha256-OxYNbwSuSzPpKveqoiGff19S7ss3t8birqiM2jw+gdc='; style-src 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: blob: https://uploads.crittertrack.net https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://crittertrack-pedigree-production.up.railway.app https://uploads.crittertrack.net; frame-src 'self' https://translate.google.com; object-src 'none'; base-uri 'self'"
+  "value": "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com 'sha256-DPmts3muVwhUl444WPF5/DJF2QQpxZjfLUEYEB8Dufk=' 'sha256-OxYNbwSuSzPpKveqoiGff19S7ss3t8birqiM2jw+gdc='; style-src 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: blob: https://uploads.crittertrack.net https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://crittertrack-pedigree-production.up.railway.app https://uploads.crittertrack.net https://translate.googleapis.com; frame-src 'self' https://translate.google.com; object-src 'none'; base-uri 'self'"
 }
+
       ]
     },
     {
