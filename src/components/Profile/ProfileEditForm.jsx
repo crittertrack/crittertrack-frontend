@@ -751,7 +751,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             }
             const blob = await response.blob();
             const ts = new Date().toISOString().slice(0, 10);
-            const filename = exportFormat === 'csv' ? `crittertrack_export_${ts}.zip` : `crittertrack_export_${ts}.json`;
+            const filename = exportFormat === 'csv' ? `crittertrack_export_${ts}.zip` : exportFormat === 'xlsx' ? `crittertrack_export_${ts}.xlsx` : `crittertrack_export_${ts}.json`;
             await downloadBlob(blob, filename);
         } catch (err) {
             showModalMessage('Export Failed', err.message);
@@ -1572,7 +1572,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">Format:</p>
                     <div className="flex gap-5 mb-4">
-                        {[['json','JSON (single file)'],['csv','CSV (zip bundle)']].map(([val, label]) => (
+                        {[['json','JSON (single file)'],['csv','CSV (zip bundle)'],['xlsx','Excel (.xlsx)']].map(([val, label]) => (
                             <label key={val} className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-dark-text-secondary cursor-pointer">
                                 <input type="radio" name="exportFmt" value={val} checked={exportFormat === val} onChange={() => setExportFormat(val)} />
                                 {label}
@@ -1610,17 +1610,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 {/* -- Import -------------------------------------------------- */}
                 <div className="border-t dark:border-dark-border pt-5">
                     <h4 className="font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2"><Upload size={16} /> Import</h4>
-                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">Upload a <code>.json</code> or <code>.zip</code> (CSV bundle) previously exported from CritterTrack.</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">Upload a <code>.json</code>, <code>.zip</code> (CSV bundle), or <code>.xlsx</code>/<code>.xls</code> file previously exported from CritterTrack or another pedigree app.</p>
 
                     {/* File picker */}
                     <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition mb-4 relative">
-                        <input type="file" accept=".json,.zip" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        <input type="file" accept=".json,.zip,.xlsx,.xls" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                             onChange={e => { setImportFile(e.target.files?.[0] || null); setImportPreview(null); setImportResult(null); }} />
                         {importFile
                             ? <p className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><FileText size={16} />{importFile.name}</p>
                             : <>
                                 <Upload size={22} className="text-gray-400 dark:text-dark-text-muted mb-1" />
-                                <p className="text-sm text-gray-500 dark:text-dark-text-muted">Click or drag to upload .json / .zip</p>
+                                <p className="text-sm text-gray-500 dark:text-dark-text-muted">Click or drag to upload .json / .zip / .xlsx / .xls</p>
                               </>
                         }
                     </label>
