@@ -1394,10 +1394,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             onClick={async () => {
                                 setBlSaving(true);
                                 setBlSaved(false);
-                                await saveBreedingLineDefs(localBLDefs, animalBreedingLines);
-                                setBlSaving(false);
-                                setBlSaved(true);
-                                setTimeout(() => setBlSaved(false), 3000);
+                                try {
+                                    await saveBreedingLineDefs(localBLDefs, animalBreedingLines || {});
+                                    setBlSaving(false);
+                                    setBlSaved(true);
+                                    setTimeout(() => setBlSaved(false), 3000);
+                                } catch (err) {
+                                    setBlSaving(false);
+                                    showModalMessage?.('Error', err?.response?.data?.message || 'Failed to save breeding lines.');
+                                }
                             }}
                             className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-5 rounded-lg shadow-md transition duration-150 flex items-center gap-2 disabled:opacity-50"
                         >
