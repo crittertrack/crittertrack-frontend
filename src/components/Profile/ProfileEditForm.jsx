@@ -335,7 +335,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         try {
             const resetDefs = localBLDefs.map((l, i) => i === idx ? { id: lineId, name: '', color: BL_PRESETS_APP[idx] || l.color, enabled: true } : l);
             const cleanedAssignments = Object.fromEntries(
-                Object.entries(animalBreedingLines).map(([animalId, lineIds]) => [animalId, (lineIds || []).filter(id => id !== lineId)])
+                Object.entries(animalBreedingLines).map(([animalId, lineIds]) => [animalId, (Array.isArray(lineIds) ? lineIds : []).filter(id => id !== lineId)])
             );
             await saveBreedingLineDefs(resetDefs, cleanedAssignments);
             setAnimalBreedingLines?.(cleanedAssignments);

@@ -2851,7 +2851,7 @@ useEffect(() => {
                         is top-right, so this corner is free; being absolute, it costs no card
                         height. */}
                     {!hideBreedingLines && (() => {
-                        const assignedIds = animalBreedingLines[animal.id_public] || [];
+                        const assignedIds = Array.isArray(animalBreedingLines[animal.id_public]) ? animalBreedingLines[animal.id_public] : [];
                         const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                         if (activeLines.length === 0) return null;
                         return (
