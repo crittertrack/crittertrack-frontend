@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertCircle, Camera, Loader2, X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import apiClient from '../../utils/apiClient';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
@@ -29,10 +29,6 @@ const createEmptyRow = () => ({
   birthDate: '',
   color: '',
   coat: '',
-  imageFile: null,
-  imageUrl: null,
-  imageUploading: false,
-  imageError: null,
 });
 
 const createEmptyRows = (n) => Array.from({ length: n }, createEmptyRow);
@@ -72,8 +68,6 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitResults, setSubmitResults] = useState(null);
-  const fileInputRefs = useRef({});
-  const uploadIds = useRef({});
 
   useEffect(() => {
     setRows((prev) => {
@@ -96,60 +90,14 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
     )));
   }, []);
 
-  const handleImageChange = useCallback(async (index, e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = '';
-
-    const uploadId = (uploadIds.current[index] || 0) + 1;
-    uploadIds.current[index] = uploadId;
-    setRows((prev) => prev.map((row, i) => (
-      i === index ? {
-        ...row,
-        imageFile: file,
-        imageUrl: null,
-        imageUploading: true,
-        imageError: null,
-      } : row
-    )));
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const res = await apiClient.post('/upload', formData);
-      const url = res.data?.url;
-      if (!url) throw new Error('Upload response did not include an image URL.');
-      if (uploadIds.current[index] !== uploadId) return;
-      setRows((prev) => prev.map((row, i) => (
-        i === index ? { ...row, imageUrl: url, imageUploading: false, imageError: null } : row
-      )));
-    } catch (err) {
-      console.error('[BULK] image upload failed', err);
-      if (uploadIds.current[index] !== uploadId) return;
-      setRows((prev) => prev.map((row, i) => (
-        i === index ? {
-          ...row,
-          imageUploading: false,
-          imageError: 'Failed to upload image.',
-        } : row
-      )));
-    }
-  }, []);
-
-  const hasLoadingImages = rows.some((row) => row.imageUploading);
   const missingNames = rows.filter((row) => !row.name.trim());
-  const canSubmit = !submitting && missingNames.length === 0 && !hasLoadingImages && rows.length >= 2;
+  const canSubmit = !submitting && missingNames.length === 0 && rows.length >= 2;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
     if (missingNames.length > 0) {
       setSubmitError(`${missingNames.length} row(s) are missing a name. All rows must have a name.`);
-      return;
-    }
-    if (hasLoadingImages) {
-      setSubmitError('Some images are still uploading. Please wait for all uploads to finish.');
       return;
     }
     if (rows.length < 2) return;
@@ -168,7 +116,6 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
         birthDate: row.birthDate,
         color: row.color,
         coat: row.coat,
-        ...(row.imageUrl ? { imageUrl: row.imageUrl } : {}),
       }));
 
       const res = await apiClient.post(
@@ -244,7 +191,6 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
                         {field.label} {field.required && <span className="text-red-500">*</span>}
                       </th>
                     ))}
-                    <th className="py-2 text-left font-semibold text-gray-500 dark:text-dark-text-secondary">Profile image</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,29 +211,6 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
                           />
                         </td>
                       ))}
-                      <td className="py-1.5">
-                        <div className="flex items-center gap-1">
-                          {row.imageUrl && <img src={row.imageUrl} alt={`Animal ${i + 1} preview`} className="w-8 h-8 rounded object-cover" />}
-                          {row.imageUploading && <Loader2 size={12} className="animate-spin text-gray-400" />}
-                          {row.imageError && <span title={row.imageError}><AlertCircle size={12} className="text-red-500" /></span>}
-                          <button
-                            type="button"
-                            aria-label={`Upload image for animal ${i + 1}`}
-                            disabled={submitting || row.imageUploading}
-                            onClick={() => fileInputRefs.current[i]?.click()}
-                            className="p-1 rounded border border-dashed text-gray-400 hover:text-primary disabled:opacity-50"
-                          >
-                            <Camera size={12} />
-                          </button>
-                          <input
-                            ref={(el) => { fileInputRefs.current[i] = el; }}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleImageChange(i, e)}
-                          />
-                        </div>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -295,7 +218,7 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
             </div>
             <div className="flex flex-wrap justify-end gap-3 pt-3 border-t border-gray-200 dark:border-dark-border">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:hover:bg-dark-surface-hover">Cancel</button>
-              <button type="submit" disabled={!canSubmit} className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 dark:bg-dark-primary text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center">
+              <button type="submit" disabled={!canSubmit} className="px-4 py-2 rounded-lg bg-info-blue hover:bg-info-blue-dark dark:bg-dark-info-blue dark:hover:bg-dark-info-blue-hover text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center">
                 {submitting ? <><Loader2 size={16} className="animate-spin mr-2" />Creating…</> : <>Create {rows.length} animals</>}
               </button>
             </div>
