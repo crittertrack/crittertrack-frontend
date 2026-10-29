@@ -218,7 +218,7 @@ const BulkAnimalCreatePage = ({ species, onClose }) => {
             </div>
             <div className="flex flex-wrap justify-end gap-3 pt-3 border-t border-gray-200 dark:border-dark-border">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:hover:bg-dark-surface-hover">Cancel</button>
-              <button type="submit" disabled={!canSubmit} className="px-4 py-2 rounded-lg bg-info-blue hover:bg-info-blue-dark dark:bg-dark-info-blue dark:hover:bg-dark-info-blue-hover text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center">
+              <button type="submit" disabled={!canSubmit} className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 dark:bg-dark-primary text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center">
                 {submitting ? <><Loader2 size={16} className="animate-spin mr-2" />Creating…</> : <>Create {rows.length} animals</>}
               </button>
             </div>
