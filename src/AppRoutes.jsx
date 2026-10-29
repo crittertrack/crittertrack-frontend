@@ -20,6 +20,7 @@ const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'))
 const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesSelector })));
 const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesManager })));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
+const BulkAnimalCreatePage = lazy(() => import('./components/AnimalForm/BulkAnimalCreatePage'));
 
 const HelpCenterPage = lazy(() => import('./components/tools/HelpCenterPage'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
