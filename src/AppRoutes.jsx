@@ -636,6 +636,30 @@ export function AppRoutes({
         )
       } />
 
+       {/* Add Animals */}
+       <Route path="/add-animals" element={
+         !speciesToAdd ? (
+           <SpeciesSelector
+             speciesOptions={speciesOptions}
+             onSelectSpecies={(species) => {
+               setSpeciesToAdd(species);
+               navigate('/add-animals');
+             }}
+             onManageSpecies={() => navigate('/manage-species')}
+             searchTerm={speciesSearchTerm}
+             setSearchTerm={setSpeciesSearchTerm}
+             categoryFilter={speciesCategoryFilter}
+             setCategoryFilter={setSpeciesCategoryFilter}
+           />
+         ) : (
+           <BulkAnimalCreatePage
+             species={speciesToAdd}
+             onClose={() => { setSpeciesToAdd(null); navigate('/'); }}
+           />
+         )
+       } />
+
+
       {/* Help Center; keep the old path available for existing bookmarks and contextual links. */}
       <Route path="/help" element={<HelpCenterPage speciesOptions={speciesOptions} showModalMessage={showModalMessage} />} />
       <Route path="/tutorials" element={<HelpCenterPage speciesOptions={speciesOptions} showModalMessage={showModalMessage} />} />

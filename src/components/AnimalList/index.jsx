@@ -6385,7 +6385,18 @@ useEffect(() => {
                                 <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
                             </button>
                         )}
-                        {/* Mobile Add Animal button icon-only on mobile, hidden on sm+ */}
+                        
+                        {/* Bulk Add button (desktop) */}
+                        {isListLikeView && !showArchiveScreen && (
+                            <button
+                                onClick={() => navigate('/add-animals')}
+                                className="hidden sm:flex bg-neutral-700 hover:bg-neutral-800 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                                data-tutorial-target="bulk-add-btn"
+                            >
+                                <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Bulk Add</span>
+                            </button>
+                        )}
+                        {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
                         {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
