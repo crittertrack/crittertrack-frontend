@@ -29,6 +29,13 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     };
     const sireLines = resolveLines(sireId);
     const damLines = resolveLines(damId);
+    const shared = sireLines.filter(l => damLines.includes(l));
+    let lineType = 'Unassigned / Undetermined';
+    if (sireLines.length && damLines.length) {
+        lineType = shared.length ? 'Within-Line Pairing' : 'Cross-Line Pairing';
+    } else if (sireLines.length || damLines.length) {
+        lineType = 'Partially Assigned';
+    }
     const ancestors = litter?.commonAncestors || [];
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
     const expectedTraits = litter?.expectedTraits || [];
@@ -48,8 +55,8 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                 </div>
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Breeding Lines</h3>
-                    <Field label="Line Type" value={litter?.lineType} />
-                    <Field label="Shared Lines" value={litter?.sharedLines} />
+                    <Field label="Line Type" value={lineType} />
+                    <Field label="Shared Lines" value={shared.length ? shared.join(', ') : null} />
                     <Field label="Sire Lines" value={sireLines.length ? sireLines.join(', ') : null} />
                     <Field label="Dam Lines" value={damLines.length ? damLines.join(', ') : null} />
                 </div>
