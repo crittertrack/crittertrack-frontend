@@ -276,6 +276,5 @@ const availableYears = useMemo(() => {
     useEffect(() => {
         fetchLitters();
     }, [fetchLitters]);
-    return null;
 };
 export default LittersOverviewPage;
