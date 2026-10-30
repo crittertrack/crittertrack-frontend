@@ -30,11 +30,15 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     const sireLines = resolveLines(sireId);
     const damLines = resolveLines(damId);
     const shared = sireLines.filter(l => damLines.includes(l));
-    let lineType = 'Unassigned / Undetermined';
+    let lineType = 'Undetermined';
     if (sireLines.length && damLines.length) {
-        lineType = shared.length ? 'Within-Line Pairing' : 'Cross-Line Pairing';
-    } else if (sireLines.length || damLines.length) {
-        lineType = 'Partially Assigned';
+        if (sireLines.length === damLines.length && sireLines.every(l => damLines.includes(l))) {
+            lineType = 'Full Linebred';
+        } else if (shared.length) {
+            lineType = 'Partial Linebred';
+        } else {
+            lineType = 'Outcross';
+        }
     }
     const ancestors = litter?.commonAncestors || [];
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
@@ -49,8 +53,8 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                     <Field label="Sire COI" value={sire.inbreedingCoefficient != null ? `${sire.inbreedingCoefficient}%` : null} />
                     <Field label="Dam COI" value={dam.inbreedingCoefficient != null ? `${dam.inbreedingCoefficient}%` : null} />
                     <Field label="Expected offspring COI" value={litter?.inbreedingCoefficient != null ? `${Number(litter.inbreedingCoefficient).toFixed(2)}%` : null} />
-                    <Field label="Sire AVK" value={sire.avgKinship != null ? `${sire.avgKinship}%` : null} />
-                    <Field label="Dam AVK" value={dam.avgKinship != null ? `${dam.avgKinship}%` : null} />
+                    <Field label="Sire AVK" value={sire.avgKinship != null ? `${Number(sire.avgKinship).toFixed(2)}%` : null} />
+                    <Field label="Dam AVK" value={dam.avgKinship != null ? `${Number(dam.avgKinship).toFixed(2)}%` : null} />
                     <Field label="Calculation depth" value={litter?.pedigreeGenerations != null ? `${litter.pedigreeGenerations} generations` : null} />
                 </div>
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">

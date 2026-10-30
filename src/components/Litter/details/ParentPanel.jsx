@@ -74,7 +74,7 @@ export default function ParentPanel({
                         <div className="font-semibold text-gray-900 dark:text-dark-text break-words">
                             {animal ? formatAnimalDisplayName(animal) : fallbackId}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">{id}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted text-right">{id}</div>
                         <Line label="Variety">{variety || NA}</Line>
                         <Line label="Genetic code">{animal?.geneticCode || NA}</Line>
                         <Line label="Born">{animal?.birthDate ? formatDate(animal.birthDate) : NA}</Line>
