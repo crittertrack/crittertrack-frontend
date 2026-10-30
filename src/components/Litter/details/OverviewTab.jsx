@@ -46,7 +46,6 @@ export default function OverviewTab({
                 
 <Summary label="Next milestone" testId="summary-milestone">
   <div className="flex items-center justify-between gap-3 w-full">
-    {/* Original milestone information - Left */}
     <div className="min-w-0">
       {milestone ? (
         <>
@@ -63,8 +62,6 @@ export default function OverviewTab({
         </Muted>
       )}
     </div>
-  </div>
-
     {(() => {
       const action = status === 'planned' ? 'mated' : status === 'mated' ? 'pregnant' : status === 'pregnant' ? 'born' : status === 'born' ? 'weaned' : null;
       if (!action || !handleQuickAction) return null;
@@ -80,6 +77,7 @@ export default function OverviewTab({
         </button>
       );
     })()}
+  </div>
 </Summary>
             </div>
 
