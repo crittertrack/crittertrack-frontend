@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { Eye, EyeOff, Edit, Loader2, Mars, Venus, Plus, Search, BookOpen } from 'lucide-react';
+import { Circle, Eye, EyeOff, Edit, Loader2, Mars, Venus, Plus, Search, BookOpen } from 'lucide-react';
 import { formatDateShort } from '../../utils/dateFormatter';
 import { deriveStoredStatus, LITTER_STATUS_LABELS } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
@@ -21,12 +21,19 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
+// Cards are always white; the status shows through the border colour and the badge.
 const STATUS_COLORS = {
-    planned: 'border-indigo-300 dark:border-indigo-800/60 bg-indigo-50/20 dark:bg-indigo-900/10',
-    mated: 'border-sky-300 dark:border-sky-800/60 bg-sky-50/20 dark:bg-sky-900/10',
-    pregnant: 'border-pink-300 dark:border-pink-800/60 bg-pink-50/20 dark:bg-pink-900/10',
+    planned: 'border-indigo-300 dark:border-indigo-800/60 bg-white dark:bg-dark-card-bg',
+    mated: 'border-sky-300 dark:border-sky-800/60 bg-white dark:bg-dark-card-bg',
+    pregnant: 'border-pink-300 dark:border-pink-800/60 bg-white dark:bg-dark-card-bg',
     born: 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg',
 };
+
+// The app's coloured gender icons (same colours as the animal cards and lists).
+const GENDER_ICON_PROPS = { size: 14, strokeWidth: 2.5, className: 'shrink-0' };
+const MaleIcon = ({ size = 14 }) => <Mars {...GENDER_ICON_PROPS} size={size} className="text-primary shrink-0" />;
+const FemaleIcon = ({ size = 14 }) => <Venus {...GENDER_ICON_PROPS} size={size} className="text-accent shrink-0" />;
+const UnknownIcon = ({ size = 14 }) => <Circle {...GENDER_ICON_PROPS} size={size} className="text-gray-500 dark:text-dark-text-muted shrink-0" />;
 
 const STATUS_BADGE_BG = {
     planned: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300',
@@ -107,11 +114,11 @@ const LitterCard = ({
 
             <div className="space-y-1">
                 <ParentLine
-                    icon={<Mars size={14} className="text-blue-500 shrink-0" />}
+                    icon={<MaleIcon />}
                     label="Sire" animal={litter.sire} fallbackId={litter.sireId_public} onView={onViewAnimal}
                 />
                 <ParentLine
-                    icon={<Venus size={14} className="text-pink-500 shrink-0" />}
+                    icon={<FemaleIcon />}
                     label="Dam" animal={litter.dam} fallbackId={litter.damId_public} onView={onViewAnimal}
                 />
             </div>
@@ -119,7 +126,12 @@ const LitterCard = ({
             <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
                 <div>{dateLabel}</div>
                 {(status === 'born' || total > 0) && (
-                    <div>{total} born · {males}♂ {females}♀{unknown ? ` ${unknown}?` : ''}</div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                        <span>{total} born</span>
+                        <span className="inline-flex items-center gap-1"><MaleIcon size={12} />{males}</span>
+                        <span className="inline-flex items-center gap-1"><FemaleIcon size={12} />{females}</span>
+                        {unknown > 0 && <span className="inline-flex items-center gap-1"><UnknownIcon size={12} />{unknown}</span>}
+                    </div>
                 )}
                 {Array.isArray(offspring) && offspring.length > 0 && (
                     <div>{offspring.length} offspring linked</div>
@@ -397,7 +409,8 @@ const LittersOverviewPage = ({
     const selectClass = 'px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card-bg text-gray-800 dark:text-dark-text';
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4 space-y-4">
+        <div className="w-full max-w-7xl mx-auto p-2 sm:p-4">
+        <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-lg p-3 sm:p-6 space-y-4" data-testid="litters-container">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text">Litters</h1>
@@ -446,8 +459,14 @@ const LittersOverviewPage = ({
             </div>
 
             {!loading && litters.length > 0 && (
-                <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                    {litterStats.litters} {litterStats.litters === 1 ? 'litter' : 'litters'} · {litterStats.males}♂ {litterStats.females}♀ {litterStats.unknown} unknown
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-gray-700 dark:text-dark-text" data-testid="litter-stats">
+                    <span className="inline-flex items-center gap-1.5 font-semibold">
+                        <BookOpen size={14} strokeWidth={2.5} className="shrink-0" />
+                        {litterStats.litters} {litterStats.litters === 1 ? 'litter' : 'litters'}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5" title="Males"><MaleIcon />{litterStats.males}</span>
+                    <span className="inline-flex items-center gap-1.5" title="Females"><FemaleIcon />{litterStats.females}</span>
+                    <span className="inline-flex items-center gap-1.5" title="Unknown sex"><UnknownIcon />{litterStats.unknown}</span>
                 </div>
             )}
 
@@ -482,6 +501,7 @@ const LittersOverviewPage = ({
                     ))}
                 </div>
             )}
+        </div>
         </div>
     );
 };
