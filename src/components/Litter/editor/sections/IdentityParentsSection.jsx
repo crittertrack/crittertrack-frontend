@@ -50,8 +50,16 @@ export default function IdentityParentsSection({
     const [picker, setPicker] = useState(null); // 'sire' | 'dam' | 'species' | null
 
     return (
-        <div className={cardClass}>
-            <SectionTitle title="Identity & parents" description="Name the pairing and choose the sire and dam." icon={UserRound} iconBg="bg-pink-100" iconColor="text-pink-600" />
+        <>
+        <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                <UsersRound size={24} />
+            </div>
+            <div>
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Identity & Parents</h1>
+                <p className="text-sm text-gray-500 dark:text-dark-text-muted">Identify the litter, select its species, and assign the parents.</p>
+            </div>
+        </div>
 
             <FieldRow label="Pair / litter name" hint="Optional. A short name to recognise this pairing.">
                 <input
@@ -139,6 +147,6 @@ export default function IdentityParentsSection({
                     species={form.species || undefined}
                 />
             )}
-        </div>
+        </>
     );
 }
