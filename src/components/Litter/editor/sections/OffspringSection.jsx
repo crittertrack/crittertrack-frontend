@@ -1,4 +1,5 @@
 import React from 'react';
+import { PawPrint } from 'lucide-react';
 import { linkableOffspring, linkOffspring, unlinkOffspring } from '../litterFormModel';
 import { SectionTitle, cardClass } from '../fields';
 import CreatePlaceholdersCard from './CreatePlaceholdersCard';
@@ -36,7 +37,7 @@ export default function OffspringSection({
     if (!hasParents) {
         return (
             <div className={cardClass}>
-                <SectionTitle title="Offspring" />
+                <SectionTitle title="Offspring" icon={PawPrint} iconBg="bg-amber-100" iconColor="text-amber-600" />
                 <p className="text-sm text-gray-500 dark:text-dark-text-muted">Choose a sire and dam first (Identity &amp; parents) to link or create offspring.</p>
             </div>
         );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, UserRound, CalendarDays, Heart, ChartNoAxesColumn, PawPrint, Target, Images } from 'lucide-react';
 import apiClient from '../../../utils/apiClient';
 import { reconcileLitterFormCounts } from './litterFormModel';
 import {
@@ -17,13 +17,13 @@ import PhotosNotesSection from './sections/PhotosNotesSection';
 import ObjectivesSection from './sections/ObjectivesSection';
 
 const SECTIONS = [
-    { id: 'identity', label: 'Identity & parents' },
-    { id: 'dates', label: 'Dates & status' },
-    { id: 'mating', label: 'Mating & birth' },
-    { id: 'stats', label: 'Statistics' },
-    { id: 'offspring', label: 'Offspring' },
-    { id: 'objectives', label: 'Breeding objectives' },
-    { id: 'photos', label: 'Photos & notes' },
+    { id: 'identity', label: 'Identity & parents', icon: UserRound },
+    { id: 'dates', label: 'Dates & status', icon: CalendarDays },
+    { id: 'mating', label: 'Mating & birth', icon: Heart },
+    { id: 'stats', label: 'Litter counts', icon: ChartNoAxesColumn },
+    { id: 'offspring', label: 'Offspring', icon: PawPrint },
+    { id: 'objectives', label: 'Breeding objectives', icon: Target },
+    { id: 'photos', label: 'Photos & notes', icon: Images },
 ];
 
 const EMPTY_CREATE_COUNTS = { males: 0, females: 0, unknown: 0 };
@@ -252,14 +252,28 @@ export default function EditorShell({
     const navBtn = 'px-3 py-2 rounded-lg border border-gray-300 dark:border-dark-border text-sm';
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-4 pb-28" data-testid="litter-editor">
-            <div className="flex items-center gap-3 mb-4">
-                <button type="button" onClick={handleCancel} className="p-2 rounded-lg border border-gray-300 dark:border-dark-border" aria-label="Back">
-                    <ArrowLeft size={16} />
-                </button>
-                <div className="min-w-0">
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text">{isEdit ? 'Edit litter' : 'New litter'}</h1>
-                    {isEdit && <div className="text-xs text-gray-500 dark:text-dark-text-muted">{litter.litter_id_public}</div>}
+        <div className="w-full mx-auto p-4 pb-28 bg-white dark:bg-dark-card-bg rounded-xl shadow-sm" data-testid="litter-editor">
+            <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3 min-w-0">
+                    <button type="button" onClick={handleCancel} className="p-2 rounded-lg border border-gray-300 dark:border-dark-border" aria-label="Back">
+                        <ArrowLeft size={16} />
+                    </button>
+                    <div className="min-w-0">
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text">{isEdit ? 'Edit litter' : 'New litter'}</h1>
+                        {isEdit && <div className="text-xs text-gray-500 dark:text-dark-text-muted">{litter.litter_id_public}</div>}
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <button type="button" onClick={handleCancel} disabled={saving} className={navBtn}>Cancel</button>
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving || uploading}
+                        className="px-4 py-2 rounded-lg bg-primary dark:bg-dark-primary text-black text-sm font-medium flex items-center gap-1 shadow-md disabled:opacity-60"
+                    >
+                        {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                        {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create litter'}
+                    </button>
                 </div>
             </div>
 
@@ -284,7 +298,10 @@ export default function EditorShell({
                             aria-current={section === s.id ? 'step' : undefined}
                             className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between ${section === s.id ? 'bg-primary dark:bg-dark-primary text-black font-medium' : 'text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface'}`}
                         >
-                            {s.label}
+                            <span className="flex items-center gap-2">
+                                {s.icon && <s.icon size={14} />}
+                                {s.label}
+                            </span>
                             {sectionHasError(s.id) && <span className="text-red-600" aria-label="has errors">●</span>}
                         </button>
                     ))}
@@ -297,18 +314,6 @@ export default function EditorShell({
                     <div className="flex gap-2">
                         <button type="button" disabled={index <= 0} onClick={() => setSection(SECTIONS[index - 1].id)} className={`${navBtn} disabled:opacity-40`}>Previous</button>
                         <button type="button" disabled={index >= SECTIONS.length - 1} onClick={() => setSection(SECTIONS[index + 1].id)} className={`${navBtn} disabled:opacity-40`}>Next</button>
-                    </div>
-                    <div className="flex gap-2">
-                        <button type="button" onClick={handleCancel} disabled={saving} className={navBtn}>Cancel</button>
-                        <button
-                            type="button"
-                            onClick={handleSave}
-                            disabled={saving || uploading}
-                            className="px-4 py-2 rounded-lg bg-primary dark:bg-dark-primary text-black text-sm font-medium flex items-center gap-1 shadow-md disabled:opacity-60"
-                        >
-                            {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                            {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create litter'}
-                        </button>
                     </div>
                 </div>
             </div>

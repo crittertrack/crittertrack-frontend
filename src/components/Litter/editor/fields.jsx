@@ -46,10 +46,17 @@ export const Checkbox = ({ checked, onChange, label, hint }) => (
     </label>
 );
 
-export const SectionTitle = ({ title, description }) => (
-    <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text">{title}</h2>
-        {description && <p className="text-sm text-gray-500 dark:text-dark-text-muted">{description}</p>}
+export const SectionTitle = ({ title, description, icon: Icon, iconBg = 'bg-blue-100', iconColor = 'text-blue-600' }) => (
+    <div className="flex items-start gap-3">
+        {Icon && (
+            <div className={`shrink-0 w-10 h-10 rounded-full ${iconBg} ${iconColor} flex items-center justify-center`}>
+                <Icon size={20} />
+            </div>
+        )}
+        <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text">{title}</h2>
+            {description && <p className="text-sm text-gray-500 dark:text-dark-text-muted">{description}</p>}
+        </div>
     </div>
 );
 

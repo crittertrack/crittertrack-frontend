@@ -87,17 +87,6 @@ const GalleryTab = ({ images }) => {
         </div>
     );
 };
-    if (!images.length) return <div className="py-8 text-center text-sm text-gray-500 dark:text-dark-text-muted">No photos have been added to this litter.</div>;
-    return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {images.map((img, i) => (
-                <a key={img.r2Key || img.url || i} href={img.url} target="_blank" rel="noreferrer">
-                    <img src={img.url} alt={`Litter gallery ${i + 1}`} className="w-full aspect-square object-cover rounded-lg" />
-                </a>
-            ))}
-        </div>
-    );
-};
 
 const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, breedingLineDefs = [], animalBreedingLines = {} }) => {
     const navigate = useNavigate();

@@ -1,6 +1,7 @@
 import React from 'react';
 import DatePicker from '../../../DatePicker';
 import { deriveLitterFormStatus, LITTER_STATUS_LABELS } from '../../../../utils/litterStatus';
+import { CalendarDays } from 'lucide-react';
 import { Checkbox, FieldRow, SectionTitle, cardClass } from '../fields';
 
 const STATUS_HINTS = {
@@ -18,6 +19,9 @@ export default function DatesReproductionSection({ form, setField, setFields, er
             <SectionTitle
                 title="Dates & status"
                 description="The status follows the dates you enter, so you can start with a planned mating and come back later."
+                icon={CalendarDays}
+                iconBg="bg-cyan-100"
+                iconColor="text-cyan-600"
             />
 
             <div className="rounded-lg bg-indigo-50 dark:bg-indigo-900/20 px-3 py-2 text-sm">

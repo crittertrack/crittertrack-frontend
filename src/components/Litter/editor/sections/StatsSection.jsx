@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChartNoAxesColumn } from 'lucide-react';
 import {
     setSexCount, setStillbornSex, setLossSex, toggleExtractStillborn, toggleExtractLosses,
 } from '../litterFormModel';
@@ -16,7 +17,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
 
     return (
         <div className={cardClass}>
-            <SectionTitle title="Litter statistics" description="Counts for the litter. Total Born is the sum of males, females and unknown." />
+            <SectionTitle title="Litter counts" description="Counts for the litter. Total Born is the sum of males, females and unknown." icon={ChartNoAxesColumn} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <ReadOnlyTotal label="Total born" value={form.litterSizeBorn} hint="Auto-calculated from M + F + U" />

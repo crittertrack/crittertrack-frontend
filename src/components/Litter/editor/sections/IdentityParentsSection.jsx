@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, Mars, Venus, X, Search } from 'lucide-react';
+import { Loader2, Mars, Venus, X, Search, UserRound } from 'lucide-react';
 import { ParentSearchModal } from '../../../Modals/SearchModals';
 import { SpeciesPickerModal } from '../../../Modals/SpeciesModals';
 import { formatAnimalDisplayName } from '../../../../utils/animalDisplayName';
@@ -51,7 +51,7 @@ export default function IdentityParentsSection({
 
     return (
         <div className={cardClass}>
-            <SectionTitle title="Identity & parents" description="Name the pairing and choose the sire and dam." />
+            <SectionTitle title="Identity & parents" description="Name the pairing and choose the sire and dam." icon={UserRound} iconBg="bg-pink-100" iconColor="text-pink-600" />
 
             <FieldRow label="Pair / litter name" hint="Optional. A short name to recognise this pairing.">
                 <input
@@ -95,6 +95,23 @@ export default function IdentityParentsSection({
                     onPick={() => setPicker('dam')}
                     onClear={() => onSelectParent('dam', null)}
                 />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {[sire, dam].map((animal, i) => animal ? (
+                    <div key={i} className="border border-gray-200 dark:border-dark-border rounded-lg p-3 flex gap-3">
+                        <div className="w-20 h-20 shrink-0 bg-gray-100 dark:bg-dark-surface rounded overflow-hidden">
+                            {(animal.images?.[0]?.url || animal.image_url || animal.photo) ? <img src={animal.images?.[0]?.url || animal.image_url || animal.photo} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No image</div>}
+                        </div>
+                        <div className="min-w-0 flex-1 text-xs space-y-1">
+                            <div className="font-medium text-gray-900 dark:text-dark-text">{formatAnimalDisplayName(animal)}</div>
+                            <div className="text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
+                            <div className="text-gray-500 dark:text-dark-text-muted">Born: {animal.birthDate || animal.birth_date || '—'}</div>
+                            <div className="text-gray-500 dark:text-dark-text-muted">Variety: {animal.variety || '—'}</div>
+                            <div className="text-gray-500 dark:text-dark-text-muted">Genetics: {animal.genetics || '—'}</div>
+                        </div>
+                    </div>
+                ) : null)}
             </div>
 
             {picker === 'species' && (

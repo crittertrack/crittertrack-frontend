@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Target } from 'lucide-react';
 import { FieldRow, SectionTitle, cardClass, inputClass, secondaryBtn } from '../fields';
 
 const MAX_OBJECTIVES = 12;
@@ -18,7 +18,7 @@ export default function ObjectivesSection({ form, setField }) {
 
     return (
         <div className={cardClass}>
-            <SectionTitle title="Breeding objectives" description="What you hoped to achieve with this pairing." />
+            <SectionTitle title="Breeding objectives" description="What you hoped to achieve with this pairing." icon={Target} iconBg="bg-violet-100" iconColor="text-violet-600" />
 
             <FieldRow label="Objectives" hint={`Short labels, e.g. “Better type” or “Solid colour”. Up to ${MAX_OBJECTIVES}.`}>
                 <div className="flex gap-2">

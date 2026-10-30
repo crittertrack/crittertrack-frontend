@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Heart } from 'lucide-react';
 import { Checkbox, FieldRow, Select, SectionTitle, cardClass, inputClass } from '../fields';
 
 const METHODS = [
@@ -40,7 +40,7 @@ const Collapsible = ({ title, open, onToggle, children }) => (
 export default function MatingBirthSection({ form, setField, setFields, extras, setExtras }) {
     return (
         <div className={cardClass}>
-            <SectionTitle title="Mating & birth" description="Optional detail about how the mating and birth went." />
+            <SectionTitle title="Mating & birth" description="Optional detail about how the mating and birth went." icon={Heart} iconBg="bg-rose-100" iconColor="text-rose-600" />
 
             <Collapsible title="Mating information" open={extras.matingExtra} onToggle={() => setExtras(p => ({ ...p, matingExtra: !p.matingExtra }))}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Camera, Loader2, Trash2 } from 'lucide-react';
+import { Camera, Loader2, Trash2, Images } from 'lucide-react';
 import { FieldRow, SectionTitle, cardClass, inputClass, secondaryBtn } from '../fields';
 
 const MAX_PHOTOS = 5;
@@ -34,6 +34,9 @@ export default function PhotosNotesSection({
                 <SectionTitle
                     title={`Photos (${count}/${MAX_PHOTOS})`}
                     description={isEdit ? 'Photos upload immediately.' : 'Photos are uploaded when you save the litter.'}
+                    icon={Images}
+                    iconBg="bg-sky-100"
+                    iconColor="text-sky-600"
                 />
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                     {isEdit && visibleSaved.map((img, i) => (
