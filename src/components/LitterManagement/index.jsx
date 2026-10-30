@@ -356,7 +356,7 @@ const EMPTY_LITTER_FORM = {
     weaningConfirmed: false
 };
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {}, formOnly = false, onFormClosed, onEntrySaved }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {}, formOnly = false, onFormClosed, onEntrySaved, editLitterId = null }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1408,7 +1408,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
 
     // Embedded mode (Reproduction tab "+ Add"): render only the entry form, open it straight away,
     // and tell the host when it closes.
-    useEffect(() => { if (formOnly) openNewEntryForm(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // With `editLitterId` (full-page editor route) the embedded form opens that litter for editing
+    // instead of a blank entry; see the effect after handleEditLitter.
+    useEffect(() => { if (formOnly && !editLitterId) openNewEntryForm(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
     const embeddedWasOpenRef = useRef(false);
     useEffect(() => {
         if (!formOnly) return;
@@ -1558,6 +1560,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
         setShowAddForm(true);
         setExpandedLitter(null);
     };
+
+    // Embedded edit (full-page editor route /litter/edit/:litterId): load the litter and open it.
+    useEffect(() => {
+        if (!formOnly || !editLitterId) return undefined;
+        let cancelled = false;
+        apiClient.get('/litters').then(res => {
+            if (cancelled) return;
+            const all = Array.isArray(res.data) ? res.data : [];
+            setLitters(all);
+            const target = all.find(l => l._id === editLitterId);
+            if (target) handleEditLitter(target);
+            else {
+                showModalMessage('Error', 'That litter could not be found.');
+                if (onFormClosed) onFormClosed();
+            }
+        }).catch(() => {
+            if (cancelled) return;
+            showModalMessage('Error', 'Failed to load the litter for editing.');
+            if (onFormClosed) onFormClosed();
+        });
+        return () => { cancelled = true; };
+    }, [formOnly, editLitterId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleLitterImageUpload = async (file) => {
         if (litterImages.length >= 5) {

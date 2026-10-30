@@ -228,6 +228,22 @@ export function AppRoutes({
     setShowMessages(true);
   };
 
+  // Shared props for the litter editor / details pages (canonical /litters/* routes and the
+  // legacy /litter/* aliases render the same components).
+  const litterPageProps = {
+    authToken,
+    API_BASE_URL,
+    userProfile,
+    setUserProfile,
+    showModalMessage,
+    onViewAnimal: handleViewAnimal,
+    handleViewAnimal,
+    handleEditAnimal,
+    speciesOptions,
+    breedingLineDefs,
+    animalBreedingLines,
+  };
+
   return (
     <RouteErrorBoundary>
     <Suspense fallback={<PageLoader />}>
@@ -471,6 +487,12 @@ export function AppRoutes({
           animalBreedingLines={animalBreedingLines}
         />
       } />
+
+      {/* Litters — canonical routes. Static segments (new) outrank :ctlId in React Router, and the
+          legacy /litter/* paths below stay registered as aliases so old links/bookmarks keep working. */}
+      <Route path="/litters/new" element={<LitterEditorPage {...litterPageProps} />} />
+      <Route path="/litters/:ctlId/edit" element={<LitterEditorPage {...litterPageProps} />} />
+      <Route path="/litters/:ctlId" element={<LitterDetailsPage {...litterPageProps} />} />
 
       {/* Litter — Create / Edit (shared full-page editor) */}
       <Route path="/litter/edit" element={
