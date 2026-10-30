@@ -16,8 +16,17 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
     const belowLinked = (gender, value) => minFor(gender) > 0 && (value || 0) < minFor(gender);
 
     return (
-        <div className={cardClass}>
-            <SectionTitle title="Litter counts" description="Counts for the litter. Total Born is the sum of males, females and unknown." icon={ChartNoAxesColumn} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+        <>
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                    <ChartNoAxesColumn size={24} />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Litter Counts</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Record births, stillbirths, losses, and weaning numbers.</p>
+                </div>
+            </div>
+            <div className={cardClass}>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <ReadOnlyTotal label="Total born" value={form.litterSizeBorn} hint="Auto-calculated from M + F + U" />
@@ -89,6 +98,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
                     <ul className="list-disc ml-5">{warnings.map(w => <li key={w}>{w}</li>)}</ul>
                 </div>
             )}
-        </div>
+</div>
+        </>
     );
 }

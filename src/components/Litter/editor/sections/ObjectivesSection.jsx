@@ -17,8 +17,17 @@ export default function ObjectivesSection({ form, setField }) {
     };
 
     return (
-        <div className={cardClass}>
-            <SectionTitle title="Breeding objectives" description="What you hoped to achieve with this pairing." icon={Target} iconBg="bg-violet-100" iconColor="text-violet-600" />
+        <>
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                    <Target size={24} />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Breeding Objectives</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Record what you hope to achieve with this pairing and evaluate the results.</p>
+                </div>
+            </div>
+            <div className={cardClass}>
 
             <FieldRow label="Objectives" hint={`Short labels, e.g. “Better type” or “Solid colour”. Up to ${MAX_OBJECTIVES}.`}>
                 <div className="flex gap-2">
@@ -52,6 +61,7 @@ export default function ObjectivesSection({ form, setField }) {
             <FieldRow label="Objective evaluation" hint="How well did the litter meet these objectives?">
                 <textarea rows={3} className={inputClass} value={form.objectivesEvaluation || ''} onChange={(e) => setField('objectivesEvaluation', e.target.value)} />
             </FieldRow>
-        </div>
+</div>
+        </>
     );
 }

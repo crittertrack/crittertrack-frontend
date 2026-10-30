@@ -15,14 +15,17 @@ export default function DatesReproductionSection({ form, setField, setFields, er
     const status = deriveLitterFormStatus(form, original);
 
     return (
-        <div className={cardClass}>
-            <SectionTitle
-                title="Dates & status"
-                description="The status follows the dates you enter, so you can start with a planned mating and come back later."
-                icon={CalendarDays}
-                iconBg="bg-cyan-100"
-                iconColor="text-cyan-600"
-            />
+        <>
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                    <CalendarDays size={24} />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Dates & Status</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Record the important dates and reproductive status of this litter.</p>
+                </div>
+            </div>
+            <div className={cardClass}>
 
             <div className="rounded-lg bg-indigo-50 dark:bg-indigo-900/20 px-3 py-2 text-sm">
                 <span className="font-semibold text-indigo-700 dark:text-indigo-300">{LITTER_STATUS_LABELS[status]}</span>
@@ -72,6 +75,7 @@ export default function DatesReproductionSection({ form, setField, setFields, er
                     </div>
                 </FieldRow>
             </div>
-        </div>
+</div>
+        </>
     );
 }

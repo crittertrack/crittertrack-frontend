@@ -44,7 +44,16 @@ export default function OffspringSection({
     }
 
     return (
-        <div className="space-y-4">
+        <>
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                    <PawPrint size={24} />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Offspring</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Add or link individual animals belonging to this litter.</p>
+                </div>
+            </div>
             <div className={cardClass}>
                 <SectionTitle
                     title="Link existing animals"
@@ -77,6 +86,6 @@ export default function OffspringSection({
             {form.birthDate && (
                 <CreatePlaceholdersCard form={form} linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts} />
             )}
-        </div>
+        </>
     );
 }

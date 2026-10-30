@@ -39,8 +39,17 @@ const Collapsible = ({ title, open, onToggle, children }) => (
 
 export default function MatingBirthSection({ form, setField, setFields, extras, setExtras }) {
     return (
-        <div className={cardClass}>
-            <SectionTitle title="Mating & birth" description="Optional detail about how the mating and birth went." icon={Heart} iconBg="bg-rose-100" iconColor="text-rose-600" />
+        <>
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                    <Heart size={24} />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Mating & Birth</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Record additional details about the mating and birth.</p>
+                </div>
+            </div>
+            <div className={cardClass}>
 
             <Collapsible title="Mating information" open={extras.matingExtra} onToggle={() => setExtras(p => ({ ...p, matingExtra: !p.matingExtra }))}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -99,6 +108,7 @@ export default function MatingBirthSection({ form, setField, setFields, extras, 
                     <textarea rows={2} className={inputClass} value={form.weaningNotes || ''} onChange={(e) => setField('weaningNotes', e.target.value)} />
                 </FieldRow>
             </Collapsible>
-        </div>
+</div>
+        </>
     );
 }

@@ -29,7 +29,16 @@ export default function PhotosNotesSection({
     };
 
     return (
-        <div className="space-y-4">
+        <>
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                    <Images size={24} />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Photos & Notes</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Add photos and additional information about this litter.</p>
+                </div>
+            </div>
             <div className={cardClass}>
                 <SectionTitle
                     title={`Photos (${count}/${MAX_PHOTOS})`}
@@ -79,6 +88,6 @@ export default function PhotosNotesSection({
                     />
                 </FieldRow>
             </div>
-        </div>
+        </>
     );
 }
