@@ -65,7 +65,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     const [litter, setLitter] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
-    const daysSinceLitterBirth = litter.birthDate
+    const daysSinceLitterBirth = litter && litter.birthDate
         ? Math.floor((new Date() - new Date(litter.birthDate)) / (1000 * 60 * 60 * 24))
         : 0;
 
