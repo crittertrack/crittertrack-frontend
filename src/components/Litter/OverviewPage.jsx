@@ -83,6 +83,7 @@ const LittersOverviewPage = ({
     const [coiCacheRef] = useState({});
     const [coiCalculating, setCoiCalculating] = useState(new Set());
     const handleMarkAsMated = async (litter) => {
+   const handleMarkAsMated = async (litter) => {
         if (!litter.sireId_public || !litter.damId_public) {
             showModalMessage('Error', 'This litter needs both a sire and a dam before it can be marked as mated.');
             return;
@@ -284,3 +285,4 @@ const availableYears = useMemo(() => {
     return null;
 };
 export default LittersOverviewPage;
+}
