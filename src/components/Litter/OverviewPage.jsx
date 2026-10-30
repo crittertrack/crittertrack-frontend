@@ -53,23 +53,35 @@ const getStatusColor = (status) => STATUS_COLORS[status] || STATUS_COLORS.born;
 const getBadgeBg = (status) => STATUS_BADGE_BG[status] || STATUS_BADGE_BG.born;
 const getQuickAction = (status) => QUICK_ACTIONS[status] || null;
 
-const ParentLine = ({ icon, label, animal, fallbackId, onView }) => (
-    <div className="flex items-center gap-1.5 text-sm min-w-0">
-        {icon}
-        <span className="text-gray-500 dark:text-dark-text-muted text-xs">{label}:</span>
+const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }) => (
+    <div className={`min-w-0 flex-1 rounded-lg bg-gray-50 dark:bg-dark-surface border border-gray-100 dark:border-dark-border px-2.5 py-1.5 ${align === 'right' ? 'text-right' : 'text-left'}`}>
+        <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : ''}`}>
+            {icon}
+            <span className="text-[10px] font-semibold tracking-wider text-gray-400 dark:text-dark-text-muted">{label}</span>
+        </div>
         {animal || fallbackId ? (
             <button
                 type="button"
-                onClick={() => onView && onView(animal || { id_public: fallbackId })}
-                className="truncate text-left font-medium text-gray-800 dark:text-dark-text hover:underline"
+                onClick={(e) => { e.stopPropagation(); if (onView) onView(animal || { id_public: fallbackId }); }}
+                className={`block w-full truncate text-sm font-medium text-gray-800 dark:text-dark-text hover:underline ${align === 'right' ? 'text-right' : 'text-left'}`}
             >
                 {animal ? formatAnimalDisplayName(animal) : fallbackId}
             </button>
         ) : (
-            <span className="text-gray-400 dark:text-dark-text-muted">Unknown</span>
+            <span className="block text-sm text-gray-400 dark:text-dark-text-muted">Unknown</span>
         )}
     </div>
 );
+
+const Stat = ({ value, label }) => (
+    <div className="flex-1 text-center min-w-0">
+        <div className="text-xl font-bold leading-tight text-gray-900 dark:text-dark-text">{value}</div>
+        <div className="text-[11px] text-gray-500 dark:text-dark-text-muted">{label}</div>
+    </div>
+);
+
+const isNum = (v) => v !== null && v !== undefined && v !== '' && !isNaN(Number(v));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 const LitterCard = ({
     litter,
@@ -84,88 +96,158 @@ const LitterCard = ({
 }) => {
     const quick = getQuickAction(status);
     const coi = litter.inbreedingCoefficient;
-    const males = litter.maleCount ?? 0;
-    const females = litter.femaleCount ?? 0;
-    const unknown = litter.unknownCount ?? 0;
-    const total = litter.numberBorn ?? (males + females + unknown);
+    const hasBirth = status === 'born';
+
+    // Only treat a figure as recorded when it is actually stored; never show a made-up 0.
+    const sexCounts = [litter.maleCount, litter.femaleCount, litter.unknownCount];
+    const anySexRecorded = sexCounts.some(isNum);
+    const sexSum = sexCounts.reduce((s, v) => s + (isNum(v) ? Number(v) : 0), 0);
+    const bornRaw = litter.litterSizeBorn ?? litter.numberBorn;
+    const born = isNum(bornRaw) ? Number(bornRaw) : (anySexRecorded ? sexSum : null);
+    const linked = Array.isArray(offspring) ? offspring.length : null;
+    const lossesRaw = litter.lossesCount ?? litter.losses ?? litter.stillbornCount;
+    const losses = isNum(lossesRaw) ? Number(lossesRaw) : null;
+
+    const showBorn = born !== null && (hasBirth || born > 0);
+    const showLinked = linked !== null && (linked > 0 || hasBirth);
+    const showLosses = losses !== null && (hasBirth || losses > 0);
+    const statCount = [showBorn, showLinked, showLosses].filter(Boolean).length;
+    const showSex = anySexRecorded && (hasBirth || sexSum > 0);
+    const males = Number(litter.maleCount) || 0;
+    const females = Number(litter.femaleCount) || 0;
+    const unknown = Number(litter.unknownCount) || 0;
+
     const dateLabel = litter.birthDate
         ? `Born ${formatDateShort(litter.birthDate)}`
-        : litter.pregnancyDate
-            ? `Pregnant since ${formatDateShort(litter.pregnancyDate)}`
-            : litter.matingDate
-                ? `${status === 'planned' ? 'Planned mating' : 'Mated'} ${formatDateShort(litter.matingDate)}`
-                : 'No dates set';
+        : litter.birthDateUnknown
+            ? 'Born, date unknown'
+            : litter.pregnancyDate
+                ? `Pregnant since ${formatDateShort(litter.pregnancyDate)}`
+                : litter.matingDate
+                    ? `${status === 'planned' ? 'Planned mating' : 'Mated'} ${formatDateShort(litter.matingDate)}`
+                    : 'No dates set';
+
+    const emptyHint = status === 'planned'
+        ? 'Planned — no offspring recorded yet'
+        : litter.expectedDueDate
+            ? `Expected due ${formatDateShort(litter.expectedDueDate)}`
+            : 'No offspring recorded yet';
+
+    // Born litters already confirmed as weaned have no further transition.
+    const showPrimary = quick && !(status === 'born' && litter.weaningConfirmed);
+
+    const handleCardKeyDown = (e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDetails(litter); }
+    };
 
     return (
-        <div data-testid="litter-card" className={`rounded-xl border p-4 shadow-sm flex flex-col gap-3 ${getStatusColor(status)}`}>
+        <div
+            data-testid="litter-card"
+            role="link"
+            tabIndex={0}
+            onClick={() => onDetails(litter)}
+            onKeyDown={handleCardKeyDown}
+            className={`rounded-xl border p-3.5 shadow-sm flex flex-col gap-3 cursor-pointer transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${getStatusColor(status)}`}
+        >
+            {/* Header */}
             <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                    <div className="font-semibold text-gray-900 dark:text-dark-text truncate">
-                        {litter.breedingPairCodeName || litter.litter_id_public || 'Litter'}
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onTogglePublic(litter); }}
+                            title={litter.isDisplayLitter ? 'Public — click to hide' : 'Private — click to make public'}
+                            aria-label={litter.isDisplayLitter ? 'Public — click to hide' : 'Private — click to make public'}
+                            className="shrink-0 p-1 -ml-1 rounded-md text-gray-500 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface"
+                        >
+                            {litter.isDisplayLitter ? <Eye size={16} /> : <EyeOff size={16} />}
+                        </button>
+                        <div className="font-semibold text-gray-900 dark:text-dark-text truncate">
+                            {litter.breedingPairCodeName
+                                ? litter.breedingPairCodeName
+                                : <span className="text-gray-400 dark:text-gray-500 font-normal">Unnamed</span>}
+                        </div>
                     </div>
-                    {litter.litter_id_public && (
-                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">{litter.litter_id_public}</div>
-                    )}
+                    <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
+                        {[litter.litter_id_public, dateLabel].filter(Boolean).join(' · ')}
+                    </div>
                 </div>
                 <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeBg(status)}`}>
                     {LITTER_STATUS_LABELS[status] || status}
                 </span>
             </div>
 
-            <div className="space-y-1">
-                <ParentLine
-                    icon={<MaleIcon />}
-                    label="Sire" animal={litter.sire} fallbackId={litter.sireId_public} onView={onViewAnimal}
+            {/* Sire | COI | Dam */}
+            <div className="flex items-stretch gap-1.5">
+                <ParentPanel
+                    icon={<MaleIcon size={12} />}
+                    label="SIRE" animal={litter.sire} fallbackId={litter.sireId_public} onView={onViewAnimal}
                 />
-                <ParentLine
-                    icon={<FemaleIcon />}
-                    label="Dam" animal={litter.dam} fallbackId={litter.damId_public} onView={onViewAnimal}
+                <div className="shrink-0 flex flex-col items-center justify-center min-w-[3.25rem] text-center" title="Coefficient of inbreeding">
+                    <span className="text-[10px] font-semibold tracking-wider text-gray-400 dark:text-dark-text-muted">COI</span>
+                    {coiCalculating ? (
+                        <Loader2 size={12} className="animate-spin text-gray-500 dark:text-dark-text-muted" />
+                    ) : coi != null ? (
+                        <span className="text-xs font-semibold text-gray-700 dark:text-dark-text">{Number(coi).toFixed(2)}%</span>
+                    ) : (
+                        <span className="text-xs text-gray-400 dark:text-dark-text-muted">—</span>
+                    )}
+                </div>
+                <ParentPanel
+                    icon={<FemaleIcon size={12} />}
+                    label="DAM" animal={litter.dam} fallbackId={litter.damId_public} onView={onViewAnimal} align="right"
                 />
             </div>
 
-            <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
-                <div>{dateLabel}</div>
-                {(status === 'born' || total > 0) && (
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                        <span>{total} born</span>
-                        <span className="inline-flex items-center gap-1"><MaleIcon size={12} />{males}</span>
-                        <span className="inline-flex items-center gap-1"><FemaleIcon size={12} />{females}</span>
-                        {unknown > 0 && <span className="inline-flex items-center gap-1"><UnknownIcon size={12} />{unknown}</span>}
-                    </div>
-                )}
-                {Array.isArray(offspring) && offspring.length > 0 && (
-                    <div>{offspring.length} offspring linked</div>
-                )}
-                {coiCalculating ? (
-                    <div className="flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Calculating COI…</div>
-                ) : coi != null ? (
-                    <div>COI: {Number(coi).toFixed(2)}%</div>
-                ) : null}
-            </div>
+            {/* Statistics */}
+            {statCount > 0 || showSex ? (
+                <div className="space-y-2">
+                    {statCount > 0 && (
+                        <div className="flex items-start divide-x divide-gray-100 dark:divide-dark-border">
+                            {showBorn && <Stat value={born} label="Total Born" />}
+                            {showLinked && <Stat value={linked} label="Total Linked" />}
+                            {showLosses && <Stat value={losses} label="Total Losses" />}
+                        </div>
+                    )}
+                    {showSex && (
+                        <div className="flex items-center justify-center gap-4 text-xs text-gray-600 dark:text-dark-text-secondary">
+                            <span className="inline-flex items-center gap-1" title="Males"><MaleIcon size={13} />{plural(males, 'male', 'males')}</span>
+                            <span className="inline-flex items-center gap-1" title="Females"><FemaleIcon size={13} />{plural(females, 'female', 'females')}</span>
+                            <span className="inline-flex items-center gap-1" title="Unknown sex"><UnknownIcon size={13} />{unknown} unknown</span>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="text-xs text-center text-gray-400 dark:text-dark-text-muted py-1">{emptyHint}</div>
+            )}
 
-            <div className="flex flex-wrap items-center gap-2 mt-auto pt-1">
-                {quick && (
+            {/* Actions */}
+            <div className="flex items-center gap-2 mt-auto pt-3 border-t border-gray-100 dark:border-dark-border">
+                {showPrimary && (
                     <button
                         type="button"
-                        onClick={() => onQuickAction(litter, quick.action)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium text-white ${quick.color}`}
+                        onClick={(e) => { e.stopPropagation(); onQuickAction(litter, quick.action); }}
+                        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-sm ${quick.color}`}
                     >
                         {quick.label}
                     </button>
                 )}
-                <button type="button" onClick={() => onDetails(litter)} className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text flex items-center gap-1">
-                    <BookOpen size={12} /> Details
-                </button>
-                <button type="button" onClick={() => onEdit(litter)} className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text flex items-center gap-1">
-                    <Edit size={12} /> Edit
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onDetails(litter); }}
+                    className={`${showPrimary ? '' : 'flex-1 justify-center'} px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-surface flex items-center gap-1`}
+                >
+                    <BookOpen size={13} /> Details
                 </button>
                 <button
                     type="button"
-                    onClick={() => onTogglePublic(litter)}
-                    title={litter.isDisplayLitter ? 'Public — click to hide' : 'Private — click to make public'}
-                    className="ml-auto p-1.5 rounded-lg border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text"
+                    onClick={(e) => { e.stopPropagation(); onEdit(litter); }}
+                    title="Edit"
+                    aria-label="Edit litter"
+                    className="p-1.5 rounded-lg text-gray-500 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface"
                 >
-                    {litter.isDisplayLitter ? <Eye size={14} /> : <EyeOff size={14} />}
+                    <Edit size={14} />
                 </button>
             </div>
         </div>

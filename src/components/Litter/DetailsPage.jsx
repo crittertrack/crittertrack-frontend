@@ -230,7 +230,9 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal })
                         <ArrowLeft size={16} />
                     </button>
                     <div className="min-w-0">
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text truncate">{litter.breedingPairCodeName || litter.litter_id_public}</h1>
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text truncate">{litter.breedingPairCodeName
+                            ? litter.breedingPairCodeName
+                            : <span className="text-gray-400 dark:text-gray-500 font-normal">Unnamed</span>}</h1>
                         <div className="text-xs text-gray-500 dark:text-dark-text-muted">{litter.litter_id_public}</div>
                     </div>
                     <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE_BG[status] || STATUS_BADGE_BG.born}`}>

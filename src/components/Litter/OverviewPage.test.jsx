@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import LittersOverviewPage from './OverviewPage';
 import apiClient from '../../utils/apiClient';
 
 // Jest (CRA) can't resolve react-router-dom v7's package exports, and the page only needs navigate().
-jest.mock('react-router-dom', () => ({ useNavigate: () => jest.fn() }), { virtual: true });
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }), { virtual: true });
 jest.mock('../../utils/apiClient', () => ({ __esModule: true, default: { get: jest.fn(), put: jest.fn() } }));
 
 const litters = [
@@ -13,6 +14,7 @@ const litters = [
 ];
 
 beforeEach(() => {
+    mockNavigate.mockClear();
     apiClient.get.mockImplementation((url) => {
         if (url === '/litters') return Promise.resolve({ data: litters });
         if (url === '/animals') return Promise.resolve({ data: [
@@ -70,5 +72,32 @@ describe('Litters overview layout', () => {
         await waitFor(() => expect(card.querySelector('svg.lucide-mars.text-primary')).not.toBeNull());
         expect(card.querySelector('svg.lucide-venus.text-accent')).not.toBeNull();
         expect(card.textContent).not.toMatch(/[\u2642\u2640]/);
+    });
+
+    it('navigates on card click, but not from Edit, visibility or status-action buttons', async () => {
+        renderPage();
+        const cards = await screen.findAllByTestId('litter-card');
+        const card = cards.find(c => text(c).includes('CTL1'));
+        fireEvent.click(within(card).getByLabelText('Edit litter'));
+        expect(mockNavigate).toHaveBeenCalledTimes(1);
+        expect(mockNavigate).toHaveBeenLastCalledWith('/litters/CTL1/edit');
+        mockNavigate.mockClear();
+
+        fireEvent.click(within(card).getByTitle(/click to/i));
+        fireEvent.click(within(card).getByText('Mark Weaned'));
+        expect(mockNavigate).not.toHaveBeenCalled();
+
+        fireEvent.click(card);
+        expect(mockNavigate).toHaveBeenCalledWith('/litters/CTL1');
+    });
+
+    it('shows labelled stats and gender distribution for born litters', async () => {
+        renderPage();
+        const cards = await screen.findAllByTestId('litter-card');
+        const card = cards.find(c => text(c).includes('CTL1'));
+        expect(text(card)).toContain('Total Born');
+        expect(text(card)).toContain('3 males');
+        expect(text(card)).toContain('2 females');
+        expect(text(card)).toContain('1 unknown');
     });
 });
