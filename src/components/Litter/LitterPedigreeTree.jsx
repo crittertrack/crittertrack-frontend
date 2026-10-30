@@ -5,14 +5,14 @@ import apiClient from '../../utils/apiClient';
 import { buildTreeGraph } from '../../utils/treeComponentUtils';
 import { PawPrint, Cat } from 'lucide-react';
 
-const LitterPedigreeTreeNode = ({ node, onViewAnimal }) => {
-    const { image, label, gender, isPlaceholder } = node.data;
+const LitterPedigreeTreeNode = ({ data, onViewAnimal }) => {
+    const { image, label, gender, isPlaceholder, animal } = data || {};
     const isMale = gender === 'Male';
     const isFemale = gender === 'Female';
     const borderColor = isPlaceholder ? 'border-gray-300' : isMale ? 'border-blue-500' : 'border-pink-500';
     const bgColor = isPlaceholder ? 'bg-gray-100' : isMale ? 'bg-blue-50' : 'bg-pink-50';
     return (
-        <div className={`rounded-xl border-2 ${borderColor} ${bgColor} p-2 cursor-pointer hover:shadow-md`} onClick={() => onViewAnimal?.(node.data.animal)}>
+        <div className={`rounded-xl border-2 ${borderColor} ${bgColor} p-2 cursor-pointer hover:shadow-md`} onClick={() => onViewAnimal?.(animal)}>
             <div className="h-20 w-full bg-gray-100 flex items-center justify-center mb-2">
                 {image ? <img src={image} alt={label} className="max-w-full max-h-full object-cover" draggable={false} /> : (
                     isPlaceholder ? <div className="flex items-center justify-center text-gray-400"><PawPrint size={40} strokeWidth={1.5} /></div> : <div className="flex items-center justify-center text-gray-400"><Cat size={40} strokeWidth={1.5} /></div>
@@ -150,7 +150,7 @@ const LitterPedigreeTree = ({ sireId, damId, litterId, generations = 4, onViewAn
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
-                nodeComponent={LitterPedigreeTreeNode}
+                nodeTypes={nodeTypes}
                 onNodeClick={(_, node) => onViewAnimal?.(node.data.animal)}
                 fitView
                 fitViewOptions={{ padding: 0.25, maxZoom: 1 }}
@@ -170,3 +170,4 @@ export default LitterPedigreeTree;
                     try { return (await apiClient.get(`/animals/any/${encodeURIComponent(id)}`)).data; }
                     catch { return { id_public: id, name: 'Unknown', gender: 'Unknown' }; }
                 };
+const nodeTypes = { default: LitterPedigreeTreeNode };
