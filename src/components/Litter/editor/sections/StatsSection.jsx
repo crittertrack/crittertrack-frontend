@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChartNoAxesColumn } from 'lucide-react';
+import { ChartNoAxesColumnIncreasing, Baby, Frown, HeartCrack, Milk } from 'lucide-react';
 import {
     setSexCount, setStillbornSex, setLossSex, toggleExtractStillborn, toggleExtractLosses,
 } from '../litterFormModel';
@@ -18,12 +18,12 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
     return (
         <>
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
-                    <ChartNoAxesColumn size={24} />
+                <div className="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400 shrink-0">
+                    <ChartNoAxesColumnIncreasing size={24} />
                 </div>
                 <div>
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Litter Counts</h1>
-                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Record births, stillbirths, losses, and weaning numbers.</p>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Litter Counts*</h1>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Enter the counts for this litter. Total born is the sum of males, females and unknown.</p>
                 </div>
             </div>
             <div className={cardClass}>
