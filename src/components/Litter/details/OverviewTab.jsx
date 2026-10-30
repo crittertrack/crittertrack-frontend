@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatDate } from '../../../utils/dateFormatter';
 import { computeLitterStats, nextMilestone, relativeDaysLabel } from './helpers';
+import { Check } from 'lucide-react';
 import { Panel, Muted, isBlank } from './ui';
 import ParentPanel from './ParentPanel';
 import TimelinePanel from './TimelinePanel';
