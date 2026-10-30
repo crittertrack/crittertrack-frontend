@@ -23,10 +23,10 @@ const getSpeciesDisplayName = (species) => {
 
 // Cards are always white; the status shows through the border colour and the badge.
 const STATUS_COLORS = {
-    planned: 'border-indigo-300 dark:border-indigo-800/60 bg-white dark:bg-dark-card-bg',
-    mated: 'border-sky-300 dark:border-sky-800/60 bg-white dark:bg-dark-card-bg',
-    pregnant: 'border-pink-300 dark:border-pink-800/60 bg-white dark:bg-dark-card-bg',
-    born: 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg',
+    planned: 'border-indigo-400 dark:border-indigo-600/70 bg-white dark:bg-dark-card-bg',
+    mated: 'border-sky-400 dark:border-sky-600/70 bg-white dark:bg-dark-card-bg',
+    pregnant: 'border-pink-400 dark:border-pink-600/70 bg-white dark:bg-dark-card-bg',
+    born: 'border-gray-400 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg',
 };
 
 // The app's coloured gender icons (same colours as the animal cards and lists).
@@ -63,7 +63,8 @@ const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }
             <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); if (onView) onView(animal || { id_public: fallbackId }); }}
-                className={`block w-full truncate text-sm font-medium text-gray-800 dark:text-dark-text hover:underline ${align === 'right' ? 'text-right' : 'text-left'}`}
+                title={animal ? formatAnimalDisplayName(animal) : fallbackId}
+                className={`block w-full line-clamp-2 break-words text-sm leading-snug font-medium text-gray-800 dark:text-dark-text hover:underline ${align === 'right' ? 'text-right' : 'text-left'}`}
             >
                 {animal ? formatAnimalDisplayName(animal) : fallbackId}
             </button>
@@ -130,7 +131,7 @@ const LitterCard = ({
     const emptyHint = status === 'planned'
         ? 'Planned — no offspring recorded yet'
         : litter.expectedDueDate
-            ? `Expected due ${formatDateShort(litter.expectedDueDate)}`
+            ? `Due ${formatDateShort(litter.expectedDueDate)}`
             : 'No offspring recorded yet';
 
     // Born litters already confirmed as weaned have no further transition.
@@ -148,7 +149,7 @@ const LitterCard = ({
             tabIndex={0}
             onClick={() => onDetails(litter)}
             onKeyDown={handleCardKeyDown}
-            className={`rounded-xl border p-3.5 shadow-sm flex flex-col gap-3 cursor-pointer transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${getStatusColor(status)}`}
+            className={`rounded-xl border-2 p-3.5 shadow-sm flex flex-col gap-3 cursor-pointer transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${getStatusColor(status)}`}
         >
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
@@ -159,14 +160,14 @@ const LitterCard = ({
                             onClick={(e) => { e.stopPropagation(); onTogglePublic(litter); }}
                             title={litter.isDisplayLitter ? 'Public — click to hide' : 'Private — click to make public'}
                             aria-label={litter.isDisplayLitter ? 'Public — click to hide' : 'Private — click to make public'}
-                            className="shrink-0 p-1 -ml-1 rounded-md text-gray-500 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface"
+                            className={`shrink-0 p-1 -ml-1 rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface ${litter.isDisplayLitter ? 'text-green-600 dark:text-green-500' : 'text-gray-500 dark:text-dark-text-muted'}`}
                         >
                             {litter.isDisplayLitter ? <Eye size={16} /> : <EyeOff size={16} />}
                         </button>
                         <div className="font-semibold text-gray-900 dark:text-dark-text truncate">
                             {litter.breedingPairCodeName
                                 ? litter.breedingPairCodeName
-                                : <span className="text-gray-400 dark:text-gray-500 font-normal">Unnamed</span>}
+                                : <span className="text-gray-400 dark:text-gray-500 font-light">Unnamed</span>}
                         </div>
                     </div>
                     <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
