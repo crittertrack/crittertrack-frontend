@@ -4,7 +4,7 @@ import { ParentSearchModal } from '../../../Modals/SearchModals';
 import { SpeciesPickerModal } from '../../../Modals/SpeciesModals';
 import { formatAnimalDisplayName } from '../../../../utils/animalDisplayName';
 import { formatDate } from '../../../../utils/dateFormatter';
-import { varietyOf } from '../../Litter/details/helpers';
+import { varietyOf } from '../../details/helpers';
 import { FieldRow, SectionTitle, cardClass, inputClass, secondaryBtn } from '../fields';
 
 const Spinner = () => (
