@@ -133,8 +133,12 @@ const LitterCard = ({
             ? `Due ${formatDateShort(litter.expectedDueDate)}`
             : 'No offspring recorded yet';
 
-    // Born litters already confirmed as weaned have no further transition.
-    const showPrimary = quick && !(status === 'born' && litter.weaningConfirmed);
+    // Born litters already confirmed as weaned, or past the 90-day nursing cutoff, have no further transition.
+    const daysSinceBirth = litter.birthDate
+        ? Math.floor((Date.now() - new Date(litter.birthDate)) / (1000 * 60 * 60 * 24))
+        : null;
+    const pastNursingCutoff = daysSinceBirth !== null && daysSinceBirth > 90;
+    const showPrimary = quick && !(status === 'born' && (litter.weaningConfirmed || pastNursingCutoff));
 
     const handleCardKeyDown = (e) => {
         if (e.target !== e.currentTarget) return;

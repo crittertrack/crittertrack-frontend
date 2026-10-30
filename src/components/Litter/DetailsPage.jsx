@@ -73,7 +73,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     // - Litter must be nursing (not yet weaned)
     // - Within 90-day boundary from litter birth date
     // - weaningDate NOT yet set (per your "date=confirmed" workflow
-    const showWeanedButton = litter.isNursing && daysSinceLitterBirth <= 90 && !litter.weaningDate;
+    const showWeanedButton = litter.isNursing && daysSinceLitterBirth <= 90 && !litter.weaningConfirmed;
 
     // Button onClick - sets BOTH fields (your workflow)
     const handleMarkWeaned = (litter) => {
