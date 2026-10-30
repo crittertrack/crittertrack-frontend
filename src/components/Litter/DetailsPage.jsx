@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { ArrowLeft, Edit, Eye, EyeOff, Loader2, Mars, Venus } from 'lucide-react';
+import { ArrowLeft, Edit, Eye, EyeOff, Loader2, Mars, Venus, Download, ChevronDown } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import OverviewTab from './details/OverviewTab';
 import GeneticsTab from './details/GeneticsTab';
 import OffspringTab from './details/OffspringTab';
+import { PedigreeChart } from '../AnimalForm';
+import DirectParentTree from '../FamilyTree/DirectParentTree';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -18,7 +20,73 @@ const TABS = [
 
 const cardClass = 'rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4';
 
+const PedigreesTab = ({ litter }) => {
+    const [view, setView] = useState('horizontal'); // horizontal | vertical | tree
+    const [generations, setGenerations] = useState(4);
+    const [showImages, setShowImages] = useState(true);
+    const [downloadOpen, setDownloadOpen] = useState(false);
+    const sireId = litter?.sireId_public || litter?.sire?.id_public;
+    const damId = litter?.damId_public || litter?.dam?.id_public;
+    return (
+        <div data-testid="tab-pedigrees" className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden" role="group" aria-label="Pedigree view">
+                    {['horizontal','vertical','tree'].map(v => (
+                        <button key={v} type="button" onClick={() => setView(v)}
+                            className={`px-3 py-1.5 text-sm capitalize ${view === v ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary'}`}>
+                            {v}
+                        </button>
+                    ))}
+                </div>
+                <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                        <span>Generations</span>
+                        <input type="range" min={1} max={6} value={generations} onChange={e => setGenerations(Number(e.target.value))} />
+                        <span>{generations}</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={showImages} onChange={e => setShowImages(e.target.checked)} />
+                        <span>Show images</span>
+                    </label>
+                    <div className="relative">
+                        <button type="button" onClick={() => setDownloadOpen(o => !o)} disabled={view === 'tree'} className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-dark-border flex items-center gap-1.5 disabled:opacity-50">
+                            <Download size={14} /> Download <ChevronDown size={14} />
+                        </button>
+                        {downloadOpen && view !== 'tree' && (
+                            <div className="absolute right-0 mt-1 w-32 rounded-lg border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg shadow-lg z-10">
+                                <button type="button" onClick={() => setDownloadOpen(false)} className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface">PDF</button>
+                                <button type="button" onClick={() => setDownloadOpen(false)} className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface">Image</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+            {view === 'tree' ? (
+                <div className="space-y-4">
+                    {sireId && <DirectParentTree focusAnimalId={sireId} authToken={null} />}
+                    {damId && <DirectParentTree focusAnimalId={damId} authToken={null} />}
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {sireId && <PedigreeChart animalId={sireId} API_BASE_URL="" authToken={null} inline vertical={view === 'vertical'} inlineGenerations={generations} />}
+                    {damId && <PedigreeChart animalId={damId} API_BASE_URL="" authToken={null} inline vertical={view === 'vertical'} inlineGenerations={generations} />}
+                </div>
+            )}
+        </div>
+    );
+};
 const GalleryTab = ({ images }) => {
+    if (!images.length) return <div className="py-8 text-center text-sm text-gray-500 dark:text-dark-text-muted">No photos have been added to this litter.</div>;
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {images.map((img, i) => (
+                <a key={img.r2Key || img.url || i} href={img.url} target="_blank" rel="noreferrer">
+                    <img src={img.url} alt={`Litter gallery ${i + 1}`} className="w-full aspect-square object-cover rounded-lg" />
+                </a>
+            ))}
+        </div>
+    );
+};
     if (!images.length) return <div className="py-8 text-center text-sm text-gray-500 dark:text-dark-text-muted">No photos have been added to this litter.</div>;
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -245,8 +313,8 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
             )}
             {/* Placeholder tabs — intentionally empty for now. */}
             {activeTab === 'genetics' && <GeneticsTab litter={litter} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} />}
-            {activeTab === 'pedigrees' && <div data-testid="tab-pedigrees" />}
-            {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} />}
+            {activeTab === 'pedigrees' && <PedigreesTab litter={litter} />}
+            {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} animalBreedingLines={animalBreedingLines} />}
             {activeTab === 'gallery' && <GalleryTab images={images} />}
         </div>
         </div>

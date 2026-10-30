@@ -3,7 +3,7 @@ import { Mars, Venus, Eye, EyeOff, Heart, HeartOff, Loader2, User, Users } from 
 import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
 import AddOffspringModal from './AddOffspringModal';
 
-const OffspringTab = ({ offspring, loading, onView }) => {
+const OffspringTab = ({ offspring, loading, onView, animalBreedingLines = {} }) => {
     const [search, setSearch] = useState('');
     const [genderFilter, setGenderFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -18,7 +18,9 @@ const OffspringTab = ({ offspring, loading, onView }) => {
     const total = offspring.length;
     const male = offspring.filter(a => a.gender === 'Male').length;
     const female = offspring.filter(a => a.gender === 'Female').length;
-    const unknown = total - male - female;
+    const intersex = offspring.filter(a => a.gender === 'Intersex').length;
+    const mixed = offspring.filter(a => a.gender === 'Mixed').length;
+    const unknown = total - male - female - intersex - mixed;
     return (
         <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -35,7 +37,7 @@ const OffspringTab = ({ offspring, loading, onView }) => {
                     <option value="all">All statuses</option>
                     {[...new Set(offspring.map(a => a.status).filter(Boolean))].map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-                <span className="text-xs text-gray-500">Total {total} / Male {male} / Female {female} / Unknown {unknown}</span>
+                <span className="text-xs text-gray-500 flex items-center gap-2">Total {total} / <Mars size={12} className="text-blue-500"/> {male} / <Venus size={12} className="text-pink-500"/> {female} / <User size={12} className="text-purple-500"/> {intersex} / <Users size={12} className="text-teal-500"/> {mixed} / <User size={12} className="text-gray-400"/> {unknown}</span>
                 <button type="button" onClick={() => setAddOpen(true)} className="ml-auto px-3 py-1 text-sm rounded bg-primary text-black">+ Add offspring</button>
             </div>
             {!filtered.length ? (
@@ -61,9 +63,10 @@ const OffspringTab = ({ offspring, loading, onView }) => {
                                     <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-dark-surface" />
                                 )}
                                 <div className="text-xs space-y-1 min-w-0">
-                                    <div className="truncate">{a.variety || [a.color, a.markings].filter(Boolean).join(' ') || '—'}</div>
+                                    <div className="truncate">{a.variety || [a.color, a.markings, a.coat, a.earset].filter(Boolean).join(' ') || '—'}</div>
                                     <div className="font-mono truncate">{a.geneticCode || '—'}</div>
                                     <div>{a.status || '—'}</div>
+                                    <div className="text-gray-500">{(animalBreedingLines[a.id_public] || a.breedingLines || []).join(', ')}</div>
                                 </div>
                             </button>
                             <button type="button" className="mt-2 text-xs text-red-500">Unlink</button>
