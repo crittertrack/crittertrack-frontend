@@ -44,6 +44,12 @@ const STATUS_BADGE_BG = {
 
 const getStatusColor = (status) => STATUS_COLORS[status] || STATUS_COLORS.born;
 const getBadgeBg = (status) => STATUS_BADGE_BG[status] || STATUS_BADGE_BG.born;
+const QUICK_ACTIONS = {
+    planned: { action: 'mated', label: 'Mark as Mated', color: 'bg-sky-500 hover:bg-sky-600' },
+    mated: { action: 'pregnant', label: 'Mark as Pregnant', color: 'bg-pink-500 hover:bg-pink-600' },
+    pregnant: { action: 'born', label: 'Mark as Born', color: 'bg-gray-500 hover:bg-gray-600' },
+    born: { action: 'weaned', label: 'Mark as Weaned', color: 'bg-emerald-500 hover:bg-emerald-600' },
+};
 const getQuickAction = (status) => QUICK_ACTIONS[status] || null;
 
 const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }) => (
