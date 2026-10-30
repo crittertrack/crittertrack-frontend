@@ -39,7 +39,7 @@ const STATUS_BADGE_BG = {
     planned: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300',
     mated: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300',
     pregnant: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
-    born: 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text',
+    born: 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text',
 };
 
 const QUICK_ACTIONS = {
