@@ -23,9 +23,9 @@ const getSpeciesDisplayName = (species) => {
 
 // Cards are always white; the status shows through the border colour and the badge.
 const STATUS_COLORS = {
-    planned: 'border-indigo-400 dark:border-indigo-600/70 bg-white dark:bg-dark-card-bg',
-    mated: 'border-sky-400 dark:border-sky-600/70 bg-white dark:bg-dark-card-bg',
-    pregnant: 'border-pink-400 dark:border-pink-600/70 bg-white dark:bg-dark-card-bg',
+    planned: 'border-indigo-300 dark:border-indigo-800/60 bg-white dark:bg-dark-card-bg',
+    mated: 'border-sky-300 dark:border-sky-800/60 bg-white dark:bg-dark-card-bg',
+    pregnant: 'border-pink-300 dark:border-pink-800/60 bg-white dark:bg-dark-card-bg',
     born: 'border-gray-400 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg',
 };
 
@@ -149,7 +149,7 @@ const LitterCard = ({
             tabIndex={0}
             onClick={() => onDetails(litter)}
             onKeyDown={handleCardKeyDown}
-            className={`rounded-xl border-2 p-3.5 shadow-sm flex flex-col gap-3 cursor-pointer transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${getStatusColor(status)}`}
+            className={`rounded-xl border p-3.5 shadow-sm flex flex-col gap-3 cursor-pointer transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${getStatusColor(status)}`}
         >
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
@@ -170,7 +170,7 @@ const LitterCard = ({
                                 : <span className="text-gray-400 dark:text-gray-500 font-light">Unnamed</span>}
                         </div>
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
+                    <div className="mt-1 text-xs text-gray-500 dark:text-dark-text-muted truncate">
                         {[litter.litter_id_public, dateLabel].filter(Boolean).join(' · ')}
                     </div>
                 </div>
