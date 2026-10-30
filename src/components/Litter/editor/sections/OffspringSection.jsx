@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { PawPrint, List } from 'lucide-react';
 import { linkableOffspring, linkOffspring, unlinkOffspring } from '../litterFormModel';
-import { SectionTitle, cardClass } from '../fields';
+import { SectionTitle, cardClass, secondaryBtn } from '../fields';
 import CreatePlaceholdersCard from './CreatePlaceholdersCard';
 
 const animalLabel = (a) =>
@@ -50,9 +50,13 @@ export default function OffspringSection({
             </div>
             <div className={cardClass}>
                 <p className="text-sm text-gray-500 dark:text-dark-text-muted bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2">Offspring can be added now or later.</p>
-                <p className="text-xs text-gray-500 dark:text-dark-text-muted">To add animals: set male/female/unknown counts in Statistics, then create placeholders below; or check existing animals in the list to link them.</p>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted">To add animals: set male/female/unknown counts in Litter counts, then create placeholders below; or check existing animals in the list to link them.</p>
                 {form.birthDate ? null : <p className="text-xs italic text-gray-500 dark:text-dark-text-muted">Set a birth date to enable placeholder creation.</p>}
                 {form.birthDate && <CreatePlaceholdersCard form={form} linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts} />}
+                <div className="flex gap-2">
+                    <button type="button" className={secondaryBtn} onClick={() => { setForm(fd => ({ ...fd, maleCount: (parseInt(fd.maleCount,10)||0)+1 })); setCreateCounts(c => ({ ...c, males: (parseInt(c?.males,10)||0)+1 })); }}>+ Male</button>
+                    <button type="button" className={secondaryBtn} onClick={() => { setForm(fd => ({ ...fd, femaleCount: (parseInt(fd.femaleCount,10)||0)+1 })); setCreateCounts(c => ({ ...c, females: (parseInt(c?.females,10)||0)+1 })); }}>+ Female</button>
+                </div>
                 <p className="text-xs font-semibold text-cyan-600 dark:text-cyan-400">Total offspring currently added: {linkedCount + (createCounts?.males || 0) + (createCounts?.females || 0) + (createCounts?.unknown || 0)}</p>
             </div>
             <div className={cardClass}>
