@@ -117,8 +117,25 @@ const LitterCard = ({
     const females = Number(litter.femaleCount) || 0;
     const unknown = Number(litter.unknownCount) || 0;
 
+    const birthDateObj = litter.birthDate ? new Date(litter.birthDate) : null;
+    const ageStr = birthDateObj && !isNaN(birthDateObj.getTime())
+        ? (() => {
+            const now = new Date();
+            let y = now.getFullYear() - birthDateObj.getFullYear();
+            let m = now.getMonth() - birthDateObj.getMonth();
+            let d = now.getDate() - birthDateObj.getDate();
+            if (d < 0) { m -= 1; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+            if (m < 0) { y -= 1; m += 12; }
+            const parts = [];
+            if (y > 0) parts.push(`${y}y`);
+            if (m > 0) parts.push(`${m}m`);
+            if (d > 0 || parts.length === 0) parts.push(`${d}d`);
+            return parts.join(' ');
+        })()
+        : null;
+
     const dateLabel = litter.birthDate
-        ? `Born ${formatDateShort(litter.birthDate)}`
+        ? `Born ${formatDateShort(litter.birthDate)}${ageStr ? ` · ${ageStr}` : ''}`
         : litter.birthDateUnknown
             ? 'Born, date unknown'
             : litter.pregnancyDate

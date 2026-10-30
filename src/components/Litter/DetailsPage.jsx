@@ -214,6 +214,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                     animalBreedingLines={animalBreedingLines}
                     showWeanedButton={showWeanedButton}
                     handleMarkWeaned={handleMarkWeaned}
+                    handleMarkWeaned={handleMarkWeaned}
                 />
             )}
             {/* Placeholder tabs — intentionally empty for now. */}

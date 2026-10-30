@@ -18,6 +18,7 @@ const Summary = ({ label, children, testId }) => (
 export default function OverviewTab({
     litter, status, offspring = [], offspringLoading = false, onView, onEdit,
     breedingLineDefs = [], animalBreedingLines = {},
+    showWeanedButton = false, handleMarkWeaned,
 }) {
     const stats = computeLitterStats(litter, status);
     const milestone = nextMilestone(litter, status);
