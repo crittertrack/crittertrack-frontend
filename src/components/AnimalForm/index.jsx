@@ -1859,7 +1859,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
     }
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 bg-black bg-opacity-30 z-[60] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-30 z-[90] overflow-y-auto">
             <div className="min-h-screen flex justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-2 sm:px-4">
                 <div className={`relative bg-white rounded-xl shadow-2xl h-fit w-full ${vertical ? 'max-w-[860px]' : 'max-w-[98vw] sm:max-w-[95vw]'}`}>
                     {/* Header */}
