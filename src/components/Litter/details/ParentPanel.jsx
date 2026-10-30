@@ -76,6 +76,7 @@ export default function ParentPanel({
                         </div>
                         <div className="text-xs text-gray-500 dark:text-dark-text-muted">{id}</div>
                         <Line label="Variety">{variety || NA}</Line>
+                        <Line label="Genetic code">{animal?.geneticCode || NA}</Line>
                         <Line label="Born">{animal?.birthDate ? formatDate(animal.birthDate) : NA}</Line>
                         <Line label="Age at mating">{age || NA}</Line>
                         <div className="text-sm leading-snug flex flex-wrap items-center gap-x-1.5 gap-y-1">
