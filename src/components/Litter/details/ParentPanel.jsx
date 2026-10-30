@@ -43,7 +43,7 @@ export default function ParentPanel({
     const open = () => id && onView && onView(animal || { id_public: id });
 
     return (
-        <section data-testid={`parent-${role.toLowerCase()}`} className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4 flex flex-col">
+        <section data-testid={`parent-${role.toLowerCase()}`} className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4 flex flex-col relative">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-500 dark:text-dark-text-muted">
                     <Icon size={14} strokeWidth={2.5} className={iconClass} /> {role.toUpperCase()}
@@ -74,7 +74,7 @@ export default function ParentPanel({
                         <div className="font-semibold text-gray-900 dark:text-dark-text break-words">
                             {animal ? formatAnimalDisplayName(animal) : fallbackId}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-dark-text-muted text-right">{id}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted absolute bottom-2 right-2">{id}</div>
                         <Line label="Variety">{variety || NA}</Line>
                         <Line label="Genetic code">{animal?.geneticCode || NA}</Line>
                         <Line label="Born">{animal?.birthDate ? formatDate(animal.birthDate) : NA}</Line>
