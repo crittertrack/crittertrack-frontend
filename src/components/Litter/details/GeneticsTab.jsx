@@ -41,10 +41,10 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">COI & AVK</h3>
                     <Field label="Sire COI" value={sire.inbreedingCoefficient != null ? `${sire.inbreedingCoefficient}%` : null} />
                     <Field label="Dam COI" value={dam.inbreedingCoefficient != null ? `${dam.inbreedingCoefficient}%` : null} />
-                    <Field label="Expected offspring COI" value={litter?.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient}%` : null} />
+                    <Field label="Expected offspring COI" value={litter?.inbreedingCoefficient != null ? `${Number(litter.inbreedingCoefficient).toFixed(2)}%` : null} />
                     <Field label="Sire AVK" value={sire.avgKinship != null ? `${sire.avgKinship}%` : null} />
                     <Field label="Dam AVK" value={dam.avgKinship != null ? `${dam.avgKinship}%` : null} />
-                    <Field label="Pedigree Generations" value={litter?.pedigreeGenerations} />
+                    <Field label="Calculation depth" value={litter?.pedigreeGenerations != null ? `${litter.pedigreeGenerations} generations` : null} />
                 </div>
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Breeding Lines</h3>
