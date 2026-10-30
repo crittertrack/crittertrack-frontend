@@ -63,6 +63,7 @@ export default function OverviewTab({
         </Muted>
       )}
     </div>
+  </div>
 
     {(() => {
       const action = status === 'planned' ? 'mated' : status === 'mated' ? 'pregnant' : status === 'pregnant' ? 'born' : status === 'born' ? 'weaned' : null;
