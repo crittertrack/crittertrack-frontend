@@ -13,14 +13,14 @@ const Spinner = () => (
     </div>
 );
 
-const ParentPicker = ({ role, icon, animal, id, locked, error, onPick, onClear }) => (
-    <FieldRow label={role} required={!locked} error={error} hint={locked ? 'Locked — parents can’t change once a litter exists.' : undefined}>
+const ParentPicker = ({ role, icon, animal, id, locked, disabled, error, onPick, onClear }) => (
+    <FieldRow label={role} required={!locked} error={error} hint={locked ? 'Locked — parents can’t change once a litter exists.' : disabled ? 'Select a species first.' : undefined}>
         <div className="flex items-center gap-2">
             <button
                 type="button"
-                disabled={locked}
+                disabled={locked || disabled}
                 onClick={onPick}
-                className={`${inputClass} flex items-center gap-2 text-left ${locked ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className={`${inputClass} flex items-center gap-2 text-left ${locked || disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
                 {icon}
                 <span className="truncate">
@@ -114,6 +114,7 @@ export default function IdentityParentsSection({
                         animal={sire}
                         id={form.sireId_public}
                         locked={isEdit}
+                        disabled={!form.species}
                         error={errors.sireId_public}
                         onPick={() => setPicker('sire')}
                         onClear={() => onSelectParent('sire', null)}
@@ -124,6 +125,7 @@ export default function IdentityParentsSection({
                         animal={dam}
                         id={form.damId_public}
                         locked={isEdit}
+                        disabled={!form.species}
                         error={errors.damId_public}
                         onPick={() => setPicker('dam')}
                         onClear={() => onSelectParent('dam', null)}

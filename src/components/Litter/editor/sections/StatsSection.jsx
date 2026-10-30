@@ -53,7 +53,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
             </div>
 
             <div className={cardClass}>
-                <CardHeader icon={Frown} iconBg="bg-[#B9F6E3]" title="Stillborn" subtitle="Record stillborn animals (not included in total born)." />
+                <CardHeader icon={Frown} iconBg="bg-[#B9F6E3]" title="Stillborn" subtitle="Record stillborn animals." />
                 <label className="flex items-start gap-2 text-sm text-[#111B35] dark:text-dark-text cursor-pointer">
                     <input type="checkbox" className="mt-0.5" checked={!!form.extractStillbornFromTotal} onChange={(e)=>setForm(fd=>toggleExtractStillborn(fd,e.target.checked))} />
                     <span>
