@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mars, Venus, Eye, Heart, Loader2 } from 'lucide-react';
-import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
+import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
 import AddOffspringModal from './AddOffspringModal';
 
 const OffspringTab = ({ offspring, loading, onView }) => {
