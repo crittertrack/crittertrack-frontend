@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 const Field = ({ label, value }) => (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-dark-border last:border-0">
         <span className="text-sm text-gray-600 dark:text-dark-text-secondary">{label}</span>
-        <span className="text-sm font-medium text-gray-900 dark:text-dark-text">{value ?? 'Not recorded'}</span>
+        <span className="text-sm font-medium text-gray-900 dark:text-dark-text">{value ?? 'Not applicable'}</span>
     </div>
 );
 
