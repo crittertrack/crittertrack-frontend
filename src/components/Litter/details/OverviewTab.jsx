@@ -40,14 +40,44 @@ export default function OverviewTab({
                 <Summary label="Birth date" testId="summary-birth">{birth || <Muted>{status === 'born' ? 'Not recorded' : 'Not born yet'}</Muted>}</Summary>
                 <Summary label="Total offspring" testId="summary-total">{total === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : total}</Summary>
                 <Summary label="COI" testId="summary-coi">{isBlank(coi) ? <Muted>Not calculated</Muted> : `${Number(coi).toFixed(2)}%`}</Summary>
-                <Summary label="Next milestone" testId="summary-milestone">
-                    {milestone ? (
-                        <>
-                            <span>{milestone.label}</span>
-                            <span className="block text-xs font-normal text-gray-500 dark:text-dark-text-muted">{formatDate(milestone.date)} · {relativeDaysLabel(milestone.days)}</span>
-                        </>
-                    ) : <Muted>{status === 'born' && litter.weaningConfirmed ? 'Complete' : 'None scheduled'}</Muted>}
-                </Summary>
+                
+<Summary label="Next milestone" testId="summary-milestone">
+  <div className="flex items-center justify-between gap-3 w-full">
+    {/* Original milestone information - Left */}
+    <div className="min-w-0">
+      {milestone ? (
+        <>
+          <span>{milestone.label}</span>
+          <span className="block text-xs font-normal text-gray-500 dark:text-dark-text-muted">
+            {formatDate(milestone.date)} · {relativeDaysLabel(milestone.days)}
+          </span>
+        </>
+      ) : (
+        <Muted>
+          {status === 'born' && litter.weaningConfirmed
+            ? 'Complete'
+            : 'None scheduled'}
+        </Muted>
+      )}
+    </div>
+
+    {/* Reproductive status action - Right */}
+    {showWeanedButton && (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleMarkWeaned(litter);
+        }}
+        className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors shrink-0"
+        title="Mark litter as weaned"
+      >
+        <Check size={12} />
+        Mark Weaned
+      </button>
+    )}
+  </div>
+</Summary>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">

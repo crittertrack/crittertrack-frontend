@@ -4147,14 +4147,169 @@ useEffect(() => {
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColor}`}>{statusLabel}</span>
                 </div>
 
-                {/* Actions */}
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
-                </div>
-            </div>
-        );
-    };
+{/* Actions */}
+<div className="sm:text-right flex items-center gap-1 justify-end">
+  {animal.isPlannedMating && (
+    <>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPlannedMating: false,
+            isInMating: true,
+            matingDate: new Date().toISOString().slice(0, 10),
+          })
+        }
+        className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"
+      >
+        <Hourglass size={12} /> Mated today
+      </button>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPlannedMating: false,
+            isInMating: false,
+            isPregnant: false,
+            isNursing: false,
+          })
+        }
+        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+        title="Clear Status"
+      >
+        <X size={12} />
+      </button>
+    </>
+  )}
+
+  {animal.isInMating && (
+    <>
+      {animal.gender !== 'Male' && (
+        <button
+          onClick={(e) =>
+            handleReproStatusUpdate(e, animal, {
+              isInMating: false,
+              isPregnant: true,
+              pregnancyDate: new Date().toISOString().slice(0, 10),
+            })
+          }
+          className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"
+        >
+          <ScanHeart size={12} /> Assign Pregnant
+        </button>
+      )}
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isInMating: false,
+            isPregnant: false,
+            isNursing: false,
+          })
+        }
+        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+        title="Clear Status"
+      >
+        <X size={12} />
+      </button>
+    </>
+  )}
+
+  {animal.isPregnant && animal.gender !== 'Male' && (
+    <>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPregnant: false,
+            isNursing: true,
+            birthDate: new Date().toISOString().slice(0, 10),
+          })
+        }
+        className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"
+      >
+        <Droplet size={12} /> Born today
+      </button>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPregnant: false,
+            isInMating: false,
+            isNursing: false,
+          })
+        }
+        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+        title="Clear Status"
+      >
+        <X size={12} />
+      </button>
+    </>
+  )}
+
+  {/* Nursing / Weaning Actions */}
+  {animal.isNursing &&
+    animal.gender !== 'Male' &&
+    (() => {
+      const litterBirthDate = animal.litterBirthDate; // TODO: Get from actual litter data source
+const daysSinceBirth = litterBirthDate 
+    ? Math.floor((new Date() - new Date(litterBirthDate)) / (1000 * 60 * 60 * 24)) 
+    : 0;
+const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSinceBirth <= 90 && !animal.weaningDate;
+
+      return (
+        <>
+          {showWeanedButton && (
+            <button
+              onClick={(e) =>
+                handleReproStatusUpdate(e, animal, {
+                  isNursing: false,
+                  weaningDate: new Date().toISOString().slice(0, 10),
+                  weaningConfirmed: true,
+                })
+              }
+              className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
+            >
+              <Check size={12} /> Mark Weaned
+            </button>
+          )}
+
+          <button
+            onClick={(e) =>
+              handleReproStatusUpdate(e, animal, {
+                isNursing: false,
+                isPregnant: false,
+                isInMating: false,
+              })
+            }
+            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+            title="Clear Status"
+          >
+            <X size={12} />
+          </button>
+        </>
+      );
+    })()}
+
+  {/* Weaned Status */}
+  {!animal.isNursing &&
+    animal.gender !== 'Male' &&
+    animal.weaningConfirmed &&
+    animal.weaningDate && (
+      <span className="text-xs text-gray-400 dark:text-dark-text-muted ml-2">
+        Weaned
+      </span>
+    )}
+
+  {/* Edit Animal */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      onEditAnimal(animal);
+    }}
+    className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+    title="Edit Animal"
+  >
+    <Edit size={14} />
+  </button>
+</div>
+</div>
+)}
 
     const HealthAnimalBar = ({ animal, type, onViewAnimal, onEditAnimal, handleUnquarantine, handleDischargeTreatment, handleMedicationAction, parseArrayField, calcNextDose, formatNextDose }) => {
         const isQuarantine = type === 'quarantine';

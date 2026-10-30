@@ -48,7 +48,16 @@ export const computeLitterStats = (litter, status) => {
 
     const weaned = numOrNull(litter.litterSizeWeaned ?? litter.numberWeaned);
     const isBorn = status === 'born';
-    const weanedState = weaned !== null ? 'value' : (isBorn && !litter.weaningConfirmed ? 'pending' : 'missing');
+
+    const maxNursingDays = 90;
+const daysSinceBirth = litter.birthDate 
+    ? Math.floor((new Date() - new Date(litter.birthDate)) / (1000 * 60 * 60 * 24))
+    : null;
+
+    const weanedState = 
+    (isBorn && daysSinceBirth <= maxNursingDays && !litter.weaningDate) 
+        ? (weaned !== null ? 'value' : 'pending') 
+        : (isBorn && !litter.weaningConfirmed ? 'pending' : 'missing');
     const survivalPct = (weaned !== null && liveBorn > 0 && (litter.weaningConfirmed || weaned > 0))
         ? Math.min(100, Math.round((weaned / liveBorn) * 100))
         : null;
