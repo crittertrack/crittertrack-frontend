@@ -2972,113 +2972,115 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                 <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Survived to weaning</p>
                                             </div>
                                         </div>
-                                        {/* Link Existing Offspring */}
-                                        {formData.sireId_public && formData.damId_public && (
-                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                                            Link Existing Animals as Offspring
-                                        </label>
-                                        <div className="bg-gray-50 dark:bg-dark-card-bg p-3 rounded-lg">
-                                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-3">
-                                                Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
-                                            </p>
-                                            <div className="space-y-2">
-                                            {myAnimals
-                                             .filter(animal => {
-                                            const matchesSire = animal.sireId_public === formData.sireId_public;
-                                            const matchesDam = animal.damId_public === formData.damId_public;
+                                </div>
+
+                                {/* Link Existing Offspring */}
+                                                                {formData.sireId_public && formData.damId_public && (
+                                                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
+                                                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                                                            Link Existing Animals as Offspring
+                                                                        </label>
+                                                                        <div className="bg-gray-50 dark:bg-dark-card-bg p-3 rounded-lg">
+                                                                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-3">
+                                                                                Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
+                                                                            </p>
+                                                                            <div className="space-y-2">
+                                                                                {myAnimals
+                                                                                    .filter(animal => {
+                                                                                        const matchesSire = animal.sireId_public === formData.sireId_public;
+                                                                                        const matchesDam = animal.damId_public === formData.damId_public;
                                                         
-                                            // If litter has birthdate, only show animals with matching birthdate
-                                            if (formData.birthDate && animal.birthDate) {
-                                            const litterDate = formData.birthDate.split('T')[0];
-                                             const animalDate = animal.birthDate.split('T')[0];
-                                            return matchesSire && matchesDam && litterDate === animalDate;
-                                            }
+                                                                                        // If litter has birthdate, only show animals with matching birthdate
+                                                                                        if (formData.birthDate && animal.birthDate) {
+                                                                                            const litterDate = formData.birthDate.split('T')[0];
+                                                                                            const animalDate = animal.birthDate.split('T')[0];
+                                                                                            return matchesSire && matchesDam && litterDate === animalDate;
+                                                                                        }
                                                         
-                                             return matchesSire && matchesDam;
-                                            })
-                                             .map(animal => (
-                                             <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded cursor-pointer">
-                                              <input
-                                              type="checkbox"
-                                            checked={formData.linkedOffspringIds?.includes(animal.id_public)}
-                                              onChange={(e) => {
-                                             if (e.target.checked) {
-                                            // Check if litter has a birthdate and animal has a different birthdate
-                                             if (formData.birthDate && animal.birthDate) {
-                                             const litterDate = formData.birthDate.split('T')[0];
-                                            const animalDate = animal.birthDate.split('T')[0];
+                                                                                        return matchesSire && matchesDam;
+                                                                                    })
+                                                                                    .map(animal => (
+                                                                                        <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded cursor-pointer">
+                                                                                            <input
+                                                                                                type="checkbox"
+                                                                                                checked={formData.linkedOffspringIds?.includes(animal.id_public)}
+                                                                                                onChange={(e) => {
+                                                                                                    if (e.target.checked) {
+                                                                                                        // Check if litter has a birthdate and animal has a different birthdate
+                                                                                                        if (formData.birthDate && animal.birthDate) {
+                                                                                                            const litterDate = formData.birthDate.split('T')[0];
+                                                                                                            const animalDate = animal.birthDate.split('T')[0];
                                                                             
-                                             if (litterDate !== animalDate) {
-                                              const confirmChange = window.confirm(
-                                              `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
-                                             `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
-                                            );
+                                                                                                            if (litterDate !== animalDate) {
+                                                                                                                const confirmChange = window.confirm(
+                                                                                                                    `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
+                                                                                                                    `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
+                                                                                                                );
                                                                                 
-                                            if (!confirmChange) {
-                                            // User cancelled, abort the link
-                                             return;
-                                             }
+                                                                                                                if (!confirmChange) {
+                                                                                                                    // User cancelled, abort the link
+                                                                                                                    return;
+                                                                                                                }
                                                                                 
-                                            // User accepted, update litter birthdate and link the animal
-                                            setFormData({
-                                             ...formData,
-                                             birthDate: animalDate,
-                                            linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
-                                              });
-                                              return;
-                                              }
-                                            }
+                                                                                                                // User accepted, update litter birthdate and link the animal
+                                                                                                                setFormData({
+                                                                                                                    ...formData,
+                                                                                                                    birthDate: animalDate,
+                                                                                                                    linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
+                                                                                                                });
+                                                                                                                return;
+                                                                                                            }
+                                                                                                        }
                                                                         
-                                             // Normal linking flow
-                                             const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
-                                             const newFormData = { ...formData, linkedOffspringIds: newLinked };
+                                                                                                        // Normal linking flow
+                                                                                                        const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
+                                                                                                        const newFormData = { ...formData, linkedOffspringIds: newLinked };
                                                                         
-                                             // Auto-fill birthdate from offspring if litter has no birthdate
-                                             if (!formData.birthDate && animal.birthDate) {
-                                              newFormData.birthDate = animal.birthDate.split('T')[0];
-                                            newFormData.birthDateUnknown = false;
-                                             }
+                                                                                                        // Auto-fill birthdate from offspring if litter has no birthdate
+                                                                                                        if (!formData.birthDate && animal.birthDate) {
+                                                                                                            newFormData.birthDate = animal.birthDate.split('T')[0];
+                                                                                                         newFormData.birthDateUnknown = false;
+                                                                                                        }
                                                                         
-                                            setFormData(newFormData);
-                                            } else {
-                                             // Unlinking
-                                            const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                            setFormData({ ...formData, linkedOffspringIds: newLinked });
-                                            }
-                                             }}
-                                            className="h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary"
-                                             />
-                                            <span className="text-sm text-gray-800 dark:text-dark-text">
-                                             {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
-                                             </span>
-                                              </label>
-                                            ))
-                                             }
-                                             {myAnimals.filter(animal => {
-                                             const matchesSire = animal.sireId_public === formData.sireId_public;
-                                              const matchesDam = animal.damId_public === formData.damId_public;
+                                                                                                        setFormData(newFormData);
+                                                                                                    } else {
+                                                                                                        // Unlinking
+                                                                                                        const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
+                                                                                                        setFormData({ ...formData, linkedOffspringIds: newLinked });
+                                                                                                    }
+                                                                                                }}
+                                                                                                className="h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary"
+                                                                                            />
+                                                                                            <span className="text-sm text-gray-800 dark:text-dark-text">
+                                                                                                {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
+                                                                                            </span>
+                                                                                        </label>
+                                                                                    ))
+                                                                                }
+                                                                                {myAnimals.filter(animal => {
+                                                                                    const matchesSire = animal.sireId_public === formData.sireId_public;
+                                                                                    const matchesDam = animal.damId_public === formData.damId_public;
                                                     
-                                            // If litter has birthdate, only show animals with matching birthdate
-                                            if (formData.birthDate && animal.birthDate) {
-                                            const litterDate = formData.birthDate.split('T')[0];
-                                            const animalDate = animal.birthDate.split('T')[0];
-                                            return matchesSire && matchesDam && litterDate === animalDate;
-                                             }
+                                                                                    // If litter has birthdate, only show animals with matching birthdate
+                                                                                    if (formData.birthDate && animal.birthDate) {
+                                                                                        const litterDate = formData.birthDate.split('T')[0];
+                                                                                        const animalDate = animal.birthDate.split('T')[0];
+                                                                                        return matchesSire && matchesDam && litterDate === animalDate;
+                                                                                    }
                                                     
-                                            return matchesSire && matchesDam;
-                                            }).length === 0 && (
-                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">No matching animals found</p>
-                                            )}
-                                            {formData.linkedOffspringIds?.length > 0 && (
-                                             <p className="text-xs text-green-600 font-semibold mt-2">
-                                             {formData.linkedOffspringIds.length} animal(s) selected
-                                             </p>
-                                            )}
-                                            </div>
-                                            </div>
-                                            </div>
-                                            )}
+                                                                                    return matchesSire && matchesDam;
+                                                                                }).length === 0 && (
+                                                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">No matching animals found</p>
+                                                                                )}
+                                                                                {formData.linkedOffspringIds?.length > 0 && (
+                                                                                    <p className="text-xs text-green-600 font-semibold mt-2">
+                                                                                        {formData.linkedOffspringIds.length} animal(s) selected
+                                                                                    </p>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
 
                                                                 {/* Create New Offspring */}
                                                                 {formData.sireId_public && formData.damId_public && formData.birthDate && (
@@ -3177,7 +3179,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, setUserProfile
                                                                         </div>
                                                                     </div>
                                                                 )}
-                                                            </div>
 
                                 {/* Litter Photos ? always visible, including while converting a still-Planned litter */}
                                                                 <div className="mb-2 p-4 border border-amber-200 dark:border-amber-800/40 rounded-lg bg-amber-50 dark:bg-amber-900/20">
