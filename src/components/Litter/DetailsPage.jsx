@@ -5,6 +5,7 @@ import { ArrowLeft, Edit, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import OverviewTab from './details/OverviewTab';
+import GeneticsTab from './details/GeneticsTab';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -269,7 +270,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                 />
             )}
             {/* Placeholder tabs — intentionally empty for now. */}
-            {activeTab === 'genetics' && <div data-testid="tab-genetics" />}
+            `{activeTab === 'genetics' && <GeneticsTab litter={litter} />}`.
             {activeTab === 'pedigrees' && <div data-testid="tab-pedigrees" />}
             {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} />}
             {activeTab === 'gallery' && <GalleryTab images={images} />}
