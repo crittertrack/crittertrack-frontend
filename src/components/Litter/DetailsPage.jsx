@@ -6,6 +6,7 @@ import { deriveStoredStatus } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import OverviewTab from './details/OverviewTab';
 import GeneticsTab from './details/GeneticsTab';
+import GeneticsTab from './details/GeneticsTab';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -270,7 +271,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                 />
             )}
             {/* Placeholder tabs — intentionally empty for now. */}
-            `{activeTab === 'genetics' && <GeneticsTab litter={litter} />}`.
+            {activeTab === 'genetics' && <GeneticsTab litter={litter} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} />}
             {activeTab === 'pedigrees' && <div data-testid="tab-pedigrees" />}
             {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} />}
             {activeTab === 'gallery' && <GalleryTab images={images} />}

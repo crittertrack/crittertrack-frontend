@@ -17,10 +17,18 @@ const PercentBar = ({ value }) => (
     </div>
 );
 
-const GeneticsTab = ({ litter }) => {
+const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [showAllAncestors, setShowAllAncestors] = useState(false);
     const sire = litter?.sire || {};
     const dam = litter?.dam || {};
+    const sireId = sire.id_public || litter?.sireId_public;
+    const damId = dam.id_public || litter?.damId_public;
+    const resolveLines = (id) => {
+        const assigned = (id && animalBreedingLines[id]) || [];
+        return breedingLineDefs.filter(l => assigned.includes(l.id) && l.name && l.enabled !== false).map(l => l.name);
+    };
+    const sireLines = resolveLines(sireId);
+    const damLines = resolveLines(damId);
     const ancestors = litter?.commonAncestors || [];
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
     const expectedTraits = litter?.expectedTraits || [];
@@ -42,8 +50,8 @@ const GeneticsTab = ({ litter }) => {
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Breeding Lines</h3>
                     <Field label="Line Type" value={litter?.lineType} />
                     <Field label="Shared Lines" value={litter?.sharedLines} />
-                    <Field label="Sire Lines" value={Array.isArray(sire.breedingLines) ? sire.breedingLines.join(', ') : sire.breedingLines} />
-                    <Field label="Dam Lines" value={Array.isArray(dam.breedingLines) ? dam.breedingLines.join(', ') : dam.breedingLines} />
+                    <Field label="Sire Lines" value={sireLines.length ? sireLines.join(', ') : null} />
+                    <Field label="Dam Lines" value={damLines.length ? damLines.join(', ') : null} />
                 </div>
             </div>
 
