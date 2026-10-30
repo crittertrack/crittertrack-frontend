@@ -42,28 +42,6 @@ const STATUS_BADGE_BG = {
     born: 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text',
 };
 
-// *** WEANED BUTTON FOR LITTERS PAGE CARDS ***
-
-// 1. Calculate days since litter birth (90-day nursing cutoff = DEFAULT_MAX_NURSING_DAYS)
-const daysSinceLitterBirth = litter.birthDate 
-    ? Math.floor((new Date() - new Date(litter.birthDate)) / (1000 * 60 * 60 * 24)) 
-    : 0;
-
-// 2. Determine if "Mark Weaned" button should show
-//    - Litter must be nursing (not yet weaned)
-//    - Within 90-day boundary from litter birth date  
-//    - weaningDate NOT yet set (per your "date=confirmed" workflow)
-const showWeanedButton = litter.isNursing && daysSinceLitterBirth <= 90 && !litter.weaningDate;
-
-// 3. Button onClick - sets BOTH fields (your workflow)
-const handleMarkWeaned = (litter) => {
-    handleLitterStatusUpdate(litter, { 
-        isNursing: false, 
-        weaningDate: new Date().toISOString().slice(0,10), 
-        weaningConfirmed: true 
-    });
-};
-
 const getStatusColor = (status) => STATUS_COLORS[status] || STATUS_COLORS.born;
 const getBadgeBg = (status) => STATUS_BADGE_BG[status] || STATUS_BADGE_BG.born;
 const getQuickAction = (status) => QUICK_ACTIONS[status] || null;
