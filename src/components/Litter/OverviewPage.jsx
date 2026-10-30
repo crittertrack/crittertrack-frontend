@@ -82,26 +82,7 @@ const LittersOverviewPage = ({
     const [litterOffspringMap, setLitterOffspringMap] = useState({});
     const [coiCacheRef] = useState({});
     const [coiCalculating, setCoiCalculating] = useState(new Set());
-    setUserProfile,
-    showModalMessage,
-    onViewAnimal,
-    handleViewAnimal,
-    handleEditAnimal,
-    speciesOptions = [],
-    cachedLitters,
-    setCachedLitters,
-    litterCacheTimestamp,
-    setLitterCacheTimestamp,
-    breedingLineDefs = [],
-    animalBreedingLines = {},
-
-}) => {
-    const [litters, setLitters] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [litterStatusFilter, setLitterStatusFilter] = useState('all');
-    const [speciesFilter, setSpeciesFilter] = useState('');
-   const handleMarkAsMated = async (litter) => {
+    const handleMarkAsMated = async (litter) => {
         if (!litter.sireId_public || !litter.damId_public) {
             showModalMessage('Error', 'This litter needs both a sire and a dam before it can be marked as mated.');
             return;
