@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mars, Venus, Eye, EyeOff, Heart, HeartOff, Loader2 } from 'lucide-react';
+import { Mars, Venus, Eye, EyeOff, Heart, HeartOff, Loader2, User, Users } from 'lucide-react';
 import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
 import AddOffspringModal from './AddOffspringModal';
 
@@ -27,6 +27,8 @@ const OffspringTab = ({ offspring, loading, onView }) => {
                     <option value="all">All genders</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
+                    <option value="Intersex">Intersex</option>
+                    <option value="Mixed">Mixed</option>
                     <option value="Unknown">Unknown</option>
                 </select>
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="border rounded px-2 py-1 text-sm">
@@ -44,7 +46,7 @@ const OffspringTab = ({ offspring, loading, onView }) => {
                         <div key={a.id_public || a._id} className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-3">
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-2">
-                                    {a.gender === 'Male' ? <Mars size={14}/> : a.gender === 'Female' ? <Venus size={14}/> : null}
+                                    {a.gender === 'Male' ? <Mars size={14} className="text-blue-500"/> : a.gender === 'Female' ? <Venus size={14} className="text-pink-500"/> : a.gender === 'Intersex' ? <User size={14} className="text-purple-500"/> : a.gender === 'Mixed' ? <Users size={14} className="text-teal-500"/> : <User size={14} className="text-gray-400"/>}
                                     <span className="font-medium text-sm">{formatAnimalDisplayName(a)}</span>
                                 </div>
                                 <div className="flex gap-1">
