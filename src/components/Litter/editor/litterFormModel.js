@@ -24,6 +24,8 @@ export const EMPTY_LITTER_FORM = {
     extractStillbornFromTotal: false,
     extractLossesFromTotal: false,
     notes: '',
+    pairingNotes: '',
+    tags: [],
     linkedOffspringIds: [],
     breedingMethod: 'Unknown',
     breedingConditionAtTime: '',
@@ -80,6 +82,8 @@ export const formFromLitter = (litter) => ({
     femaleCount: litter.femaleCount || null,
     unknownCount: litter.unknownCount || null,
     notes: litter.notes || '',
+    pairingNotes: litter.pairingNotes || '',
+    tags: Array.isArray(litter.tags) ? litter.tags : [],
     linkedOffspringIds: litter.offspringIds_public || [],
     species: litter.sire?.species || litter.dam?.species || '',
     breedingMethod: litter.breedingMethod || 'Unknown',
@@ -224,6 +228,8 @@ const sharedPayload = (fd, counts, offspringIds) => ({
     breedingObjectives: Array.isArray(fd.breedingObjectives) ? fd.breedingObjectives : [],
     objectivesNotes: fd.objectivesNotes || null,
     objectivesEvaluation: fd.objectivesEvaluation || null,
+    pairingNotes: fd.pairingNotes || null,
+    tags: Array.isArray(fd.tags) ? fd.tags : [],
 });
 
 /** POST /litters body. Status (isPlanned) follows the dates via litterStatusPatch. */

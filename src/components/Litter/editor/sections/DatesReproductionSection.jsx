@@ -17,7 +17,7 @@ export default function DatesReproductionSection({ form, setField, setFields, er
     return (
         <>
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
                     <CalendarDays size={24} />
                 </div>
                 <div>
