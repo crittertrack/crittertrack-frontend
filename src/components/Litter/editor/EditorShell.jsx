@@ -306,17 +306,15 @@ export default function EditorShell({
                         </button>
                     ))}
                 </nav>
-                <div className="flex-1 min-w-0">{renderSection()}</div>
-            </div>
-
-            <div className="fixed bottom-0 inset-x-0 z-30 border-t border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-3">
-                <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
-                    <div className="flex gap-2">
+                <div className="flex-1 min-w-0">
+                    {renderSection()}
+                    <div className="mt-4 flex justify-end gap-2">
                         <button type="button" disabled={index <= 0} onClick={() => setSection(SECTIONS[index - 1].id)} className={`${navBtn} disabled:opacity-40`}>Previous</button>
                         <button type="button" disabled={index >= SECTIONS.length - 1} onClick={() => setSection(SECTIONS[index + 1].id)} className={`${navBtn} disabled:opacity-40`}>Next</button>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 }
