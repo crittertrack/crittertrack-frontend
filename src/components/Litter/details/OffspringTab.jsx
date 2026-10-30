@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mars, Venus, Eye, Heart, Loader2 } from 'lucide-react';
+import { Mars, Venus, Eye, EyeOff, Heart, HeartOff, Loader2 } from 'lucide-react';
 import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
 import AddOffspringModal from './AddOffspringModal';
 
@@ -47,7 +47,10 @@ const OffspringTab = ({ offspring, loading, onView }) => {
                                     {a.gender === 'Male' ? <Mars size={14}/> : a.gender === 'Female' ? <Venus size={14}/> : null}
                                     <span className="font-medium text-sm">{formatAnimalDisplayName(a)}</span>
                                 </div>
-                                <div className="flex gap-1 text-gray-400"><Eye size={14}/><Heart size={14}/></div>
+                                <div className="flex gap-1">
+                                    {(a.isDisplay || a.isPublic || a.isDisplayAnimal) ? <Eye size={14} className="text-green-500" /> : <EyeOff size={14} className="text-gray-400" />}
+                                    {a.isOwned || a.owned ? <Heart size={14} className="text-red-500" /> : <HeartOff size={14} className="text-gray-400" />}
+                                </div>
                             </div>
                             <button type="button" onClick={() => onView && onView(a)} className="flex gap-3 mt-2 w-full text-left">
                                 {(a.imageUrl || a.photoUrl) ? (
@@ -56,7 +59,7 @@ const OffspringTab = ({ offspring, loading, onView }) => {
                                     <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-dark-surface" />
                                 )}
                                 <div className="text-xs space-y-1 min-w-0">
-                                    <div className="truncate">{[a.color, a.markings].filter(Boolean).join(' ') || '—'}</div>
+                                    <div className="truncate">{a.variety || [a.color, a.markings].filter(Boolean).join(' ') || '—'}</div>
                                     <div className="font-mono truncate">{a.geneticCode || '—'}</div>
                                     <div>{a.status || '—'}</div>
                                 </div>
