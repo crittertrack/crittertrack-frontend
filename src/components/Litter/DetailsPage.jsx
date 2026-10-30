@@ -76,12 +76,63 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     const showWeanedButton = !!litter && !!litter.isNursing && daysSinceLitterBirth <= 90 && !litter.weaningConfirmed;
 
     // Button onClick - sets BOTH fields (your workflow)
-    const handleMarkWeaned = (litter) => {
-        handleLitterStatusUpdate(litter, {
-            isNursing: false,
-            weaningDate: new Date().toISOString().slice(0, 10),
-            weaningConfirmed: true,
-        });
+    const handleMarkAsMated = async (litter) => {
+        if (!litter.sireId_public || !litter.damId_public) {
+            if (showModalMessage) showModalMessage('Error', 'This litter needs both a sire and a dam before it can be marked as mated.');
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await apiClient.put(`/litters/${litter._id}`, { matingDate: today, isPlanned: false });
+            await load();
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err) {
+            if (showModalMessage) showModalMessage('Error', 'Failed to mark as mated.');
+        }
+    };
+    const handleMarkAsPregnant = async (litter) => {
+        if (!litter.damId_public) {
+            if (showModalMessage) showModalMessage('Error', 'This litter has no dam assigned.');
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await Promise.all([
+                apiClient.put(`/litters/${litter._id}`, { pregnancyDate: today }),
+                apiClient.put(`/animals/${litter.damId_public}`, { isPregnant: true, isInMating: false }),
+            ]);
+            await load();
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isPregnant: true, isInMating: false } }));
+        } catch (err) {
+            if (showModalMessage) showModalMessage('Error', 'Failed to mark dam as pregnant.');
+        }
+    };
+    const handleMarkAsBorn = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await apiClient.put(`/litters/${litter._id}`, { birthDate: today });
+            try { await apiClient.put(`/animals/${litter.damId_public}`, { isPregnant: false, isNursing: true }); } catch {}
+            await load();
+        } catch (err) {
+            if (showModalMessage) showModalMessage('Error', 'Failed to mark as born.');
+        }
+    };
+    const handleMarkAsWeaned = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await apiClient.put(`/litters/${litter._id}`, { weaningDate: today, weaningConfirmed: true });
+            await load();
+        } catch (err) {
+            if (showModalMessage) showModalMessage('Error', 'Failed to mark as weaned.');
+        }
+    };
+    const handleMarkWeaned = handleMarkAsWeaned;
+    const handleQuickAction = (litter, action) => {
+        const st = status;
+        if (action === 'mated' && st === 'planned') return handleMarkAsMated(litter);
+        if (action === 'pregnant' && st === 'mated') return handleMarkAsPregnant(litter);
+        if (action === 'born' && st === 'pregnant') return handleMarkAsBorn(litter);
+        if (action === 'weaned' && st === 'born') return handleMarkWeaned(litter);
     };
     const [offspring, setOffspring] = useState([]);
     const [offspringLoading, setOffspringLoading] = useState(true);
@@ -214,7 +265,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                     animalBreedingLines={animalBreedingLines}
                     showWeanedButton={showWeanedButton}
                     handleMarkWeaned={handleMarkWeaned}
-                    handleMarkWeaned={handleMarkWeaned}
+                    handleQuickAction={handleQuickAction}
                 />
             )}
             {/* Placeholder tabs — intentionally empty for now. */}

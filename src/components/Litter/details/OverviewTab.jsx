@@ -20,6 +20,7 @@ export default function OverviewTab({
     litter, status, offspring = [], offspringLoading = false, onView, onEdit,
     breedingLineDefs = [], animalBreedingLines = {},
     showWeanedButton = false, handleMarkWeaned,
+    handleQuickAction,
 }) {
     const stats = computeLitterStats(litter, status);
     const milestone = nextMilestone(litter, status);
@@ -63,22 +64,21 @@ export default function OverviewTab({
       )}
     </div>
 
-    {/* Reproductive status action - Right */}
-    {showWeanedButton && (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleMarkWeaned(litter);
-        }}
-        className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors shrink-0"
-        title="Mark litter as weaned"
-      >
-        <Check size={12} />
-        Mark Weaned
-      </button>
-    )}
-  </div>
+    {(() => {
+      const action = status === 'planned' ? 'mated' : status === 'mated' ? 'pregnant' : status === 'pregnant' ? 'born' : status === 'born' ? 'weaned' : null;
+      if (!action || !handleQuickAction) return null;
+      return (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleQuickAction(litter, action); }}
+          className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+          title={`Mark as ${action}`}
+          aria-label={`Mark as ${action}`}
+        >
+          <Check size={14} />
+        </button>
+      );
+    })()}
 </Summary>
             </div>
 
