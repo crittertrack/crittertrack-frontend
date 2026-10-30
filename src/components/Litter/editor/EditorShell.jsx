@@ -232,6 +232,7 @@ export default function EditorShell({
                     <OffspringSection
                         form={form} setForm={setForm} myAnimals={myAnimals} animalsLoaded={animalsLoaded}
                         linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts}
+                        isEdit={isEdit}
                     />
                 );
             case 'objectives':

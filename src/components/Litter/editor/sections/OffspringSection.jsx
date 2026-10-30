@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { PawPrint, Users, List } from 'lucide-react';
+import { PawPrint, List } from 'lucide-react';
 import { linkableOffspring, linkOffspring, unlinkOffspring } from '../litterFormModel';
 import { SectionTitle, cardClass } from '../fields';
 import CreatePlaceholdersCard from './CreatePlaceholdersCard';
@@ -9,6 +9,8 @@ const animalLabel = (a) =>
 
 export default function OffspringSection({
     form, setForm, myAnimals, animalsLoaded, linkedCounts, createCounts, setCreateCounts,
+    isEdit = false,
+
 }) {
     const hasParents = !!(form.sireId_public && form.damId_public);
     const candidates = linkableOffspring(myAnimals, form);
@@ -34,7 +36,6 @@ export default function OffspringSection({
                     <div><h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Offspring</h1><p className="text-sm text-gray-500 dark:text-dark-text-muted">Add and manage the individual animals belonging to this litter.</p></div>
                 </div>
                 <div className={cardClass}>
-                    <SectionTitle title="Offspring management" icon={Users} iconBg="bg-cyan-100" iconColor="text-cyan-600" description="Create new offspring or link existing animals to this litter." />
                     <p className="text-sm text-gray-500 dark:text-dark-text-muted">Choose a sire and dam first.</p>
                 </div>
             </div>
@@ -48,8 +49,9 @@ export default function OffspringSection({
                 <div><h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">Offspring</h1><p className="text-sm text-gray-500 dark:text-dark-text-muted">Add and manage the individual animals belonging to this litter.</p></div>
             </div>
             <div className={cardClass}>
-                <SectionTitle title="Offspring management" icon={Users} iconBg="bg-cyan-100" iconColor="text-cyan-600" description="Create new offspring or link existing animals to this litter." />
                 <p className="text-sm text-gray-500 dark:text-dark-text-muted bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2">Offspring can be added now or later.</p>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted">To add animals: set male/female/unknown counts in Statistics, then create placeholders below; or check existing animals in the list to link them.</p>
+                {form.birthDate ? null : <p className="text-xs italic text-gray-500 dark:text-dark-text-muted">Set a birth date to enable placeholder creation.</p>}
                 {form.birthDate && <CreatePlaceholdersCard form={form} linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts} />}
                 <p className="text-xs font-semibold text-cyan-600 dark:text-cyan-400">Total offspring currently added: {linkedCount + (createCounts?.males || 0) + (createCounts?.females || 0) + (createCounts?.unknown || 0)}</p>
             </div>
