@@ -238,7 +238,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                 </div>
             </div>
 
-            <div className="flex gap-1 overflow-x-auto border-b border-gray-200 dark:border-dark-border" role="tablist">
+            <div className="flex gap-1 border-b border-gray-200 dark:border-dark-border" role="tablist">
                 {TABS.map(t => (
                     <button
                         key={t.id}
