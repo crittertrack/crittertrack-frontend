@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, Mars, Venus, X, Search, UserRound } from 'lucide-react';
+import { Loader2, Mars, Venus, X, Search, UsersRound, Tag, HeartHandshake } from 'lucide-react';
 import { ParentSearchModal } from '../../../Modals/SearchModals';
 import { SpeciesPickerModal } from '../../../Modals/SpeciesModals';
 import { formatAnimalDisplayName } from '../../../../utils/animalDisplayName';

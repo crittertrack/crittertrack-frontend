@@ -296,7 +296,7 @@ export default function EditorShell({
                             type="button"
                             onClick={() => setSection(s.id)}
                             aria-current={section === s.id ? 'step' : undefined}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between ${section === s.id ? 'bg-primary dark:bg-dark-primary text-black font-medium' : 'text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface'}`}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between ${section === s.id ? 'bg-cyan-100 text-cyan-900 font-medium' : 'text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface'}`}
                         >
                             <span className="flex items-center gap-2">
                                 {s.icon && <s.icon size={14} />}
