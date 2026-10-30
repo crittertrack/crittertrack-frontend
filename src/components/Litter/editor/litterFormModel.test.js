@@ -62,8 +62,10 @@ describe('formFromLitter', () => {
 
 describe('initialExtras', () => {
     it('expands mating/birth extras only when they hold data', () => {
-        expect(initialExtras({})).toEqual({ matingExtra: false, birthExtra: false });
-        expect(initialExtras({ breedingMethod: 'AI', birthMethod: 'Natural' })).toEqual({ matingExtra: true, birthExtra: true });
+        expect(initialExtras({})).toEqual({ matingExtra: false, birthExtra: false, weaningExtra: false });
+        expect(initialExtras({ breedingMethod: 'AI', birthMethod: 'Natural' })).toEqual({ matingExtra: true, birthExtra: true, weaningExtra: false });
+        expect(initialExtras({ weaningOutcome: 'All weaned' }).weaningExtra).toBe(true);
+        expect(initialExtras({ assistanceRequired: false }).birthExtra).toBe(true);
         expect(initialExtras({ breedingMethod: 'Unknown', outcome: 'Unknown' }).matingExtra).toBe(false);
     });
 });

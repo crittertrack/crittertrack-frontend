@@ -32,6 +32,13 @@ export const EMPTY_LITTER_FORM = {
     birthMethod: '',
     birthComplications: '',
     birthOutcome: '',
+    assistanceRequired: '', // '' = not recorded, 'yes' | 'no'
+    birthNotes: '',
+    weaningOutcome: '',
+    weaningNotes: '',
+    breedingObjectives: [],
+    objectivesNotes: '',
+    objectivesEvaluation: '',
     pregnancyLost: false,
     pregnancyLostReason: null,
     pregnancyLostNotes: null,
@@ -99,6 +106,13 @@ export const formFromLitter = (litter) => ({
     weaningConfirmed: litter.weaningConfirmed || false,
     birthComplications: litter.birthComplications || '',
     birthOutcome: litter.birthOutcome || '',
+    assistanceRequired: litter.assistanceRequired === true ? 'yes' : litter.assistanceRequired === false ? 'no' : '',
+    birthNotes: litter.birthNotes || '',
+    weaningOutcome: litter.weaningOutcome || '',
+    weaningNotes: litter.weaningNotes || '',
+    breedingObjectives: Array.isArray(litter.breedingObjectives) ? litter.breedingObjectives : [],
+    objectivesNotes: litter.objectivesNotes || '',
+    objectivesEvaluation: litter.objectivesEvaluation || '',
     pregnancyLost: !!litter.pregnancyLost,
     pregnancyLostReason: litter.pregnancyLostReason || null,
     pregnancyLostNotes: litter.pregnancyLostNotes || null,
@@ -107,7 +121,8 @@ export const formFromLitter = (litter) => ({
 /** Whether the optional "mating extra" / "birth extra" groups should start expanded. */
 export const initialExtras = (litter) => ({
     matingExtra: !!(litter.breedingConditionAtTime || (litter.breedingMethod && litter.breedingMethod !== 'Unknown') || (litter.outcome && litter.outcome !== 'Unknown') || litter.pregnancyLost),
-    birthExtra: !!(litter.birthMethod || litter.birthComplications || litter.birthOutcome),
+    birthExtra: !!(litter.birthMethod || litter.birthComplications || litter.birthOutcome || litter.birthNotes || typeof litter.assistanceRequired === 'boolean'),
+    weaningExtra: !!(litter.weaningOutcome || litter.weaningNotes),
 });
 
 /**
@@ -202,6 +217,13 @@ const sharedPayload = (fd, counts, offspringIds) => ({
     cullsCount: fd.cullsCount || null,
     birthComplications: fd.birthComplications || null,
     birthOutcome: fd.birthOutcome || null,
+    assistanceRequired: fd.assistanceRequired === 'yes' ? true : fd.assistanceRequired === 'no' ? false : null,
+    birthNotes: fd.birthNotes || null,
+    weaningOutcome: fd.weaningOutcome || null,
+    weaningNotes: fd.weaningNotes || null,
+    breedingObjectives: Array.isArray(fd.breedingObjectives) ? fd.breedingObjectives : [],
+    objectivesNotes: fd.objectivesNotes || null,
+    objectivesEvaluation: fd.objectivesEvaluation || null,
 });
 
 /** POST /litters body. Status (isPlanned) follows the dates via litterStatusPatch. */

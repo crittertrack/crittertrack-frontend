@@ -18,6 +18,7 @@ const LOSS_REASONS = [
 ];
 const BIRTH_METHODS = ['Natural', 'C-Section', 'Assisted', 'Induced', 'Unknown'];
 const BIRTH_OUTCOMES = ['Healthy litter', 'Some losses', 'Dam complications', 'All lost', 'Unknown'];
+const WEANING_OUTCOMES = ['All weaned', 'Some losses', 'Early weaning', 'Late weaning', 'Unknown'];
 
 const Collapsible = ({ title, open, onToggle, children }) => (
     <div className="border border-gray-200 dark:border-dark-border rounded-lg">
@@ -74,8 +75,28 @@ export default function MatingBirthSection({ form, setField, setFields, extras, 
                         <Select value={form.birthOutcome} onChange={(v) => setField('birthOutcome', v)} options={BIRTH_OUTCOMES} placeholder="Select outcome..." />
                     </FieldRow>
                 </div>
+                <FieldRow label="Assistance required">
+                    <Select
+                        value={form.assistanceRequired}
+                        onChange={(v) => setField('assistanceRequired', v)}
+                        options={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
+                        placeholder="Not recorded"
+                    />
+                </FieldRow>
                 <FieldRow label="Complications">
                     <textarea rows={2} className={inputClass} value={form.birthComplications || ''} onChange={(e) => setField('birthComplications', e.target.value)} />
+                </FieldRow>
+                <FieldRow label="Birth notes">
+                    <textarea rows={2} className={inputClass} value={form.birthNotes || ''} onChange={(e) => setField('birthNotes', e.target.value)} />
+                </FieldRow>
+            </Collapsible>
+
+            <Collapsible title="Weaning information" open={!!extras.weaningExtra} onToggle={() => setExtras(p => ({ ...p, weaningExtra: !p.weaningExtra }))}>
+                <FieldRow label="Weaning outcome">
+                    <Select value={form.weaningOutcome} onChange={(v) => setField('weaningOutcome', v)} options={WEANING_OUTCOMES} placeholder="Select outcome..." />
+                </FieldRow>
+                <FieldRow label="Weaning notes">
+                    <textarea rows={2} className={inputClass} value={form.weaningNotes || ''} onChange={(e) => setField('weaningNotes', e.target.value)} />
                 </FieldRow>
             </Collapsible>
         </div>

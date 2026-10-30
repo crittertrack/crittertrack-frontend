@@ -14,6 +14,7 @@ import MatingBirthSection from './sections/MatingBirthSection';
 import StatsSection from './sections/StatsSection';
 import OffspringSection from './sections/OffspringSection';
 import PhotosNotesSection from './sections/PhotosNotesSection';
+import ObjectivesSection from './sections/ObjectivesSection';
 
 const SECTIONS = [
     { id: 'identity', label: 'Identity & parents' },
@@ -21,6 +22,7 @@ const SECTIONS = [
     { id: 'mating', label: 'Mating & birth' },
     { id: 'stats', label: 'Statistics' },
     { id: 'offspring', label: 'Offspring' },
+    { id: 'objectives', label: 'Breeding objectives' },
     { id: 'photos', label: 'Photos & notes' },
 ];
 
@@ -44,7 +46,7 @@ export default function EditorShell({
 
     const baseline = useMemo(() => (litter ? formFromLitter(litter) : { ...EMPTY_LITTER_FORM }), [litter]);
     const [form, setForm] = useState(baseline);
-    const [extras, setExtras] = useState(litter ? initialExtras(litter) : { matingExtra: false, birthExtra: false });
+    const [extras, setExtras] = useState(litter ? initialExtras(litter) : { matingExtra: false, birthExtra: false, weaningExtra: false });
     const [section, setSection] = useState('identity');
     const [saving, setSaving] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -232,6 +234,8 @@ export default function EditorShell({
                         linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts}
                     />
                 );
+            case 'objectives':
+                return <ObjectivesSection form={form} setField={setField} />;
             default:
                 return (
                     <PhotosNotesSection

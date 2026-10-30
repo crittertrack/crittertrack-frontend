@@ -496,7 +496,7 @@ const LittersOverviewPage = ({
         <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-lg p-3 sm:p-6 space-y-4" data-testid="litters-container">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text">Litters</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-dark-text">Litters</h1>
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                         Record planned matings, track pregnancies, and log litters with offspring counts and details.
                     </p>
