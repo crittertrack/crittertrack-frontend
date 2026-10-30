@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { ArrowLeft, Edit, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit, Eye, EyeOff, Loader2, Mars, Venus } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import OverviewTab from './details/OverviewTab';
 import GeneticsTab from './details/GeneticsTab';
+import OffspringTab from './details/OffspringTab';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -16,33 +17,6 @@ const TABS = [
 ];
 
 const cardClass = 'rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4';
-
-const OffspringTab = ({ offspring, loading, onView }) => {
-    if (loading) return <div className="flex items-center py-8 text-gray-500"><Loader2 className="animate-spin mr-2" size={18} /> Loading offspring…</div>;
-    if (!offspring.length) return <div className="py-8 text-center text-sm text-gray-500 dark:text-dark-text-muted">No offspring are linked to this litter yet.</div>;
-    return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {offspring.map(a => (
-                <button
-                    key={a.id_public || a._id}
-                    type="button"
-                    onClick={() => onView && onView(a)}
-                    className={`${cardClass} flex items-center gap-3 text-left hover:opacity-80`}
-                >
-                    {(a.imageUrl || a.photoUrl) ? (
-                        <img src={a.imageUrl || a.photoUrl} alt="" className="w-12 h-12 rounded-lg object-cover" />
-                    ) : (
-                        <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-dark-surface" />
-                    )}
-                    <div className="min-w-0">
-                        <div className="font-medium text-gray-900 dark:text-dark-text truncate">{formatAnimalDisplayName(a)}</div>
-                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">{a.id_public}{a.gender ? ` · ${a.gender}` : ''}</div>
-                    </div>
-                </button>
-            ))}
-        </div>
-    );
-};
 
 const GalleryTab = ({ images }) => {
     if (!images.length) return <div className="py-8 text-center text-sm text-gray-500 dark:text-dark-text-muted">No photos have been added to this litter.</div>;
