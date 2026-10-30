@@ -1,6 +1,6 @@
 // Service Worker for CritterTrack PWA
 const CACHE_PREFIX = 'crittertrack-';
-const CACHE_NAME = 'crittertrack-v34';
+const CACHE_NAME = 'crittertrack-v35';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -102,6 +102,12 @@ self.addEventListener('fetch', (event) => {
   // failure from that layer (axios saw `error.response` present and never took the offline
   // path). PUT/PATCH/DELETE requests never reach here at all (returned above, method !== GET).
   if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  // Let the browser fetch the manifest natively. On protected Vercel previews it redirects to
+  // vercel.com/sso-api (no CORS headers), which a SW-initiated fetch() can't follow.
+  if (url.pathname === '/manifest.json') {
     return;
   }
 

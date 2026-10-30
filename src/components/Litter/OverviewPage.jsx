@@ -207,12 +207,20 @@ const availableYears = useMemo(() => {
                 if (l.damId_public) parentIds.add(l.damId_public);
             });
 
-            const [anyAnimals, publicAnimals] = await Promise.all([
-                apiClient.get('/animals', { params: { ids: [...parentIds] } }).catch(() => ({ data: [] })),
-                apiClient.get('/public/animals', { params: { ids: [...parentIds] } }).catch(() => ({ data: [] })),
-            ]);
+            // GET /animals ignores an `ids` param (it returns all of the user's animals), so don't
+            // send hundreds of IDs in the URL. Only IDs not owned by the user are looked up
+            // publicly, in chunks to keep each URL well under proxy length limits.
+            const anyAnimals = await apiClient.get('/animals').catch(() => ({ data: [] }));
             const anyMap = new Map((anyAnimals.data || []).map(a => [a.id_public, a]));
-            const publicMap = new Map((publicAnimals.data || []).map(a => [a.id_public, a]));
+
+            const missingIds = [...parentIds].filter(id => !anyMap.has(id));
+            const CHUNK_SIZE = 100;
+            const chunks = [];
+            for (let i = 0; i < missingIds.length; i += CHUNK_SIZE) chunks.push(missingIds.slice(i, i + CHUNK_SIZE));
+            const publicResults = await Promise.all(
+                chunks.map(ids => apiClient.get('/public/animals', { params: { ids } }).catch(() => ({ data: [] })))
+            );
+            const publicMap = new Map(publicResults.flatMap(r => r.data || []).map(a => [a.id_public, a]));
             const getParent = (id_public) => (id_public && (anyMap.get(id_public) || publicMap.get(id_public))) || null;
 
             const enriched = littersData.map(litter => ({
