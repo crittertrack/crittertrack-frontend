@@ -45,7 +45,6 @@ export default function DatesReproductionSection({ form, setField, setFields, er
                         <FieldRow label="Expected due date" hint={autoCalcAvailable && autoCalcDueDate ? 'Automatically calculated from the mating date if left blank.' : undefined}>
                             <DatePicker value={form.expectedDueDate || ''} onChange={(e) => setField('expectedDueDate', e.target.value)} className="px-3 py-2" />
                         </FieldRow>
-                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">Automatically calculated from the mating date if left blank.</p>
                     </div>
                 </div>
             </div>
@@ -80,7 +79,7 @@ export default function DatesReproductionSection({ form, setField, setFields, er
                     </select>
                     <div className="rounded-lg bg-indigo-50 dark:bg-indigo-900/20 px-3 py-2 text-sm">
                         <span className="font-semibold text-indigo-700 dark:text-indigo-300">{LITTER_STATUS_LABELS[status]}</span>
-                        <span className="text-gray-600 dark:text-dark-text-secondary"> — {STATUS_HINTS[status]}</span>
+                        <span className="text-gray-600 dark:text-dark-text-secondary"> â€” {STATUS_HINTS[status]}</span>
                     </div>
                 </div>
             </div>
