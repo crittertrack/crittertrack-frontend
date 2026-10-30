@@ -65,6 +65,24 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     const [litter, setLitter] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+    const daysSinceLitterBirth = litter.birthDate
+        ? Math.floor((new Date() - new Date(litter.birthDate)) / (1000 * 60 * 60 * 24))
+        : 0;
+
+    // Determine if "Mark Weaned" button should show
+    // - Litter must be nursing (not yet weaned)
+    // - Within 90-day boundary from litter birth date
+    // - weaningDate NOT yet set (per your "date=confirmed" workflow
+    const showWeanedButton = litter.isNursing && daysSinceLitterBirth <= 90 && !litter.weaningDate;
+
+    // Button onClick - sets BOTH fields (your workflow)
+    const handleMarkWeaned = (litter) => {
+        handleLitterStatusUpdate(litter, {
+            isNursing: false,
+            weaningDate: new Date().toISOString().slice(0, 10),
+            weaningConfirmed: true,
+        });
+    };
     const [offspring, setOffspring] = useState([]);
     const [offspringLoading, setOffspringLoading] = useState(true);
 
@@ -194,6 +212,8 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                     onEdit={() => navigate(`/litters/${encodeURIComponent(litter.litter_id_public)}/edit`)}
                     breedingLineDefs={breedingLineDefs}
                     animalBreedingLines={animalBreedingLines}
+                    showWeanedButton={showWeanedButton}
+                    handleMarkWeaned={handleMarkWeaned}
                 />
             )}
             {/* Placeholder tabs — intentionally empty for now. */}
