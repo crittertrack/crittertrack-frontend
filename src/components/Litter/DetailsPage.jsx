@@ -53,14 +53,14 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
                     <button
                         type="button"
                         onClick={toggleCert('horizontal')}
-                        className="px-4 py-2 text-sm rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary transition flex items-center gap-1.5 font-semibold shadow-sm"
+                        className="px-4 py-2 text-sm rounded-lg bg-primary dark:bg-dark-primary text-black border border-primary/40 hover:bg-primary/90 transition flex items-center gap-1.5 font-semibold shadow-sm"
                     >
                         <ScrollText size={16} /> Open Horizontal Certificate
                     </button>
                     <button
                         type="button"
                         onClick={toggleCert('vertical')}
-                        className="px-4 py-2 text-sm rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary transition flex items-center gap-1.5 font-semibold shadow-sm"
+                        className="px-4 py-2 text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm"
                     >
                         <ScrollText size={16} /> Open Vertical Certificate
                     </button>
@@ -76,7 +76,7 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
 
             {/* Inline tree — identical to DirectParentTree, litter as focus */}
             {litter && (
-                <div className="w-full max-w-4xl mx-auto">
+                <div className="w-full max-w-4xl mx-auto h-[70vh]">
                     <DirectParentTree
                         focusAnimalId={litterId}
                         focusAnimal={litterAsAnimal}
