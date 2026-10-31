@@ -86,23 +86,7 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     }, [litter?.sireId_public, litter?.damId_public, !sireGeneticCode, !damGeneticCode]);
 
     // Compute expected offspring traits from parent genetic codes
-    // Priority: database expectedTraits > genetic code calculation > empty array
-    let expectedTraits = [];
-    
-    // First try database expectedTraits if available and has items
-    if (litter?.expectedTraits && Array.isArray(litter.expectedTraits) && litter.expectedTraits.length > 0) {
-        expectedTraits = litter.expectedTraits;
-    } else if (!codesError && sireGeneticCode && damGeneticCode && litter?.species) {
-        // Then try computing from parent genetic codes
-        try {
-            expectedTraits = computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter.species);
-        } catch (e) {
-            console.error('Error computing expected offspring:', e);
-        }
-    }
-    
-    // If still empty and codes loaded without error, show the computed result
-    // (even if empty, it means no traits found for this pairing)
+    const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
 
     // Compute confirmed offspring traits from linked offspring genetic codes and appearance fields
     useEffect(() => {

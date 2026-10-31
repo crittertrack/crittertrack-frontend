@@ -4,6 +4,7 @@ import { X, Search, Loader2, Info, ArrowLeftRight } from 'lucide-react';
 
 const TransferAnimalModal = ({
     animal,
+    animals,
     onClose,
     userQuery,
     setUserQuery,
@@ -21,6 +22,7 @@ const TransferAnimalModal = ({
     showModalMessage,
     // API_BASE_URL, // Not directly used in this component, can be removed if not needed elsewhere
     // authToken // Not directly used in this component, can be removed if not needed elsewhere
+    bulkMode = false
 }) => {
 
     console.log({
@@ -44,7 +46,7 @@ const TransferAnimalModal = ({
         return parts.join(' / ') || String(user.id_public || '') || 'Unknown User';
     };
 
-    if (!animal) return null;
+    if (!animal && (!animals || animals.length === 0)) return null;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[150] p-4">
@@ -59,25 +61,48 @@ const TransferAnimalModal = ({
                     </button>
                 </div>
 
-                {/* Animal Info */}
+{/* Animal Info */}
                 <div className="p-4 bg-gray-50 border-b">
-                    <div className="flex items-center gap-3">
-                        {(animal.imageUrl || animal.photoUrl) ? (
-                            <img
-                                src={animal.imageUrl || animal.photoUrl}
-                                alt={animal.name}
-                                className="w-16 h-16 rounded-lg object-cover" // animal.name is used here, but alt={undefined} is safe.
-                            />
-                        ) : (
-                            <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
-                                <ArrowLeftRight className="text-gray-400" size={24} />
+                    {bulkMode && animals && animals.length > 0 ? (
+                        <div className="space-y-2">
+                            <p className="text-sm font-medium text-gray-700">Transferring {animals.length} animal(s):</p>
+                            <div className="max-h-40 overflow-y-auto space-y-2">
+                                {animals.map((a) => (
+                                    <div key={a.id_public} className="flex items-center gap-3">
+                                        {(a.imageUrl || a.photoUrl) ? (
+                                            <img src={a.imageUrl || a.photoUrl} alt={a.name} className="w-10 h-10 rounded object-cover" />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center">
+                                                <ArrowLeftRight className="text-gray-400" size={16} />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-800">{String(a.name || '')}</p>
+                                            <p className="text-xs text-gray-600">{String(a.species || '')} • {String(a.id_public || '')}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        )}
-                        <div>
-                            <h3 className="font-semibold text-gray-800">{String(animal.name || '')}</h3>
-                            <p className="text-sm text-gray-600">{String(animal.species || '')} • {String(animal.id_public || '')}</p>
                         </div>
-                    </div>
+                    ) : animal ? (
+                        <div className="flex items-center gap-3">
+                            {(animal.imageUrl || animal.photoUrl) ? (
+                                <img
+                                    src={animal.imageUrl || animal.photoUrl}
+                                    alt={animal.name}
+                                    className="w-16 h-16 rounded-lg object-cover"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
+                                    <ArrowLeftRight className="text-gray-400" size={24} />
+                                </div>
+                            )}
+                            <div>
+                                <h3 className="font-semibold text-gray-800">{String(animal.name || '')}</h3>
+                                <p className="text-sm text-gray-600">{String(animal.species || '')} • {String(animal.id_public || '')}</p>
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
 
                 {/* Form Content */}
@@ -203,10 +228,12 @@ const TransferAnimalModal = ({
                     >
                         Cancel
                     </button>
-                    <button
+<button
                         type="button"
                         onClick={() => {
-                            if (animal && selectedUser) {
+                            if (bulkMode) {
+                                onSubmit();
+                            } else if (animal && selectedUser) {
                                 const computedTransferType = parseFloat(price || '0') > 0 ? 'sale' : 'gift';
                                 onSubmit({
                                     animal: animal,
@@ -219,7 +246,7 @@ const TransferAnimalModal = ({
                                 });
                             }
                         }}
-                        disabled={!selectedUser}
+                        disabled={!selectedUser || (bulkMode ? !(animals && animals.length > 0) : !animal)}
                         className="flex-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Send Transfer Request
