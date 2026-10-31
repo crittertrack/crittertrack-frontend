@@ -8,7 +8,7 @@ import OverviewTab from './details/OverviewTab';
 import GeneticsTab from './details/GeneticsTab';
 import OffspringTab from './details/OffspringTab';
 import { PedigreeChart } from '../AnimalForm';
-import DirectParentTree from '../FamilyTree/DirectParentTree';
+import LitterPedigreeTree from './LitterPedigreeTree';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -20,13 +20,13 @@ const TABS = [
 
 const cardClass = 'rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4';
 
-const PedigreesTab = ({ litter }) => {
+const PedigreesTab = ({ litter, onViewAnimal }) => {
     const [view, setView] = useState('horizontal'); // horizontal | vertical | tree
     const [generations, setGenerations] = useState(4);
-    const [showImages, setShowImages] = useState(true);
     const [downloadOpen, setDownloadOpen] = useState(false);
     const sireId = litter?.sireId_public || litter?.sire?.id_public;
     const damId = litter?.damId_public || litter?.dam?.id_public;
+    const litterId = litter?.litter_id_public || litter?._id;
     return (
         <div data-testid="tab-pedigrees" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -44,10 +44,6 @@ const PedigreesTab = ({ litter }) => {
                         <input type="range" min={1} max={6} value={generations} onChange={e => setGenerations(Number(e.target.value))} />
                         <span>{generations}</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm">
-                        <input type="checkbox" checked={showImages} onChange={e => setShowImages(e.target.checked)} />
-                        <span>Show images</span>
-                    </label>
                     <div className="relative">
                         <button type="button" onClick={() => setDownloadOpen(o => !o)} disabled={view === 'tree'} className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-dark-border flex items-center gap-1.5 disabled:opacity-50">
                             <Download size={14} /> Download <ChevronDown size={14} />
@@ -61,17 +57,27 @@ const PedigreesTab = ({ litter }) => {
                     </div>
                 </div>
             </div>
-            {view === 'tree' ? (
-                <div className="space-y-4">
-                    {sireId && <DirectParentTree focusAnimalId={sireId} authToken={null} />}
-                    {damId && <DirectParentTree focusAnimalId={damId} authToken={null} />}
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {sireId && <PedigreeChart animalId={sireId} API_BASE_URL="" authToken={null} inline vertical={view === 'vertical'} inlineGenerations={generations} />}
-                    {damId && <PedigreeChart animalId={damId} API_BASE_URL="" authToken={null} inline vertical={view === 'vertical'} inlineGenerations={generations} />}
-                </div>
-            )}
+            <div key={view} className="space-y-4">
+                {view === 'tree' ? (
+                    <LitterPedigreeTree
+                        sireId={sireId}
+                        damId={damId}
+                        litterId={litterId}
+                        generations={generations}
+                        onViewAnimal={onViewAnimal}
+                    />
+                ) : (
+                    <PedigreeChart
+                        litterId={litterId}
+                        API_BASE_URL=""
+                        authToken={null}
+                        inline
+                        vertical={view === 'vertical'}
+                        inlineGenerations={generations}
+                        onViewAnimal={onViewAnimal}
+                    />
+                )}
+            </div>
         </div>
     );
 };
@@ -302,7 +308,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
             )}
             {/* Placeholder tabs — intentionally empty for now. */}
             {activeTab === 'genetics' && <GeneticsTab litter={litter} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} />}
-            {activeTab === 'pedigrees' && <PedigreesTab litter={litter} />}
+            {activeTab === 'pedigrees' && <PedigreesTab litter={litter} onViewAnimal={viewAnimal} />}
             {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} animalBreedingLines={animalBreedingLines} breedingLineDefs={breedingLineDefs} />}
             {activeTab === 'gallery' && <GalleryTab images={images} />}
         </div>
