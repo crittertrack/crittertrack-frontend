@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { ArrowLeft, Edit, Eye, EyeOff, Loader2, Mars, Venus, Download, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Edit, Eye, EyeOff, Loader2, Mars, Venus, Download, ChevronDown, ScrollText } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import OverviewTab from './details/OverviewTab';
@@ -49,13 +49,21 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
     return (
         <div data-testid="tab-pedigrees" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden" role="group" aria-label="Pedigree chart">
-                    {['horizontal','vertical'].map(v => (
-                        <button key={v} type="button" onClick={toggleCert(v)}
-                            className={`px-3 py-1.5 text-sm capitalize ${certView === v ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary'}`}>
-                            {v}
-                        </button>
-                    ))}
+                <div className="flex gap-2 flex-wrap" role="group" aria-label="Pedigree chart">
+                    <button
+                        type="button"
+                        onClick={toggleCert('horizontal')}
+                        className="px-4 py-2 text-sm rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary transition flex items-center gap-1.5 font-semibold shadow-sm"
+                    >
+                        <ScrollText size={16} /> Open Horizontal Certificate
+                    </button>
+                    <button
+                        type="button"
+                        onClick={toggleCert('vertical')}
+                        className="px-4 py-2 text-sm rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary transition flex items-center gap-1.5 font-semibold shadow-sm"
+                    >
+                        <ScrollText size={16} /> Open Vertical Certificate
+                    </button>
                 </div>
                 <div className="flex items-center gap-3">
                     <label className="flex items-center gap-2 text-sm">
@@ -67,16 +75,18 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
             </div>
 
             {/* Inline tree — identical to DirectParentTree, litter as focus */}
-            <div className="w-full max-w-4xl mx-auto">
-                <DirectParentTree
-                    focusAnimalId={litterId}
-                    focusAnimal={litterAsAnimal}
-                    authToken={null}
-                    maxDepth={generations}
-                    onNodeClick={() => {}}
-                    onViewAnimal={onViewAnimal}
-                />
-            </div>
+            {litter && (
+                <div className="w-full max-w-4xl mx-auto">
+                    <DirectParentTree
+                        focusAnimalId={litterId}
+                        focusAnimal={litterAsAnimal}
+                        authToken={null}
+                        maxDepth={generations}
+                        onNodeClick={() => {}}
+                        onViewAnimal={onViewAnimal}
+                    />
+                </div>
+            )}
 
             {/* Modal: horizontal / vertical certificate chart (same as normal animal charts) */}
             {certView && (

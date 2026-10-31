@@ -102,6 +102,15 @@ const DirectParentTree = ({
       return;
     }
 
+    // Litter IDs (CTL…) are never fetchable as animals. When no focusAnimal
+    // is provided for a litter, skip fetching to avoid a 404.
+    if (!focusAnimal && String(focusAnimalId).startsWith('CTL')) {
+      setNodes([]);
+      setEdges([]);
+      setLoading(false);
+      return;
+    }
+
     // Check for cached tree data in localStorage
     const cacheKey = `treeCache_${focusAnimalId}`;
     const cached = localStorage.getItem(cacheKey);
