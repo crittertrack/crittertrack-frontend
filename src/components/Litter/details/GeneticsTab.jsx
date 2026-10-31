@@ -49,6 +49,7 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     const [sireGeneticCode, setSireGeneticCode] = useState(sire.geneticCode || sire.genetic_code || {});
     const [damGeneticCode, setDamGeneticCode] = useState(dam.geneticCode || dam.genetic_code || {});
     const [codesLoaded, setCodesLoaded] = useState(false);
+    const [codesError, setCodesError] = useState(false);
 
     useEffect(() => {
        const fetchParentCodes = async () => {
@@ -62,6 +63,8 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                     const sireAnimal = res.data?.[0];
                     if (sireAnimal?.geneticCode) {
                         setSireGeneticCode(sireAnimal.geneticCode);
+                    } else {
+                        setCodesError(true);
                     }
                 }
                 if (litter?.damId_public && !damGeneticCode) {
@@ -69,18 +72,37 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                     const damAnimal = res.data?.[0];
                     if (damAnimal?.geneticCode) {
                         setDamGeneticCode(damAnimal.geneticCode);
+                    } else {
+                        setCodesError(true);
                     }
                 }
                 setCodesLoaded(true);
             } catch (error) {
                 console.error('Error fetching parent genetic codes:', error);
+                setCodesError(true);
             }
         };
         fetchParentCodes();
     }, [litter?.sireId_public, litter?.damId_public, !sireGeneticCode, !damGeneticCode]);
 
     // Compute expected offspring traits from parent genetic codes
-    const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
+    // Priority: database expectedTraits > genetic code calculation > empty array
+    let expectedTraits = [];
+    
+    // First try database expectedTraits if available and has items
+    if (litter?.expectedTraits && Array.isArray(litter.expectedTraits) && litter.expectedTraits.length > 0) {
+        expectedTraits = litter.expectedTraits;
+    } else if (!codesError && sireGeneticCode && damGeneticCode && litter?.species) {
+        // Then try computing from parent genetic codes
+        try {
+            expectedTraits = computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter.species);
+        } catch (e) {
+            console.error('Error computing expected offspring:', e);
+        }
+    }
+    
+    // If still empty and codes loaded without error, show the computed result
+    // (even if empty, it means no traits found for this pairing)
 
     // Compute confirmed offspring traits from linked offspring genetic codes and appearance fields
     useEffect(() => {
