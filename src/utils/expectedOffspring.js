@@ -191,11 +191,11 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
 
   // Compute traits for EACH offspring and merge them
   for (let i = 0; i < offspringCodes.length; i++) {
-    const offspringCode = offspringCodes[i];
+    const currentOffspringCode = offspringCodes[i];
     const appearance = appearanceFields && appearanceFields[i] ? appearanceFields[i] : null;
 
     // Try to match phenotype from genetic code first
-    const geneticTraits = computeExpectedOffspring(offspringCode, offspringCode, species);
+    const geneticTraits = computeExpectedOffspring(currentOffspringCode, currentOffspringCode, species);
 
     // If we got valid genetic traits, add them with 100% confidence
     if (geneticTraits && geneticTraits.length > 0) {
