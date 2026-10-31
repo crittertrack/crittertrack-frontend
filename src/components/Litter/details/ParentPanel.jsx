@@ -64,8 +64,8 @@ export default function ParentPanel({
             {!animal && !fallbackId ? (
                 <div className="text-sm text-gray-400 dark:text-dark-text-muted py-6 text-center">No {role.toLowerCase()} assigned</div>
             ) : (
-                <div className="flex gap-4 flex-1">
-                    <div className="shrink-0 w-28 sm:w-32 self-stretch min-h-[8rem] rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-surface flex items-center justify-center">
+                <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                    <div className="shrink-0 w-full h-40 sm:w-28 sm:min-h-[8rem] sm:self-stretch rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-surface flex items-center justify-center">
                         {img
                             ? <img src={img} alt="" className="w-full h-full object-cover" />
                             : <Icon size={32} className="text-gray-300 dark:text-dark-text-muted" />}

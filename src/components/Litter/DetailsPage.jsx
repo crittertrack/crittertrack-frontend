@@ -72,9 +72,7 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
                         litterId={litterId}
                         API_BASE_URL=""
                         authToken={null}
-                        inline
                         vertical={view === 'vertical'}
-                        inlineGenerations={generations}
                         onViewAnimal={onViewAnimal}
                     />
                 )}
@@ -277,7 +275,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                 </div>
             </div>
 
-            <div className="flex gap-1 border-b border-gray-200 dark:border-dark-border" role="tablist">
+            <div className="flex flex-wrap gap-1 border-b border-gray-200 dark:border-dark-border" role="tablist">
                 {TABS.map(t => (
                     <button
                         key={t.id}
