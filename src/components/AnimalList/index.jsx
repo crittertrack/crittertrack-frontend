@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useTransferWorkflow } from './hooks/useTransferWorkflow';
+import { useTransferWorkflow } from '../../hooks/useTransferWorkflow';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { resolveLiteMode } from '../../utils/liteMode';
