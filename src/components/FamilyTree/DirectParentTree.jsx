@@ -203,6 +203,7 @@ const DirectParentTree = ({
           'damCtuid',
           'damId',
         ]);
+        console.log('[DirectParentTree] rootAnimal:', rootAnimal, 'rootSireId:', rootSireId, 'rootDamId:', rootDamId);
 
         animalMap.set(rootId, {
           id: rootId,

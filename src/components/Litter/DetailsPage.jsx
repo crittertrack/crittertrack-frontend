@@ -32,16 +32,18 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
     // on the litter's nested sire/dam objects.
     const litterAsAnimal = useMemo(() => {
         if (!litter) return null;
-        return {
-            id_public: litter.litter_id_public || litter._id,
-            name: litter.breedingPairCodeName || litter.litter_id_public || litter._id,
+        const animal = {
+            id_public: litter.litter_id_public || litter._id || litter.id,
+            name: litter.breedingPairCodeName || litter.litter_id_public || litter._id || litter.id,
             gender: 'Unknown',
-            sireId_public: litter.sireId_public || litter.sire?.id_public,
-            damId_public: litter.damId_public || litter.dam?.id_public,
+            sireId_public: litter.sireId_public || litter.sire?.id_public || litter.sireId || litter.sire?.id,
+            damId_public: litter.damId_public || litter.dam?.id_public || litter.damId || litter.dam?.id,
             birthDate: litter.birthDate,
             imageUrl: litter.imageUrl || litter.photoUrl,
             status: undefined,
         };
+        console.log('[PedigreesTab] litter:', litter, '-> litterAsAnimal:', animal);
+        return animal;
     }, [litter]);
 
     const toggleCert = (view) => () => setCertView(certView === view ? null : view);
