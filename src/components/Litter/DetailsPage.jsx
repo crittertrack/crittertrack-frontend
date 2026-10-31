@@ -27,11 +27,6 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
     const damId = litter?.damId_public || litter?.dam?.id_public;
     const litterId = litter?.litter_id_public || litter?._id;
 
-    // Open the horizontal chart modal directly when the pedigrees tab is shown
-    useEffect(() => {
-        setCertView('horizontal');
-    }, []);
-
     const toggleCert = (view) => () => setCertView(certView === view ? null : view);
 
     return (
