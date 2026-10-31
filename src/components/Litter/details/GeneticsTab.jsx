@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { computeExpectedOffspring } from '../../../utils/expectedOffspring';
+import { computeExpectedOffspring, computeConfirmedOffspringTraits } from '../../../utils/expectedOffspring';
 
 const Field = ({ label, value }) => (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-dark-border last:border-0">
@@ -43,9 +43,96 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     }
     const ancestors = litter?.commonAncestors || [];
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
-    const computedExpected = computeExpectedOffspring(sire.geneticCode || sire.genetic_code, dam.geneticCode || dam.genetic_code, litter?.species);
+    const [confirmedTraits, setConfirmedTraits] = useState([]);
+
+    const [sireGeneticCode, setSireGeneticCode] = useState(sire.geneticCode || sire.genetic_code || {});
+    const [damGeneticCode, setDamGeneticCode] = useState(dam.geneticCode || dam.genetic_code || {});
+
+    const computedExpected = computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
+
+    // Fetch sire and dam genetic codes from database if not in litter object
+    useEffect(() => {
+        const fetchParentCodes = async () => {
+            if (!litter?.sireId_public && !litter?.damId_public) return;
+            try {
+                // Fetch sire if we have an ID and it's not already in litter.sire
+                if (litter?.sireId_public && !sireGeneticCode) {
+                    const sireAnimal = await Animal.findOne({ id_public: litter.sireId_public }).lean();
+                    if (sireAnimal?.geneticCode) {
+                        setSireGeneticCode(sireAnimal.geneticCode);
+                    }
+                }
+                // Fetch dam if we have an ID and it's not already in litter.dam
+                if (litter?.damId_public && !damGeneticCode) {
+                    const damAnimal = await Animal.findOne({ id_public: litter.damId_public }).lean();
+                    if (damAnimal?.geneticCode) {
+                        setDamGeneticCode(damAnimal.geneticCode);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching parent genetic codes:', error);
+            }
+        };
+        fetchParentCodes();
+    }, [litter?.sireId_public, litter?.damId_public, !sireGeneticCode, !damGeneticCode]);
+
+    // Compute confirmed offspring traits from linked offspring genetic codes and appearance fields
+    useEffect(() => {
+        const computeConfirmedOffspring = async () => {
+            if (!litter?.offspringIds_public?.length) {
+                setConfirmedTraits([]);
+                return;
+            }
+            try {
+                // Fetch offspring animals with their genetic code and appearance fields
+                const offspringAnimals = await Animal.find({ id_public: { $in: litter.offspringIds_public } }).lean();
+                
+                if (!offspringAnimals.length) {
+                    setConfirmedTraits([]);
+                    return;
+                }
+                
+                // Extract genetic codes and appearance fields from offspring
+                const offspringCodes = offspringAnimals.map(a => a.geneticCode || {});
+                const appearanceFields = offspringAnimals.map(a => ({
+                    color: a.color,
+                    markings: a.markings,
+                    coat: a.coat,
+                    earset: a.earset,
+                }));
+                
+                // Use the first offspring's code and appearance for confirmed traits
+                const firstOffspringCode = offspringCodes[0];
+                const firstAppearance = appearanceFields[0];
+                
+                if (firstOffspringCode) {
+                    const traits = computeConfirmedOffspringTraits(
+                        [firstOffspringCode], 
+                        litter.species, 
+                        firstAppearance
+                    );
+                    setConfirmedTraits(traits);
+                } else {
+                    // Fall back to appearance fields only if no genetic code
+                    if (firstAppearance) {
+                        const traits = computeConfirmedOffspringTraits(
+                            [], 
+                            litter.species, 
+                            firstAppearance
+                        );
+                        setConfirmedTraits(traits);
+                    } else {
+                        setConfirmedTraits([]);
+                    }
+                }
+            } catch (error) {
+                console.error('Error computing confirmed offspring traits:', error);
+                setConfirmedTraits([]);
+            }
+        };
+        computeConfirmedOffspring();
+    }, [litter?.offspringIds_public, litter?.species]);
     const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computedExpected;
-    const confirmedTraits = litter?.confirmedTraits || [];
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
