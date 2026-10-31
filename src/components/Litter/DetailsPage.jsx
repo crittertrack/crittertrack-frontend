@@ -42,7 +42,6 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
             imageUrl: litter.imageUrl || litter.photoUrl,
             status: undefined,
         };
-        console.log('[PedigreesTab] litter:', litter, '-> litterAsAnimal:', animal);
         return animal;
     }, [litter]);
 

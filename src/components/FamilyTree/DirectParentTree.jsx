@@ -112,7 +112,7 @@ const DirectParentTree = ({
     }
 
     // Check for cached tree data in localStorage
-    const cacheKey = `treeCache_${focusAnimalId}`;
+    const cacheKey = `treeCache_v2_${focusAnimalId}`;
     const cached = localStorage.getItem(cacheKey);
     const now = Date.now();
 
@@ -203,7 +203,7 @@ const DirectParentTree = ({
           'damCtuid',
           'damId',
         ]);
-        console.log('[DirectParentTree] rootAnimal:', rootAnimal, 'rootSireId:', rootSireId, 'rootDamId:', rootDamId);
+        // (debug removed)
 
         animalMap.set(rootId, {
           id: rootId,
@@ -671,7 +671,7 @@ const DirectParentTree = ({
               nodes: ns,
               edges: es
             };
-            localStorage.setItem(`treeCache_${focusAnimalId}`, JSON.stringify(cacheData));
+            localStorage.setItem(`treeCache_v2_${focusAnimalId}`, JSON.stringify(cacheData));
           } catch {
             // localStorage full or disabled, ignore
           }
