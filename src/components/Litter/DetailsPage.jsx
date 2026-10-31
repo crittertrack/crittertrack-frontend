@@ -27,6 +27,23 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
     const damId = litter?.damId_public || litter?.dam?.id_public;
     const litterId = litter?.litter_id_public || litter?._id;
 
+    // Build a clean animal-shaped object for the litter so DirectParentTree
+    // (designed for animals) can render it as the focus node without choking
+    // on the litter's nested sire/dam objects.
+    const litterAsAnimal = useMemo(() => {
+        if (!litter) return null;
+        return {
+            id_public: litter.litter_id_public || litter._id,
+            name: litter.breedingPairCodeName || litter.litter_id_public || litter._id,
+            gender: 'Unknown',
+            sireId_public: litter.sireId_public || litter.sire?.id_public,
+            damId_public: litter.damId_public || litter.dam?.id_public,
+            birthDate: litter.birthDate,
+            imageUrl: litter.imageUrl || litter.photoUrl,
+            status: undefined,
+        };
+    }, [litter]);
+
     const toggleCert = (view) => () => setCertView(certView === view ? null : view);
 
     return (
@@ -53,7 +70,7 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
             <div className="w-full max-w-4xl mx-auto">
                 <DirectParentTree
                     focusAnimalId={litterId}
-                    focusAnimal={litter}
+                    focusAnimal={litterAsAnimal}
                     authToken={null}
                     maxDepth={generations}
                     onNodeClick={() => {}}
