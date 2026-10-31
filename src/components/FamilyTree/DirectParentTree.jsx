@@ -137,6 +137,7 @@ const DirectParentTree = ({
 
     if (!useCache) {
       const fetchOne = async (id) => {
+        console.log('[DirectParentTree] fetchOne called with:', id);
         if (!id) return null;
 
         try {
