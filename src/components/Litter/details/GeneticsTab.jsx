@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { computeExpectedOffspring } from '../../../utils/expectedOffspring';
 
 const Field = ({ label, value }) => (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-dark-border last:border-0">
@@ -42,7 +43,8 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     }
     const ancestors = litter?.commonAncestors || [];
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
-    const expectedTraits = litter?.expectedTraits || [];
+    const computedExpected = computeExpectedOffspring(sire.geneticCode || sire.genetic_code, dam.geneticCode || dam.genetic_code, litter?.species);
+    const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computedExpected;
     const confirmedTraits = litter?.confirmedTraits || [];
 
     return (
