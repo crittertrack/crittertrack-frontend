@@ -12,8 +12,13 @@ import { Mars, Venus, Cat } from 'lucide-react';
 const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
   const { image, label } = node.data;
   const isMale = node.data.gender === 'Male';
-  const borderColor = isMale ? 'border-blue-500' : 'border-pink-500';
-  const bgColor = isMale ? 'bg-white' : 'bg-white';
+  const isFemale = node.data.gender === 'Female';
+  const borderColor = isMale
+    ? 'border-blue-500'
+    : isFemale
+    ? 'border-pink-500'
+    : 'border-gray-300';
+  const bgColor = 'bg-white';
 
   const handleClick = () => {
     onNodeClick?.(node.data.id);
@@ -77,7 +82,9 @@ const CACHE_TTL = 86400000;
 
 const DirectParentTree = ({
   focusAnimalId,
+  focusAnimal = null,
   authToken,
+  maxDepth = 6,
   onNodeClick,
   onViewAnimal,
 }) => {
@@ -166,17 +173,49 @@ const DirectParentTree = ({
         const queue = [{ id: rootId, depth: 0 }];
         const visited = new Set();
 
+        // Resolve the root node: use a pre-resolved focus animal (e.g. a litter)
+        // when provided, otherwise fetch it from the API like a regular animal.
+        let rootAnimal = focusAnimal || null;
+        if (!rootAnimal) {
+          rootAnimal = await fetchOne(rootId);
+        }
+        if (!rootAnimal) {
+          setLoading(false);
+          return;
+        }
+
+        const rootSireId = getParentId(rootAnimal, [
+          'sireId_public',
+          'sireCtuid',
+          'sireId',
+        ]);
+        const rootDamId = getParentId(rootAnimal, [
+          'damId_public',
+          'damCtuid',
+          'damId',
+        ]);
+
+        animalMap.set(rootId, {
+          id: rootId,
+          animal: rootAnimal,
+          sireId: rootSireId,
+          damId: rootDamId,
+        });
+
+        if (rootSireId && !visited.has(String(rootSireId))) {
+          queue.push({ id: String(rootSireId), depth: 1 });
+        }
+        if (rootDamId && !visited.has(String(rootDamId))) {
+          queue.push({ id: String(rootDamId), depth: 1 });
+        }
+
         while (queue.length > 0) {
           if (cancelled) return;
 
           const current = queue.shift();
           const id = String(current.id);
 
-          if (
-            !id ||
-            current.depth > MAX_DEPTH ||
-            visited.has(id)
-          ) {
+          if (!id || current.depth > maxDepth || visited.has(id)) {
             continue;
           }
 
@@ -205,7 +244,7 @@ const DirectParentTree = ({
             damId,
           });
 
-          if (current.depth < MAX_DEPTH) {
+          if (current.depth < maxDepth) {
             if (sireId && !visited.has(String(sireId))) {
               queue.push({
                 id: String(sireId),
@@ -244,7 +283,7 @@ const DirectParentTree = ({
 
           const entry = animalMap.get(key);
 
-          if (!entry || depth >= MAX_DEPTH) {
+          if (!entry || depth >= maxDepth) {
             return NODE_WIDTH;
           }
 
@@ -644,7 +683,7 @@ const DirectParentTree = ({
     return () => {
       cancelled = true;
     };
-  }, [focusAnimalId, authToken]);
+  }, [focusAnimalId, focusAnimal, authToken, maxDepth]);
 
   if (loading) {
     return (

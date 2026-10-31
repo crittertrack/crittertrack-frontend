@@ -8,7 +8,7 @@ import OverviewTab from './details/OverviewTab';
 import GeneticsTab from './details/GeneticsTab';
 import OffspringTab from './details/OffspringTab';
 import { PedigreeChart } from '../AnimalForm';
-import LitterPedigreeTree from './LitterPedigreeTree';
+import DirectParentTree from '../FamilyTree/DirectParentTree';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -59,11 +59,12 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
             </div>
             <div key={view} className="space-y-4">
                 {view === 'tree' ? (
-                    <LitterPedigreeTree
-                        sireId={sireId}
-                        damId={damId}
-                        litterId={litterId}
-                        generations={generations}
+                    <DirectParentTree
+                        focusAnimalId={litterId}
+                        focusAnimal={litter}
+                        authToken={null}
+                        maxDepth={generations}
+                        onNodeClick={() => {}}
                         onViewAnimal={onViewAnimal}
                     />
                 ) : (
