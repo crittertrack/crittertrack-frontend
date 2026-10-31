@@ -1,13 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mars, Venus, VenusAndMars, Eye, EyeOff, Heart, HeartOff, Loader2, User, Users, Circle } from 'lucide-react';
 import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
 import AddOffspringModal from './AddOffspringModal';
+import apiClient from '../../../utils/apiClient';
 
 const OffspringTab = ({ offspring, loading, onView, animalBreedingLines = {}, breedingLineDefs = [] }) => {
     const [search, setSearch] = useState('');
     const [genderFilter, setGenderFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [addOpen, setAddOpen] = useState(false);
+    const [creatorNames, setCreatorNames] = useState({});
+    useEffect(() => {
+        const ids = [...new Set((offspring || []).filter(a => !a.ownerId_public && a.creatorId_public).map(a => a.creatorId_public))];
+        if (!ids.length) return;
+        let cancelled = false;
+        (async () => {
+            const results = await Promise.all(ids.map(async (id) => {
+                try {
+                    const res = await apiClient.get(`/public/profile/${id}`);
+                    const p = res.data || {};
+                    return [id, p.breederName || p.personalName || id];
+                } catch (e) {
+                    return [id, id];
+                }
+            }));
+            if (cancelled) return;
+            setCreatorNames(prev => {
+                const next = { ...prev };
+                results.forEach(([id, name]) => { next[id] = name; });
+                return next;
+            });
+        })();
+        return () => { cancelled = true; };
+    }, [offspring]);
+    if (loading) return <div className=\"flex items-center py-8 text-gray-500\"><Loader2 className=\"animate-spin mr-2\" size={18} /> Loading offspring…</div>;
     if (loading) return <div className="flex items-center py-8 text-gray-500"><Loader2 className="animate-spin mr-2" size={18} /> Loading offspring…</div>;
     const filtered = offspring.filter(a => {
         if (search && !(a.name || '').toLowerCase().includes(search.toLowerCase())) return false;
@@ -66,7 +92,7 @@ const OffspringTab = ({ offspring, loading, onView, animalBreedingLines = {}, br
                                     <div className="truncate">{a.variety || [a.color, a.markings, a.coat, a.earset].filter(Boolean).join(' ') || '—'}</div>
                                     <div className="font-mono truncate">{a.geneticCode || '—'}</div>
                                     <div>{a.status || '—'}</div>
-                                    <div className="text-gray-500">{a.ownerId_public ? (a.ownerInfo?.breederName || a.ownerInfo?.personalName || a.manualownerName || a.ownerId_public) : (a.manualownerName || a.creatorId_public || a.owner || a.ownerName || '')}</div>
+                                    <div className="text-gray-500">{a.ownerId_public ? (a.ownerInfo?.breederName || a.ownerInfo?.personalName || a.manualownerName || a.ownerId_public) : (a.manualownerName || creatorNames[a.creatorId_public] || a.creatorId_public || a.owner || a.ownerName || '')}</div>
                                 </div>
                             </button>
                             <button type="button" className="mt-2 text-xs text-red-500">Unlink</button>
