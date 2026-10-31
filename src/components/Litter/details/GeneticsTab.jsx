@@ -48,21 +48,16 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     const [sireGeneticCode, setSireGeneticCode] = useState(sire.geneticCode || sire.genetic_code || {});
     const [damGeneticCode, setDamGeneticCode] = useState(dam.geneticCode || dam.genetic_code || {});
 
-    const computedExpected = computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
-
-    // Fetch sire and dam genetic codes from database if not in litter object
     useEffect(() => {
         const fetchParentCodes = async () => {
             if (!litter?.sireId_public && !litter?.damId_public) return;
             try {
-                // Fetch sire if we have an ID and it's not already in litter.sire
                 if (litter?.sireId_public && !sireGeneticCode) {
                     const sireAnimal = await Animal.findOne({ id_public: litter.sireId_public }).lean();
                     if (sireAnimal?.geneticCode) {
                         setSireGeneticCode(sireAnimal.geneticCode);
                     }
                 }
-                // Fetch dam if we have an ID and it's not already in litter.dam
                 if (litter?.damId_public && !damGeneticCode) {
                     const damAnimal = await Animal.findOne({ id_public: litter.damId_public }).lean();
                     if (damAnimal?.geneticCode) {
@@ -75,6 +70,17 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
         };
         fetchParentCodes();
     }, [litter?.sireId_public, litter?.damId_public, !sireGeneticCode, !damGeneticCode]);
+
+    // Recompute expected offspring when genetic codes are available
+    useEffect(() => {
+        const recomputeExpected = () => {
+            const computedExpected = computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
+            const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computedExpected;
+            // Store computedExpected for use in JSX - we'll just use computedExpected directly
+            // by having this effect re-run when codes change
+        };
+        recomputeExpected();
+    }, [sireGeneticCode, damGeneticCode, litter?.species]);
 
     // Compute confirmed offspring traits from linked offspring genetic codes and appearance fields
     useEffect(() => {
@@ -132,7 +138,7 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
         };
         computeConfirmedOffspring();
     }, [litter?.offspringIds_public, litter?.species]);
-    const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computedExpected;
+    const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
