@@ -33,7 +33,6 @@ const OffspringTab = ({ offspring, loading, onView, animalBreedingLines = {}, br
         })();
         return () => { cancelled = true; };
     }, [offspring]);
-    if (loading) return <div className=\"flex items-center py-8 text-gray-500\"><Loader2 className=\"animate-spin mr-2\" size={18} /> Loading offspring…</div>;
     if (loading) return <div className="flex items-center py-8 text-gray-500"><Loader2 className="animate-spin mr-2" size={18} /> Loading offspring…</div>;
     const filtered = offspring.filter(a => {
         if (search && !(a.name || '').toLowerCase().includes(search.toLowerCase())) return false;
