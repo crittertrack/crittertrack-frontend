@@ -102,12 +102,12 @@ const DirectParentTree = ({
       return;
     }
 
-    console.log('[DPT] run start. focusAnimalId:', focusAnimalId, 'focusAnimal:', focusAnimal, 'maxDepth:', maxDepth);
+
 
     // Litter IDs (CTL…) are never fetchable as animals. When no focusAnimal
     // is provided for a litter, skip fetching to avoid a 404.
     if (!focusAnimal && String(focusAnimalId).startsWith('CTL')) {
-      console.log('[DPT] guard triggered - skipping fetch for litter ID');
+
       setNodes([]);
       setEdges([]);
       setLoading(false);
@@ -115,10 +115,8 @@ const DirectParentTree = ({
     }
 
     // Check for cached tree data in localStorage
-    const cacheKey = `treeCache_v2_${focusAnimalId}`;
-    const cached = localStorage.getItem(cacheKey);
-    const now = Date.now();
-    console.log('[DPT] cache check:', cacheKey, cached ? 'HIT' : 'MISS');
+    // Caching disabled (React elements not serializable). Re-fetch on each view.
+    const cached = null;
 
     let useCache = false;
     let cachedData = null;
@@ -141,7 +139,7 @@ const DirectParentTree = ({
 
     if (!useCache) {
       const fetchOne = async (id) => {
-        console.log('[DirectParentTree] fetchOne called with:', id);
+
         if (!id) return null;
 
         try {
@@ -184,8 +182,9 @@ const DirectParentTree = ({
 
         const animalMap = new Map();
         const rootId = String(focusAnimalId);
-        const queue = [{ id: rootId, depth: 0 }];
+        const queue = [];
         const visited = new Set();
+        visited.add(rootId);
 
         // Resolve the root node: use a pre-resolved focus animal (e.g. a litter)
         // when provided, otherwise fetch it from the API like a regular animal.
@@ -217,7 +216,7 @@ const DirectParentTree = ({
           damId: rootDamId,
         });
 
-        console.log('[DPT] rootSireId:', rootSireId, 'rootDamId:', rootDamId);
+
 
         if (rootSireId && !visited.has(String(rootSireId))) {
           queue.push({ id: String(rootSireId), depth: 1 });
@@ -226,7 +225,7 @@ const DirectParentTree = ({
           queue.push({ id: String(rootDamId), depth: 1 });
         }
 
-        console.log('[DPT] queue after root:', queue.map(q => q.id));
+
 
         while (queue.length > 0) {
           if (cancelled) return;
@@ -672,18 +671,11 @@ const DirectParentTree = ({
           setEdges(es);
           setLoading(false);
 
-          // Cache the fetched data in localStorage for quicker loading
-          try {
-            const cacheData = {
-              focusAnimalId,
-              timestamp: Date.now(),
-              nodes: ns,
-              edges: es
-            };
-            localStorage.setItem(`treeCache_v2_${focusAnimalId}`, JSON.stringify(cacheData));
-          } catch {
-            // localStorage full or disabled, ignore
-          }
+          // Caching disabled: tree nodes contain pre-built React elements (JSX)
+          // in `label`, which are not serializable via JSON.stringify/parse.
+          // Re-hydrating them from cache produces plain objects that trigger
+          // React error #31. Re-fetching on each view is fast (apiClient
+          // caches GETs offline).
         }
       } catch (error) {
         console.error('Failed to build pedigree tree:', error);

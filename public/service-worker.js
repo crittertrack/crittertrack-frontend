@@ -1,6 +1,6 @@
 // Service Worker for CritterTrack PWA
 const CACHE_PREFIX = 'crittertrack-';
-const CACHE_NAME = 'crittertrack-v36';
+const CACHE_NAME = 'crittertrack-v37';
 const urlsToCache = [
   '/',
   '/index.html',
