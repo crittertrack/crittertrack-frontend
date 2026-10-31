@@ -1,7 +1,7 @@
 ﻿import { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
-import apiClient from '../utils/apiClient';
-import { withRetry } from '../utils/errorHandler';
+import apiClient from '../../utils/apiClient';
+import { withRetry } from '../../utils/errorHandler';
 
 interface User {
     userId_backend?: string;
