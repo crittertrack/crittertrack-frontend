@@ -35,7 +35,7 @@ const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
         {image ? (
           <img
             src={image}
-            alt={label}
+            alt=""
             className="max-w-full max-h-full object-cover"
             draggable={false}
           />
@@ -46,8 +46,8 @@ const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
 )}
       </div>
 
-      {/* Name - centered horizontally */}
-      <p className="text-xs font-medium text-gray-800 text-center">{label}</p>
+      {/* Card content (label is a pre-built JSX card from addNode) */}
+      {label}
     </div>
   );
 };
