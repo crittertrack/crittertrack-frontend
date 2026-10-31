@@ -67,7 +67,6 @@ const OffspringTab = ({ offspring, loading, onView, animalBreedingLines = {}, br
                                     <div className="font-mono truncate">{a.geneticCode || '—'}</div>
                                     <div>{a.status || '—'}</div>
                                     <div className="text-gray-500">{a.owner || a.ownerName || ''}</div>
-                                    <div className="text-gray-500">{(animalBreedingLines[a.id_public] || a.breedingLines || []).map(id => breedingLineDefs.find(d => d.id === id)?.name || id).join(', ')}</div>
                                 </div>
                             </button>
                             <button type="button" className="mt-2 text-xs text-red-500">Unlink</button>

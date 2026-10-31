@@ -21,19 +21,26 @@ const TABS = [
 const cardClass = 'rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4';
 
 const PedigreesTab = ({ litter, onViewAnimal }) => {
-    const [view, setView] = useState('horizontal'); // horizontal | vertical | tree
+    const [certView, setCertView] = useState(null); // null | 'horizontal' | 'vertical'
     const [generations, setGenerations] = useState(4);
-    const [downloadOpen, setDownloadOpen] = useState(false);
     const sireId = litter?.sireId_public || litter?.sire?.id_public;
     const damId = litter?.damId_public || litter?.dam?.id_public;
     const litterId = litter?.litter_id_public || litter?._id;
+
+    // Open the horizontal chart modal directly when the pedigrees tab is shown
+    useEffect(() => {
+        setCertView('horizontal');
+    }, []);
+
+    const toggleCert = (view) => () => setCertView(certView === view ? null : view);
+
     return (
         <div data-testid="tab-pedigrees" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden" role="group" aria-label="Pedigree view">
-                    {['horizontal','vertical','tree'].map(v => (
-                        <button key={v} type="button" onClick={() => setView(v)}
-                            className={`px-3 py-1.5 text-sm capitalize ${view === v ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary'}`}>
+                <div className="flex rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden" role="group" aria-label="Pedigree chart">
+                    {['horizontal','vertical'].map(v => (
+                        <button key={v} type="button" onClick={toggleCert(v)}
+                            className={`px-3 py-1.5 text-sm capitalize ${certView === v ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary'}`}>
                             {v}
                         </button>
                     ))}
@@ -44,39 +51,32 @@ const PedigreesTab = ({ litter, onViewAnimal }) => {
                         <input type="range" min={1} max={6} value={generations} onChange={e => setGenerations(Number(e.target.value))} />
                         <span>{generations}</span>
                     </label>
-                    <div className="relative">
-                        <button type="button" onClick={() => setDownloadOpen(o => !o)} disabled={view === 'tree'} className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-dark-border flex items-center gap-1.5 disabled:opacity-50">
-                            <Download size={14} /> Download <ChevronDown size={14} />
-                        </button>
-                        {downloadOpen && view !== 'tree' && (
-                            <div className="absolute right-0 mt-1 w-32 rounded-lg border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg shadow-lg z-10">
-                                <button type="button" onClick={() => setDownloadOpen(false)} className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface">PDF</button>
-                                <button type="button" onClick={() => setDownloadOpen(false)} className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface">Image</button>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
-            <div key={view} className="space-y-4">
-                {view === 'tree' ? (
-                    <DirectParentTree
-                        focusAnimalId={litterId}
-                        focusAnimal={litter}
-                        authToken={null}
-                        maxDepth={generations}
-                        onNodeClick={() => {}}
-                        onViewAnimal={onViewAnimal}
-                    />
-                ) : (
-                    <PedigreeChart
-                        litterId={litterId}
-                        API_BASE_URL=""
-                        authToken={null}
-                        vertical={view === 'vertical'}
-                        onViewAnimal={onViewAnimal}
-                    />
-                )}
+
+            {/* Inline tree — identical to DirectParentTree, litter as focus */}
+            <div className="w-full max-w-4xl mx-auto">
+                <DirectParentTree
+                    focusAnimalId={litterId}
+                    focusAnimal={litter}
+                    authToken={null}
+                    maxDepth={generations}
+                    onNodeClick={() => {}}
+                    onViewAnimal={onViewAnimal}
+                />
             </div>
+
+            {/* Modal: horizontal / vertical certificate chart (same as normal animal charts) */}
+            {certView && (
+                <PedigreeChart
+                    litterId={litterId}
+                    API_BASE_URL=""
+                    authToken={null}
+                    vertical={certView === 'vertical'}
+                    onClose={() => setCertView(null)}
+                    onViewAnimal={onViewAnimal}
+                />
+            )}
         </div>
     );
 };
