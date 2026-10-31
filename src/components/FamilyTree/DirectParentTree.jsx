@@ -102,9 +102,12 @@ const DirectParentTree = ({
       return;
     }
 
+    console.log('[DPT] run start. focusAnimalId:', focusAnimalId, 'focusAnimal:', focusAnimal, 'maxDepth:', maxDepth);
+
     // Litter IDs (CTL…) are never fetchable as animals. When no focusAnimal
     // is provided for a litter, skip fetching to avoid a 404.
     if (!focusAnimal && String(focusAnimalId).startsWith('CTL')) {
+      console.log('[DPT] guard triggered - skipping fetch for litter ID');
       setNodes([]);
       setEdges([]);
       setLoading(false);
@@ -115,6 +118,7 @@ const DirectParentTree = ({
     const cacheKey = `treeCache_v2_${focusAnimalId}`;
     const cached = localStorage.getItem(cacheKey);
     const now = Date.now();
+    console.log('[DPT] cache check:', cacheKey, cached ? 'HIT' : 'MISS');
 
     let useCache = false;
     let cachedData = null;
@@ -213,12 +217,16 @@ const DirectParentTree = ({
           damId: rootDamId,
         });
 
+        console.log('[DPT] rootSireId:', rootSireId, 'rootDamId:', rootDamId);
+
         if (rootSireId && !visited.has(String(rootSireId))) {
           queue.push({ id: String(rootSireId), depth: 1 });
         }
         if (rootDamId && !visited.has(String(rootDamId))) {
           queue.push({ id: String(rootDamId), depth: 1 });
         }
+
+        console.log('[DPT] queue after root:', queue.map(q => q.id));
 
         while (queue.length > 0) {
           if (cancelled) return;
