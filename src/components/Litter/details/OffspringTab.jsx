@@ -66,7 +66,7 @@ const OffspringTab = ({ offspring, loading, onView, animalBreedingLines = {}, br
                                     <div className="truncate">{a.variety || [a.color, a.markings, a.coat, a.earset].filter(Boolean).join(' ') || '—'}</div>
                                     <div className="font-mono truncate">{a.geneticCode || '—'}</div>
                                     <div>{a.status || '—'}</div>
-                                    <div className="text-gray-500">{a.ownerId_public ? (a.ownerInfo?.breederName || a.ownerInfo?.personalName || a.manualownerName || a.ownerId_public) : (a.manualownerName || a.owner || a.ownerName || '')}</div>
+                                    <div className="text-gray-500">{a.ownerId_public ? (a.ownerInfo?.breederName || a.ownerInfo?.personalName || a.manualownerName || a.ownerId_public) : (a.manualownerName || a.creatorId_public || a.owner || a.ownerName || '')}</div>
                                 </div>
                             </button>
                             <button type="button" className="mt-2 text-xs text-red-500">Unlink</button>
