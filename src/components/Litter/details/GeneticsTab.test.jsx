@@ -74,4 +74,21 @@ describe('GeneticsTab expected offspring', () => {
         expect(apiClient.get).toHaveBeenCalledWith('/animals/any/sire-id');
         expect(apiClient.get).toHaveBeenCalledWith('/animals/any/dam-id');
     });
+
+    it('shows genetic discoveries and suggested parent updates without changing records', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Fancy Mouse',
+                    sire: { geneticCode: 'B/B' },
+                    dam: { geneticCode: 'B/B' },
+                }}
+                offspring={[{ geneticCode: 'b/b' }]}
+            />,
+        );
+
+        expect(screen.getAllByText('Chocolate').length).toBeGreaterThan(0);
+        expect(screen.getByText('Suggested update: Sire: B locus B/b')).toBeTruthy();
+        expect(screen.getByText('Suggested update: Dam: B locus B/b')).toBeTruthy();
+    });
 });

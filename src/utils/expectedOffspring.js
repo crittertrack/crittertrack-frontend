@@ -431,6 +431,135 @@ function computeMouseExpectedOffspring(sireCode, damCode) {
     .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
 }
 
+function getMouseLocusUpdates(sireGenotype, damGenotype, locus, offspringGenotype) {
+  const wildtype = MOUSE_WILDTYPE_GENOTYPES[locus];
+  if (!wildtype) return [];
+  const sireNotation = sireGenotype[locus] || wildtype;
+  const damNotation = damGenotype[locus] || wildtype;
+  const sireAlleles = getGametes(sireNotation);
+  const damAlleles = getGametes(damNotation);
+  const offspringAlleles = getGametes(offspringGenotype);
+  if (!sireAlleles.length || !damAlleles.length || !offspringAlleles.length) return [];
+
+  const assignments = [
+    [offspringAlleles[0], offspringAlleles[1]],
+    [offspringAlleles[1], offspringAlleles[0]],
+  ];
+  const possibleUpdates = assignments.map(([sireAllele, damAllele]) => {
+    const updates = [];
+    if (!sireAlleles.includes(sireAllele)) {
+      const retainedAllele = sireAlleles.find((allele) => allele !== sireAllele) || sireAlleles[0];
+      updates.push(`Sire: ${locus} locus ${normalizeGenotype({ [locus]: `${retainedAllele}/${sireAllele}` })[locus]}`);
+    }
+    if (!damAlleles.includes(damAllele)) {
+      const retainedAllele = damAlleles.find((allele) => allele !== damAllele) || damAlleles[0];
+      updates.push(`Dam: ${locus} locus ${normalizeGenotype({ [locus]: `${retainedAllele}/${damAllele}` })[locus]}`);
+    }
+    return updates;
+  });
+  const uniqueUpdates = Array.from(new Map(
+    possibleUpdates.map((updates) => [updates.join('|'), updates]),
+  ).values());
+  const minimumUpdateCount = Math.min(...uniqueUpdates.map((updates) => updates.length));
+  const minimalUpdates = uniqueUpdates.filter((updates) => updates.length === minimumUpdateCount);
+  if (minimumUpdateCount === 0) return [];
+  if (minimalUpdates.length === 1) return minimalUpdates[0];
+
+  const alternatives = minimalUpdates.flat();
+  const sharedLocusUpdate = alternatives.every((update) => update.split(': ')[1] === alternatives[0].split(': ')[1]);
+  if (sharedLocusUpdate) {
+    const locusGenotype = alternatives[0].split(': ')[1];
+    return [`Sire or Dam: ${locusGenotype} (offspring genotype cannot identify which parent)`];
+  }
+  return ['Sire or Dam: review this locus (offspring genotype cannot identify which parent)'];
+}
+
+/**
+ * Find mouse traits observed in linked offspring that were absent from the
+ * expected-trait list. Genotype-backed discoveries include possible parent
+ * locus updates; appearance-only discoveries are informational.
+ */
+export function computeGeneticDiscoveries(
+  sireCode,
+  damCode,
+  offspringCodes,
+  species,
+  expectedTraits,
+  appearanceFields,
+) {
+  const speciesKey = getSpeciesKey(species);
+  if (
+    (speciesKey !== 'fancymouse' && speciesKey !== 'mouse')
+    || !Array.isArray(offspringCodes)
+    || !offspringCodes.length
+  ) {
+    return [];
+  }
+
+  const expectedTraitNames = new Set(
+    (Array.isArray(expectedTraits) ? expectedTraits : [])
+      .map((item) => (item?.trait || item?.name || '').trim().toLowerCase())
+      .filter(Boolean),
+  );
+  const parsedSireGenotype = normalizeGenotype(parseGeneticCode(sireCode, species));
+  const parsedDamGenotype = normalizeGenotype(parseGeneticCode(damCode, species));
+  const discoveries = new Map();
+
+  const recordDiscovery = (trait, recommendations = []) => {
+    if (!trait || expectedTraitNames.has(trait.toLowerCase())) return;
+    const key = trait.toLowerCase();
+    const existing = discoveries.get(key) || {
+      trait,
+      count: 0,
+      recommendations: new Set(),
+    };
+    existing.count += 1;
+    recommendations.forEach((recommendation) => existing.recommendations.add(recommendation));
+    discoveries.set(key, existing);
+  };
+
+  offspringCodes.forEach((offspringCode, index) => {
+    const offspringGenotype = normalizeGenotype(parseGeneticCode(offspringCode, species));
+    if (Object.keys(offspringGenotype).length) {
+      const offspringDiscoveries = new Map();
+      Object.entries(offspringGenotype).forEach(([locus, notation]) => {
+        getMouseTraits({ [locus]: notation }).forEach((trait) => {
+          if (expectedTraitNames.has(trait.toLowerCase())) return;
+          const recommendations = offspringDiscoveries.get(trait) || new Set();
+          getMouseLocusUpdates(parsedSireGenotype, parsedDamGenotype, locus, notation)
+            .forEach((recommendation) => recommendations.add(recommendation));
+          offspringDiscoveries.set(trait, recommendations);
+        });
+      });
+      offspringDiscoveries.forEach((recommendations, trait) =>
+        recordDiscovery(trait, Array.from(recommendations))
+      );
+      return;
+    }
+
+    const appearance = appearanceFields?.[index] || {};
+    const appearanceValues = [
+      appearance.variety,
+      appearance.color,
+      appearance.markings,
+      appearance.coat,
+      appearance.earset,
+      appearance.eyeColor,
+      appearance.body,
+    ];
+    new Set(appearanceValues.flatMap((value) => getMouseAppearanceTraits(value)))
+      .forEach((trait) => recordDiscovery(trait));
+  });
+
+  return Array.from(discoveries.values())
+    .map(({ trait, count, recommendations }) => ({
+      trait,
+      percentage: Math.round((count / offspringCodes.length) * 100),
+      recommendations: Array.from(recommendations),
+    }))
+    .sort((a, b) => b.percentage - a.percentage || a.trait.localeCompare(b.trait));
+}
+
 function toPercentages(probabilities) {
   const rounded = Object.entries(probabilities).map(([trait, probability]) => {
     const exactPercentage = probability * 100;

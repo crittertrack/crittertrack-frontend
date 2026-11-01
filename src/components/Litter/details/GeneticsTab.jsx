@@ -4,6 +4,7 @@ import apiClient from '../../../utils/apiClient';
 import {
     computeConfirmedOffspringTraits,
     computeExpectedOffspring,
+    computeGeneticDiscoveries,
 } from '../../../utils/expectedOffspring';
 
 const Field = ({ label, value }) => (
@@ -112,6 +113,22 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
             carrierTraits: animal.carrierTraits,
         })),
     );
+    const geneticDiscoveries = computeGeneticDiscoveries(
+        sireGeneticCode,
+        damGeneticCode,
+        offspring.map((animal) => animal.geneticCode || animal.genetic_code || {}),
+        species,
+        expectedTraits,
+        offspring.map((animal) => ({
+            color: animal.color,
+            markings: animal.markings,
+            coat: animal.coat,
+            earset: animal.earset,
+            eyeColor: animal.eyeColor,
+            body: animal.body,
+        })),
+    );
+    const mouseDiscoveriesSupported = typeof species === 'string' && /mouse/i.test(species);
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
@@ -163,7 +180,40 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                 </div>
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Genetic Discoveries</h3>
-                    <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">No genetic discoveries recorded.</div>
+                    {geneticDiscoveries.length === 0 ? (
+                        <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">
+                            {mouseDiscoveriesSupported
+                                ? 'No confirmed offspring traits differ from the expected traits.'
+                                : 'Genetic discovery comparisons are currently available for mice.'}
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                These confirmed traits were not predicted. Review the suggested parent genetic-code updates.
+                            </p>
+                            {geneticDiscoveries.map((discovery) => (
+                                <div key={discovery.trait} className="border-b border-gray-100 dark:border-dark-border pb-2 last:border-0">
+                                    <div className="flex items-center justify-between gap-2 text-sm">
+                                        <span className="font-medium text-gray-900 dark:text-dark-text">{discovery.trait}</span>
+                                        <span className="text-gray-500 dark:text-dark-text-muted">{discovery.percentage}%</span>
+                                    </div>
+                                    {discovery.recommendations.length ? (
+                                        <ul className="mt-1 space-y-1 text-xs text-gray-600 dark:text-dark-text-secondary">
+                                            {discovery.recommendations.map((recommendation) => (
+                                                <li key={recommendation}>
+                                                    Suggested update: {recommendation}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">
+                                            Appearance-based discovery; offspring genetic code is needed to suggest parent updates.
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

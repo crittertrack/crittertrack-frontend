@@ -1,6 +1,7 @@
 import {
   computeConfirmedOffspringTraits,
   computeExpectedOffspring,
+  computeGeneticDiscoveries,
 } from './expectedOffspring';
 
 describe('computeExpectedOffspring', () => {
@@ -318,5 +319,62 @@ describe('computeConfirmedOffspringTraits', () => {
   it('returns [] when no offspring or species are provided', () => {
     expect(computeConfirmedOffspringTraits([], 'syrianHamster', [])).toEqual([]);
     expect(computeConfirmedOffspringTraits([{}], null, [{}])).toEqual([]);
+  });
+});
+
+describe('computeGeneticDiscoveries', () => {
+  it('recommends both parents be reviewed for a confirmed recessive chocolate genotype', () => {
+    const sireCode = 'B/B';
+    const damCode = 'B/B';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, 'Fancy Mouse');
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['b/b'],
+      'Fancy Mouse',
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Chocolate',
+      percentage: 100,
+      recommendations: ['Sire: B locus B/b', 'Dam: B locus B/b'],
+    }]);
+  });
+
+  it('identifies the unrecorded parent locus when a Siamese offspring reveals it', () => {
+    const sireCode = 'C/ch';
+    const damCode = 'C/C';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, 'Fancy Mouse');
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['ch/ch'],
+      'Fancy Mouse',
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Siamese',
+      percentage: 100,
+      recommendations: ['Dam: C locus C/ch'],
+    }]);
+  });
+
+  it('reports appearance discoveries without inferring parent genotypes', () => {
+    const expectedTraits = [{ trait: 'Black', probability: 100 }];
+
+    expect(computeGeneticDiscoveries(
+      'A/a',
+      'A/a',
+      [''],
+      'Fancy Mouse',
+      expectedTraits,
+      [{ color: 'Chocolate' }],
+    )).toEqual([{
+      trait: 'Chocolate',
+      percentage: 100,
+      recommendations: [],
+    }]);
   });
 });
