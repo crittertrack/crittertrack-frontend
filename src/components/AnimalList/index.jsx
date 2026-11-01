@@ -14,7 +14,7 @@ import { DEAD_STATUSES, isDeadStatus } from '../../utils/constants';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import {
-    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, Ban, Info, Transfer,
+    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, Ban, Info,
     Bell, Bird, Bug, Bean, Building, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, Dna, Hourglass, Star,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users, PawPrint,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, ScanHeart, LampCeiling, BarChart2, Thermometer, Worm,
@@ -6486,7 +6486,7 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                                         onClick={() => handleOpenBulkTransferWithAnimals()}
                                         className="btn btn-ghost btn-sm flex items-center rounded-md bg-white p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 dark:btn-ghost-active"
                                         title="Bulk Transfer">
-                                        <Transfer className="h-4 w-4" />
+                                        <ArrowLeftRight className="h-4 w-4" />
                                     </button>
                                     <button
                                         className={`px-2.5 sm:px-3 py-1 sm:py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
