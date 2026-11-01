@@ -128,7 +128,19 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
             body: animal.body,
         })),
     );
-    const mouseDiscoveriesSupported = typeof species === 'string' && /mouse/i.test(species);
+    const speciesKey = typeof species === 'string'
+        ? species.toLowerCase().replace(/[^a-z0-9]/g, '')
+        : '';
+    const offspringCalculationsSupported = [
+        'mouse',
+        'fancymouse',
+        'fancyrat',
+        'syrianhamster',
+        'campbellsdwarfhamster',
+        'russiandwarfhamster',
+        'ballpython',
+    ].includes(speciesKey);
+    const geneticDiscoveriesSupported = offspringCalculationsSupported;
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
@@ -182,9 +194,9 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Genetic Discoveries</h3>
                     {geneticDiscoveries.length === 0 ? (
                         <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">
-                            {mouseDiscoveriesSupported
+                            {geneticDiscoveriesSupported
                                 ? 'No confirmed offspring traits differ from the expected traits.'
-                                : 'Genetic discovery comparisons are currently available for mice.'}
+                                : 'Genetic discovery comparisons for this species are coming in a future release.'}
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -239,7 +251,11 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Expected Offspring</h3>
-                    {expectedTraits.length === 0 ? (
+                    {!offspringCalculationsSupported ? (
+                        <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">
+                            Genetic calculations for this species are coming in a future release.
+                        </div>
+                    ) : expectedTraits.length === 0 ? (
                         <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">No expected traits recorded.</div>
                     ) : expectedTraits.map((t, i) => (
                         <div key={i} className="py-2">
@@ -255,7 +271,11 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
                         Observed traits from {offspring.length} linked offspring.
                     </p>
-                    {confirmedTraits.length === 0 ? (
+                    {!offspringCalculationsSupported ? (
+                        <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">
+                            Genetic calculations for this species are coming in a future release.
+                        </div>
+                    ) : confirmedTraits.length === 0 ? (
                         <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">
                             {offspring.length
                                 ? 'No appearance traits or genetic codes are recorded for these offspring.'

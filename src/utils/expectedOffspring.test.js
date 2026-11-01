@@ -15,7 +15,18 @@ describe('computeExpectedOffspring', () => {
     expect(result).toEqual([
       { trait: '(Golden) Agouti', probability: 50 },
       { trait: 'Black', probability: 50 },
+      { trait: 'Black (carrier)', probability: 50 },
     ]);
+  });
+
+  it('includes expected Syrian Hamster carrier traits', () => {
+    expect(computeExpectedOffspring(
+      'a/a B/B',
+      'a/a B/b',
+      'Syrian Hamster',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Rust (carrier)', probability: 50 },
+    ]));
   });
 
   it('parses stored genetic-code strings before calculating', () => {
@@ -26,6 +37,7 @@ describe('computeExpectedOffspring', () => {
     )).toEqual([
       { trait: '(Golden) Agouti', probability: 50 },
       { trait: 'Black', probability: 50 },
+      { trait: 'Black (carrier)', probability: 50 },
     ]);
   });
 
@@ -39,7 +51,18 @@ describe('computeExpectedOffspring', () => {
     expect(result).toEqual([
       { trait: 'Agouti', probability: 50 },
       { trait: 'Black', probability: 50 },
+      { trait: 'Black (carrier)', probability: 50 },
     ]);
+  });
+
+  it('includes expected Campbell dwarf hamster carrier traits', () => {
+    expect(computeExpectedOffspring(
+      'a/a B/B',
+      'a/a B/b',
+      "Campbell's Dwarf Hamster",
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Chocolate (carrier)', probability: 50 },
+    ]));
   });
 
   it('calculates phenotypes for Russian dwarf hamsters', () => {
@@ -50,7 +73,18 @@ describe('computeExpectedOffspring', () => {
     )).toEqual([
       { trait: 'Agouti', probability: 50 },
       { trait: 'Black', probability: 50 },
+      { trait: 'Black (carrier)', probability: 50 },
     ]);
+  });
+
+  it('includes expected Russian Dwarf Hamster carrier traits', () => {
+    expect(computeExpectedOffspring(
+      'a/a D/D',
+      'a/a D/d',
+      'Russian Dwarf Hamster',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Sapphire (carrier)', probability: 50 },
+    ]));
   });
 
   it('uses the species rules to predict rat phenotypes', () => {
@@ -59,6 +93,16 @@ describe('computeExpectedOffspring', () => {
       { C: 'c/c' },
       'fancyRat',
     )).toEqual([{ trait: 'Albino', probability: 100 }]);
+  });
+
+  it('includes expected Fancy Rat carrier traits', () => {
+    expect(computeExpectedOffspring(
+      'a/a B/B',
+      'a/a B/b',
+      'Fancy Rat',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Chocolate (carrier)', probability: 50 },
+    ]));
   });
 
   it('predicts a dominant ball python trait and normal offspring', () => {
@@ -175,7 +219,7 @@ describe('computeExpectedOffspring', () => {
     )).toEqual([]);
   });
 
-  it('rounds multi-locus probabilities so the total is exactly 100%', () => {
+  it('keeps phenotype probabilities totaling 100% alongside independent carrier probabilities', () => {
     const result = computeExpectedOffspring(
       { a: 'A/a', b: 'B/b' },
       { a: 'A/a', b: 'B/b' },
@@ -183,7 +227,9 @@ describe('computeExpectedOffspring', () => {
     );
 
     expect(result.length).toBeGreaterThan(0);
-    expect(result.reduce((total, item) => total + item.probability, 0)).toBe(100);
+    expect(result
+      .filter((item) => !item.trait.endsWith('(carrier)'))
+      .reduce((total, item) => total + item.probability, 0)).toBe(100);
   });
 
   it('returns [] when either parent code or the species is missing or unsupported', () => {
@@ -278,6 +324,41 @@ describe('computeConfirmedOffspringTraits', () => {
     ]);
   });
 
+  it('uses a Fancy Rat offspring genotype before its appearance fields', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['a/a B/b'],
+      'Fancy Rat',
+      [{ color: 'Black' }],
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Black', percentage: 100 },
+      { trait: 'Chocolate (carrier)', percentage: 100 },
+    ]));
+  });
+
+  it('uses a Syrian Hamster offspring genotype before its appearance fields', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['a/a e/e'],
+      'Syrian Hamster',
+      [{ color: 'Black' }],
+    )).toEqual([{ trait: 'Black Eyed Cream', percentage: 100 }]);
+  });
+
+  it('uses a Campbell dwarf hamster offspring genotype before its appearance fields', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['a/a b/b'],
+      "Campbell's Dwarf Hamster",
+      [{ color: 'Black' }],
+    )).toEqual([{ trait: 'Chocolate', percentage: 100 }]);
+  });
+
+  it('uses a Russian Dwarf Hamster offspring genotype before its appearance fields', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['a/a d/d'],
+      'Russian Dwarf Hamster',
+      [{ color: 'Agouti' }],
+    )).toEqual([{ trait: 'Russian Blue', percentage: 100 }]);
+  });
+
   it('does not replace recorded mouse genotypes with appearance fallback traits', () => {
     expect(computeConfirmedOffspringTraits(
       ['B/B D/D'],
@@ -313,7 +394,7 @@ describe('computeConfirmedOffspringTraits', () => {
       [{ a: 'a/a' }, { a: 'a/a' }],
       'syrianHamster',
       [{}, {}],
-    )).toEqual([{ trait: 'Phenotype: Black', percentage: 100 }]);
+    )).toEqual([{ trait: 'Black', percentage: 100 }]);
   });
 
   it('returns [] when no offspring or species are provided', () => {
@@ -375,6 +456,132 @@ describe('computeGeneticDiscoveries', () => {
     )).toEqual([{
       trait: 'Chocolate',
       recommendations: [],
+    }]);
+  });
+
+  it('finds Fancy Rat discoveries and recommends parent locus updates', () => {
+    const sireCode = 'a/a B/B';
+    const damCode = 'a/a B/B';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, 'Fancy Rat');
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['a/a b/b'],
+      'Fancy Rat',
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Chocolate',
+      recommendations: [
+        { parent: 'Sire', locus: 'B', genotype: 'B/b' },
+        { parent: 'Dam', locus: 'B', genotype: 'B/b' },
+      ],
+    }]);
+  });
+
+  it('identifies the unrecorded Fancy Rat parent locus for a Siamese discovery', () => {
+    const sireCode = 'a/a C/ch';
+    const damCode = 'a/a C/C';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, 'Fancy Rat');
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['a/a ch/ch'],
+      'Fancy Rat',
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Seal Point Siamese',
+      recommendations: [{ parent: 'Dam', locus: 'C', genotype: 'C/ch' }],
+    }]);
+  });
+
+  it('finds Syrian Hamster discoveries and recommends parent locus updates', () => {
+    const sireCode = 'a/a E/E';
+    const damCode = 'a/a E/E';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, 'Syrian Hamster');
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['a/a e/e'],
+      'Syrian Hamster',
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Black Eyed Cream',
+      recommendations: [
+        { parent: 'Sire', locus: 'e', genotype: 'E/e' },
+        { parent: 'Dam', locus: 'e', genotype: 'E/e' },
+      ],
+    }]);
+  });
+
+  it('finds Campbell dwarf hamster discoveries and recommends parent locus updates', () => {
+    const sireCode = 'a/a B/B';
+    const damCode = 'a/a B/B';
+    const species = "Campbell's Dwarf Hamster";
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, species);
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['a/a b/b'],
+      species,
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Chocolate',
+      recommendations: [
+        { parent: 'Sire', locus: 'b', genotype: 'B/b' },
+        { parent: 'Dam', locus: 'b', genotype: 'B/b' },
+      ],
+    }]);
+  });
+
+  it('finds Russian Dwarf Hamster discoveries and recommends parent locus updates', () => {
+    const sireCode = 'a/a D/D';
+    const damCode = 'a/a D/D';
+    const species = 'Russian Dwarf Hamster';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, species);
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['a/a d/d'],
+      species,
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Russian Blue',
+      recommendations: [
+        { parent: 'Sire', locus: 'd', genotype: 'D/d' },
+        { parent: 'Dam', locus: 'd', genotype: 'D/d' },
+      ],
+    }]);
+  });
+
+  it('finds Ball Python discoveries and recommends parent locus updates', () => {
+    const sireCode = 'Cl/Cl';
+    const damCode = 'Cl/Cl';
+    const species = 'Ball Python';
+    const expectedTraits = computeExpectedOffspring(sireCode, damCode, species);
+
+    expect(computeGeneticDiscoveries(
+      sireCode,
+      damCode,
+      ['cl/cl'],
+      species,
+      expectedTraits,
+      [{}],
+    )).toEqual([{
+      trait: 'Clown',
+      recommendations: [
+        { parent: 'Sire', locus: 'cl', genotype: 'Cl/cl' },
+        { parent: 'Dam', locus: 'cl', genotype: 'Cl/cl' },
+      ],
     }]);
   });
 });

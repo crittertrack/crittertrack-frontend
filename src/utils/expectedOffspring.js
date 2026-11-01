@@ -1,18 +1,22 @@
 // Calculate expected phenotype probabilities and observed traits for a litter.
 
 import {
+  getFancyRatCarriers,
   matchFancyRatPhenotype,
   RAT_GENE_LOCI,
 } from '../data/fancyRatPhenotypeRules';
 import {
+  getSyrianHamsterCarriers,
   matchSyrianHamsterPhenotype,
   SYRIAN_HAMSTER_GENE_LOCI,
 } from '../data/syrianHamsterPhenotypeRules';
 import {
+  getCampbellsDwarfHamsterCarriers,
   matchCampbellsDwarfHamsterPhenotype,
   CAMPBELLS_DWARF_HAMSTER_GENE_LOCI,
 } from '../data/campbellsDwarfHamsterPhenotypeRules';
 import {
+  getRussianDwarfHamsterCarriers,
   matchRussianDwarfHamsterPhenotype,
   RUSSIAN_DWARF_HAMSTER_GENE_LOCI,
 } from '../data/russianDwarfHamsterPhenotypeRules';
@@ -431,11 +435,7 @@ function computeMouseExpectedOffspring(sireCode, damCode) {
     .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
 }
 
-function getMouseLocusUpdates(sireGenotype, damGenotype, locus, offspringGenotype) {
-  const wildtype = MOUSE_WILDTYPE_GENOTYPES[locus];
-  if (!wildtype) return [];
-  const sireNotation = sireGenotype[locus] || wildtype;
-  const damNotation = damGenotype[locus] || wildtype;
+function getParentLocusUpdates(sireNotation, damNotation, locus, offspringGenotype) {
   const sireAlleles = getGametes(sireNotation);
   const damAlleles = getGametes(damNotation);
   const offspringAlleles = getGametes(offspringGenotype);
@@ -492,10 +492,22 @@ function getMouseLocusUpdates(sireGenotype, damGenotype, locus, offspringGenotyp
   }];
 }
 
+function getMouseLocusUpdates(sireGenotype, damGenotype, locus, offspringGenotype) {
+  const wildtype = MOUSE_WILDTYPE_GENOTYPES[locus];
+  if (!wildtype) return [];
+  return getParentLocusUpdates(
+    sireGenotype[locus] || wildtype,
+    damGenotype[locus] || wildtype,
+    locus,
+    offspringGenotype,
+  );
+}
+
 /**
- * Find mouse traits observed in linked offspring that were absent from the
- * expected-trait list. Genotype-backed discoveries include possible parent
- * locus updates; appearance-only discoveries are informational.
+ * Find mouse traits or supported rodent phenotypes observed in linked
+ * offspring that were absent from the expected-trait list. Genotype-backed
+ * discoveries include possible parent locus updates; appearance-only discoveries
+ * are informational.
  */
 export function computeGeneticDiscoveries(
   sireCode,
@@ -506,8 +518,14 @@ export function computeGeneticDiscoveries(
   appearanceFields,
 ) {
   const speciesKey = getSpeciesKey(species);
+  const isMouse = speciesKey === 'fancymouse' || speciesKey === 'mouse';
+  const isRat = speciesKey === 'fancyrat';
+  const isSyrianHamster = speciesKey === 'syrianhamster';
+  const isCampbellsHamster = speciesKey === 'campbellsdwarfhamster';
+  const isRussianHamster = speciesKey === 'russiandwarfhamster';
+  const isBallPython = speciesKey === 'ballpython';
   if (
-    (speciesKey !== 'fancymouse' && speciesKey !== 'mouse')
+    (!isMouse && !isRat && !isSyrianHamster && !isCampbellsHamster && !isRussianHamster && !isBallPython)
     || !Array.isArray(offspringCodes)
     || !offspringCodes.length
   ) {
@@ -539,6 +557,63 @@ export function computeGeneticDiscoveries(
   offspringCodes.forEach((offspringCode, index) => {
     const offspringGenotype = normalizeGenotype(parseGeneticCode(offspringCode, species));
     if (Object.keys(offspringGenotype).length) {
+      if (isRat || isSyrianHamster || isCampbellsHamster || isRussianHamster || isBallPython) {
+        const phenotypeMatch = isRat
+          ? matchFancyRatPhenotype(offspringGenotype)
+          : isSyrianHamster
+            ? matchSyrianHamsterPhenotype(offspringGenotype)
+            : isCampbellsHamster
+              ? matchCampbellsDwarfHamsterPhenotype(offspringGenotype)
+              : isRussianHamster
+                ? matchRussianDwarfHamsterPhenotype(offspringGenotype)
+                : matchBallPythonPhenotype(offspringGenotype);
+        const phenotype = phenotypeMatch?.phenotype;
+        if (phenotype && !expectedTraitNames.has(phenotype.toLowerCase())) {
+          const recommendations = [];
+          Object.entries(offspringGenotype).forEach(([locus, notation]) => {
+            if (!parsedSireGenotype[locus] || !parsedDamGenotype[locus]) return;
+            recommendations.push(
+              ...getParentLocusUpdates(
+                parsedSireGenotype[locus],
+                parsedDamGenotype[locus],
+                locus,
+                notation,
+              ),
+            );
+          });
+          recordDiscovery(phenotype, recommendations);
+        }
+
+        (isBallPython ? [] : phenotypeMatch?.carriers || []).forEach((carrier) => {
+          const carrierTrait = `${carrier} (carrier)`;
+          if (expectedTraitNames.has(carrierTrait.toLowerCase())) return;
+          const recommendations = [];
+          Object.entries(offspringGenotype).forEach(([locus, notation]) => {
+            const locusCarriers = isRat
+              ? getFancyRatCarriers({ [locus]: notation })
+              : isSyrianHamster
+                ? getSyrianHamsterCarriers({ [locus]: notation })
+                : isCampbellsHamster
+                  ? getCampbellsDwarfHamsterCarriers({ [locus]: notation })
+                  : isRussianHamster
+                    ? getRussianDwarfHamsterCarriers({ [locus]: notation })
+                    : [];
+            if (!locusCarriers.includes(carrier)) return;
+            if (!parsedSireGenotype[locus] || !parsedDamGenotype[locus]) return;
+            recommendations.push(
+              ...getParentLocusUpdates(
+                parsedSireGenotype[locus],
+                parsedDamGenotype[locus],
+                locus,
+                notation,
+              ),
+            );
+          });
+          recordDiscovery(carrierTrait, recommendations);
+        });
+        return;
+      }
+
       const offspringDiscoveries = new Map();
       Object.entries(offspringGenotype).forEach(([locus, notation]) => {
         getMouseTraits({ [locus]: notation }).forEach((trait) => {
@@ -565,8 +640,23 @@ export function computeGeneticDiscoveries(
       appearance.eyeColor,
       appearance.body,
     ];
-    new Set(appearanceValues.flatMap((value) => getMouseAppearanceTraits(value)))
-      .forEach((trait) => recordDiscovery(trait));
+    if (isMouse) {
+      new Set(appearanceValues.flatMap((value) => getMouseAppearanceTraits(value)))
+        .forEach((trait) => recordDiscovery(trait));
+    } else {
+      const observedNames = appearanceValues
+        .filter((value) => typeof value === 'string')
+        .map((value) => value.trim())
+        .filter(Boolean);
+      observedNames.forEach((observedName) => {
+        const normalizedObservedName = observedName.toLowerCase();
+        const wasExpected = expectedTraitNames.has(normalizedObservedName)
+          || Array.from(expectedTraitNames).some((expectedName) =>
+            expectedName.includes(normalizedObservedName)
+          );
+        if (!wasExpected) recordDiscovery(observedName);
+      });
+    }
   });
 
   return Array.from(discoveries.values())
@@ -650,19 +740,52 @@ export function computeExpectedOffspring(sireCode, damCode, species) {
   }
 
   const phenotypeProbabilities = {};
+  const carrierProbabilities = {};
   for (const combo of offspringCombos) {
-    const phenotype = matchGenotypePhenotype(combo.genotype, species) || 'Unknown';
+    const ratMatch = speciesKey === 'fancyrat'
+      ? matchFancyRatPhenotype(normalizeGenotype(combo.genotype))
+      : null;
+    const syrianMatch = speciesKey === 'syrianhamster'
+      ? matchSyrianHamsterPhenotype(normalizeGenotype(combo.genotype))
+      : null;
+    const campbellsMatch = speciesKey === 'campbellsdwarfhamster'
+      ? matchCampbellsDwarfHamsterPhenotype(normalizeGenotype(combo.genotype))
+      : null;
+    const russianMatch = speciesKey === 'russiandwarfhamster'
+      ? matchRussianDwarfHamsterPhenotype(normalizeGenotype(combo.genotype))
+      : null;
+    const phenotype = ratMatch?.phenotype
+      || syrianMatch?.phenotype
+      || campbellsMatch?.phenotype
+      || russianMatch?.phenotype
+      || matchGenotypePhenotype(combo.genotype, species)
+      || 'Unknown';
     phenotypeProbabilities[phenotype] =
       (phenotypeProbabilities[phenotype] || 0) + combo.probability;
+    [
+      ...(ratMatch?.carriers || []),
+      ...(syrianMatch?.carriers || []),
+      ...(campbellsMatch?.carriers || []),
+      ...(russianMatch?.carriers || []),
+    ].forEach((carrier) => {
+      const trait = `${carrier} (carrier)`;
+      carrierProbabilities[trait] =
+        (carrierProbabilities[trait] || 0) + combo.probability;
+    });
   }
 
-  return toPercentages(phenotypeProbabilities);
+  const expectedPhenotypes = toPercentages(phenotypeProbabilities);
+  const expectedCarriers = Object.entries(carrierProbabilities)
+    .map(([trait, probability]) => ({ trait, probability: Math.round(probability * 100) }))
+    .filter(({ probability }) => probability > 0)
+    .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
+  return [...expectedPhenotypes, ...expectedCarriers];
 }
 
 /**
- * Summarize mouse genotype traits when known, using appearance fields only as
- * the fallback. Other supported species retain their existing appearance-first
- * summaries and use genotype phenotypes only when no appearance is recorded.
+ * Summarize mouse traits and supported rodent phenotypes from genotype when
+ * known, using appearance fields as fallback. Other supported species retain
+ * their existing appearance-first summaries and use genotype phenotypes when needed.
  */
 export function computeConfirmedOffspringTraits(offspringCodes, species, appearanceFields) {
   if (!Array.isArray(offspringCodes) || !offspringCodes.length) return [];
@@ -682,6 +805,10 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
     const appearance = appearanceFields?.[index] || {};
     const speciesKey = getSpeciesKey(species);
     const isMouse = speciesKey === 'fancymouse' || speciesKey === 'mouse';
+    const isRat = speciesKey === 'fancyrat';
+    const isSyrianHamster = speciesKey === 'syrianhamster';
+    const isCampbellsHamster = speciesKey === 'campbellsdwarfhamster';
+    const isRussianHamster = speciesKey === 'russiandwarfhamster';
     const parsedCode = species ? parseGeneticCode(offspringCode, species) : {};
     let traits;
     const appearanceTraits = appearanceKeys.flatMap(([key, label]) => {
@@ -696,6 +823,18 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
     if (isMouse) {
       traits = Array.from(getMouseTraits(parsedCode));
       if (!Object.keys(parsedCode).length) traits = appearanceTraits;
+    } else if ((isRat || isSyrianHamster || isCampbellsHamster || isRussianHamster) && Object.keys(parsedCode).length) {
+      const phenotypeMatch = isRat
+        ? matchFancyRatPhenotype(normalizeGenotype(parsedCode))
+        : isSyrianHamster
+          ? matchSyrianHamsterPhenotype(normalizeGenotype(parsedCode))
+          : isCampbellsHamster
+            ? matchCampbellsDwarfHamsterPhenotype(normalizeGenotype(parsedCode))
+            : matchRussianDwarfHamsterPhenotype(normalizeGenotype(parsedCode));
+      traits = phenotypeMatch?.phenotype ? [phenotypeMatch.phenotype] : [];
+      if (phenotypeMatch?.carriers?.length) {
+        traits.push(...phenotypeMatch.carriers.map((carrier) => `${carrier} (carrier)`));
+      }
     } else {
       traits = appearanceTraits;
       if (!traits.length) {

@@ -8,6 +8,31 @@ jest.mock('../../../utils/apiClient', () => ({
 }));
 
 describe('GeneticsTab expected offspring', () => {
+    it('shows a future-release message in unsupported genetics sections', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Rabbit',
+                    expectedTraits: [{ trait: 'Black', probability: 100 }],
+                    sire: { geneticCode: 'a/a' },
+                    dam: { geneticCode: 'A/a' },
+                }}
+                offspring={[{ color: 'Black' }]}
+            />,
+        );
+
+        const discoveriesSection = screen.getByText('Genetic Discoveries').parentElement;
+        const expectedSection = screen.getByText('Expected Offspring').parentElement;
+        const confirmedSection = screen.getByText('Confirmed Offspring').parentElement;
+        expect(within(discoveriesSection).getByText(
+            'Genetic discovery comparisons for this species are coming in a future release.',
+        )).toBeTruthy();
+        const futureCalculationMessage = 'Genetic calculations for this species are coming in a future release.';
+        expect(within(expectedSection).getByText(futureCalculationMessage)).toBeTruthy();
+        expect(within(confirmedSection).getByText(futureCalculationMessage)).toBeTruthy();
+        expect(screen.queryByText('No expected traits recorded.')).toBeNull();
+    });
+
     it('calculates traits from assigned parents when the litter has no species field', () => {
         render(
             <GeneticsTab
@@ -93,6 +118,96 @@ describe('GeneticsTab expected offspring', () => {
         expect(screen.getAllByText('B/b')).toHaveLength(2);
         const discoveriesSection = screen.getByText('Genetic Discoveries').parentElement;
         expect(within(discoveriesSection).queryByText('100%')).toBeNull();
+    });
+
+    it('shows Fancy Rat phenotype discoveries and parent code recommendations', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Fancy Rat',
+                    sire: { geneticCode: 'a/a B/B' },
+                    dam: { geneticCode: 'a/a B/B' },
+                }}
+                offspring={[{ geneticCode: 'a/a b/b' }]}
+            />,
+        );
+
+        expect(screen.getAllByText('Chocolate').length).toBeGreaterThan(0);
+        expect(screen.getByText('Review Sire genetic code')).toBeTruthy();
+        expect(screen.getByText('Review Dam genetic code')).toBeTruthy();
+    });
+
+    it('shows Syrian Hamster discoveries and suggested parent updates', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Syrian Hamster',
+                    sire: { geneticCode: 'a/a E/E' },
+                    dam: { geneticCode: 'a/a E/E' },
+                }}
+                offspring={[{ geneticCode: 'a/a e/e' }]}
+            />,
+        );
+
+        expect(screen.getAllByText('Black Eyed Cream').length).toBeGreaterThan(0);
+        expect(screen.getByText('Review Sire genetic code')).toBeTruthy();
+        expect(screen.getByText('Review Dam genetic code')).toBeTruthy();
+        expect(screen.getAllByText('E/e')).toHaveLength(2);
+    });
+
+    it('shows Campbell dwarf hamster discoveries and suggested parent updates', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: "Campbell's Dwarf Hamster",
+                    sire: { geneticCode: 'a/a B/B' },
+                    dam: { geneticCode: 'a/a B/B' },
+                }}
+                offspring={[{ geneticCode: 'a/a b/b' }]}
+            />,
+        );
+
+        expect(screen.getAllByText('Chocolate').length).toBeGreaterThan(0);
+        expect(screen.getByText('Review Sire genetic code')).toBeTruthy();
+        expect(screen.getByText('Review Dam genetic code')).toBeTruthy();
+        expect(screen.getAllByText('B/b')).toHaveLength(2);
+    });
+
+    it('shows Russian Dwarf Hamster discoveries and suggested parent updates', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Russian Dwarf Hamster',
+                    sire: { geneticCode: 'a/a D/D' },
+                    dam: { geneticCode: 'a/a D/D' },
+                }}
+                offspring={[{ geneticCode: 'a/a d/d' }]}
+            />,
+        );
+
+        expect(screen.getAllByText('Russian Blue').length).toBeGreaterThan(0);
+        expect(screen.getByText('Review Sire genetic code')).toBeTruthy();
+        expect(screen.getByText('Review Dam genetic code')).toBeTruthy();
+        expect(screen.getAllByText('D/d')).toHaveLength(2);
+    });
+
+    it('shows Ball Python discoveries and suggested parent updates', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Ball Python',
+                    sire: { geneticCode: 'Cl/Cl' },
+                    dam: { geneticCode: 'Cl/Cl' },
+                }}
+                offspring={[{ geneticCode: 'cl/cl' }]}
+            />,
+        );
+
+        const discoveriesSection = screen.getByText('Genetic Discoveries').parentElement;
+        expect(within(discoveriesSection).getByText('Clown')).toBeTruthy();
+        expect(within(discoveriesSection).getByText('Review Sire genetic code')).toBeTruthy();
+        expect(within(discoveriesSection).getByText('Review Dam genetic code')).toBeTruthy();
+        expect(within(discoveriesSection).getAllByText('Cl/cl')).toHaveLength(2);
     });
 
     it('shows each expected and confirmed percentage only once beside its bar', () => {
