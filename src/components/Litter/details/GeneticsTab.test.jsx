@@ -1,6 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import apiClient from '../../../utils/apiClient';
 import GeneticsTab from './GeneticsTab';
+
+jest.mock('../../../utils/apiClient', () => ({
+    get: jest.fn().mockResolvedValue({ data: {} }),
+}));
 
 describe('GeneticsTab expected offspring', () => {
     it('calculates traits from assigned parents when the litter has no species field', () => {
@@ -46,5 +51,27 @@ describe('GeneticsTab expected offspring', () => {
         expect(screen.getByText('Color: Black')).toBeTruthy();
         expect(screen.getByText('Color: Agouti')).toBeTruthy();
         expect(screen.queryByText('No linked offspring recorded.')).toBeNull();
+    });
+
+    it('loads genetic codes for assigned parents when litter data omits them', async () => {
+        apiClient.get.mockImplementation((url) => Promise.resolve({
+            data: {
+                geneticCode: url.endsWith('sire-id') ? 'B/B' : 'B/b',
+            },
+        }));
+
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Fancy Mouse',
+                    sire: { id_public: 'sire-id' },
+                    dam: { id_public: 'dam-id' },
+                }}
+            />,
+        );
+
+        expect(await screen.findByText('Chocolate (carrier)')).toBeTruthy();
+        expect(apiClient.get).toHaveBeenCalledWith('/animals/any/sire-id');
+        expect(apiClient.get).toHaveBeenCalledWith('/animals/any/dam-id');
     });
 });

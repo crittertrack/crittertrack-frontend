@@ -20,6 +20,7 @@ import {
   matchBallPythonPhenotype,
   parseBallPythonGeneticCode,
 } from '../data/ballPythonPhenotypeRules';
+import { MOUSE_PHENOTYPE_EXAMPLES } from '../data/mousePhenotypeExamples';
 
 const RULES_BY_SPECIES = {
   fancyrat: matchFancyRatPhenotype,
@@ -34,6 +35,188 @@ const GENE_LOCI_BY_SPECIES = {
   campbellsdwarfhamster: CAMPBELLS_DWARF_HAMSTER_GENE_LOCI,
   russiandwarfhamster: RUSSIAN_DWARF_HAMSTER_GENE_LOCI,
 };
+
+const MOUSE_ALLELE_TRAITS = {
+  A: { A: 'Agouti', a: 'Black', at: 'Tan', Ay: 'Dominant Red', Avy: 'Brindle', Aw: 'White-Bellied Agouti', ae: 'Extreme Black' },
+  B: { b: 'Chocolate' },
+  C: { c: 'Albino', ch: 'Siamese', ce: 'Beige', cch: 'Chinchilla' },
+  D: { d: 'Blue' },
+  E: { e: 'Recessive Red' },
+  Ln: { ln: 'Leaden' },
+  P: { p: 'Pink Eyed' },
+  S: { s: 'Pied' },
+  Bt: { bt: 'Belted' },
+  U: { U: 'Umbrous' },
+  W: { W: 'Dominant White Spot', Wsh: 'Variegated', Rw: 'Rumpwhite' },
+  Spl: { Spl: 'Splashed' },
+  Rn: { rn: 'Roan' },
+  Si: { si: 'Silvered' },
+  Mobr: { Mobr: 'Brindle' },
+  Go: { Go: 'Shorthair', go: 'Longhair' },
+  Re: { Re: 'Rex' },
+  Sa: { sa: 'Satin' },
+  Rst: { rst: 'Rosette' },
+  Fz: { fz: 'Fuzz' },
+  Nu: { nu: 'Nude' },
+};
+const MOUSE_WILDTYPE_GENOTYPES = {
+  A: 'A/A',
+  B: 'B/B',
+  C: 'C/C',
+  D: 'D/D',
+  E: 'E/E',
+  Ln: 'Ln/Ln',
+  P: 'P/P',
+  S: 'S/S',
+  Bt: 'Bt/Bt',
+  U: 'u/u',
+  W: 'w/w',
+  Spl: 'spl/spl',
+  Rn: 'Rn/Rn',
+  Si: 'Si/Si',
+  Mobr: 'mobr/mobr',
+  Go: 'Go/Go',
+  Re: 're/re',
+  Sa: 'Sa/Sa',
+  Rst: 'Rst/Rst',
+  Fz: 'Fz/Fz',
+  Nu: 'nu/nu',
+};
+const MOUSE_ALLELES_BY_LOCUS = {
+  A: ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'],
+  B: ['B', 'b'],
+  C: ['C', 'c', 'ch', 'ce', 'cch'],
+  D: ['D', 'd'],
+  E: ['E', 'e'],
+  Ln: ['Ln', 'ln'],
+  P: ['P', 'p'],
+  S: ['S', 's', 's+'],
+  Bt: ['Bt', 'bt'],
+  U: ['U', 'u'],
+  W: ['W', 'w', 'Wsh', 'Rw'],
+  Spl: ['Spl', 'spl'],
+  Rn: ['Rn', 'rn'],
+  Si: ['Si', 'si'],
+  Mobr: ['Mobr', 'mobr', 'Y'],
+  Go: ['Go', 'go'],
+  Re: ['Re', 're'],
+  Sa: ['Sa', 'sa'],
+  Rst: ['Rst', 'rst'],
+  Fz: ['Fz', 'fz'],
+  Nu: ['Nu', 'nu'],
+};
+const MOUSE_ALLELE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
+const MOUSE_DOMINANT_TRAIT_ALLELES = new Set([
+  'U', 'W', 'Wsh', 'Rw', 'Spl', 'Mobr', 'Re',
+]);
+const MOUSE_APPEARANCE_ALIASES = {
+  'black eyed white': ['Albino'],
+  'pink eyed white': ['Albino', 'Pink Eyed'],
+  'blue agouti': ['Blue', 'Agouti'],
+  'chocolate agouti': ['Chocolate', 'Agouti'],
+  'recessive red': ['Recessive Red'],
+  'dominant red': ['Dominant Red'],
+  'white-bellied agouti': ['White-Bellied Agouti'],
+  'white bellied agouti': ['White-Bellied Agouti'],
+  champagne: ['Black', 'Chocolate', 'Pink Eyed'],
+  cinnamon: ['Agouti', 'Chocolate'],
+  argente: ['Agouti', 'Pink Eyed'],
+  dove: ['Black', 'Pink Eyed'],
+  lilac: ['Black', 'Chocolate', 'Blue'],
+  silver: ['Black', 'Blue', 'Pink Eyed'],
+  'blue': ['Blue'],
+  'black': ['Black'],
+  'agouti': ['Agouti'],
+  'chocolate': ['Black', 'Chocolate'],
+  'pink eyed': ['Pink Eyed'],
+  'pink-eye': ['Pink Eyed'],
+  pied: ['Pied'],
+  belted: ['Belted'],
+  brindle: ['Brindle'],
+  tan: ['Tan'],
+  'recessive fawn': ['Recessive Red'],
+  'recessive amber': ['Recessive Red', 'Blue'],
+};
+Object.values(MOUSE_ALLELE_TRAITS)
+  .flatMap((traits) => Object.values(traits))
+  .forEach((trait) => {
+    const alias = trait.toLowerCase();
+    if (!Object.prototype.hasOwnProperty.call(MOUSE_APPEARANCE_ALIASES, alias)) {
+      MOUSE_APPEARANCE_ALIASES[alias] = [trait];
+    }
+  });
+
+function getMouseVisibleTraits(genotype) {
+  const traits = new Set();
+  for (const [locus, notation] of Object.entries(genotype || {})) {
+    const alleles = getGametes(notation);
+    const locusTraits = MOUSE_ALLELE_TRAITS[locus];
+    if (!locusTraits || !alleles.length) continue;
+
+    if (locus === 'A') {
+      const visibleAllele = alleles
+        .filter((allele) => Object.prototype.hasOwnProperty.call(locusTraits, allele))
+        .sort((a, b) => MOUSE_ALLELE_ORDER.indexOf(a) - MOUSE_ALLELE_ORDER.indexOf(b))[0];
+      if (visibleAllele) traits.add(locusTraits[visibleAllele]);
+      continue;
+    }
+
+    Object.entries(locusTraits).forEach(([allele, trait]) => {
+      const copies = alleles.filter((inheritedAllele) => inheritedAllele === allele).length;
+      if (copies === 2 || (copies > 0 && MOUSE_DOMINANT_TRAIT_ALLELES.has(allele))) {
+        traits.add(trait);
+      }
+    });
+  }
+  return traits;
+}
+
+Object.values(MOUSE_PHENOTYPE_EXAMPLES).forEach(({ examples = [] }) => {
+  examples.forEach(({ name, genotype, genotypes }) => {
+    const candidates = genotypes || (genotype ? [genotype] : []);
+    if (!name || !candidates.length) return;
+
+    const candidateTraits = candidates.map((candidate) =>
+      Array.from(getMouseVisibleTraits(candidate)).sort()
+    );
+    const firstCandidate = candidateTraits[0];
+    if (
+      !firstCandidate.length
+      || candidateTraits.some((candidate) => candidate.join('|') !== firstCandidate.join('|'))
+    ) {
+      return;
+    }
+
+    const alias = name.toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    MOUSE_APPEARANCE_ALIASES[alias] = firstCandidate;
+  });
+});
+
+function getMouseAppearanceTraits(value) {
+  if (typeof value !== 'string' || !value.trim()) return [];
+  const normalized = value.toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const matches = [];
+  const aliases = Object.keys(MOUSE_APPEARANCE_ALIASES)
+    .sort((a, b) => b.length - a.length);
+  const occupiedRanges = [];
+
+  for (const alias of aliases) {
+    const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`(^|[^a-z])${escaped}([^a-z]|$)`, 'g');
+    let match;
+    while ((match = pattern.exec(normalized)) !== null) {
+      const start = match.index + match[1].length;
+      const end = start + alias.length;
+      if (occupiedRanges.some(([rangeStart, rangeEnd]) => start < rangeEnd && end > rangeStart)) {
+        continue;
+      }
+      occupiedRanges.push([start, end]);
+      matches.push(...MOUSE_APPEARANCE_ALIASES[alias]);
+    }
+  }
+
+  return [...new Set(matches)];
+}
 
 function getSpeciesKey(species) {
   if (typeof species !== 'string') return null;
@@ -53,6 +236,21 @@ function parseGeneticCode(code, species) {
 
   const speciesKey = getSpeciesKey(species);
   if (speciesKey === 'ballpython') return parseBallPythonGeneticCode(code);
+
+  if (speciesKey === 'fancymouse' || speciesKey === 'mouse') {
+    const genotype = {};
+    for (const token of code.trim().replace(/,/g, ' ').split(/\s+/)) {
+      const alleles = token.split('/');
+      if (alleles.length !== 2 || !alleles.every(Boolean)) continue;
+      for (const [locus, knownAlleles] of Object.entries(MOUSE_ALLELES_BY_LOCUS)) {
+        if (alleles.every((allele) => knownAlleles.includes(allele))) {
+          genotype[locus] = token;
+          break;
+        }
+      }
+    }
+    return genotype;
+  }
 
   const geneLoci = GENE_LOCI_BY_SPECIES[speciesKey];
   if (!geneLoci) return {};
@@ -94,7 +292,15 @@ function normalizeGenotype(genotype) {
     if (alleles.length !== 2 || !alleles.every(Boolean)) continue;
     const [a, b] = alleles;
 
-    if (a === 'Y' || b === 'Y') {
+    if (locus === 'A') {
+      const sorted = [a, b].sort((first, second) => {
+        const firstRank = MOUSE_ALLELE_ORDER.indexOf(first);
+        const secondRank = MOUSE_ALLELE_ORDER.indexOf(second);
+        if (firstRank >= 0 && secondRank >= 0) return firstRank - secondRank;
+        return first.localeCompare(second);
+      });
+      normalized[locus] = `${sorted[0]}/${sorted[1]}`;
+    } else if (a === 'Y' || b === 'Y') {
       normalized[locus] = `${a === 'Y' ? b : a}/Y`;
       continue;
     }
@@ -140,6 +346,81 @@ function matchGenotypePhenotype(genotype, species) {
   return typeof result?.phenotype === 'string' ? result.phenotype : null;
 }
 
+function getMouseTraits(genotype) {
+  const traits = new Set();
+  for (const [locus, notation] of Object.entries(genotype || {})) {
+    const alleles = getGametes(notation);
+    const locusTraits = MOUSE_ALLELE_TRAITS[locus];
+    if (!locusTraits || !alleles.length) continue;
+
+    if (locus === 'A') {
+      const primaryAllele = alleles.slice().sort((a, b) => {
+        const aRank = MOUSE_ALLELE_ORDER.indexOf(a);
+        const bRank = MOUSE_ALLELE_ORDER.indexOf(b);
+        if (aRank !== -1 && bRank !== -1) return aRank - bRank;
+        return a.localeCompare(b);
+      })[0];
+      if (locusTraits[primaryAllele]) traits.add(locusTraits[primaryAllele]);
+      const hiddenAllele = alleles.find((allele) => allele !== primaryAllele);
+      if (hiddenAllele && locusTraits[hiddenAllele]) {
+        traits.add(`${locusTraits[hiddenAllele]} (carrier)`);
+      }
+      continue;
+    }
+
+    Object.entries(locusTraits).forEach(([allele, trait]) => {
+      const copies = alleles.filter((inheritedAllele) => inheritedAllele === allele).length;
+      if (!copies) return;
+      if (MOUSE_DOMINANT_TRAIT_ALLELES.has(allele)) {
+        traits.add(trait);
+      } else {
+        traits.add(copies === 2 ? trait : `${trait} (carrier)`);
+      }
+    });
+  }
+  return traits;
+}
+
+function computeMouseExpectedOffspring(sireCode, damCode) {
+  const parsedSireGenotype = normalizeGenotype(parseGeneticCode(sireCode, 'Fancy Mouse'));
+  const parsedDamGenotype = normalizeGenotype(parseGeneticCode(damCode, 'Fancy Mouse'));
+  const allLoci = new Set([
+    ...Object.keys(parsedSireGenotype),
+    ...Object.keys(parsedDamGenotype),
+  ]);
+  const sireGenotype = { ...parsedSireGenotype };
+  const damGenotype = { ...parsedDamGenotype };
+  allLoci.forEach((locus) => {
+    const wildtype = MOUSE_WILDTYPE_GENOTYPES[locus];
+    if (!wildtype) return;
+    if (!sireGenotype[locus]) sireGenotype[locus] = wildtype;
+    if (!damGenotype[locus]) damGenotype[locus] = wildtype;
+  });
+  const sharedLoci = Array.from(allLoci)
+    .filter((locus) => sireGenotype[locus] && damGenotype[locus]);
+  const traitProbabilities = new Map();
+
+  sharedLoci.forEach((locus) => {
+    const distribution = computeLocusOffspringDistribution(
+      sireGenotype[locus],
+      damGenotype[locus],
+    );
+    if (!distribution) return;
+    Object.entries(distribution).forEach(([offspringGenotype, probability]) => {
+      getMouseTraits({ [locus]: offspringGenotype }).forEach((trait) => {
+        traitProbabilities.set(trait, (traitProbabilities.get(trait) || 0) + probability);
+      });
+    });
+  });
+
+  return Array.from(traitProbabilities.entries())
+    .map(([trait, probability]) => ({
+      trait,
+      probability: Math.round(probability * 100),
+    }))
+    .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
+}
+
 function toPercentages(probabilities) {
   const rounded = Object.entries(probabilities).map(([trait, probability]) => {
     const exactPercentage = probability * 100;
@@ -171,9 +452,14 @@ function toPercentages(probabilities) {
  * be calculated from the available data.
  */
 export function computeExpectedOffspring(sireCode, damCode, species) {
-  if (!sireCode || !damCode || !getSpeciesRules(species)) {
-    return [];
+  if (!species) return [];
+  const speciesKey = getSpeciesKey(species);
+  if (speciesKey === 'fancymouse' || speciesKey === 'mouse') {
+    if (!sireCode && !damCode) return [];
+    return computeMouseExpectedOffspring(sireCode, damCode);
   }
+  if (!sireCode || !damCode) return [];
+  if (!getSpeciesRules(species)) return [];
 
   const sireGenotype = parseGeneticCode(sireCode, species);
   const damGenotype = parseGeneticCode(damCode, species);
@@ -218,12 +504,12 @@ export function computeExpectedOffspring(sireCode, damCode, species) {
 }
 
 /**
- * Summarize the share of recorded offspring exhibiting each observed trait.
- * Appearance fields take precedence; genetic phenotype is used only when an
- * offspring has no appearance traits recorded.
+ * Summarize mouse genotype traits when known, using appearance fields only as
+ * the fallback. Other supported species retain their existing appearance-first
+ * summaries and use genotype phenotypes only when no appearance is recorded.
  */
 export function computeConfirmedOffspringTraits(offspringCodes, species, appearanceFields) {
-  if (!Array.isArray(offspringCodes) || !offspringCodes.length || !species) return [];
+  if (!Array.isArray(offspringCodes) || !offspringCodes.length) return [];
 
   const appearanceKeys = [
     ['variety', 'Variety'],
@@ -238,24 +524,36 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
 
   offspringCodes.forEach((offspringCode, index) => {
     const appearance = appearanceFields?.[index] || {};
-    const traits = appearanceKeys.flatMap(([key, label]) => {
+    const speciesKey = getSpeciesKey(species);
+    const isMouse = speciesKey === 'fancymouse' || speciesKey === 'mouse';
+    const parsedCode = species ? parseGeneticCode(offspringCode, species) : {};
+    let traits;
+    const appearanceTraits = appearanceKeys.flatMap(([key, label]) => {
       const value = appearance[key];
-      return typeof value === 'string' && value.trim()
-        ? [`${label}: ${value.trim()}`]
-        : [];
+      if (typeof value !== 'string' || !value.trim()) return [];
+      const normalizedValue = value.trim();
+      const matchedTraits = isMouse ? getMouseAppearanceTraits(normalizedValue) : [];
+      if (matchedTraits.length) return matchedTraits;
+      return isMouse ? [] : [`${label}: ${normalizedValue}`];
     });
 
-    if (Array.isArray(appearance.carrierTraits)) {
+    if (isMouse) {
+      traits = Array.from(getMouseTraits(parsedCode));
+      if (!Object.keys(parsedCode).length) traits = appearanceTraits;
+    } else {
+      traits = appearanceTraits;
+      if (!traits.length) {
+        const phenotype = matchGenotypePhenotype(parsedCode, species);
+        if (phenotype) traits.push(`Phenotype: ${phenotype}`);
+      }
+    }
+
+    if (!isMouse && Array.isArray(appearance.carrierTraits)) {
       traits.push(
         ...appearance.carrierTraits
           .filter((trait) => typeof trait === 'string' && trait.trim())
           .map((trait) => `Carrier: ${trait.trim()}`),
       );
-    }
-
-    if (traits.length === 0) {
-      const phenotype = matchGenotypePhenotype(offspringCode, species);
-      if (phenotype) traits.push(`Phenotype: ${phenotype}`);
     }
 
     for (const trait of new Set(traits)) {

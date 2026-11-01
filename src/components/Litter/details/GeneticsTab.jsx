@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import apiClient from '../../../utils/apiClient';
 import {
     computeConfirmedOffspringTraits,
     computeExpectedOffspring,
@@ -59,10 +60,8 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
             : code && typeof code === 'object' && Object.keys(code).length > 0;
         const fetchParentCode = async (id, code) => {
             if (hasGeneticCode(code) || !id) return code;
-            const res = await apiClient.get(
-                `/public/global/animals?id_public=${encodeURIComponent(id)}`,
-            );
-            const animal = res.data?.[0];
+            const res = await apiClient.get(`/animals/any/${encodeURIComponent(id)}`);
+            const animal = res.data;
             const fetchedCode = animal?.geneticCode || animal?.genetic_code;
             return hasGeneticCode(fetchedCode) ? fetchedCode : null;
         };

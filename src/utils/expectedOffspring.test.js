@@ -82,6 +82,53 @@ describe('computeExpectedOffspring', () => {
     ]);
   });
 
+  it('reports each independent Fancy Mouse base trait, including carriers', () => {
+    expect(computeExpectedOffspring(
+      'A/a B/B D/D E/E',
+      'A/a B/b D/d E/e',
+      'Fancy Mouse',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Agouti', probability: 75 },
+      { trait: 'Black (carrier)', probability: 50 },
+      { trait: 'Black', probability: 25 },
+      { trait: 'Chocolate (carrier)', probability: 50 },
+      { trait: 'Blue (carrier)', probability: 50 },
+      { trait: 'Recessive Red (carrier)', probability: 50 },
+    ]));
+  });
+
+  it('reports dominant red, brindle and pink-eyed traits independently', () => {
+    expect(computeExpectedOffspring(
+      'Ay/Avy P/P',
+      'A/Avy P/p',
+      'Fancy Mouse',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Dominant Red', probability: 50 },
+      { trait: 'Brindle', probability: 50 },
+      { trait: 'Brindle (carrier)', probability: 25 },
+      { trait: 'Pink Eyed (carrier)', probability: 50 },
+    ]));
+  });
+
+  it('defaults an unrecorded mouse parent locus to wildtype', () => {
+    expect(computeExpectedOffspring(
+      'B/B',
+      'B/b',
+      'Fancy Mouse',
+    )).toEqual([
+      { trait: 'Chocolate (carrier)', probability: 50 },
+    ]);
+
+    expect(computeExpectedOffspring(
+      'B/B D/d',
+      'B/b',
+      'Fancy Mouse',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Chocolate (carrier)', probability: 50 },
+      { trait: 'Blue (carrier)', probability: 50 },
+    ]));
+  });
+
   it('does not infer alleles from a locus missing in either parent', () => {
     expect(computeExpectedOffspring(
       { a: 'a/a' },
@@ -135,6 +182,70 @@ describe('computeConfirmedOffspringTraits', () => {
       'syrianHamster',
       [{ variety: 'Golden' }, { variety: 'Golden' }, {}],
     )).toEqual([{ trait: 'Variety: Golden', percentage: 67 }]);
+  });
+
+  it('uses mouse offspring genetic codes before appearance fallback', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['A/a B/b D/d', 'a/a B/B D/D'],
+      'Fancy Mouse',
+      [{ color: 'Recessive Red Pied' }, { color: 'Blue' }],
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Agouti', percentage: 50 },
+      { trait: 'Black (carrier)', percentage: 50 },
+      { trait: 'Black', percentage: 50 },
+      { trait: 'Chocolate (carrier)', percentage: 50 },
+      { trait: 'Blue (carrier)', percentage: 50 },
+    ]));
+  });
+
+  it('splits fallback appearance values into base traits rather than compounds', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['', ''],
+      'Fancy Mouse',
+      [{ color: 'Recessive Red Pied', coat: 'Shorthair' }, { color: 'Blue' }],
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Recessive Red', percentage: 50 },
+      { trait: 'Pied', percentage: 50 },
+      { trait: 'Blue', percentage: 50 },
+      { trait: 'Shorthair', percentage: 50 },
+    ]));
+  });
+
+  it('decomposes mouse color names into their base genetic traits', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['', '', ''],
+      'Fancy Mouse',
+      [
+        { color: 'Dove' },
+        { color: 'Chocolate Agouti' },
+        { color: 'Blue Agouti' },
+      ],
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Black', percentage: 33 },
+      { trait: 'Pink Eyed', percentage: 33 },
+      { trait: 'Chocolate', percentage: 33 },
+      { trait: 'Agouti', percentage: 67 },
+      { trait: 'Blue', percentage: 33 },
+    ]));
+  });
+
+  it('uses the GeneticBuilder catalogue and skips unrecognized mouse appearance values', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['', ''],
+      'Fancy Mouse',
+      [{ color: 'Sealpoint Siamese' }, { color: 'Unrecognized shade' }],
+    )).toEqual([
+      { trait: 'Black', percentage: 50 },
+      { trait: 'Siamese', percentage: 50 },
+    ]);
+  });
+
+  it('does not replace recorded mouse genotypes with appearance fallback traits', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['B/B D/D'],
+      'Fancy Mouse',
+      [{ color: 'Dove' }],
+    )).toEqual([]);
   });
 
   it('uses an offspring genotype when no appearance traits are recorded', () => {
