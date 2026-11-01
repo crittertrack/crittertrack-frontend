@@ -675,14 +675,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     </div>
                                 </div>
 
-                                {/* Login Activity Tracking - DISABLED: Component deleted */}
-                                {/* <div className="mt-8">
-                                    {authToken && API_BASE_URL && (
-                                        <React.Suspense fallback={<div className="text-gray-500">Loading login history...</div>}>
-                                            <LoginTracking authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                                        </React.Suspense>
-                                    )}
-                                </div> */}
                             </div>
                         )}
 
