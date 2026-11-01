@@ -87,7 +87,8 @@ describe('Litter details page', () => {
         const objectives = await screen.findByTestId('objectives-panel');
         expect(within(objectives).getByText('Agouti babies expected')).toBeTruthy();
         expect(within(objectives).getByText('Both parents may carry dilute')).toBeTruthy();
-        expect(within(objectives).getByText('Maybe, depending on results · Some available for placement')).toBeTruthy();
+        expect(within(objectives).getByText('Maybe, depending on results')).toBeTruthy();
+        expect(within(objectives).getByText('Some available for placement')).toBeTruthy();
     });
 
     it('loads the overview without requesting deferred tab data', async () => {

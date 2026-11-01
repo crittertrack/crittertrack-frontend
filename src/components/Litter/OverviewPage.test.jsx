@@ -6,10 +6,10 @@ import apiClient from '../../utils/apiClient';
 // Jest (CRA) can't resolve react-router-dom v7's package exports, and the page only needs navigate().
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }), { virtual: true });
-jest.mock('../../utils/apiClient', () => ({ __esModule: true, default: { get: jest.fn(), put: jest.fn() } }));
+jest.mock('../../utils/apiClient', () => ({ __esModule: true, default: { get: jest.fn(), put: jest.fn(), delete: jest.fn() } }));
 
 const litters = [
-    { _id: 'a', litter_id_public: 'CTL1', sireId_public: 'CTC1', damId_public: 'CTC2', birthDate: '2026-01-01', maleCount: 3, femaleCount: 2, unknownCount: 1, inbreedingCoefficient: 0 },
+    { _id: 'a', litter_id_public: 'CTL1', sireId_public: 'CTC1', damId_public: 'CTC2', birthDate: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10), maleCount: 3, femaleCount: 2, unknownCount: 1, inbreedingCoefficient: 0 },
     { _id: 'b', litter_id_public: 'CTL2', sireId_public: 'CTC1', damId_public: 'CTC2', birthDate: '2026-02-01', maleCount: 1, femaleCount: 1, unknownCount: 0, inbreedingCoefficient: 0 },
 ];
 
@@ -23,6 +23,8 @@ beforeEach(() => {
         ] });
         return Promise.resolve({ data: [] });
     });
+    apiClient.delete.mockReset();
+    apiClient.delete.mockResolvedValue({ data: { message: 'Litter deleted successfully!' } });
 });
 
 const renderPage = () => render(<LittersOverviewPage showModalMessage={jest.fn()} />);
@@ -84,11 +86,39 @@ describe('Litters overview layout', () => {
         mockNavigate.mockClear();
 
         fireEvent.click(within(card).getByTitle(/click to/i));
-        fireEvent.click(within(card).getByText('Mark Weaned'));
+        fireEvent.click(within(card).getByText('Mark as Weaned'));
         expect(mockNavigate).not.toHaveBeenCalled();
 
         fireEvent.click(card);
         expect(mockNavigate).toHaveBeenCalledWith('/litters/CTL1');
+    });
+
+    it('confirms litter deletion, removes the litter, and preserves offspring records', async () => {
+        const showModalMessage = jest.fn();
+        const confirm = jest.spyOn(window, 'confirm').mockReturnValue(true);
+        render(<LittersOverviewPage showModalMessage={showModalMessage} />);
+        const cards = await screen.findAllByTestId('litter-card');
+        const card = cards.find(c => text(c).includes('CTL1'));
+        fireEvent.click(within(card).getByRole('button', { name: 'Delete litter' }));
+
+        await waitFor(() => expect(apiClient.delete).toHaveBeenCalledWith('/litters/a'));
+        expect(confirm).toHaveBeenCalledWith(expect.stringContaining('offspring animal records will not be deleted'));
+        await waitFor(() => expect(screen.queryByText(/CTL1/)).toBeNull());
+        expect(showModalMessage).toHaveBeenCalledWith('Success', expect.stringContaining('Offspring animal records were not deleted.'));
+        expect(mockNavigate).not.toHaveBeenCalled();
+        confirm.mockRestore();
+    });
+
+    it('does not delete a litter when confirmation is declined', async () => {
+        const confirm = jest.spyOn(window, 'confirm').mockReturnValue(false);
+        renderPage();
+        const cards = await screen.findAllByTestId('litter-card');
+        const card = cards.find(c => text(c).includes('CTL1'));
+        fireEvent.click(within(card).getByRole('button', { name: 'Delete litter' }));
+
+        expect(apiClient.delete).not.toHaveBeenCalled();
+        expect(screen.getAllByTestId('litter-card')).toHaveLength(2);
+        confirm.mockRestore();
     });
 
     it('shows labelled stats and gender distribution for born litters', async () => {

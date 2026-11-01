@@ -1675,7 +1675,7 @@ useEffect(() => {
         }
     }, [logEnclosureHistory]);
 
-    const handleOpenDetail = (enclosure) => {
+    const handleOpenDetail = useCallback((enclosure) => {
         setSelectedEnclosure(enclosure);
         setShowDetailModal(true);
         setLoadingAnimals(false); // Not loading from API anymore
@@ -1687,7 +1687,18 @@ useEffect(() => {
 
         const occupants = allAnimalsRaw.filter(a => a.enclosureId === enclosureId); // This is correct
         setEnclosureAnimals(occupants);
-    };
+    }, [allAnimalsRaw, getLocationPath, locations]);
+
+    useEffect(() => {
+        const requestedEnclosureId = new URLSearchParams(routerLocation.search).get('open');
+        if (!requestedEnclosureId || routerLocation.pathname !== '/enclosures') return;
+
+        const enclosure = enclosures.find(item => String(item._id || item.id) === requestedEnclosureId);
+        if (!enclosure) return;
+
+        handleOpenDetail(enclosure);
+        routerNavigate(routerLocation.pathname, { replace: true, state: null });
+    }, [routerLocation.pathname, routerLocation.search, enclosures, routerNavigate, handleOpenDetail]);
 
     const assignableAnimals = useMemo(() => {
         if (!selectedEnclosure) return [];

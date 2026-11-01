@@ -1,6 +1,4 @@
-// Pure helpers for the full-page litter editor (Stage 2). Everything here is copied from, and
-// must stay behaviourally identical to, the save logic in LitterManagement/index.jsx so the
-// existing status / count / payload semantics are preserved. No React, no network.
+// Pure helpers for the full-page litter editor. No React, no network.
 import { litterStatusPatch } from '../../../utils/litterStatus';
 
 export const EMPTY_LITTER_FORM = {
@@ -287,7 +285,7 @@ export const buildNewOffspringBodies = ({ counts, species, birthDate, sireId, da
     ];
 };
 
-// ---- Sex-breakdown arithmetic (mirrors the inline handlers in LitterManagement) -------------
+// ---- Sex-breakdown arithmetic ---------------------------------------------------------------
 const n = (v) => parseInt(v, 10) || 0;
 const orNull = (v) => v || null;
 

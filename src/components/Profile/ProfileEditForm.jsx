@@ -297,6 +297,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     }, [userProfile]);
 
     const [email, setEmail] = useState(userProfile.email);
+    const [recoveryEmail, setRecoveryEmail] = useState(userProfile.recoveryEmail || '');
+    const [recoveryEmailVerified, setRecoveryEmailVerified] = useState(!!userProfile.recoveryEmailVerified);
+    const [recoveryEmailCode, setRecoveryEmailCode] = useState('');
+    const [recoveryEmailPending, setRecoveryEmailPending] = useState(false);
+    const [recoveryEmailPassword, setRecoveryEmailPassword] = useState('');
+    const [recoveryEmailLoading, setRecoveryEmailLoading] = useState(false);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -651,6 +657,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         try {
             await apiClient.put('/auth/change-email', { newEmail: email });
             showModalMessage('Email Changed', 'Your email has been updated. You may need to log in again with the new email.');
+            setRecoveryEmailPending(false);
+            setRecoveryEmailCode('');
+            if (email.trim().toLowerCase() === recoveryEmail.trim().toLowerCase()) {
+                setRecoveryEmail('');
+                setRecoveryEmailVerified(false);
+            }
             await onSaveSuccess(); 
         } catch (error) {
             console.error('Email Update Error:', error.response?.data || error.message);
@@ -683,6 +695,47 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showModalMessage('Error', error.response?.data?.message || 'Failed to change password. Check your current password.');
         } finally {
             setPasswordLoading(false);
+        }
+    };
+
+    const handleRecoveryEmailRequest = async (e) => {
+        e.preventDefault();
+        setRecoveryEmailLoading(true);
+        try {
+            const response = await apiClient.post('/auth/recovery-email/request', {
+                recoveryEmail,
+                currentPassword: recoveryEmailPassword
+            });
+            setRecoveryEmailPending(true);
+            setRecoveryEmailCode('');
+            setRecoveryEmailPassword('');
+            showModalMessage('Verification Sent', response.data?.message || 'Check the recovery email address for a verification code.');
+        } catch (error) {
+            console.error('Recovery email request error:', error.response?.data || error.message);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to send a recovery email verification code.');
+        } finally {
+            setRecoveryEmailLoading(false);
+        }
+    };
+
+    const handleRecoveryEmailVerify = async (e) => {
+        e.preventDefault();
+        setRecoveryEmailLoading(true);
+        try {
+            const response = await apiClient.post('/auth/recovery-email/verify', { code: recoveryEmailCode });
+            const verifiedEmail = response.data?.recoveryEmail || recoveryEmail;
+            setRecoveryEmail(verifiedEmail);
+            setRecoveryEmailVerified(true);
+            setRecoveryEmailPending(false);
+            setRecoveryEmailPassword('');
+            setRecoveryEmailCode('');
+            showModalMessage('Recovery Email Verified', 'Your recovery email is ready to use for sign-in email recovery.');
+            if (onSaveSuccess) await onSaveSuccess({ recoveryEmail: verifiedEmail, recoveryEmailVerified: true });
+        } catch (error) {
+            console.error('Recovery email verification error:', error.response?.data || error.message);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to verify the recovery email.');
+        } finally {
+            setRecoveryEmailLoading(false);
         }
     };
 
@@ -1534,6 +1587,69 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
+
+            <section className="space-y-4 mb-8 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Recovery Email</h3>
+                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                    Add a separate, verified email address to receive your sign-in email if you forget it.
+                </p>
+                {recoveryEmailVerified && !recoveryEmailPending && (
+                    <p className="text-sm text-green-700 dark:text-green-400">Verified recovery email: {recoveryEmail}</p>
+                )}
+                {recoveryEmailPending ? (
+                    <form onSubmit={handleRecoveryEmailVerify} className="space-y-4">
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                            Enter the 6-digit code sent to {recoveryEmail}. It expires in 10 minutes.
+                        </p>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            pattern="[0-9]{6}"
+                            maxLength={6}
+                            placeholder="6-digit verification code *"
+                            value={recoveryEmailCode}
+                            onChange={(e) => setRecoveryEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            required
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                        />
+                        <button type="submit" disabled={recoveryEmailLoading || recoveryEmailCode.length !== 6}
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg disabled:opacity-50">
+                            {recoveryEmailLoading ? 'Verifying...' : 'Verify Recovery Email'}
+                        </button>
+                        <button type="button" disabled={recoveryEmailLoading}
+                            onClick={() => { setRecoveryEmailPending(false); setRecoveryEmailCode(''); }}
+                            className="ml-3 text-sm text-accent dark:text-dark-accent disabled:opacity-50">
+                            Change address or request a new code
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={handleRecoveryEmailRequest} className="space-y-4">
+                        <input
+                            type="email"
+                            placeholder="Recovery Email Address *"
+                            value={recoveryEmail}
+                            onChange={(e) => setRecoveryEmail(e.target.value)}
+                            required
+                            autoComplete="email"
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Current Password *"
+                            value={recoveryEmailPassword}
+                            onChange={(e) => setRecoveryEmailPassword(e.target.value)}
+                            required
+                            autoComplete="current-password"
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
+                        />
+                        <button type="submit" disabled={recoveryEmailLoading}
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg disabled:opacity-50">
+                            {recoveryEmailLoading ? 'Sending...' : recoveryEmailVerified ? 'Change Recovery Email' : 'Verify Recovery Email'}
+                        </button>
+                    </form>
+                )}
+            </section>
 
             <form onSubmit={handlePasswordUpdate} className="space-y-4 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Change Password</h3>

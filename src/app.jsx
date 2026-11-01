@@ -1503,7 +1503,12 @@ const App = () => {
         } catch (e) {
             console.warn('Could not persist authToken to localStorage', e);
         }
-        navigate('/');
+        const requestedEnclosureId = location.pathname === '/enclosures'
+            ? new URLSearchParams(location.search).get('open')
+            : null;
+        navigate(requestedEnclosureId
+            ? `/enclosures?open=${encodeURIComponent(requestedEnclosureId)}`
+            : '/');
         setIsRegister(false);
     };
 
@@ -1542,6 +1547,7 @@ const App = () => {
                         <div className="mb-3">
                             <GlobalSearchBar 
                                 API_BASE_URL={API_BASE_URL}
+                                userId={userProfile?.id_public}
                                 onSelectUser={(user) => setViewingPublicProfile(user)}
                                 onSelectAnimal={handleViewPublicAnimal}
                             />
@@ -1602,6 +1608,7 @@ const App = () => {
                         <div className="mb-3">
                             <GlobalSearchBar 
                                 API_BASE_URL={API_BASE_URL}
+                                userId={userProfile?.id_public}
                                 onSelectUser={(user) => { navigate(`/user/${user.id_public}`); }}
                                 onSelectAnimal={handleViewPublicAnimal}
                             />
@@ -1991,6 +1998,7 @@ const App = () => {
                 <div className="hidden md:block mb-3">
                     <GlobalSearchBar 
                         API_BASE_URL={API_BASE_URL}
+                        userId={userProfile?.id_public}
                         onSelectUser={(user) => navigate(`/user/${user.id_public}`)}
                         onSelectAnimal={handleViewPublicAnimal}
                     />
@@ -2154,6 +2162,7 @@ const App = () => {
                     <div className="mb-3">
                         <GlobalSearchBar 
                             API_BASE_URL={API_BASE_URL}
+                            userId={userProfile?.id_public}
                             onSelectUser={(user) => navigate(`/user/${user.id_public}`)}
                             onSelectAnimal={handleViewPublicAnimal}
                         />

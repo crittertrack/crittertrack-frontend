@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { Circle, Eye, EyeOff, Edit, Loader2, Mars, Venus, Plus, Search, BookOpen } from 'lucide-react';
+import { Circle, Eye, EyeOff, Edit, Loader2, Mars, Venus, Plus, Search, BookOpen, Trash2 } from 'lucide-react';
 import { formatDateShort } from '../../utils/dateFormatter';
 import { deriveStoredStatus, LITTER_STATUS_LABELS } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
@@ -92,6 +92,9 @@ const LitterCard = ({
     onEdit,
     onDetails,
     onViewAnimal,
+    onDelete,
+    canDelete = true,
+    deleting = false,
     coiCalculating = false,
 }) => {
     const quick = getQuickAction(status);
@@ -270,6 +273,18 @@ const LitterCard = ({
                 >
                     <Edit size={14} />
                 </button>
+                {canDelete && (
+                    <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onDelete(litter); }}
+                        title="Delete litter"
+                        aria-label="Delete litter"
+                        disabled={deleting}
+                        className="p-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+                    >
+                        {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -302,6 +317,7 @@ const LittersOverviewPage = ({
     const [litterOffspringMap, setLitterOffspringMap] = useState({});
     const [coiCacheRef] = useState({});
     const [coiCalculating, setCoiCalculating] = useState(new Set());
+    const [deletingLitterIds, setDeletingLitterIds] = useState(new Set());
 
     const viewAnimal = onViewAnimal || handleViewAnimal;
     const getStatus = (litter) => deriveStoredStatus(litter);
@@ -459,6 +475,39 @@ const LittersOverviewPage = ({
         }
     };
 
+    const deleteLitter = async (litter) => {
+        const label = litter.breedingPairCodeName || litter.litter_id_public || 'this litter';
+        if (!window.confirm(`Delete ${label}? This removes the litter record only; offspring animal records will not be deleted.`)) return;
+
+        setDeletingLitterIds(previous => new Set(previous).add(litter._id));
+        try {
+            const response = await apiClient.delete(`/litters/${encodeURIComponent(litter._id)}`);
+            setLitters(previous => previous.filter(item => item._id !== litter._id));
+            setLitterOffspringMap(previous => {
+                const next = { ...previous };
+                delete next[litter._id];
+                return next;
+            });
+            if (setCachedLitters) setCachedLitters(previous => (previous || []).filter(item => item._id !== litter._id));
+            if (setLitterCacheTimestamp) setLitterCacheTimestamp(Date.now());
+            showModalMessage(
+                response.queued ? 'Delete queued' : 'Success',
+                response.queued
+                    ? `${label} will be deleted when your connection is restored.`
+                    : `${label} was deleted. Offspring animal records were not deleted.`
+            );
+        } catch (error) {
+            console.error('[LittersOverviewPage] Failed to delete litter:', error);
+            showModalMessage('Error', error.response?.data?.message || `Failed to delete ${label}. Please try again.`);
+        } finally {
+            setDeletingLitterIds(previous => {
+                const next = new Set(previous);
+                next.delete(litter._id);
+                return next;
+            });
+        }
+    };
+
     const handleQuickAction = (litter, action) => {
         const status = getStatus(litter);
         if (action === 'mated' && status === 'planned') return handleMarkAsMated(litter);
@@ -599,6 +648,9 @@ const LittersOverviewPage = ({
                             onEdit={goEdit}
                             onDetails={goDetails}
                             onViewAnimal={viewAnimal}
+                            onDelete={deleteLitter}
+                            canDelete={!userProfile?._id || String(litter.creatorId) === String(userProfile._id)}
+                            deleting={deletingLitterIds.has(litter._id)}
                             coiCalculating={coiCalculating.has(litter._id)}
                         />
                     ))}

@@ -1,6 +1,4 @@
-// Network side of the full-page litter editor. Ported from LitterManagement/index.jsx
-// (handleSubmit / handleUpdateLitter / image handlers) with the same order of operations and
-// side effects (dam nursing sync, "All lost" reset, parent links on linked offspring, COI).
+// Network side of the full-page litter editor, including the save and image workflows.
 import apiClient from '../../../utils/apiClient';
 import { decodeErrorMessage } from '../../../utils/imageDecode';
 import { compressImageToMaxSize } from '../../../utils/imageCompression';

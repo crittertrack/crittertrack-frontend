@@ -471,7 +471,7 @@ export function AppRoutes({
       <Route path="/community/news" element={<CommunityNewsPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
       <Route path="/community/breeders" element={<CommunityBreedersPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
 
-      {/* Litters — Overview (replaces the monolithic LitterManagement list view) */}
+      {/* Litters — Overview */}
       <Route path="/litters" element={
         <LittersOverviewPage
           key="litters-route"

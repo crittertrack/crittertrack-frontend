@@ -43,10 +43,12 @@ export default function ObjectivesPanel({ litter, onEdit }) {
                         : <p className="whitespace-pre-wrap text-gray-800 dark:text-dark-text">{litter.geneticNotes}</p>}
                 </div>
                 <div>
-                    <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">Keepers &amp; placement plans</div>
-                    <p className="text-gray-800 dark:text-dark-text">
-                        {litter.keepersGrowouts || 'Undecided'} · {litter.placementPlans || 'Undecided'}
-                    </p>
+                    <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">Keepers</div>
+                    <p className="text-gray-800 dark:text-dark-text">{litter.keepersGrowouts || 'Undecided'}</p>
+                </div>
+                <div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">Placement plans</div>
+                    <p className="text-gray-800 dark:text-dark-text">{litter.placementPlans || 'Undecided'}</p>
                 </div>
                 <div>
                     <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">Notes</div>

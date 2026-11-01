@@ -3,13 +3,15 @@ import apiClient from '../utils/apiClient';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
     AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package, ClipboardList, Utensils,
-    Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search,
+    Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search, QrCode,
     Lightbulb, RefreshCw, Star, Info, Activity, Plus
 } from 'lucide-react';
 import AnimalImage from './shared/AnimalImage';
 import { formatDate, parseLocalDate } from '../utils/dateFormatter';
 import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 import { getEnclosurePurposeLabel } from '../utils/enclosurePurpose';
+import { enclosureShareUrl } from '../utils/publicUrl';
+import QRCodeLabelModal from './shared/QRCodeLabelModal';
 
 const TABS = [
     { id: 'dashboard', label: 'Dashboard', icon: Info },
@@ -144,6 +146,8 @@ const EnclosureDetailModal = ({
     const [updatingTask, setUpdatingTask] = useState(null);
     const modalRef = useRef(null);
     const [showAnimalPicker, setShowAnimalPicker] = useState(false);
+    const [showQRCode, setShowQRCode] = useState(false);
+    const enclosureId = enclosure?._id || enclosure?.id;
 
     const TASK_TYPE_STYLES = {
         Cleaning: { icon: <Wrench size={12} className="text-amber-700" />, color: 'text-amber-700' },
@@ -450,6 +454,16 @@ const EnclosureDetailModal = ({
                         </p>
                     </div>
                     <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/20 p-1 rounded-lg">
+                        <button
+                            type="button"
+                            onClick={() => setShowQRCode(true)}
+                            disabled={!enclosureId}
+                            className="p-2 rounded-md hover:bg-white/20 text-white disabled:opacity-50"
+                            title="Download QR code or print enclosure label"
+                            aria-label="Download QR code or print enclosure label"
+                        >
+                            <QrCode size={18} />
+                        </button>
                         <button
                             onClick={() => { onEditEnclosure(enclosure); onClose(); }}
                             className="p-2 rounded-md hover:bg-white/20 text-white"
@@ -1033,6 +1047,18 @@ const EnclosureDetailModal = ({
                     />
                 )}
             </div>
+            {showQRCode && enclosureId && (
+                <QRCodeLabelModal
+                    value={enclosureShareUrl(enclosureId)}
+                    title={enclosure.name || 'Enclosure'}
+                    subtitle={enclosure.enclosureType || 'Enclosure'}
+                    details={[
+                        `ID: ${enclosureId}`,
+                        enclosure.locationName || enclosure.location
+                    ]}
+                    onClose={() => setShowQRCode(false)}
+                />
+            )}
         </div>
     );
 };
