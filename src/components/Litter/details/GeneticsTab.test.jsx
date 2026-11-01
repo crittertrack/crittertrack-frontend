@@ -94,4 +94,27 @@ describe('GeneticsTab expected offspring', () => {
         const discoveriesSection = screen.getByText('Genetic Discoveries').parentElement;
         expect(within(discoveriesSection).queryByText('100%')).toBeNull();
     });
+
+    it('shows each expected and confirmed percentage only once beside its bar', () => {
+        render(
+            <GeneticsTab
+                litter={{
+                    species: 'Fancy Mouse',
+                    sire: { geneticCode: 'B/B' },
+                    dam: { geneticCode: 'B/b' },
+                }}
+                offspring={[
+                    { geneticCode: 'B/B Go/Go' },
+                    { geneticCode: 'B/b Go/Go' },
+                ]}
+            />,
+        );
+
+        const expectedSection = screen.getByText('Expected Offspring').parentElement;
+        const confirmedSection = screen.getByText('Confirmed Offspring').parentElement;
+        expect(within(expectedSection).getAllByText('50%')).toHaveLength(1);
+        expect(within(expectedSection).getAllByText('100%')).toHaveLength(1);
+        expect(within(confirmedSection).getAllByText('50%')).toHaveLength(1);
+        expect(within(confirmedSection).getAllByText('100%')).toHaveLength(1);
+    });
 });

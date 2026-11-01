@@ -243,9 +243,8 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                         <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">No expected traits recorded.</div>
                     ) : expectedTraits.map((t, i) => (
                         <div key={i} className="py-2">
-                            <div className="flex justify-between text-sm mb-1">
+                            <div className="text-sm mb-1">
                                 <span className="text-gray-700 dark:text-dark-text-secondary">{t.trait || t.name}</span>
-                                <span className="text-gray-500 dark:text-dark-text-muted">{t.probability}%</span>
                             </div>
                             <PercentBar value={t.probability} />
                         </div>
@@ -264,9 +263,8 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                         </div>
                     ) : confirmedTraits.map((t, i) => (
                         <div key={i} className="py-2">
-                            <div className="flex justify-between text-sm mb-1">
+                            <div className="text-sm mb-1">
                                 <span className="text-gray-700 dark:text-dark-text-secondary">{t.trait || t.name}</span>
-                                <span className="text-gray-500 dark:text-dark-text-muted">{t.percentage}%</span>
                             </div>
                             <PercentBar value={t.percentage} />
                         </div>
