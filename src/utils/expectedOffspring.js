@@ -226,6 +226,7 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
   if (!Array.isArray(offspringCodes) || !offspringCodes.length || !species) return [];
 
   const appearanceKeys = [
+    ['variety', 'Variety'],
     ['color', 'Color'],
     ['markings', 'Markings'],
     ['coat', 'Coat'],

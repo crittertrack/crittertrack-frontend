@@ -129,6 +129,14 @@ describe('computeConfirmedOffspringTraits', () => {
     ]);
   });
 
+  it('includes a recorded variety in confirmed offspring traits', () => {
+    expect(computeConfirmedOffspringTraits(
+      [{}, {}, {}],
+      'syrianHamster',
+      [{ variety: 'Golden' }, { variety: 'Golden' }, {}],
+    )).toEqual([{ trait: 'Variety: Golden', percentage: 67 }]);
+  });
+
   it('uses an offspring genotype when no appearance traits are recorded', () => {
     expect(computeConfirmedOffspringTraits(
       [{ a: 'a/a' }, { a: 'a/a' }],

@@ -4,7 +4,6 @@ import {
     computeConfirmedOffspringTraits,
     computeExpectedOffspring,
 } from '../../../utils/expectedOffspring';
-import apiClient from '../../../utils/apiClient';
 
 const Field = ({ label, value }) => (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-dark-border last:border-0">
@@ -22,10 +21,11 @@ const PercentBar = ({ value }) => (
     </div>
 );
 
-const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }) => {
+const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [showAllAncestors, setShowAllAncestors] = useState(false);
     const sire = litter?.sire || {};
     const dam = litter?.dam || {};
+    const species = litter?.species || sire.species || dam.species;
     const sireId = sire.id_public || litter?.sireId_public;
     const damId = dam.id_public || litter?.damId_public;
     const resolveLines = (id) => {
@@ -47,8 +47,6 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     }
     const ancestors = litter?.commonAncestors || [];
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
-    const [confirmedTraits, setConfirmedTraits] = useState([]);
-
     const sireGeneticCodeFromLitter = sire.geneticCode || sire.genetic_code || null;
     const damGeneticCodeFromLitter = dam.geneticCode || dam.genetic_code || null;
     const [sireGeneticCode, setSireGeneticCode] = useState(sireGeneticCodeFromLitter);
@@ -96,55 +94,25 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     const calculatedExpectedTraits = computeExpectedOffspring(
         sireGeneticCode,
         damGeneticCode,
-        litter?.species,
+        species,
     );
     const expectedTraits = calculatedExpectedTraits.length
         ? calculatedExpectedTraits
         : (Array.isArray(litter?.expectedTraits) ? litter.expectedTraits : []);
 
-    // Compute confirmed offspring traits from linked offspring genetic codes and appearance fields
-    useEffect(() => {
-        let cancelled = false;
-        const litterId = litter?.litter_id_public || litter?.id_public;
-        if (!litterId || !litter?.offspringIds_public?.length) {
-            setConfirmedTraits([]);
-            return () => {
-                cancelled = true;
-            };
-        }
-
-        apiClient.get(`/litters/${litterId}/offspring`)
-            .then((response) => {
-                if (cancelled) return;
-                const offspring = Array.isArray(response.data) ? response.data : [];
-                setConfirmedTraits(computeConfirmedOffspringTraits(
-                    offspring.map((animal) => animal.geneticCode || animal.genetic_code || {}),
-                    litter?.species,
-                    offspring.map((animal) => ({
-                        color: animal.color,
-                        markings: animal.markings,
-                        coat: animal.coat,
-                        earset: animal.earset,
-                        eyeColor: animal.eyeColor,
-                        body: animal.body,
-                    })),
-                ));
-            })
-            .catch((error) => {
-                if (cancelled) return;
-                console.error('Error computing confirmed offspring traits:', error);
-                setConfirmedTraits([]);
-            });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [
-        litter?.litter_id_public,
-        litter?.id_public,
-        litter?.offspringIds_public?.join('|'),
-        litter?.species,
-    ]);
+    const confirmedTraits = computeConfirmedOffspringTraits(
+        offspring.map((animal) => animal.geneticCode || animal.genetic_code || {}),
+        species,
+        offspring.map((animal) => ({
+            color: animal.color,
+            markings: animal.markings,
+            coat: animal.coat,
+            earset: animal.earset,
+            eyeColor: animal.eyeColor,
+            body: animal.body,
+            carrierTraits: animal.carrierTraits,
+        })),
+    );
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
@@ -218,10 +186,14 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Confirmed Offspring</h3>
                     <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
-                        Percentage of linked offspring with each recorded trait.
+                        Observed traits from {offspring.length} linked offspring.
                     </p>
                     {confirmedTraits.length === 0 ? (
-                        <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">No confirmed offspring traits recorded.</div>
+                        <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">
+                            {offspring.length
+                                ? 'No appearance traits or genetic codes are recorded for these offspring.'
+                                : 'No linked offspring recorded.'}
+                        </div>
                     ) : confirmedTraits.map((t, i) => (
                         <div key={i} className="py-2">
                             <div className="flex justify-between text-sm mb-1">

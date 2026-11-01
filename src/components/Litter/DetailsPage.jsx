@@ -329,7 +329,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                 />
             )}
             {/* Placeholder tabs — intentionally empty for now. */}
-            {activeTab === 'genetics' && <GeneticsTab litter={litter} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} />}
+            {activeTab === 'genetics' && <GeneticsTab litter={litter} offspring={offspring} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} />}
             {activeTab === 'pedigrees' && <PedigreesTab litter={litter} onViewAnimal={viewAnimal} />}
             {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} animalBreedingLines={animalBreedingLines} breedingLineDefs={breedingLineDefs} />}
             {activeTab === 'gallery' && <GalleryTab images={images} />}
