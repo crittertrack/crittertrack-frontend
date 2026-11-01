@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import apiClient from '../../../utils/apiClient';
 import GeneticsTab from './GeneticsTab';
 
@@ -88,7 +88,10 @@ describe('GeneticsTab expected offspring', () => {
         );
 
         expect(screen.getAllByText('Chocolate').length).toBeGreaterThan(0);
-        expect(screen.getByText('Suggested update: Sire: B locus B/b')).toBeTruthy();
-        expect(screen.getByText('Suggested update: Dam: B locus B/b')).toBeTruthy();
+        expect(screen.getByText('Review Sire genetic code')).toBeTruthy();
+        expect(screen.getByText('Review Dam genetic code')).toBeTruthy();
+        expect(screen.getAllByText('B/b')).toHaveLength(2);
+        const discoveriesSection = screen.getByText('Genetic Discoveries').parentElement;
+        expect(within(discoveriesSection).queryByText('100%')).toBeNull();
     });
 });

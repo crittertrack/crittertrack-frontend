@@ -337,8 +337,10 @@ describe('computeGeneticDiscoveries', () => {
       [{}],
     )).toEqual([{
       trait: 'Chocolate',
-      percentage: 100,
-      recommendations: ['Sire: B locus B/b', 'Dam: B locus B/b'],
+      recommendations: [
+        { parent: 'Sire', locus: 'B', genotype: 'B/b' },
+        { parent: 'Dam', locus: 'B', genotype: 'B/b' },
+      ],
     }]);
   });
 
@@ -356,8 +358,7 @@ describe('computeGeneticDiscoveries', () => {
       [{}],
     )).toEqual([{
       trait: 'Siamese',
-      percentage: 100,
-      recommendations: ['Dam: C locus C/ch'],
+      recommendations: [{ parent: 'Dam', locus: 'C', genotype: 'C/ch' }],
     }]);
   });
 
@@ -373,7 +374,6 @@ describe('computeGeneticDiscoveries', () => {
       [{ color: 'Chocolate' }],
     )).toEqual([{
       trait: 'Chocolate',
-      percentage: 100,
       recommendations: [],
     }]);
   });

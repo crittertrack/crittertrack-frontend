@@ -449,16 +449,24 @@ function getMouseLocusUpdates(sireGenotype, damGenotype, locus, offspringGenotyp
     const updates = [];
     if (!sireAlleles.includes(sireAllele)) {
       const retainedAllele = sireAlleles.find((allele) => allele !== sireAllele) || sireAlleles[0];
-      updates.push(`Sire: ${locus} locus ${normalizeGenotype({ [locus]: `${retainedAllele}/${sireAllele}` })[locus]}`);
+      updates.push({
+        parent: 'Sire',
+        locus,
+        genotype: normalizeGenotype({ [locus]: `${retainedAllele}/${sireAllele}` })[locus],
+      });
     }
     if (!damAlleles.includes(damAllele)) {
       const retainedAllele = damAlleles.find((allele) => allele !== damAllele) || damAlleles[0];
-      updates.push(`Dam: ${locus} locus ${normalizeGenotype({ [locus]: `${retainedAllele}/${damAllele}` })[locus]}`);
+      updates.push({
+        parent: 'Dam',
+        locus,
+        genotype: normalizeGenotype({ [locus]: `${retainedAllele}/${damAllele}` })[locus],
+      });
     }
     return updates;
   });
   const uniqueUpdates = Array.from(new Map(
-    possibleUpdates.map((updates) => [updates.join('|'), updates]),
+    possibleUpdates.map((updates) => [JSON.stringify(updates), updates]),
   ).values());
   const minimumUpdateCount = Math.min(...uniqueUpdates.map((updates) => updates.length));
   const minimalUpdates = uniqueUpdates.filter((updates) => updates.length === minimumUpdateCount);
@@ -466,12 +474,22 @@ function getMouseLocusUpdates(sireGenotype, damGenotype, locus, offspringGenotyp
   if (minimalUpdates.length === 1) return minimalUpdates[0];
 
   const alternatives = minimalUpdates.flat();
-  const sharedLocusUpdate = alternatives.every((update) => update.split(': ')[1] === alternatives[0].split(': ')[1]);
+  const sharedLocusUpdate = alternatives.every((update) =>
+    update.locus === alternatives[0].locus && update.genotype === alternatives[0].genotype
+  );
   if (sharedLocusUpdate) {
-    const locusGenotype = alternatives[0].split(': ')[1];
-    return [`Sire or Dam: ${locusGenotype} (offspring genotype cannot identify which parent)`];
+    return [{
+      parent: 'Sire or Dam',
+      locus: alternatives[0].locus,
+      genotype: alternatives[0].genotype,
+      note: 'Offspring genotype cannot identify which parent.',
+    }];
   }
-  return ['Sire or Dam: review this locus (offspring genotype cannot identify which parent)'];
+  return [{
+    parent: 'Sire or Dam',
+    locus,
+    note: 'Offspring genotype cannot identify which parent.',
+  }];
 }
 
 /**
@@ -510,11 +528,11 @@ export function computeGeneticDiscoveries(
     const key = trait.toLowerCase();
     const existing = discoveries.get(key) || {
       trait,
-      count: 0,
-      recommendations: new Set(),
+      recommendations: new Map(),
     };
-    existing.count += 1;
-    recommendations.forEach((recommendation) => existing.recommendations.add(recommendation));
+    recommendations.forEach((recommendation) =>
+      existing.recommendations.set(JSON.stringify(recommendation), recommendation)
+    );
     discoveries.set(key, existing);
   };
 
@@ -552,12 +570,11 @@ export function computeGeneticDiscoveries(
   });
 
   return Array.from(discoveries.values())
-    .map(({ trait, count, recommendations }) => ({
+    .map(({ trait, recommendations }) => ({
       trait,
-      percentage: Math.round((count / offspringCodes.length) * 100),
-      recommendations: Array.from(recommendations),
+      recommendations: Array.from(recommendations.values()),
     }))
-    .sort((a, b) => b.percentage - a.percentage || a.trait.localeCompare(b.trait));
+    .sort((a, b) => a.trait.localeCompare(b.trait));
 }
 
 function toPercentages(probabilities) {

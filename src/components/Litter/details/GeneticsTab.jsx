@@ -192,21 +192,40 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                                 These confirmed traits were not predicted. Review the suggested parent genetic-code updates.
                             </p>
                             {geneticDiscoveries.map((discovery) => (
-                                <div key={discovery.trait} className="border-b border-gray-100 dark:border-dark-border pb-2 last:border-0">
-                                    <div className="flex items-center justify-between gap-2 text-sm">
-                                        <span className="font-medium text-gray-900 dark:text-dark-text">{discovery.trait}</span>
-                                        <span className="text-gray-500 dark:text-dark-text-muted">{discovery.percentage}%</span>
+                                <div key={discovery.trait} className="rounded-lg border border-amber-200 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/20 p-3">
+                                    <div className="text-sm font-semibold text-gray-900 dark:text-dark-text">
+                                        {discovery.trait}
                                     </div>
                                     {discovery.recommendations.length ? (
-                                        <ul className="mt-1 space-y-1 text-xs text-gray-600 dark:text-dark-text-secondary">
+                                        <ul className="mt-2 space-y-2">
                                             {discovery.recommendations.map((recommendation) => (
-                                                <li key={recommendation}>
-                                                    Suggested update: {recommendation}
+                                                <li
+                                                    key={`${recommendation.parent}-${recommendation.locus}-${recommendation.genotype || ''}`}
+                                                    className="flex flex-wrap items-center gap-2 rounded-md border border-white/80 dark:border-dark-border bg-white/80 dark:bg-dark-card-bg px-2.5 py-2 text-xs"
+                                                >
+                                                    <span className="font-medium text-gray-700 dark:text-dark-text-secondary">
+                                                        Review {recommendation.parent} genetic code
+                                                    </span>
+                                                    {recommendation.genotype && (
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <span className="text-gray-500 dark:text-dark-text-muted">
+                                                                {recommendation.locus} locus
+                                                            </span>
+                                                            <code className="rounded bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 font-semibold text-indigo-800 dark:text-indigo-200">
+                                                                {recommendation.genotype}
+                                                            </code>
+                                                        </span>
+                                                    )}
+                                                    {recommendation.note && (
+                                                        <span className="basis-full text-gray-500 dark:text-dark-text-muted">
+                                                            {recommendation.note}
+                                                        </span>
+                                                    )}
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">
+                                        <p className="mt-2 rounded-md border border-white/80 dark:border-dark-border bg-white/80 dark:bg-dark-card-bg px-2.5 py-2 text-xs text-gray-500 dark:text-dark-text-muted">
                                             Appearance-based discovery; offspring genetic code is needed to suggest parent updates.
                                         </p>
                                     )}
