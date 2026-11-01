@@ -57,7 +57,7 @@ const MOUSE_ALLELE_TRAITS = {
   Sa: { sa: 'Satin' },
   Rst: { rst: 'Rosette' },
   Fz: { fz: 'Fuzz' },
-  Nu: { nu: 'Nude' },
+  Nu: { Nu: 'Nude' },
 };
 const MOUSE_WILDTYPE_GENOTYPES = {
   A: 'A/A',
@@ -107,7 +107,7 @@ const MOUSE_ALLELES_BY_LOCUS = {
 };
 const MOUSE_ALLELE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
 const MOUSE_DOMINANT_TRAIT_ALLELES = new Set([
-  'U', 'W', 'Wsh', 'Rw', 'Spl', 'Mobr', 'Re',
+  'U', 'W', 'Wsh', 'Rw', 'Spl', 'Mobr', 'Re', 'Nu',
 ]);
 const MOUSE_APPEARANCE_ALIASES = {
   'black eyed white': ['Albino'],
@@ -368,6 +368,15 @@ function getMouseTraits(genotype) {
       continue;
     }
 
+    if (locus === 'Go') {
+      if (alleles.includes('Go')) traits.add('Shorthair');
+      if (alleles.every((allele) => allele === 'go')) traits.add('Longhair');
+      if (alleles.includes('Go') && alleles.includes('go')) {
+        traits.add('Longhair (carrier)');
+      }
+      continue;
+    }
+
     Object.entries(locusTraits).forEach(([allele, trait]) => {
       const copies = alleles.filter((inheritedAllele) => inheritedAllele === allele).length;
       if (!copies) return;
@@ -387,6 +396,7 @@ function computeMouseExpectedOffspring(sireCode, damCode) {
   const allLoci = new Set([
     ...Object.keys(parsedSireGenotype),
     ...Object.keys(parsedDamGenotype),
+    'Go',
   ]);
   const sireGenotype = { ...parsedSireGenotype };
   const damGenotype = { ...parsedDamGenotype };

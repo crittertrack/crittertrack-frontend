@@ -115,9 +115,10 @@ describe('computeExpectedOffspring', () => {
       'B/B',
       'B/b',
       'Fancy Mouse',
-    )).toEqual([
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Shorthair', probability: 100 },
       { trait: 'Chocolate (carrier)', probability: 50 },
-    ]);
+    ]));
 
     expect(computeExpectedOffspring(
       'B/B D/d',
@@ -126,6 +127,42 @@ describe('computeExpectedOffspring', () => {
     )).toEqual(expect.arrayContaining([
       { trait: 'Chocolate (carrier)', probability: 50 },
       { trait: 'Blue (carrier)', probability: 50 },
+    ]));
+  });
+
+  it('only predicts Nude when the dominant Nu allele is inherited', () => {
+    expect(computeExpectedOffspring(
+      'Nu/nu',
+      'nu/nu',
+      'Fancy Mouse',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Nude', probability: 50 },
+      { trait: 'Shorthair', probability: 100 },
+    ]));
+
+    expect(computeExpectedOffspring(
+      'nu/nu',
+      'nu/nu',
+      'Fancy Mouse',
+    )).toEqual([{ trait: 'Shorthair', probability: 100 }]);
+  });
+
+  it('defaults the expected coat locus to Shorthair unless longhair is inherited', () => {
+    expect(computeExpectedOffspring(
+      'A/a',
+      'A/a',
+      'Fancy Mouse',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Shorthair', probability: 100 },
+    ]));
+
+    expect(computeExpectedOffspring(
+      'Go/go',
+      'Go/Go',
+      'Fancy Mouse',
+    )).toEqual(expect.arrayContaining([
+      { trait: 'Shorthair', probability: 100 },
+      { trait: 'Longhair (carrier)', probability: 50 },
     ]));
   });
 
@@ -246,6 +283,28 @@ describe('computeConfirmedOffspringTraits', () => {
       'Fancy Mouse',
       [{ color: 'Dove' }],
     )).toEqual([]);
+  });
+
+  it('does not report the normal nu/nu genotype as Nude', () => {
+    expect(computeConfirmedOffspringTraits(
+      ['nu/nu'],
+      'Fancy Mouse',
+      [{}],
+    )).toEqual([]);
+
+    expect(computeConfirmedOffspringTraits(
+      ['Nu/nu'],
+      'Fancy Mouse',
+      [{}],
+    )).toEqual([{ trait: 'Nude', percentage: 100 }]);
+  });
+
+  it('does not infer Nude from catalogue phenotypes with the normal nu/nu allele', () => {
+    expect(computeConfirmedOffspringTraits(
+      [''],
+      'Fancy Mouse',
+      [{ coat: 'Shorthair' }],
+    )).toEqual([{ trait: 'Shorthair', percentage: 100 }]);
   });
 
   it('uses an offspring genotype when no appearance traits are recorded', () => {
