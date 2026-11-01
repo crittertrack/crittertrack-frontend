@@ -2,14 +2,16 @@ import React from 'react';
 import { computeLitterStats } from './helpers';
 import { Panel, Muted } from './ui';
 import { Big, BreakdownToggle, SEX } from './StatsParts';
+import { getLitterFieldLabel, getLitterSpecies, isEggLayingSpecies } from '../../../utils/litterSpeciesPresentation';
 
 const Divider = ({ children }) => (
     <div className="mt-4 pt-3 border-t border-gray-100 dark:border-dark-border">{children}</div>
 );
 
-export default function StatsPanel({ litter, status }) {
+export default function StatsPanel({ litter, status, speciesOptions = [] }) {
     const s = computeLitterStats(litter, status);
     const isBorn = status === 'born';
+    const eggLaying = isEggLayingSpecies(getLitterSpecies(litter), speciesOptions);
 
     if (!isBorn && s.totalBorn === null && !s.sexRecorded && !s.anyLossRecorded) {
         return (
@@ -27,12 +29,12 @@ export default function StatsPanel({ litter, status }) {
     return (
         <Panel title="Litter statistics" testId="stats-panel">
             <div className="grid grid-cols-3 gap-y-4 gap-x-2">
-                <Big label="Total born" value={s.totalBorn} state={st(s.totalBorn)} testId="stat-born" />
-                <Big label="Males" value={s.male} state={st(s.male)} testId="stat-males" />
-                <Big label="Females" value={s.female} state={st(s.female)} testId="stat-females" />
-                <Big label="Unknown" value={s.unknown} state={st(s.unknown)} testId="stat-unknown" />
+                <Big label={getLitterFieldLabel('litterSizeBorn', getLitterSpecies(litter), 'Total born', speciesOptions)} value={s.totalBorn} state={st(s.totalBorn)} testId="stat-born" />
+                <Big label={eggLaying ? 'Male hatchlings' : 'Males'} value={s.male} state={st(s.male)} testId="stat-males" />
+                <Big label={eggLaying ? 'Female hatchlings' : 'Females'} value={s.female} state={st(s.female)} testId="stat-females" />
+                <Big label={eggLaying ? 'Unknown hatchlings' : 'Unknown'} value={s.unknown} state={st(s.unknown)} testId="stat-unknown" />
                 <Big label="Surviving" value={s.surviving} state={st(s.surviving)} testId="stat-surviving" />
-                <Big label="Weaned" value={s.weaned} state={s.weanedState} testId="stat-weaned" />
+                <Big label={eggLaying ? 'Fledged / independent' : getLitterFieldLabel('litterSizeWeaned', getLitterSpecies(litter), 'Weaned', speciesOptions)} value={s.weaned} state={s.weanedState} testId="stat-weaned" />
             </div>
             {s.sexExcludesLosses && s.sexRecorded && (
                 <p className="mt-2 text-[11px] text-gray-400 dark:text-dark-text-muted">Sex counts exclude the losses you extracted from the total.</p>
@@ -61,11 +63,11 @@ export default function StatsPanel({ litter, status }) {
             </div>
 
             <Divider>
-                <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">Losses</div>
+                <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">{eggLaying ? 'Egg / hatchling losses' : 'Losses'}</div>
                 {s.anyLossRecorded ? (
                     <div className="divide-y divide-gray-100 dark:divide-dark-border">
-                        <BreakdownToggle title="Stillborn" total={s.stillborn} bySex={s.stillbornBySex} />
-                        <BreakdownToggle title="Postnatal losses" total={s.postnatal} bySex={s.lossesBySex} note={s.culls ? 'Excludes culls' : undefined} />
+                        <BreakdownToggle title={eggLaying ? 'Unhatched / non-viable eggs' : 'Stillborn'} total={s.stillborn} bySex={s.stillbornBySex} />
+                        <BreakdownToggle title={eggLaying ? 'Post-hatch losses' : 'Postnatal losses'} total={s.postnatal} bySex={s.lossesBySex} note={s.culls ? 'Excludes culls' : undefined} />
                         {s.culls !== null && <BreakdownToggle title="Culls" total={s.culls} bySex={[null, null, null]} />}
                     </div>
                 ) : (
@@ -76,11 +78,11 @@ export default function StatsPanel({ litter, status }) {
             <Divider>
                 <div className="text-sm space-y-1">
                     <div className="flex justify-between">
-                        <span className="text-gray-500 dark:text-dark-text-muted">Live born</span>
+                        <span className="text-gray-500 dark:text-dark-text-muted">{eggLaying ? 'Live hatched' : 'Live born'}</span>
                         <span className="font-medium text-gray-900 dark:text-dark-text">{s.liveBorn === null ? <Muted>Not recorded</Muted> : s.liveBorn}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-gray-500 dark:text-dark-text-muted">Survival to weaning</span>
+                        <span className="text-gray-500 dark:text-dark-text-muted">{eggLaying ? 'Survival to independence' : 'Survival to weaning'}</span>
                         <span className="font-medium text-gray-900 dark:text-dark-text">
                             {s.survivalPct !== null
                                 ? `${s.survivalPct}%`

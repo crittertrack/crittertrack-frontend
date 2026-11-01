@@ -449,6 +449,22 @@ test('adding a multi-species waitlist entry posts speciesRequests array', async 
     })));
 });
 
+test('adding a waitlist entry preserves its selected entry date in the request', async () => {
+    await setup();
+    fireEvent.click(screen.getByText('Waitlist'));
+    fireEvent.click(screen.getByText('Add to Waitlist'));
+    await screen.findByText('New Waitlist Entry');
+    fireEvent.change(screen.getByPlaceholderText('e.g. Jane Doe'), { target: { value: 'Test Buyer' } });
+    fireEvent.change(screen.getAllByPlaceholderText('e.g. Fancy Mouse')[0], { target: { value: 'Fancy Mouse' } });
+    fireEvent.change(screen.getByText('Entry Date').parentElement.querySelector('input'), { target: { value: '2024-06-15' } });
+
+    fireEvent.click(screen.getByText('Add'));
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/waitlist', expect.objectContaining({
+        name: 'Test Buyer',
+        entryDate: '2024-06-15',
+    })));
+});
+
 test('waitlist card shows the per-gender split and fulfillment respects it', async () => {
     const split = [{
         _id: 'W9', name: 'Pat', speciesRequests: [{ species: 'Fancy Mouse', genderCounts: [{ gender: 'Male', count: 3 }, { gender: 'Female', count: 2 }], amount: 5 }],
@@ -869,5 +885,3 @@ test('edits made in the animal modal (animal-updated) are reflected in the list'
     window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: 'CTC2', status: 'Retired' } }));
     await waitFor(() => expect(cardIds()).toEqual(['CTC1']));
 });
-
-

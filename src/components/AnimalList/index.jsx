@@ -45,9 +45,6 @@ import GeneralTaskModal from '../GeneralTaskModal';
 import QuickAddAnimalModal from '../QuickAddAnimalModal';
 import { API_BASE_URL } from '../../utils/apiConfig';
 
-// The Reproduction tab's + Add opens the shared entry form (formOnly mode of Litter Management).
-const LitterEntryForm = React.lazy(() => import('../LitterManagement'));
-
 const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
@@ -712,8 +709,6 @@ const AnimalList = ({
         });
     };
 
-    // "+ Add" on the Reproduction tab opens the shared entry form (components/LitterManagement, formOnly)
-    const [showAddEntryForm, setShowAddEntryForm] = useState(false);
     const [showQuickAdd, setShowQuickAdd] = useState(false); // Lite mode's Add Animal flow (see QuickAddAnimalModal)
 
     // Assign Quarantine/Treatment modal state
@@ -6559,7 +6554,7 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                         )}
                         {/* Add Enclosure button */}
                         {animalView === 'reproduction' ? (
-                            <button onClick={() => setShowAddEntryForm(true)} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
+                            <button onClick={() => routerNavigate('/litters/new')} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add</span>
                             </button>
                         ) : animalView === 'health' ? (
@@ -7305,23 +7300,6 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                     onClose={() => setShowQuickAdd(false)}
                     onCreated={async () => { setShowQuickAdd(false); await handleRefresh(); }}
                 />
-            )}
-            {showAddEntryForm && (
-                <React.Suspense fallback={null}>
-                    <LitterEntryForm
-                        formOnly
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        showModalMessage={showModalMessage}
-                        onViewAnimal={onViewAnimal}
-                        speciesOptions={speciesOptions}
-                        breedingLineDefs={breedingLineDefs}
-                        animalBreedingLines={animalBreedingLines}
-                        onFormClosed={() => setShowAddEntryForm(false)}
-                        onEntrySaved={() => { fetchLitters(); handleRefresh(); }}
-                    />
-                </React.Suspense>
             )}
             </div>
         </>

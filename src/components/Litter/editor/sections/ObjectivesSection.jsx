@@ -98,6 +98,16 @@ export default function ObjectivesSection({ form, setField }) {
             </div>
 
             <div className={cardClass}>
+                <SectionTitle title="Notes & evaluation" description="Add notes about these objectives and evaluate how well the litter met them." icon={ClipboardList} iconBg="bg-indigo-100" iconColor="text-indigo-600" />
+                <FieldRow label="Notes">
+                    <textarea aria-label="Notes" rows={4} className={inputClass} style={{ minHeight: '90px' }} value={form.objectivesNotes || ''} onChange={(e) => setField('objectivesNotes', e.target.value)} placeholder="Additional notes about these breeding objectives..." />
+                </FieldRow>
+                <FieldRow label="Objective evaluation">
+                    <textarea aria-label="Objective evaluation" rows={4} className={inputClass} style={{ minHeight: '90px' }} value={form.objectivesEvaluation || ''} onChange={(e) => setField('objectivesEvaluation', e.target.value)} placeholder="How well did the litter meet the objectives?" />
+                </FieldRow>
+            </div>
+
+            <div className={cardClass}>
                 <SectionTitle title="Genetic notes" description="Record relevant genetic considerations for this pairing." icon={Dna} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
                 <FieldRow label="Genetic notes">
                     <textarea rows={5} className={inputClass} style={{ minHeight: '110px' }} value={form.geneticNotes || ''} onChange={(e) => setField('geneticNotes', e.target.value)} placeholder="Possible carriers, inheritance considerations, genetic uncertainties, or genes being evaluated..." />

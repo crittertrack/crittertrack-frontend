@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import apiClient from '../../utils/apiClient';
+import { getOrderedLitterImages } from '../../utils/litterGallery';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
@@ -1208,7 +1209,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         }
         if (animal.isLitterRoot) {
             const litter = animal.litterInfo || {};
-            const imgSrc = litter.images?.[0]?.url || null;
+            const imgSrc = getOrderedLitterImages(litter.images)[0]?.image.url || null;
             const idLabel = [litter.litter_id_public, litter.breedingPairCodeName].filter(Boolean).join(' · ');
             const totalBorn = litter.litterSizeBorn ?? litter.numberBorn ?? null;
             const litterCardBg = themeColors['accent-purple-bg'];

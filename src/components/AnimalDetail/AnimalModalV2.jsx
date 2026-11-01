@@ -14,6 +14,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { openExternalLink } from '../../utils/externalLink';
 import { animalShareUrl } from '../../utils/publicUrl';
+import { getOrderedLitterImages } from '../../utils/litterGallery';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
@@ -1833,30 +1834,27 @@ useEffect(() => {
                                                     </h4>
 
                                                     <div className="flex flex-wrap gap-2">
-                                                        {litter.images.map(
-                                                            (img, idx) => (
+                                                        {getOrderedLitterImages(litter.images).map(
+                                                            ({ image: img, index: idx, isCover }) => (
                                                                 <div
                                                                     key={
                                                                         img.r2Key ||
+                                                                        img.url ||
                                                                         idx
                                                                     }
                                                                     className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-border"
                                                                 >
                                                                     <img
-                                                                        src={
-                                                                            img.url
-                                                                        }
-                                                                        alt={
-                                                                            'Gallery ' +
-                                                                            (idx +
-                                                                                1)
-                                                                        }
+                                                                        src={img.url}
+                                                                        alt={img.caption || `Gallery ${idx + 1}`}
+                                                                        title={[
+                                                                            isCover ? 'Cover image' : '',
+                                                                            img.caption,
+                                                                            img.captureDate ? `Captured ${img.captureDate}` : '',
+                                                                            img.offspringId_public ? `Offspring ${img.offspringId_public}` : '',
+                                                                        ].filter(Boolean).join(' · ')}
                                                                         className="w-full h-full object-cover cursor-pointer"
-                                                                        onClick={() =>
-                                                                            openExternalLink(
-                                                                                img.url
-                                                                            )
-                                                                        }
+                                                                        onClick={() => openExternalLink(img.url)}
                                                                     />
                                                                 </div>
                                                             )

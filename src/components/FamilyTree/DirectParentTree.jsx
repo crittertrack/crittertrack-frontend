@@ -87,6 +87,7 @@ const DirectParentTree = ({
   maxDepth = 6,
   onNodeClick,
   onViewAnimal,
+  onError,
 }) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -151,7 +152,8 @@ const DirectParentTree = ({
           );
 
           return response.data;
-        } catch {
+        } catch (error) {
+          if (!cancelled) onError?.(error);
           return { id_public: id, name: 'Unknown' };
         }
       };
@@ -694,7 +696,7 @@ const DirectParentTree = ({
     return () => {
       cancelled = true;
     };
-  }, [focusAnimalId, focusAnimal, authToken, maxDepth]);
+  }, [focusAnimalId, focusAnimal, authToken, maxDepth, onError]);
 
   if (loading) {
     return (

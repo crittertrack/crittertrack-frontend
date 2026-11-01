@@ -58,6 +58,19 @@ describe('formFromLitter', () => {
         expect(fd.birthDateUnknown).toBe(true);
         expect(fd.cullsCount).toBeNull();
     });
+    it('loads expected outcomes, genetic notes, and placement plans', () => {
+        expect(formFromLitter({
+            expectedOutcomes: 'Agouti carriers expected',
+            geneticNotes: 'Both parents may carry dilute',
+            keepersGrowouts: 'Maybe, depending on results',
+            placementPlans: 'Some available for placement',
+        })).toMatchObject({
+            expectedOutcomes: 'Agouti carriers expected',
+            geneticNotes: 'Both parents may carry dilute',
+            keepersGrowouts: 'Maybe, depending on results',
+            placementPlans: 'Some available for placement',
+        });
+    });
 });
 
 describe('initialExtras', () => {
@@ -145,9 +158,25 @@ describe('payload builders', () => {
         const unchanged = buildUpdatePayload(form({ matingDate: '2026-01-01', notes: 'edited' }), counts, [], original);
         expect(unchanged).not.toHaveProperty('isPlanned');
         expect(unchanged.notes).toBe('edited');
+        expect(unchanged.expectedOutcomes).toBeNull();
+        expect(unchanged.geneticNotes).toBeNull();
+        expect(unchanged.keepersGrowouts).toBe('Undecided');
+        expect(unchanged.placementPlans).toBe('Undecided');
 
         const nowBorn = buildUpdatePayload(form({ matingDate: '2026-01-01', birthDate: '2026-01-22' }), counts, [], original);
         expect(nowBorn.isPlanned).toBe(false);
+    });
+    it('sends the breeding objective fields on create and update', () => {
+        const values = {
+            expectedOutcomes: 'Agouti babies',
+            geneticNotes: 'Possible dilute carriers',
+            keepersGrowouts: 'Yes, planning to keep grow-outs',
+            placementPlans: 'Some available for placement',
+            objectivesNotes: 'Review the line next season',
+            objectivesEvaluation: 'Most goals were met',
+        };
+        expect(buildCreatePayload(form(values), counts, [])).toMatchObject(values);
+        expect(buildUpdatePayload(form(values), counts, [], {})).toMatchObject(values);
     });
     it('update: clears pregnancy-lost details when the flag is off', () => {
         const p = buildUpdatePayload(form({ pregnancyLost: false, pregnancyLostReason: 'Reabsorbed' }), counts, [], {});

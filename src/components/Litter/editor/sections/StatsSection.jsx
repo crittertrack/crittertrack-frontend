@@ -1,7 +1,8 @@
 import React from 'react';
 import { ChartNoAxesColumnIncreasing, Baby, Frown, HeartCrack, Milk } from 'lucide-react';
 import { setSexCount, setStillbornSex, setLossSex, toggleExtractStillborn, toggleExtractLosses } from '../litterFormModel';
-import { Checkbox, FieldRow, NumberInput } from '../fields';
+import { FieldRow, NumberInput } from '../fields';
+import { getLitterFieldLabel, isEggLayingSpecies } from '../../../../utils/litterSpeciesPresentation';
 
 const ReadOnlyTotal = ({ label, value, hint }) => (
     <FieldRow label={label} hint={hint}>
@@ -24,10 +25,18 @@ const CardHeader = ({ icon: Icon, iconBg, title, subtitle }) => (
 const cardClass = 'bg-white dark:bg-dark-card-bg rounded-[13px] border border-gray-100 dark:border-dark-border shadow-sm p-5 space-y-4';
 const inputClass = 'w-full h-[40px] px-3 py-2 text-sm rounded-lg border border-[#D0D9E6] bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-[#9CE4EC]';
 
-export default function StatsSection({ form, setForm, setField, linkedCounts, warnings }) {
+export default function StatsSection({ form, setForm, setField, linkedCounts, warnings, species = '', speciesOptions = [] }) {
     const minFor = (gender) => linkedCounts[gender] || 0;
     const belowLinked = (gender, value) => minFor(gender) > 0 && (value || 0) < minFor(gender);
-
+    const eggLaying = isEggLayingSpecies(species, speciesOptions);
+    const bornTitle = eggLaying ? 'Clutch / hatchling counts' : 'Born';
+    const bornSubtitle = eggLaying ? 'Record the clutch or brood size and any hatchlings recorded.' : 'Record the number of live born animals.';
+    const nonViableTitle = eggLaying ? 'Unhatched / non-viable eggs' : 'Stillborn';
+    const nonViableSubtitle = eggLaying ? 'Record eggs that did not hatch or were not viable.' : 'Record stillborn animals.';
+    const lossesTitle = eggLaying ? 'Post-hatch losses' : 'Losses';
+    const lossDescription = eggLaying ? 'Record losses after hatching (not unhatched eggs).' : 'Record any losses after birth (not stillborn).';
+    const independentTitle = eggLaying ? 'Fledged / independent' : 'Weaned';
+    const independentDescription = eggLaying ? 'Record how many young fledged or became independent.' : 'Record how many animals were weaned from this litter.';
     return (
         <div className="space-y-3">
             <div className="flex items-center gap-4 mb-[18px]">
@@ -36,15 +45,15 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
                 </div>
                 <div>
                     <h1 className="text-[22px] font-bold text-[#111B35] dark:text-dark-text">Litter Counts</h1>
-                    <p className="text-[14px] text-[#7284A3] dark:text-dark-text-muted">Enter the counts for this litter. Total born is the sum of males, females and unknown.</p>
+                    <p className="text-[14px] text-[#7284A3] dark:text-dark-text-muted">{eggLaying ? 'Enter clutch, hatchling, and offspring counts using the existing litter count fields.' : 'Enter the counts for this litter. Total born is the sum of males, females and unknown.'}</p>
                 </div>
             </div>
 
             <div className={cardClass}>
-                <CardHeader icon={Baby} iconBg="bg-[#DFE5FF]" title="Born" subtitle="Record the number of live born animals." />
+                <CardHeader icon={Baby} iconBg="bg-[#DFE5FF]" title={bornTitle} subtitle={bornSubtitle} />
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <ReadOnlyTotal label="Total born" value={form.litterSizeBorn} hint="Auto-calculated from M + F + U" />
-                    {[["maleCount","Males","Male"],["femaleCount","Females","Female"],["unknownCount","Unknown","Unknown"]].map(([key,label,gender]) => (
+                    <ReadOnlyTotal label={getLitterFieldLabel('litterSizeBorn', species, 'Total born', speciesOptions)} value={form.litterSizeBorn} hint="Auto-calculated from M + F + U" />
+                    {[["maleCount",eggLaying ? "Male hatchlings" : "Males","Male"],["femaleCount",eggLaying ? "Female hatchlings" : "Females","Female"],["unknownCount",eggLaying ? "Unknown hatchlings" : "Unknown","Unknown"]].map(([key,label,gender]) => (
                         <FieldRow key={key} label={label} error={belowLinked(gender, form[key]) ? `At least ${minFor(gender)} (linked animals).` : undefined}>
                             <NumberInput value={form[key]} min={minFor(gender)} onChange={(v)=>setForm(fd=>setSexCount(fd,key,v))} placeholder="0" className={inputClass} />
                         </FieldRow>
@@ -53,18 +62,18 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
             </div>
 
             <div className={cardClass}>
-                <CardHeader icon={Frown} iconBg="bg-[#B9F6E3]" title="Stillborn" subtitle="Record stillborn animals." />
+                <CardHeader icon={Frown} iconBg="bg-[#B9F6E3]" title={nonViableTitle} subtitle={nonViableSubtitle} />
                 <label className="flex items-start gap-2 text-sm text-[#111B35] dark:text-dark-text cursor-pointer">
                     <input type="checkbox" className="mt-0.5" checked={!!form.extractStillbornFromTotal} onChange={(e)=>setForm(fd=>toggleExtractStillborn(fd,e.target.checked))} />
                     <span>
-                        <span className="font-medium">Extract stillborn from total counts</span>
-                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">Reduces the M/F/U counts above by the stillborn amounts, leaving only live-born.</span>
+                        <span className="font-medium">{eggLaying ? 'Extract non-viable eggs from total counts' : 'Extract stillborn from total counts'}</span>
+                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">{eggLaying ? 'Reduces the M/F/U counts above by the unhatched or non-viable amounts.' : 'Reduces the M/F/U counts above by the stillborn amounts, leaving only live-born.'}</span>
                     </span>
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <ReadOnlyTotal label="Total stillborn" value={form.stillbornCount} hint="Auto-calculated" />
+                    <ReadOnlyTotal label={getLitterFieldLabel('stillbornCount', species, 'Total stillborn', speciesOptions)} value={form.stillbornCount} hint="Auto-calculated" />
                     {[["maleStillborn","Male"],["femaleStillborn","Female"],["unknownStillborn","Unknown"]].map(([key,label]) => (
-                        <FieldRow key={key} label={`${label} stillborn`}>
+                        <FieldRow key={key} label={eggLaying ? `${label} non-viable eggs` : `${label} stillborn`}>
                             <NumberInput value={form[key]} onChange={(v)=>setForm(fd=>setStillbornSex(fd,key,v))} placeholder="0" className={inputClass} />
                         </FieldRow>
                     ))}
@@ -72,7 +81,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
             </div>
 
             <div className={cardClass}>
-                <CardHeader icon={HeartCrack} iconBg="bg-[#FFDDE2]" title="Losses" subtitle="Record any losses after birth (not stillborn)." />
+                <CardHeader icon={HeartCrack} iconBg="bg-[#FFDDE2]" title={lossesTitle} subtitle={lossDescription} />
                 <label className="flex items-start gap-2 text-sm text-[#111B35] dark:text-dark-text cursor-pointer">
                     <input type="checkbox" className="mt-0.5" checked={!!form.extractLossesFromTotal} onChange={(e)=>setForm(fd=>toggleExtractLosses(fd,e.target.checked))} />
                     <span>
@@ -103,11 +112,11 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
             </div>
 
             <div className={cardClass}>
-                <CardHeader icon={Milk} iconBg="bg-[#C9F7FA]" title="Weaned" subtitle="Record how many animals were weaned from this litter." />
+                <CardHeader icon={Milk} iconBg="bg-[#C9F7FA]" title={independentTitle} subtitle={independentDescription} />
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <ReadOnlyTotal label="Total weaned" value={form.litterSizeWeaned} hint="Auto-calculated" />
+                    <ReadOnlyTotal label={getLitterFieldLabel('litterSizeWeaned', species, 'Total weaned', speciesOptions)} value={form.litterSizeWeaned} hint="Auto-calculated" />
                     {[["maleWeaned","Males"],["femaleWeaned","Females"],["unknownWeaned","Unknown"]].map(([key,label]) => (
-                        <FieldRow key={key} label={`${label} weaned`}>
+                        <FieldRow key={key} label={eggLaying ? `${label} fledged / independent` : `${label} weaned`}>
                             <NumberInput value={form[key]} onChange={(v)=>setField(key,v)} placeholder="0" className={inputClass} />
                         </FieldRow>
                     ))}

@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { ArrowLeft, Edit, Eye, EyeOff, Loader2, Mars, Venus, Download, ChevronDown, ScrollText } from 'lucide-react';
+import { ArrowLeft, Edit, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
-import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import OverviewTab from './details/OverviewTab';
-import GeneticsTab from './details/GeneticsTab';
-import OffspringTab from './details/OffspringTab';
-import { PedigreeChart } from '../AnimalForm';
-import DirectParentTree from '../FamilyTree/DirectParentTree';
+const GeneticsTab = React.lazy(() => import('./details/GeneticsTab'));
+const OffspringTab = React.lazy(() => import('./details/OffspringTab'));
+const PedigreesTab = React.lazy(() => import('./details/PedigreesTab'));
+const GalleryTab = React.lazy(() => import('./details/GalleryTab'));
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -18,105 +17,20 @@ const TABS = [
     { id: 'gallery', label: 'Gallery' },
 ];
 
-const cardClass = 'rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4';
+const TabLoading = () => (
+    <div role="status" className="flex items-center justify-center py-10 text-sm text-gray-500 dark:text-dark-text-muted">
+        <Loader2 className="animate-spin mr-2" size={18} /> Loading tab…
+    </div>
+);
 
-const PedigreesTab = ({ litter, onViewAnimal }) => {
-    const [certView, setCertView] = useState(null); // null | 'horizontal' | 'vertical'
-    const [generations, setGenerations] = useState(4);
-    const sireId = litter?.sireId_public || litter?.sire?.id_public;
-    const damId = litter?.damId_public || litter?.dam?.id_public;
-    const litterId = litter?.litter_id_public || litter?._id;
+const TabError = ({ message, onRetry }) => (
+    <div role="alert" className="py-8 text-center space-y-3">
+        <p className="text-sm text-red-600 dark:text-red-400">{message}</p>
+        <button type="button" onClick={onRetry} className="px-3 py-1.5 rounded border text-sm">Retry</button>
+    </div>
+);
 
-    // Build a clean animal-shaped object for the litter so DirectParentTree
-    // (designed for animals) can render it as the focus node without choking
-    // on the litter's nested sire/dam objects.
-    const litterAsAnimal = useMemo(() => {
-        if (!litter) return null;
-        const animal = {
-            id_public: litter.litter_id_public || litter._id || litter.id,
-            name: litter.breedingPairCodeName || litter.litter_id_public || litter._id || litter.id,
-            gender: 'Unknown',
-            sireId_public: litter.sireId_public || litter.sire?.id_public || litter.sireId || litter.sire?.id,
-            damId_public: litter.damId_public || litter.dam?.id_public || litter.damId || litter.dam?.id,
-            birthDate: litter.birthDate,
-            imageUrl: litter.imageUrl || litter.photoUrl,
-            status: undefined,
-        };
-        return animal;
-    }, [litter]);
-
-    const toggleCert = (view) => () => setCertView(certView === view ? null : view);
-
-    return (
-        <div data-testid="tab-pedigrees" className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex gap-2 flex-wrap" role="group" aria-label="Pedigree chart">
-                    <button
-                        type="button"
-                        onClick={toggleCert('horizontal')}
-                        className="px-4 py-2 text-sm rounded-lg bg-primary dark:bg-dark-primary text-black border border-primary/40 hover:bg-primary/90 transition flex items-center gap-1.5 font-semibold shadow-sm"
-                    >
-                        <ScrollText size={16} /> Open Horizontal Certificate
-                    </button>
-                    <button
-                        type="button"
-                        onClick={toggleCert('vertical')}
-                        className="px-4 py-2 text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm"
-                    >
-                        <ScrollText size={16} /> Open Vertical Certificate
-                    </button>
-                </div>
-                <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 text-sm">
-                        <span>Generations</span>
-                        <input type="range" min={1} max={6} value={generations} onChange={e => setGenerations(Number(e.target.value))} />
-                        <span>{generations}</span>
-                    </label>
-                </div>
-            </div>
-
-            {/* Inline tree — identical to DirectParentTree, litter as focus */}
-            {litter && (
-                <div className="w-full max-w-4xl mx-auto h-[70vh]">
-                    <DirectParentTree
-                        focusAnimalId={litterId}
-                        focusAnimal={litterAsAnimal}
-                        authToken={null}
-                        maxDepth={generations}
-                        onNodeClick={() => {}}
-                        onViewAnimal={onViewAnimal}
-                    />
-                </div>
-            )}
-
-            {/* Modal: horizontal / vertical certificate chart (same as normal animal charts) */}
-            {certView && (
-                <PedigreeChart
-                    litterId={litterId}
-                    API_BASE_URL=""
-                    authToken={null}
-                    vertical={certView === 'vertical'}
-                    onClose={() => setCertView(null)}
-                    onViewAnimal={onViewAnimal}
-                />
-            )}
-        </div>
-    );
-};
-const GalleryTab = ({ images }) => {
-    if (!images.length) return <div className="py-8 text-center text-sm text-gray-500 dark:text-dark-text-muted">No photos have been added to this litter.</div>;
-    return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {images.map((img, i) => (
-                <a key={img.r2Key || img.url || i} href={img.url} target="_blank" rel="noreferrer">
-                    <img src={img.url} alt={`Litter gallery ${i + 1}`} className="w-full aspect-square object-cover rounded-lg" />
-                </a>
-            ))}
-        </div>
-    );
-};
-
-const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, breedingLineDefs = [], animalBreedingLines = {} }) => {
+const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, speciesOptions = [] }) => {
     const navigate = useNavigate();
     // /litters/:ctlId (canonical) and /litter/:ctilid (legacy alias) both render this page.
     const { ctlId, ctilid: legacyId } = useParams();
@@ -195,7 +109,14 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
         if (action === 'weaned' && st === 'born') return handleMarkWeaned(litter);
     };
     const [offspring, setOffspring] = useState([]);
-    const [offspringLoading, setOffspringLoading] = useState(true);
+    const [offspringStatus, setOffspringStatus] = useState('idle');
+    const [offspringError, setOffspringError] = useState('');
+    const [geneticsSummary, setGeneticsSummary] = useState(null);
+    const [geneticsStatus, setGeneticsStatus] = useState('idle');
+    const [geneticsError, setGeneticsError] = useState('');
+    const [galleryImages, setGalleryImages] = useState([]);
+    const [galleryStatus, setGalleryStatus] = useState('idle');
+    const [galleryError, setGalleryError] = useState('');
 
     const viewAnimal = onViewAnimal || handleViewAnimal;
     const requestedTab = searchParams.get('tab');
@@ -205,31 +126,92 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
         setLoading(true);
         setNotFound(false);
         try {
-            const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}`);
+            const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}?view=overview`);
             setLitter(res.data);
+            return true;
         } catch (err) {
+            console.error('[LitterDetailsPage] Failed to load litter:', err);
             if (err?.response?.status === 404) setNotFound(true);
             else if (showModalMessage) showModalMessage('Error', 'Failed to load this litter.');
             setLitter(null);
+            return false;
         } finally {
             setLoading(false);
-        }
-        setOffspringLoading(true);
-        try {
-            const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}/offspring`);
-            setOffspring(Array.isArray(res.data) ? res.data : []);
-        } catch {
-            setOffspring([]);
-        } finally {
-            setOffspringLoading(false);
         }
     }, [ctilid, showModalMessage]);
 
     useEffect(() => { load(); }, [load]);
 
-    const status = useMemo(() => deriveStoredStatus(litter), [litter]);
-    const images = Array.isArray(litter?.images) ? litter.images.filter(i => i && i.url) : [];
+    const loadOffspring = useCallback(async (retry = false) => {
+        if (!retry && offspringStatus !== 'idle') return offspringStatus === 'loaded';
+        setOffspringStatus('loading');
+        setOffspringError('');
+        try {
+            const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}/offspring`);
+            if (!Array.isArray(res.data)) throw new Error('The offspring response was invalid.');
+            setOffspring(res.data);
+            setOffspringStatus('loaded');
+            return true;
+        } catch (err) {
+            console.error('[LitterDetailsPage] Failed to load litter offspring:', err);
+            setOffspringError(err.response?.data?.message || 'Failed to load this litter’s offspring.');
+            setOffspringStatus('error');
+            return false;
+        }
+    }, [ctilid, offspringStatus]);
 
+    const loadGeneticsSummary = useCallback(async (retry = false) => {
+        if (!retry && geneticsStatus !== 'idle') return geneticsStatus === 'loaded';
+        setGeneticsStatus('loading');
+        setGeneticsError('');
+        try {
+            const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}/genetics-summary`);
+            setGeneticsSummary(res.data || {});
+            setGeneticsStatus('loaded');
+            return true;
+        } catch (err) {
+            console.error('[LitterDetailsPage] Failed to load genetics summary:', err);
+            setGeneticsError(err.response?.data?.message || 'Failed to load genetics data.');
+            setGeneticsStatus('error');
+            return false;
+        }
+    }, [ctilid, geneticsStatus]);
+
+    const loadGallery = useCallback(async (retry = false) => {
+        if (!retry && galleryStatus !== 'idle') return galleryStatus === 'loaded';
+        setGalleryStatus('loading');
+        setGalleryError('');
+        try {
+            const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}/gallery`);
+            if (!Array.isArray(res.data)) throw new Error('The gallery response was invalid.');
+            setGalleryImages(res.data);
+            setGalleryStatus('loaded');
+            return true;
+        } catch (err) {
+            console.error('[LitterDetailsPage] Failed to load litter gallery:', err);
+            setGalleryError(err.response?.data?.message || 'Failed to load this litter’s photos.');
+            setGalleryStatus('error');
+            return false;
+        }
+    }, [ctilid, galleryStatus]);
+
+    useEffect(() => {
+        if (!litter) return;
+        if (activeTab === 'offspring') loadOffspring();
+        if (activeTab === 'genetics') {
+            loadGeneticsSummary();
+            loadOffspring();
+        }
+        if (activeTab === 'gallery') loadGallery();
+    }, [activeTab, litter, loadOffspring, loadGeneticsSummary, loadGallery]);
+
+    const refreshLitterAndOffspring = useCallback(async () => {
+        const litterLoaded = await load();
+        const offspringLoaded = await loadOffspring(true);
+        return litterLoaded && offspringLoaded;
+    }, [load, loadOffspring]);
+
+    const status = useMemo(() => deriveStoredStatus(litter), [litter]);
     const setTab = (id) => {
         const next = new URLSearchParams(searchParams);
         if (id === 'overview') next.delete('tab'); else next.set('tab', id);
@@ -244,6 +226,27 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
         } catch {
             setLitter(prev => ({ ...prev, isDisplayLitter: !next }));
             if (showModalMessage) showModalMessage('Error', 'Failed to update visibility.');
+        }
+    };
+
+    const handleUnlinkOffspring = async (animal) => {
+        const animalId = animal?.id_public;
+        if (!animalId || !litter?._id) {
+            showModalMessage?.('Error', 'Could not unlink this animal because its ID or litter ID is missing.');
+            return;
+        }
+        if (!window.confirm(`Remove ${animal.name || animalId} from this litter? The animal record will not be deleted.`)) return;
+
+        try {
+            await apiClient.put(`/litters/${encodeURIComponent(litter._id)}`, {
+                offspringIds_public: (litter.offspringIds_public || []).filter(id => id !== animalId),
+            });
+            const refreshed = await refreshLitterAndOffspring();
+            if (refreshed) showModalMessage?.('Success', 'Offspring unlinked from the litter. The animal record was not deleted.');
+            else showModalMessage?.('Error', 'Offspring was unlinked, but the litter views could not be refreshed.');
+        } catch (err) {
+            console.error('[LitterDetailsPage] Failed to unlink offspring:', err);
+            showModalMessage?.('Error', err.response?.data?.message || 'Failed to unlink offspring from this litter.');
         }
     };
 
@@ -317,8 +320,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                 <OverviewTab
                     litter={litter}
                     status={status}
-                    offspring={offspring}
-                    offspringLoading={offspringLoading}
+                    speciesOptions={speciesOptions}
                     onView={viewAnimal}
                     onEdit={() => navigate(`/litters/${encodeURIComponent(litter.litter_id_public)}/edit`)}
                     breedingLineDefs={breedingLineDefs}
@@ -328,11 +330,57 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                     handleQuickAction={handleQuickAction}
                 />
             )}
-            {/* Placeholder tabs — intentionally empty for now. */}
-            {activeTab === 'genetics' && <GeneticsTab litter={litter} offspring={offspring} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} />}
-            {activeTab === 'pedigrees' && <PedigreesTab litter={litter} onViewAnimal={viewAnimal} />}
-            {activeTab === 'offspring' && <OffspringTab offspring={offspring} loading={offspringLoading} onView={viewAnimal} animalBreedingLines={animalBreedingLines} breedingLineDefs={breedingLineDefs} />}
-            {activeTab === 'gallery' && <GalleryTab images={images} />}
+            {activeTab === 'genetics' && (
+                geneticsStatus === 'error' || offspringStatus === 'error'
+                    ? <TabError
+                        message={geneticsStatus === 'error' ? geneticsError : offspringError}
+                        onRetry={() => {
+                            if (geneticsStatus === 'error') loadGeneticsSummary(true);
+                            if (offspringStatus === 'error') loadOffspring(true);
+                        }}
+                    />
+                    : geneticsStatus !== 'loaded' || offspringStatus !== 'loaded'
+                        ? <TabLoading />
+                        : <React.Suspense fallback={<TabLoading />}>
+                            <GeneticsTab
+                                litter={{ ...litter, ...geneticsSummary }}
+                                offspring={offspring}
+                                breedingLineDefs={breedingLineDefs}
+                                animalBreedingLines={animalBreedingLines}
+                            />
+                        </React.Suspense>
+            )}
+            {activeTab === 'pedigrees' && (
+                <React.Suspense fallback={<TabLoading />}>
+                    <PedigreesTab litter={litter} onViewAnimal={viewAnimal} />
+                </React.Suspense>
+            )}
+            {activeTab === 'offspring' && (
+                offspringStatus === 'error'
+                    ? <TabError message={offspringError} onRetry={() => loadOffspring(true)} />
+                    : <React.Suspense fallback={<TabLoading />}>
+                        <OffspringTab
+                            litter={litter}
+                            offspring={offspring}
+                            loading={offspringStatus !== 'loaded'}
+                            onView={viewAnimal}
+                            onOffspringChanged={refreshLitterAndOffspring}
+                            onUnlink={handleUnlinkOffspring}
+                            animalBreedingLines={animalBreedingLines}
+                            breedingLineDefs={breedingLineDefs}
+                            speciesOptions={speciesOptions}
+                        />
+                    </React.Suspense>
+            )}
+            {activeTab === 'gallery' && (
+                galleryStatus === 'error'
+                    ? <TabError message={galleryError} onRetry={() => loadGallery(true)} />
+                    : galleryStatus !== 'loaded'
+                        ? <TabLoading />
+                        : <React.Suspense fallback={<TabLoading />}>
+                            <GalleryTab images={galleryImages} />
+                        </React.Suspense>
+            )}
         </div>
         </div>
     );

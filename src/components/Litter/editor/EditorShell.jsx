@@ -6,7 +6,7 @@ import {
     EMPTY_LITTER_FORM, formFromLitter, initialExtras, validateLitterForm, isFormDirty, countLinkedBySex,
 } from './litterFormModel';
 import {
-    createLitter, updateLitter, uploadLitterImage, deleteLitterImage, imageErrorMessage,
+    createLitter, updateLitter, uploadLitterImage, updateLitterImageMetadata, deleteLitterImage, imageErrorMessage,
 } from './litterSave';
 import IdentityParentsSection from './sections/IdentityParentsSection';
 import DatesReproductionSection from './sections/DatesReproductionSection';
@@ -57,8 +57,11 @@ export default function EditorShell({
     const [sireAnimal, setSireAnimal] = useState(litter?.sire || null);
     const [damAnimal, setDamAnimal] = useState(litter?.dam || null);
     const [createCounts, setCreateCounts] = useState(EMPTY_CREATE_COUNTS);
-    const [savedImages, setSavedImages] = useState(litter?.images || []);
+    const [savedImages, setSavedImages] = useState(() => (litter?.images || []).map(image =>
+        typeof image === 'string' ? { url: image } : image
+    ));
     const [pendingImages, setPendingImages] = useState([]);
+    const [unsavedPhotoKeys, setUnsavedPhotoKeys] = useState(() => new Set());
     const [uploading, setUploading] = useState(false);
 
     const setFields = useCallback((patch) => setForm(fd => ({ ...fd, ...patch })), []);
@@ -79,7 +82,7 @@ export default function EditorShell({
 
     const errors = useMemo(() => validateLitterForm(form, { sire, dam }), [form, sire, dam]);
     const hasErrors = Object.keys(errors).length > 0;
-    const dirty = isFormDirty(form, baseline) || pendingImages.length > 0
+    const dirty = isFormDirty(form, baseline) || pendingImages.length > 0 || unsavedPhotoKeys.size > 0
         || (createCounts.males || createCounts.females || createCounts.unknown);
 
     const linkedCounts = useMemo(() => countLinkedBySex(myAnimals, form.linkedOffspringIds), [myAnimals, form.linkedOffspringIds]);
@@ -111,12 +114,28 @@ export default function EditorShell({
 
     const stagePhoto = (file) => {
         if (pendingImages.length >= 5) return showModalMessage('Error', 'Maximum of 5 images per litter');
-        return setPendingImages(prev => [...prev, { file, previewUrl: URL.createObjectURL(file) }]);
+        return setPendingImages(prev => [...prev, {
+            file,
+            previewUrl: URL.createObjectURL(file),
+            caption: '',
+            captureDate: '',
+            offspringId_public: '',
+            isCover: prev.length === 0,
+        }]);
     };
     const removePending = (idx) => setPendingImages(prev => {
         URL.revokeObjectURL(prev[idx]?.previewUrl);
-        return prev.filter((_, i) => i !== idx);
+        const remaining = prev.filter((_, i) => i !== idx);
+        if (prev[idx]?.isCover && remaining.length && !remaining.some(image => image.isCover)) {
+            return remaining.map((image, i) => i === 0 ? { ...image, isCover: true } : image);
+        }
+        return remaining;
     });
+    const updatePendingImage = (idx, patch) => setPendingImages(prev => prev.map((image, i) => ({
+        ...image,
+        ...(i === idx ? patch : {}),
+        ...(patch.isCover && i !== idx ? { isCover: false } : {}),
+    })));
 
     const uploadPhoto = async (file) => {
         if (savedImages.filter(i => i.r2Key !== '__uploading__').length >= 5) {
@@ -140,10 +159,24 @@ export default function EditorShell({
     const deletePhoto = async (r2Key) => {
         try {
             setSavedImages(await deleteLitterImage(litter._id, r2Key));
+            setPhotoMetadataDirty(r2Key, false);
         } catch (err) {
             showModalMessage('Error', err.response?.data?.message || 'Failed to delete image');
         }
     };
+
+    const savePhotoMetadata = async (r2Key, metadata) => {
+        const images = await updateLitterImageMetadata(litter._id, r2Key, metadata);
+        setSavedImages(images);
+    };
+    const setPhotoMetadataDirty = useCallback((r2Key, isDirty) => {
+        setUnsavedPhotoKeys(current => {
+            const next = new Set(current);
+            if (isDirty) next.add(r2Key);
+            else next.delete(r2Key);
+            return next;
+        });
+    }, []);
 
     // Jump to the first section with a problem so the message is actually visible.
     const sectionForErrors = (errs) => {
@@ -171,8 +204,11 @@ export default function EditorShell({
             const result = isEdit ? await updateLitter(form, ctx) : await createLitter(form, ctx);
             if (result.status === 'cancelled') return;
             pendingImages.forEach(p => URL.revokeObjectURL(p.previewUrl));
-            if (result.failedOffspring) {
-                showModalMessage('Warning', `${result.failedOffspring} placeholder animal(s) could not be created. The litter was saved.`);
+            if (result.failedOffspring || result.failedImages) {
+                const warnings = [];
+                if (result.failedOffspring) warnings.push(`${result.failedOffspring} placeholder animal(s) could not be created`);
+                if (result.failedImages) warnings.push(`${result.failedImages} photo(s) could not be uploaded`);
+                showModalMessage('Warning', `${warnings.join(' and ')}. The litter was saved.`);
             } else {
                 showModalMessage('Success', result.message);
             }
@@ -218,21 +254,22 @@ export default function EditorShell({
                 return (
                     <DatesReproductionSection
                         form={form} setField={setField} setFields={setFields} errors={visibleErrors} original={litter}
+                        species={form.species} speciesOptions={speciesOptions}
                         autoCalcAvailable={!!userProfile?.autoCalcAvailable}
                         autoCalcDueDate={userProfile?.uiPreferences?.autoCalcDueDate !== false}
                         autoCalcWeaningDate={userProfile?.uiPreferences?.autoCalcWeaningDate !== false}
                     />
                 );
             case 'mating':
-                return <MatingBirthSection form={form} setField={setField} setFields={setFields} extras={extras} setExtras={setExtras} />;
+                return <MatingBirthSection form={form} setField={setField} setFields={setFields} species={form.species} speciesOptions={speciesOptions} extras={extras} setExtras={setExtras} />;
             case 'stats':
-                return <StatsSection form={form} setForm={setForm} setField={setField} linkedCounts={linkedCounts} warnings={warnings} />;
+                return <StatsSection form={form} setForm={setForm} setField={setField} linkedCounts={linkedCounts} warnings={warnings} species={form.species} speciesOptions={speciesOptions} />;
             case 'offspring':
                 return (
                     <OffspringSection
                         form={form} setForm={setForm} myAnimals={myAnimals} animalsLoaded={animalsLoaded}
                         linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts}
-                        isEdit={isEdit}
+                        isEdit={isEdit} species={form.species} speciesOptions={speciesOptions}
                     />
                 );
             case 'objectives':
@@ -243,6 +280,9 @@ export default function EditorShell({
                         form={form} setField={setField} isEdit={isEdit} savedImages={savedImages} pendingImages={pendingImages}
                         uploading={uploading} onUpload={uploadPhoto} onStage={stagePhoto}
                         onDeleteSaved={deletePhoto} onRemovePending={removePending}
+                        onUpdatePending={updatePendingImage} onSaveImageMetadata={savePhotoMetadata}
+                        onPhotoMetadataDirtyChange={setPhotoMetadataDirty}
+                        linkedOffspring={myAnimals.filter(animal => (form.linkedOffspringIds || []).includes(animal.id_public))}
                     />
                 );
         }

@@ -2,11 +2,23 @@ import React from 'react';
 import { formatDate } from '../../../utils/dateFormatter';
 import { buildTimeline } from './helpers';
 import { Panel } from './ui';
+import { getLitterSpecies, isEggLayingSpecies } from '../../../utils/litterSpeciesPresentation';
 
-export default function TimelinePanel({ litter, status }) {
-    const steps = buildTimeline(litter, status);
+export default function TimelinePanel({ litter, status, speciesOptions = [] }) {
+    const eggLaying = isEggLayingSpecies(getLitterSpecies(litter), speciesOptions);
+    const steps = buildTimeline(litter, status).map(step => {
+        if (!eggLaying) return step;
+        const labels = {
+            mating: status === 'planned' ? 'Planned pairing' : 'Paired',
+            pregnancy: 'Gravid / egg-producing state confirmed',
+            due: 'Expected hatch',
+            birth: 'Eggs laid / offspring hatched',
+            weaning: litter.weaningConfirmed ? 'Independent' : 'Expected independence',
+        };
+        return { ...step, label: labels[step.key] || step.label };
+    });
     return (
-        <Panel title="Reproductive timeline" testId="timeline-panel">
+        <Panel title={eggLaying ? 'Pairing, laying & hatch timeline' : 'Reproductive timeline'} testId="timeline-panel">
             <ol className="relative ml-2">
                 {steps.map((s, i) => {
                     const last = i === steps.length - 1;

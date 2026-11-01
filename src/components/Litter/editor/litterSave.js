@@ -38,14 +38,22 @@ export const clearDamReproState = async (damId) => {
 };
 
 /** Compress and upload one photo; returns the litter's full image list. */
-export const uploadLitterImage = async (litterId, file) => {
+export const uploadLitterImage = async (litterId, file, metadata = {}) => {
     const blob = await compressImageToMaxSize(file, TARGET_BYTES, { maxWidth: 1600, maxHeight: 1600, startQuality: 0.82, forceJpeg: true });
     if (blob.size > SERVER_MAX_BYTES) {
         throw new Error(`That photo is too large (${Math.round(blob.size / 1024)} KB). Please pick a smaller image or crop it first.`);
     }
     const fd = new FormData();
     fd.append('image', blob, 'litter-photo.jpg');
+    Object.entries(metadata).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) fd.append(key, String(value));
+    });
     const resp = await apiClient.post(`/litters/${litterId}/images`, fd);
+    return resp.data.images || [];
+};
+
+export const updateLitterImageMetadata = async (litterId, r2Key, metadata) => {
+    const resp = await apiClient.put(`/litters/${litterId}/images/${encodeURIComponent(r2Key)}`, metadata);
     return resp.data.images || [];
 };
 
@@ -100,8 +108,14 @@ export const createLitter = async (form, ctx) => {
     if (form.birthOutcome === 'All lost') await clearDamReproState(form.damId_public);
 
     // Photos staged while creating.
-    for (const { file } of pendingImages) {
-        try { await uploadLitterImage(litterId, file); } catch (err) { console.error('Failed to upload litter image:', err); }
+    let failedImages = 0;
+    for (const { file, caption, captureDate, isCover, offspringId_public } of pendingImages) {
+        try {
+            await uploadLitterImage(litterId, file, { caption, captureDate, isCover, offspringId_public });
+        } catch (err) {
+            failedImages += 1;
+            console.error('Failed to upload litter image:', err);
+        }
     }
 
     // COI in the background; never blocks or fails the save.
@@ -134,7 +148,7 @@ export const createLitter = async (form, ctx) => {
     const message = parts.length ? `Litter created with ${parts.join(', ')}!` : 'Litter created successfully!';
 
     window.dispatchEvent(new Event('animals-changed'));
-    return { status: 'created', litter: { ...response.data, litter_id_public: publicId }, message, failedOffspring: created.failed };
+    return { status: 'created', litter: { ...response.data, litter_id_public: publicId }, message, failedOffspring: created.failed, failedImages };
 };
 
 /**

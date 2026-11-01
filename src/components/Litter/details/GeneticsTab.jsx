@@ -25,6 +25,8 @@ const PercentBar = ({ value }) => (
 
 const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [showAllAncestors, setShowAllAncestors] = useState(false);
+    const [parentCodesError, setParentCodesError] = useState('');
+    const [parentCodesRetry, setParentCodesRetry] = useState(0);
     const sire = litter?.sire || {};
     const dam = litter?.dam || {};
     const species = litter?.species || sire.species || dam.species;
@@ -69,6 +71,7 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
 
         setSireGeneticCode(sireGeneticCodeFromLitter);
         setDamGeneticCode(damGeneticCodeFromLitter);
+        setParentCodesError('');
         Promise.all([
             fetchParentCode(sireId, sireGeneticCodeFromLitter),
             fetchParentCode(damId, damGeneticCodeFromLitter),
@@ -79,6 +82,7 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
         }).catch((error) => {
             if (cancelled) return;
             console.error('Error fetching parent genetic codes:', error);
+            setParentCodesError('Could not load one or both parent genetic codes.');
         });
 
         return () => {
@@ -89,6 +93,7 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
         damId,
         sireGeneticCodeFromLitter,
         damGeneticCodeFromLitter,
+        parentCodesRetry,
     ]);
 
     const calculatedExpectedTraits = computeExpectedOffspring(
@@ -144,6 +149,12 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
+            {parentCodesError && (
+                <div role="alert" className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+                    <span>{parentCodesError}</span>
+                    <button type="button" onClick={() => setParentCodesRetry(value => value + 1)} className="underline">Retry</button>
+                </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">COI & AVK</h3>
