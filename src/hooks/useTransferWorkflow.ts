@@ -70,6 +70,9 @@ export function useTransferWorkflow(
         setTransferSearchPerformed(false);
         setTransferPrice('');
         setTransferNotes('');
+        setTransferType('gift');
+        setBulkMode(false);
+        setTransferAnimals([]);
         setPreSelectedTransferAnimal(null);
         setPreSelectedTransactionType(null);
 
@@ -293,67 +296,6 @@ export function useTransferWorkflow(
         }
     }, [showModalMessage]);
 
-    const handleBulkTransfer = useCallback(async () => {
-        if (transferAnimals.length === 0 || !transferSelectedUser) {
-            showModalMessage('Error', 'Please select animals and a recipient.');
-            return;
-        }
-
-        const recipientId =
-            transferSelectedUser.userId_backend || transferSelectedUser.id_public;
-
-        if (!recipientId) {
-            showModalMessage('Error', 'The selected recipient has no valid user ID.');
-            return;
-        }
-
-        const parsedPrice = transferPrice.trim()
-            ? Number.parseFloat(transferPrice)
-            : undefined;
-
-        if (parsedPrice !== undefined && (!Number.isFinite(parsedPrice) || parsedPrice < 0)) {
-            showModalMessage('Invalid Price', 'Please enter a valid, non-negative price.');
-            return;
-        }
-
-        try {
-            // Do not automatically retry this POST: it may create duplicate transfer requests.
-            await apiClient.post('/transfers/bulk', {
-                animalIds_public: transferAnimals.map((animal) => animal.id_public),
-                toUserId: recipientId,
-                price: parsedPrice,
-                notes: transferNotes || undefined,
-                transferType,
-            });
-
-            showModalMessage(
-                'Success',
-                `Bulk transfer request sent for ${transferAnimals.length} animal${transferAnimals.length !== 1 ? 's' : ''}.`,
-            );
-
-            setBulkMode(false);
-            setTransferAnimals([]);
-            setTransferPrice('');
-            setTransferNotes('');
-            setTransferType('gift');
-            setTransferSelectedUser(null);
-            window.dispatchEvent(new Event('animals-changed'));
-        } catch (error: unknown) {
-            console.error('Failed to bulk transfer:', error);
-            const message = axios.isAxiosError(error)
-                ? error.response?.data?.message || error.message
-                : error instanceof Error ? error.message : 'An unexpected error occurred.';
-            showModalMessage('Error', `Failed to bulk transfer: ${message}`);
-        }
-    }, [
-        transferAnimals,
-        transferSelectedUser,
-        transferPrice,
-        transferNotes,
-        transferType,
-        showModalMessage,
-    ]);
-
     const handleBulkTransferWithdraw = useCallback(async (batchId: string) => {
         if (!batchId) {
             showModalMessage('Error', 'Batch ID is required.');
@@ -375,7 +317,7 @@ export function useTransferWorkflow(
 
     // Handle bulk transfer submission
     const handleSubmitBulkTransfer = useCallback(async () => {
-        if (transferAnimals.length === 0) {
+        if (!Array.isArray(transferAnimals) || transferAnimals.length === 0) {
             showModalMessage('Error', 'Please select at least one animal to transfer.');
             return;
         }
@@ -383,46 +325,68 @@ export function useTransferWorkflow(
             showModalMessage('Error', 'Please select a recipient.');
             return;
         }
-        if (transferPrice === '' || transferPrice === null) {
-            showModalMessage('Error', 'Please enter a price.');
+        const recipientId = transferSelectedUser.userId_backend || transferSelectedUser.id_public;
+        if (!recipientId) {
+            showModalMessage('Error', 'The selected recipient has no valid user ID.');
             return;
         }
 
-        const parsedPrice = parseFloat(transferPrice) || 0;
-        const recipientId = transferSelectedUser.userId_backend || transferSelectedUser.id_public;
+        const animalIds = transferAnimals.map((animal) => animal.id_public);
+        if (animalIds.some((id) => !id) || new Set(animalIds).size !== animalIds.length) {
+            showModalMessage('Error', 'The selected animals contain invalid or duplicate IDs.');
+            return;
+        }
+
+        const parsedPrice = transferPrice.trim() === '' ? 0 : Number(transferPrice);
+        if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+            showModalMessage('Invalid Price', 'Please enter a valid, non-negative price.');
+            return;
+        }
 
         try {
             const { data } = await apiClient.post('/transfers/bulk', {
-                animalIds_public: transferAnimals.map((animal) => animal.id_public),
+                animalIds_public: animalIds,
                 toUserId: recipientId,
                 price: parsedPrice,
-                notes: transferNotes,
-                transferType: transferType,
+                notes: transferNotes || undefined,
+                transferType: parsedPrice > 0 ? 'sale' : 'gift',
             });
 
-            showModalMessage('Success', `Bulk transfer requested for ${data.transfers.length} animal(s).`);
-            window.dispatchEvent(new Event('animals-changed'));
+            if (!Array.isArray(data?.transfers) || data.transfers.length !== animalIds.length) {
+                throw new Error('The server did not confirm every transfer in the batch.');
+            }
 
-            // Reset bulk transfer state
-            setTransferAnimals([]);
-            setTransferSelectedUser(null);
-            setTransferPrice('');
-            setTransferNotes('');
-            setTransferType('gift');
-            setBulkMode(false);
+            showModalMessage('Success', `Bulk transfer requested for ${data.transfers.length} animal(s).`);
+            handleCloseTransferWorkflow();
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (error: unknown) {
+            console.error('Failed to create bulk transfer:', error);
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.message || error.message
                 : error instanceof Error ? error.message : 'An unexpected error occurred.';
             showModalMessage('Error', `Failed to create bulk transfer: ${message}`);
         }
-    }, [transferAnimals, transferSelectedUser, transferPrice, transferNotes, transferType, showModalMessage, setTransferAnimals, setTransferSelectedUser, setTransferPrice, setTransferNotes, setBulkMode]);
+    }, [transferAnimals, transferSelectedUser, transferPrice, transferNotes, showModalMessage, handleCloseTransferWorkflow]);
+
+    const handleBulkTransfer = handleSubmitBulkTransfer;
 
     const handleOpenBulkTransferWithAnimals = useCallback((animals: Animal[]) => {
+        if (!Array.isArray(animals) || animals.length === 0) {
+            showModalMessage('Error', 'Select at least one animal to transfer.');
+            return;
+        }
+
+        const validAnimals = animals.filter((animal) => animal?.id_public);
+        if (!validAnimals.length) {
+            showModalMessage('Error', 'The selected animals do not have valid IDs.');
+            return;
+        }
+
         abortControllerRef.current?.abort();
         abortControllerRef.current = new AbortController();
-        setTransferAnimals(animals);
+        setTransferAnimals(validAnimals);
         setBulkMode(true);
+        setTransferType('gift');
         setTransferAnimal(null);
         setTransferUserQuery('');
         setTransferUserResults([]);
@@ -432,7 +396,7 @@ export function useTransferWorkflow(
         setTransferPrice('');
         setTransferNotes('');
         setShowTransferModal(true);
-    }, []);
+    }, [showModalMessage]);
 
     const handleReturnTransferredAnimal = useCallback(async (animalId_public?: string) => {
         const id = animalId_public || transferViewingAnimal?.id_public;

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { computeExpectedOffspring } from '../../../utils/expectedOffspring';
+import {
+    computeConfirmedOffspringTraits,
+    computeExpectedOffspring,
+} from '../../../utils/expectedOffspring';
 import apiClient from '../../../utils/apiClient';
 
 const Field = ({ label, value }) => (
@@ -46,66 +49,102 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
     const visibleAncestors = showAllAncestors ? ancestors : ancestors.slice(0, 5);
     const [confirmedTraits, setConfirmedTraits] = useState([]);
 
-    const [sireGeneticCode, setSireGeneticCode] = useState(sire.geneticCode || sire.genetic_code || {});
-    const [damGeneticCode, setDamGeneticCode] = useState(dam.geneticCode || dam.genetic_code || {});
-    const [codesLoaded, setCodesLoaded] = useState(false);
-    const [codesError, setCodesError] = useState(false);
+    const sireGeneticCodeFromLitter = sire.geneticCode || sire.genetic_code || null;
+    const damGeneticCodeFromLitter = dam.geneticCode || dam.genetic_code || null;
+    const [sireGeneticCode, setSireGeneticCode] = useState(sireGeneticCodeFromLitter);
+    const [damGeneticCode, setDamGeneticCode] = useState(damGeneticCodeFromLitter);
 
     useEffect(() => {
-       const fetchParentCodes = async () => {
-        if (!litter?.sireId_public && !litter?.damId_public) {
-            setCodesLoaded(true);
-            return;
-        }
-        try {
-                if (litter?.sireId_public && !sireGeneticCode) {
-                    const res = await apiClient.get(`/public/global/animals?id_public=${litter.sireId_public}`);
-                    const sireAnimal = res.data?.[0];
-                    if (sireAnimal?.geneticCode) {
-                        setSireGeneticCode(sireAnimal.geneticCode);
-                    } else {
-                        setCodesError(true);
-                    }
-                }
-                if (litter?.damId_public && !damGeneticCode) {
-                    const res = await apiClient.get(`/public/global/animals?id_public=${litter.damId_public}`);
-                    const damAnimal = res.data?.[0];
-                    if (damAnimal?.geneticCode) {
-                        setDamGeneticCode(damAnimal.geneticCode);
-                    } else {
-                        setCodesError(true);
-                    }
-                }
-                setCodesLoaded(true);
-            } catch (error) {
-                console.error('Error fetching parent genetic codes:', error);
-                setCodesError(true);
-            }
+        let cancelled = false;
+        const hasGeneticCode = (code) => typeof code === 'string'
+            ? code.trim().length > 0
+            : code && typeof code === 'object' && Object.keys(code).length > 0;
+        const fetchParentCode = async (id, code) => {
+            if (hasGeneticCode(code) || !id) return code;
+            const res = await apiClient.get(
+                `/public/global/animals?id_public=${encodeURIComponent(id)}`,
+            );
+            const animal = res.data?.[0];
+            const fetchedCode = animal?.geneticCode || animal?.genetic_code;
+            return hasGeneticCode(fetchedCode) ? fetchedCode : null;
         };
-        fetchParentCodes();
-    }, [litter?.sireId_public, litter?.damId_public, !sireGeneticCode, !damGeneticCode]);
 
-    // Compute expected offspring traits from parent genetic codes
-    const expectedTraits = (litter?.expectedTraits && litter.expectedTraits.length) ? litter.expectedTraits : computeExpectedOffspring(sireGeneticCode, damGeneticCode, litter?.species);
+        setSireGeneticCode(sireGeneticCodeFromLitter);
+        setDamGeneticCode(damGeneticCodeFromLitter);
+        Promise.all([
+            fetchParentCode(sireId, sireGeneticCodeFromLitter),
+            fetchParentCode(damId, damGeneticCodeFromLitter),
+        ]).then(([sireCode, damCode]) => {
+            if (cancelled) return;
+            setSireGeneticCode(sireCode);
+            setDamGeneticCode(damCode);
+        }).catch((error) => {
+            if (cancelled) return;
+            console.error('Error fetching parent genetic codes:', error);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [
+        sireId,
+        damId,
+        sireGeneticCodeFromLitter,
+        damGeneticCodeFromLitter,
+    ]);
+
+    const calculatedExpectedTraits = computeExpectedOffspring(
+        sireGeneticCode,
+        damGeneticCode,
+        litter?.species,
+    );
+    const expectedTraits = calculatedExpectedTraits.length
+        ? calculatedExpectedTraits
+        : (Array.isArray(litter?.expectedTraits) ? litter.expectedTraits : []);
 
     // Compute confirmed offspring traits from linked offspring genetic codes and appearance fields
     useEffect(() => {
-        const computeConfirmedOffspring = async () => {
-            if (!litter?.offspringIds_public?.length) {
-                setConfirmedTraits([]);
-                return;
-            }
-            try {
-                const res = await apiClient.get(`/litters/${litter?.litter_id_public || litter?.id_public}/confirmed-offspring-traits`);
-                setConfirmedTraits(res.data || []);
-                return;
-            } catch (error) {
+        let cancelled = false;
+        const litterId = litter?.litter_id_public || litter?.id_public;
+        if (!litterId || !litter?.offspringIds_public?.length) {
+            setConfirmedTraits([]);
+            return () => {
+                cancelled = true;
+            };
+        }
+
+        apiClient.get(`/litters/${litterId}/offspring`)
+            .then((response) => {
+                if (cancelled) return;
+                const offspring = Array.isArray(response.data) ? response.data : [];
+                setConfirmedTraits(computeConfirmedOffspringTraits(
+                    offspring.map((animal) => animal.geneticCode || animal.genetic_code || {}),
+                    litter?.species,
+                    offspring.map((animal) => ({
+                        color: animal.color,
+                        markings: animal.markings,
+                        coat: animal.coat,
+                        earset: animal.earset,
+                        eyeColor: animal.eyeColor,
+                        body: animal.body,
+                    })),
+                ));
+            })
+            .catch((error) => {
+                if (cancelled) return;
                 console.error('Error computing confirmed offspring traits:', error);
                 setConfirmedTraits([]);
-            }
+            });
+
+        return () => {
+            cancelled = true;
         };
-        computeConfirmedOffspring();
-    }, [litter?.offspringIds_public, litter?.species]);
+    }, [
+        litter?.litter_id_public,
+        litter?.id_public,
+        litter?.offspringIds_public?.join('|'),
+        litter?.species,
+    ]);
 
     return (
         <div data-testid="tab-genetics" className="space-y-6">
@@ -178,6 +217,9 @@ const GeneticsTab = ({ litter, breedingLineDefs = [], animalBreedingLines = {} }
                 </div>
                 <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Confirmed Offspring</h3>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
+                        Percentage of linked offspring with each recorded trait.
+                    </p>
                     {confirmedTraits.length === 0 ? (
                         <div className="py-4 text-sm text-gray-500 dark:text-dark-text-muted">No confirmed offspring traits recorded.</div>
                     ) : confirmedTraits.map((t, i) => (

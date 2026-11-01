@@ -51,7 +51,15 @@ const ageDetailed = (birthDate, endDate) => {
 const varietyOf = (a) =>
     [a.color, a.coat, a.earset, a.markings, a.eyeColor, a.body].filter(Boolean).join(' ') || '';
 
-const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal }) => {
+const LiteAnimalRow = ({
+    animal,
+    onViewAnimal,
+    toggleAnimalOwned,
+    onUpdateAnimal,
+    isSelectable = false,
+    isSelected = false,
+    onToggleSelect,
+}) => {
     const [busy, setBusy] = useState(false);
 
     const reproState = getReproState(animal);
@@ -81,6 +89,16 @@ const LiteAnimalRow = ({ animal, onViewAnimal, toggleAnimalOwned, onUpdateAnimal
                 stacked beside it. Only the MIDDLE and RIGHT columns are re-flowed on mobile.
                 min-w-0 + truncate keeps a long name/variety from pushing things out of line. */}
             <div className="flex items-center gap-3 min-w-0 flex-1">
+                {isSelectable && (
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={onToggleSelect}
+                        onClick={(event) => event.stopPropagation()}
+                        className="w-4 h-4 shrink-0 rounded cursor-pointer"
+                        aria-label={`Select ${animal.name || animal.id_public} for transfer`}
+                    />
+                )}
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-surface flex-shrink-0">
                     <AnimalImage src={animal.imageUrl || animal.photoUrl} alt="" iconSize={20} FallbackIcon={CircleDot} />
                 </div>

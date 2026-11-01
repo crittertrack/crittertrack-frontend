@@ -1,105 +1,144 @@
-// Expected Offspring Probability Engine Tests
-// Tests computeExpectedOffspring for all supported species
-
-import { computeExpectedOffspring } from './expectedOffspring';
-import { matchFancyRatPhenotype } from '../data/fancyRatPhenotypeRules';
-import { matchSyrianHamsterPhenotype } from '../data/syrianHamsterPhenotypeRules';
-import { matchCampbellsDwarfHamsterPhenotype } from '../data/campbellsDwarfHamsterPhenotypeRules';
-import { matchRussianDwarfHamsterPhenotype } from '../data/russianDwarfHamsterPhenotypeRules';
-import { matchBallPythonPhenotype } from '../data/ballPythonPhenotypeRules';
+import {
+  computeConfirmedOffspringTraits,
+  computeExpectedOffspring,
+} from './expectedOffspring';
 
 describe('computeExpectedOffspring', () => {
-  // Fancy Rat test: A/a × a/a at A-locus, B/b × b/b at B-locus
-  it('fancyRat: A/a × a/a, B/b × b/b produces multiple phenotypes', () => {
-    const sire = { A: 'A/a', B: 'B/b' };
-    const dam = { A: 'a/a', B: 'b/b' };
-    const result = computeExpectedOffspring(sire, dam, 'fancyRat');
-    expect(result).toBeInstanceOf(Array);
+  it('calculates the expected split for Syrian hamster alleles', () => {
+    const result = computeExpectedOffspring(
+      { a: 'a/a' },
+      { a: 'A/a' },
+      'syrianHamster',
+    );
+
+    expect(result).toEqual([
+      { trait: '(Golden) Agouti', probability: 50 },
+      { trait: 'Black', probability: 50 },
+    ]);
+  });
+
+  it('parses stored genetic-code strings before calculating', () => {
+    expect(computeExpectedOffspring(
+      'a/a',
+      'A/a',
+      'Syrian Hamster',
+    )).toEqual([
+      { trait: '(Golden) Agouti', probability: 50 },
+      { trait: 'Black', probability: 50 },
+    ]);
+  });
+
+  it('accepts display names with punctuation and predicts Campbell dwarf hamsters', () => {
+    const result = computeExpectedOffspring(
+      { a: 'a/a' },
+      { a: 'A/a' },
+      "Campbell's Dwarf Hamster",
+    );
+
+    expect(result).toEqual([
+      { trait: 'Agouti', probability: 50 },
+      { trait: 'Black', probability: 50 },
+    ]);
+  });
+
+  it('calculates phenotypes for Russian dwarf hamsters', () => {
+    expect(computeExpectedOffspring(
+      { a: 'a/a' },
+      { a: 'A/a' },
+      'russianDwarfHamster',
+    )).toEqual([
+      { trait: 'Agouti', probability: 50 },
+      { trait: 'Black', probability: 50 },
+    ]);
+  });
+
+  it('uses the species rules to predict rat phenotypes', () => {
+    expect(computeExpectedOffspring(
+      { C: 'c/c' },
+      { C: 'c/c' },
+      'fancyRat',
+    )).toEqual([{ trait: 'Albino', probability: 100 }]);
+  });
+
+  it('predicts a dominant ball python trait and normal offspring', () => {
+    expect(computeExpectedOffspring(
+      { sp: 'Sp/sp' },
+      { sp: 'sp/sp' },
+      'ballPython',
+    )).toEqual([
+      { trait: 'Normal', probability: 50 },
+      { trait: 'Spider', probability: 50 },
+    ]);
+  });
+
+  it('parses ball python genetic-code strings before calculating', () => {
+    expect(computeExpectedOffspring(
+      'Sp/sp',
+      'sp/sp',
+      'Ball Python',
+    )).toEqual([
+      { trait: 'Normal', probability: 50 },
+      { trait: 'Spider', probability: 50 },
+    ]);
+  });
+
+  it('does not infer alleles from a locus missing in either parent', () => {
+    expect(computeExpectedOffspring(
+      { a: 'a/a' },
+      { b: 'B/b' },
+      'syrianHamster',
+    )).toEqual([]);
+  });
+
+  it('rounds multi-locus probabilities so the total is exactly 100%', () => {
+    const result = computeExpectedOffspring(
+      { a: 'A/a', b: 'B/b' },
+      { a: 'A/a', b: 'B/b' },
+      'syrianHamster',
+    );
+
     expect(result.length).toBeGreaterThan(0);
-    // Verify all results have trait and probability
-    result.forEach(item => {
-      expect(item).toHaveProperty('trait');
-      expect(item).toHaveProperty('probability');
-      expect(typeof item.probability).toBe('number');
-    });
+    expect(result.reduce((total, item) => total + item.probability, 0)).toBe(100);
   });
 
-  // Syrian Hamster test: a/a × A/A at A-locus (Black × Agouti)
-  it('syrianHamster: a/a × A/a produces Black and Agouti offspring', () => {
-    const sire = { a: 'a/a' };
-    const dam = { A: 'A/a' };
-    const result = computeExpectedOffspring(sire, dam, 'syrianHamster');
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toBeGreaterThan(0);
-    result.forEach(item => {
-      expect(item).toHaveProperty('trait');
-      expect(item).toHaveProperty('probability');
-    });
+  it('returns [] when either parent code or the species is missing or unsupported', () => {
+    expect(computeExpectedOffspring(null, { a: 'A/a' }, 'syrianHamster')).toEqual([]);
+    expect(computeExpectedOffspring({ a: 'A/a' }, null, 'syrianHamster')).toEqual([]);
+    expect(computeExpectedOffspring({ a: 'A/a' }, { a: 'a/a' }, null)).toEqual([]);
+    expect(computeExpectedOffspring({ a: 'A/a' }, { a: 'a/a' }, 'unknown species')).toEqual([]);
+    expect(computeExpectedOffspring({}, {}, 'syrianHamster')).toEqual([]);
+  });
+});
+
+describe('computeConfirmedOffspringTraits', () => {
+  it('reports the frequency of each observed trait across all offspring', () => {
+    const result = computeConfirmedOffspringTraits(
+      [{}, {}, {}],
+      'syrianHamster',
+      [
+        { color: 'Black', markings: 'Banded' },
+        { color: 'Black' },
+        { color: 'Agouti', markings: 'Banded' },
+      ],
+    );
+
+    expect(result).toEqual([
+      { trait: 'Color: Black', percentage: 67 },
+      { trait: 'Markings: Banded', percentage: 67 },
+      { trait: 'Color: Agouti', percentage: 33 },
+    ]);
   });
 
-  // Campbell's Dwarf Hamster test: a/a × A/A at A-locus
-  it('campbellsDwarfHamster: a/a × A/a produces Black and Agouti offspring', () => {
-    const sire = { a: 'a/a' };
-    const dam = { A: 'A/a' };
-    const result = computeExpectedOffspring(sire, dam, 'campbellsDwarfHamster');
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toBeGreaterThan(0);
-    result.forEach(item => {
-      expect(item).toHaveProperty('trait');
-      expect(item).toHaveProperty('probability');
-    });
+  it('uses an offspring genotype when no appearance traits are recorded', () => {
+    expect(computeConfirmedOffspringTraits(
+      [{ a: 'a/a' }, { a: 'a/a' }],
+      'syrianHamster',
+      [{}, {}],
+    )).toEqual([{ trait: 'Phenotype: Black', percentage: 100 }]);
   });
 
-  // Russian Dwarf Hamster test: a/a × A/A at A-locus
-  it('russianDwarfHamster: a/a × A/a produces Black and Agouti offspring', () => {
-    const sire = { a: 'a/a' };
-    const dam = { A: 'A/a' };
-    const result = computeExpectedOffspring(sire, dam, 'russianDwarfHamster');
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toBeGreaterThan(0);
-    result.forEach(item => {
-      expect(item).toHaveProperty('trait');
-      expect(item).toHaveProperty('probability');
-    });
-  });
-
-  // Ball Python test: simple cross at C-locus (normal × carrier)
-  it('ballPython: Normal × carrier produces normal and carrier offspring', () => {
-    const sire = { C: 'C/c' };
-    const dam = { C: 'C/c' };
-    const result = computeExpectedOffspring(sire, dam, 'ballPython');
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toBeGreaterThan(0);
-    result.forEach(item => {
-      expect(item).toHaveProperty('trait');
-      expect(item).toHaveProperty('probability');
-    });
-  });
-
-  // Test missing genetic codes returns []
-  it('returns [] when sireCode is missing', () => {
-    const result = computeExpectedOffspring(null, { A: 'A/a' }, 'fancyRat');
-    expect(result).toEqual([]);
-  });
-
-  it('returns [] when damCode is missing', () => {
-    const result = computeExpectedOffspring({ A: 'A/a' }, null, 'fancyRat');
-    expect(result).toEqual([]);
-  });
-
-  it('returns [] when species is missing', () => {
-    const result = computeExpectedOffspring({ A: 'A/a' }, { A: 'a/a' }, null);
-    expect(result).toEqual([]);
-  });
-
-  // Test invalid/unsupported species returns []
-  it('returns [] for unsupported species', () => {
-    const result = computeExpectedOffspring({ A: 'A/a' }, { A: 'a/a' }, 'unknownSpecies');
-    expect(result).toEqual([]);
-  });
-
-  it('returns [] for empty genetic codes', () => {
-    const result = computeExpectedOffspring({}, {}, 'fancyRat');
-    expect(result).toEqual([]);
+  it('returns [] when no offspring or species are provided', () => {
+    expect(computeConfirmedOffspringTraits([], 'syrianHamster', [])).toEqual([]);
+    expect(computeConfirmedOffspringTraits([{}], null, [{}])).toEqual([]);
   });
 });

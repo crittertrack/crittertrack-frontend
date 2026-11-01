@@ -177,6 +177,7 @@ export function AppRoutes({
   setPreSelectedTransactionType,
   setTransferAnimal,
   setShowTransferModal,
+  handleOpenBulkTransferWithAnimals,
   
   // Species Management
   speciesToAdd,
@@ -272,6 +273,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
         />
       } />
       
@@ -299,6 +301,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
         />
       } />
 
@@ -327,6 +330,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
           initialAnimalView="collections"
         />
       } />
@@ -353,6 +357,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
           initialAnimalView="enclosures"
         />
       } />

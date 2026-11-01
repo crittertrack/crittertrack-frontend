@@ -2678,6 +2678,7 @@ const App = () => {
                   setPreSelectedTransactionType={setPreSelectedTransactionType}
                   setTransferAnimal={setTransferAnimal}
                   setShowTransferModal={setShowTransferModal}
+                  handleOpenBulkTransferWithAnimals={handleOpenBulkTransferWithAnimals}
                   speciesToAdd={speciesToAdd}
                   setSpeciesToAdd={setSpeciesToAdd}
                   speciesOptions={speciesOptions}

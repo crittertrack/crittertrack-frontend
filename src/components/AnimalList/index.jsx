@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
 import { Capacitor } from '@capacitor/core';
 import apiClient from '../../utils/apiClient';
 import { resolveLiteMode } from '../../utils/liteMode';
@@ -280,7 +279,8 @@ const AnimalList = ({
     locations,
     fetchLocations,
     // Standalone (not animal/enclosure-linked) Feeding & Care tasks
-    generalTasksState
+    generalTasksState,
+    onBulkTransferSelected,
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -457,7 +457,10 @@ const AnimalList = ({
     }, []);
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [bulkArchiveMode, setBulkArchiveMode] = useState({}); // { species: true/false }
+    const [bulkTransferMode, setBulkTransferMode] = useState({});
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
+    const [liteBulkTransferMode, setLiteBulkTransferMode] = useState(false);
+    const [liteTransferSelectedIds, setLiteTransferSelectedIds] = useState(new Set());
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     const [filtersExpanded, setFiltersExpanded] = useState(false); // toggle filter panel visibility
@@ -2536,6 +2539,11 @@ useEffect(() => {
         setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
     };
 
+    const toggleBulkTransferMode = (species) => {
+        setBulkTransferMode(prev => ({ ...prev, [species]: !prev[species] }));
+        setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+    };
+
     const toggleAnimalSelection = (species, animalId) => {
         setSelectedAnimals(prev => {
             const current = prev[species] || [];
@@ -2751,7 +2759,9 @@ useEffect(() => {
 
     const handleListSelectAll = (e) => {
         if (e.target.checked) {
-            setListSelectedIds(new Set(displayedAnimalsForList.map(a => a.id_public)));
+            setListSelectedIds(new Set(displayedAnimalsForList
+                .filter(animal => animal.isOwned !== false && !animal.pendingTransferId)
+                .map(animal => animal.id_public)));
         } else {
             setListSelectedIds(new Set());
         }
@@ -6483,11 +6493,44 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                             <>
                                 <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
                                     <button
-                                        onClick={() => handleOpenBulkTransferWithAnimals()}
-                                        className="btn btn-ghost btn-sm flex items-center rounded-md bg-white p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 dark:btn-ghost-active"
-                                        title="Bulk Transfer">
+                                        onClick={() => {
+                                            if (!liteBulkTransferMode) {
+                                                setLiteBulkTransferMode(true);
+                                                setLiteTransferSelectedIds(new Set());
+                                                return;
+                                            }
+                                            const selected = animals.filter(
+                                                animal => liteTransferSelectedIds.has(animal.id_public)
+                                                    && animal.isOwned !== false
+                                                    && !animal.pendingTransferId,
+                                            );
+                                            if (selected.length) onBulkTransferSelected?.(selected);
+                                            setLiteBulkTransferMode(false);
+                                            setLiteTransferSelectedIds(new Set());
+                                        }}
+                                        disabled={liteBulkTransferMode && liteTransferSelectedIds.size === 0}
+                                        className="btn btn-ghost btn-sm flex items-center rounded-md bg-white p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 dark:btn-ghost-active disabled:opacity-50"
+                                        title={liteBulkTransferMode ? 'Transfer selected animals' : 'Select animals to transfer'}
+                                    >
                                         <ArrowLeftRight className="h-4 w-4" />
+                                        <span className="text-xs">
+                                            {liteBulkTransferMode
+                                                ? `Send (${liteTransferSelectedIds.size})`
+                                                : 'Transfer'}
+                                        </span>
                                     </button>
+                                    {liteBulkTransferMode && (
+                                        <button
+                                            onClick={() => {
+                                                setLiteBulkTransferMode(false);
+                                                setLiteTransferSelectedIds(new Set());
+                                            }}
+                                            className="btn btn-ghost btn-sm rounded-md p-1.5"
+                                            title="Cancel bulk transfer"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    )}
                                     <button
                                         className={`px-2.5 sm:px-3 py-1 sm:py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                                         title="Show only animals you own"
@@ -6808,6 +6851,14 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                             onViewAnimal={onViewAnimal}
                             toggleAnimalOwned={toggleAnimalOwned}
                             onUpdateAnimal={onUpdateAnimal}
+                            isSelectable={liteBulkTransferMode && animal.isOwned !== false && !animal.pendingTransferId}
+                            isSelected={liteTransferSelectedIds.has(animal.id_public)}
+                            onToggleSelect={() => setLiteTransferSelectedIds((previous) => {
+                                const next = new Set(previous);
+                                if (next.has(animal.id_public)) next.delete(animal.id_public);
+                                else next.add(animal.id_public);
+                                return next;
+                            })}
                         />
                     ))}
                 </div>
@@ -6824,6 +6875,30 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                             ))}
                         </div>
                     )}
+                    {onBulkTransferSelected && listSelectedIds.size > 0 && (
+                        <div className="mb-2 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const selected = displayedAnimalsForList.filter(
+                                        animal => listSelectedIds.has(animal.id_public)
+                                            && animal.isOwned !== false
+                                            && !animal.pendingTransferId,
+                                    );
+                                    if (selected.length) onBulkTransferSelected(selected);
+                                    setListSelectedIds(new Set());
+                                }}
+                                disabled={!displayedAnimalsForList.some(
+                                    animal => listSelectedIds.has(animal.id_public)
+                                        && animal.isOwned !== false
+                                        && !animal.pendingTransferId,
+                                )}
+                                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Transfer Selected ({listSelectedIds.size})
+                            </button>
+                        </div>
+                    )}
                     <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-dark-border shadow-sm">
                     <table className="min-w-full text-xs divide-y divide-gray-200 dark:divide-dark-border">
                         <thead className="bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary uppercase text-[10px] sticky top-0 z-10 border-b dark:border-dark-text-muted">
@@ -6833,8 +6908,17 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                                         type="checkbox"
                                         className="w-4 h-4 cursor-pointer rounded"
                                         onChange={handleListSelectAll}
-                                        checked={displayedAnimalsForList.length > 0 && listSelectedIds.size === displayedAnimalsForList.length}
-                                        ref={el => el && (el.indeterminate = listSelectedIds.size > 0 && listSelectedIds.size < displayedAnimalsForList.length)}
+                                        checked={displayedAnimalsForList.some(animal => animal.isOwned !== false && !animal.pendingTransferId)
+                                            && displayedAnimalsForList.filter(animal => animal.isOwned !== false && !animal.pendingTransferId)
+                                                .every(animal => listSelectedIds.has(animal.id_public))}
+                                        ref={el => {
+                                            if (!el) return;
+                                            const eligible = displayedAnimalsForList.filter(
+                                                animal => animal.isOwned !== false && !animal.pendingTransferId,
+                                            );
+                                            const selected = eligible.filter(animal => listSelectedIds.has(animal.id_public));
+                                            el.indeterminate = selected.length > 0 && selected.length < eligible.length;
+                                        }}
                                     />
                                 </th>
                                 {listViewColumns.animal && <th className="px-3 py-2 text-left font-semibold">Animal</th>}
@@ -6871,6 +6955,7 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                                                 type="checkbox"
                                                 checked={listSelectedIds.has(animal.id_public)}
                                                 onChange={() => handleListToggle(animal.id_public)}
+                                                disabled={animal.isOwned === false || Boolean(animal.pendingTransferId)}
                                                 className="w-4 h-4 cursor-pointer rounded"
                                                 onClick={e => e.stopPropagation()}
                                             />
@@ -6937,7 +7022,8 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
             ) : (
                 <div className="space-y-3 sm:space-y-4">
                     {speciesNames.map(species => {
-                        const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species] || false;
+                        const isTransferMode = bulkTransferMode[species] || false;
+                        const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species] || isTransferMode;
                         const isArchiveMode = bulkArchiveMode[species] || false;
                         const selected = selectedAnimals[species] || [];
                         const isCollapsed = collapsedSpecies[species] || false;
@@ -7015,6 +7101,31 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                                                         Cancel
                                                     </button>
                                                 </>
+                                            ) : isTransferMode ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => {
+                                                            const selectedTransferAnimals = groupedAnimals[species].filter(
+                                                                animal => selected.includes(animal.id_public) && animal.isOwned !== false && !animal.pendingTransferId,
+                                                            );
+                                                            if (selectedTransferAnimals.length) {
+                                                                onBulkTransferSelected?.(selectedTransferAnimals);
+                                                                toggleBulkTransferMode(species);
+                                                            }
+                                                        }}
+                                                        disabled={selected.length === 0 || !onBulkTransferSelected}
+                                                        className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <span className="hidden sm:inline">Transfer Selected</span>
+                                                        <span className="sm:hidden">Transfer</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBulkTransferMode(species)}
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:text-dark-text text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
                                             ) : (
                                                 <>
                                                     <button
@@ -7066,6 +7177,15 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                                             >
                                                 <Archive className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600 dark:text-dark-text-secondary" />
                                             </button>
+                                            {onBulkTransferSelected && (
+                                                <button
+                                                    onClick={() => toggleBulkTransferMode(species)}
+                                                    className="p-1 sm:p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
+                                                    title="Transfer Multiple"
+                                                >
+                                                    <ArrowLeftRight className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-blue-600 dark:text-blue-400" />
+                                                </button>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -7079,7 +7199,7 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
                                             animal={animal} 
                                             onEditAnimal={onEditAnimal}
                                             species={species}
-                                            isSelectable={isBulkMode}
+                                            isSelectable={isBulkMode && (!isTransferMode || (animal.isOwned !== false && !animal.pendingTransferId))}
                                             isSelected={selected.includes(animal.id_public)}
                                             onToggleSelect={toggleAnimalSelection}
                                             onTogglePrivacy={toggleAnimalPrivacy}
