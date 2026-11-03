@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import apiClient from '../../utils/apiClient';
 import { AnimalNameWithFlag } from '../../utils/animalDisplayName';
-import { Flame, Gem, Loader2, Search, User, Cat } from 'lucide-react';
+import { Flame, Gem, History, Loader2, Search, Trash2, User, Cat, X } from 'lucide-react';
 
 const getDonationBadge = (user) => {
     if (!user) return null;
@@ -87,14 +87,55 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
 
 // Conflict Resolution Modal Component
 
-const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className = '' }) => {
+const RECENT_SEARCH_LIMIT = 6;
+
+const readRecentSearches = (storageKey) => {
+    try {
+        const saved = window.localStorage.getItem(storageKey);
+        const parsed = saved ? JSON.parse(saved) : [];
+        return Array.isArray(parsed) ? parsed.filter(term => typeof term === 'string').slice(0, RECENT_SEARCH_LIMIT) : [];
+    } catch (error) {
+        console.warn('Unable to load recent global searches:', error);
+        return [];
+    }
+};
+
+const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className = '', userId }) => {
+    const storageKey = `crittertrack:global-search:recent:${userId || 'guest'}`;
     const [searchTerm, setSearchTerm] = useState('');
     const [userResults, setUserResults] = useState([]);
     const [animalResults, setAnimalResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [recentSearches, setRecentSearches] = useState(() => readRecentSearches(storageKey));
     const searchRef = React.useRef(null);
     const debounceTimerRef = React.useRef(null);
+
+    const persistRecentSearches = (nextSearches) => {
+        setRecentSearches(nextSearches);
+        try {
+            window.localStorage.setItem(storageKey, JSON.stringify(nextSearches));
+            window.dispatchEvent(new CustomEvent('crittertrack:global-search:recent-updated', {
+                detail: { storageKey, searches: nextSearches }
+            }));
+        } catch (error) {
+            console.warn('Unable to save recent global searches:', error);
+        }
+    };
+
+    useEffect(() => {
+        setRecentSearches(readRecentSearches(storageKey));
+    }, [storageKey]);
+
+    useEffect(() => {
+        const updateRecentSearches = (event) => {
+            if (event.detail?.storageKey === storageKey && Array.isArray(event.detail.searches)) {
+                setRecentSearches(event.detail.searches);
+            }
+        };
+        window.addEventListener('crittertrack:global-search:recent-updated', updateRecentSearches);
+        return () => window.removeEventListener('crittertrack:global-search:recent-updated', updateRecentSearches);
+    }, [storageKey]);
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -112,10 +153,15 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
         if (!term || term.trim().length < 2) {
             setUserResults([]);
             setAnimalResults([]);
-            setShowResults(false);
+            setShowResults(!!searchRef.current?.contains(document.activeElement));
             return;
         }
 
+        const nextSearches = [
+            term.trim(),
+            ...recentSearches.filter(recent => recent.toLowerCase() !== term.trim().toLowerCase())
+        ].slice(0, RECENT_SEARCH_LIMIT);
+        persistRecentSearches(nextSearches);
         setLoading(true);
         setShowResults(true);
         
@@ -197,6 +243,7 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
     // Debounce search input
     const handleSearchChange = (value) => {
         setSearchTerm(value);
+        setShowResults(true);
         
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -219,6 +266,18 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
         onSelectAnimal(animal);
     };
 
+    const handleRecentSearchClick = (term) => {
+        setSearchTerm(term);
+        performSearch(term);
+    };
+
+    const removeRecentSearch = (event, term) => {
+        event.stopPropagation();
+        persistRecentSearches(recentSearches.filter(recent => recent !== term));
+    };
+
+    const clearRecentSearches = () => persistRecentSearches([]);
+
     const totalResults = userResults.length + animalResults.length;
 
     return (
@@ -230,7 +289,7 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                     placeholder="Search users, animals, IDs..."
                     value={searchTerm}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    onFocus={() => searchTerm.trim().length >= 2 && setShowResults(true)}
+                    onFocus={() => setShowResults(true)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition text-sm"
                 />
                 {loading && (
@@ -239,9 +298,47 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             </div>
 
             {/* Results dropdown */}
-            {showResults && searchTerm.trim().length >= 2 && (
+            {showResults && (searchTerm.trim().length >= 2 || recentSearches.length > 0) && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-dark-card-bg rounded-lg shadow-xl border border-gray-200 dark:border-dark-border max-h-96 overflow-y-auto z-50">
-                    {loading ? (
+                    {searchTerm.trim().length < 2 ? (
+                        <div>
+                            <div className="px-3 py-2 bg-gray-50 dark:bg-dark-surface text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wide flex items-center justify-between">
+                                <span className="flex items-center gap-1.5"><History size={14} /> Recent searches</span>
+                                <button
+                                    type="button"
+                                    onClick={clearRecentSearches}
+                                    className="normal-case font-medium text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text flex items-center gap-1"
+                                >
+                                    <Trash2 size={13} /> Clear
+                                </button>
+                            </div>
+                            {recentSearches
+                                .filter(term => !searchTerm.trim() || term.toLowerCase().includes(searchTerm.trim().toLowerCase()))
+                                .map(term => (
+                                    <div key={term} className="flex items-center hover:bg-gray-50 dark:hover:bg-dark-surface-hover">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRecentSearchClick(term)}
+                                            className="flex-1 min-w-0 px-3 py-2 text-left text-sm text-gray-700 dark:text-dark-text truncate flex items-center gap-2"
+                                        >
+                                            <History size={14} className="flex-shrink-0 text-gray-400 dark:text-dark-text-muted" />
+                                            <span className="truncate">{term}</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            aria-label={`Remove ${term} from recent searches`}
+                                            onClick={(event) => removeRecentSearch(event, term)}
+                                            className="p-2 mr-1 text-gray-400 hover:text-gray-700 dark:text-dark-text-muted dark:hover:text-dark-text"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            {recentSearches.filter(term => !searchTerm.trim() || term.toLowerCase().includes(searchTerm.trim().toLowerCase())).length === 0 && (
+                                <p className="px-3 py-3 text-sm text-gray-500 dark:text-dark-text-muted">No recent searches.</p>
+                            )}
+                        </div>
+                    ) : loading ? (
                         <div className="p-4 text-center text-gray-500 dark:text-dark-text-muted">
                             <Loader2 size={24} className="animate-spin mx-auto mb-2" />
                             <p className="text-sm">Searching...</p>

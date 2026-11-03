@@ -17,6 +17,9 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [verificationCode, setVerificationCode] = useState('');
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [forgotPasswordStep, setForgotPasswordStep] = useState(0); // 0=off, 1=email, 2=code, 3=new password
+    const [forgotUsername, setForgotUsername] = useState(false);
+    const [usernameRecoveryEmail, setUsernameRecoveryEmail] = useState('');
+    const [usernameRecoverySubmitted, setUsernameRecoverySubmitted] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
     const [resetCode, setResetCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -440,6 +443,29 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         setConfirmNewPassword('');
     };
 
+    const handleForgotUsername = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await apiClient.post('/auth/forgot-username', { recoveryEmail: usernameRecoveryEmail });
+            setUsernameRecoverySubmitted(true);
+        } catch (error) {
+            console.error('Forgot username error:', error.response?.data || error.message);
+            showModalMessage(
+                'Request Failed',
+                error.response?.data?.message || 'Unable to process the request. Please try again.'
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const closeForgotUsername = () => {
+        setForgotUsername(false);
+        setUsernameRecoveryEmail('');
+        setUsernameRecoverySubmitted(false);
+    };
+
     const handleResendCode = async () => {
         setLoading(true);
         try {
@@ -474,7 +500,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     </div>
                 </div>
             )}
-            {!forgotPasswordStep && !verificationStep && (
+            {!forgotPasswordStep && !forgotUsername && !verificationStep && (
                 <div className="mb-6 flex items-center gap-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 p-4 shadow lg:hidden dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg">
                     <Users size={30} className="flex-shrink-0 text-primary-dark dark:text-dark-primary" />
                     <div>
@@ -488,7 +514,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 </div>
             )}
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-dark-text mb-6 text-center">
-                {forgotPasswordStep > 0 ? 'Reset Password' : (verificationStep ? 'Verify Your Email' : mainTitle)}
+                {forgotPasswordStep > 0 ? 'Reset Password' : (forgotUsername ? 'Forgot Username?' : (verificationStep ? 'Verify Your Email' : mainTitle))}
             </h2>
 
             {forgotPasswordStep > 0 ? (
@@ -555,6 +581,43 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         className="w-full text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition py-2"
                     >
                         ? Back to Login
+                    </button>
+                </form>
+            ) : forgotUsername ? (
+                <form onSubmit={handleForgotUsername} className="space-y-4">
+                    {usernameRecoverySubmitted ? (
+                        <p role="status" className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                            If a verified recovery email matches, the sign-in email has been sent.
+                        </p>
+                    ) : (
+                        <>
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                                Your username is the email address you use to sign in. Enter the separate recovery email you previously verified.
+                            </p>
+                            <input
+                                type="email"
+                                placeholder="Verified Recovery Email *"
+                                value={usernameRecoveryEmail}
+                                onChange={(e) => setUsernameRecoveryEmail(e.target.value)}
+                                required
+                                autoComplete="email"
+                                className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition"
+                            />
+                            <button
+                                type="submit"
+                                disabled={loading || !usernameRecoveryEmail}
+                                className="w-full bg-primary dark:bg-dark-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Send Sign-in Email'}
+                            </button>
+                        </>
+                    )}
+                    <button
+                        type="button"
+                        onClick={closeForgotUsername}
+                        className="w-full text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition py-2"
+                    >
+                        Back to Login
                     </button>
                 </form>
             ) : verificationStep ? (
@@ -757,15 +820,22 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 </form>
             )}
             
-            {!verificationStep && forgotPasswordStep === 0 && (
+            {!verificationStep && forgotPasswordStep === 0 && !forgotUsername && (
                 <>
                     <div className="mt-6 text-center space-y-3">
                         {!isRegister && (
-                            <button type="button" onClick={() => setForgotPasswordStep(1)}
-                                className="block w-full text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium"
-                            >
-                                Forgot Password?
-                            </button>
+                            <>
+                                <button type="button" onClick={() => setForgotPasswordStep(1)}
+                                    className="block w-full text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium"
+                                >
+                                    Forgot Password?
+                                </button>
+                                <button type="button" onClick={() => { setForgotUsername(true); setUsernameRecoverySubmitted(false); }}
+                                    className="block w-full text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium"
+                                >
+                                    Forgot Username?
+                                </button>
+                            </>
                         )}
                         <button type="button" onClick={() => setIsRegister(prev => !prev)}
                             className="block w-full text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium"

@@ -13,7 +13,9 @@ const CommunityFavoritesPage = lazy(() => import('./components/Community/Communi
 const CommunityNewsPage = lazy(() => import('./components/Community/CommunityNewsPage'));
 const CommunityBreedersPage = lazy(() => import('./components/Community/CommunityBreedersPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
-const LitterManagement = lazy(() => import('./components/LitterManagement'));
+const LittersOverviewPage = lazy(() => import('./components/Litter/OverviewPage'));
+const LitterDetailsPage = lazy(() => import('./components/Litter/DetailsPage'));
+const LitterEditorPage = lazy(() => import('./components/Litter/EditorPage'));
 const CalendarPage = lazy(() => import('./components/CalendarPage'));
 const BudgetingTab = lazy(() => import('./components/BudgetingTab'));
 const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
@@ -175,6 +177,7 @@ export function AppRoutes({
   setPreSelectedTransactionType,
   setTransferAnimal,
   setShowTransferModal,
+  handleOpenBulkTransferWithAnimals,
   
   // Species Management
   speciesToAdd,
@@ -226,6 +229,22 @@ export function AppRoutes({
     setShowMessages(true);
   };
 
+  // Shared props for the litter editor / details pages (canonical /litters/* routes and the
+  // legacy /litter/* aliases render the same components).
+  const litterPageProps = {
+    authToken,
+    API_BASE_URL,
+    userProfile,
+    setUserProfile,
+    showModalMessage,
+    onViewAnimal: handleViewAnimal,
+    handleViewAnimal,
+    handleEditAnimal,
+    speciesOptions,
+    breedingLineDefs,
+    animalBreedingLines,
+  };
+
   return (
     <RouteErrorBoundary>
     <Suspense fallback={<PageLoader />}>
@@ -254,6 +273,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
         />
       } />
       
@@ -281,6 +301,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
         />
       } />
 
@@ -309,6 +330,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
           initialAnimalView="collections"
         />
       } />
@@ -335,6 +357,7 @@ export function AppRoutes({
           locations={locations}
           fetchLocations={fetchLocations}
           generalTasksState={generalTasksState}
+          onBulkTransferSelected={handleOpenBulkTransferWithAnimals}
           initialAnimalView="enclosures"
         />
       } />
@@ -448,9 +471,9 @@ export function AppRoutes({
       <Route path="/community/news" element={<CommunityNewsPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
       <Route path="/community/breeders" element={<CommunityBreedersPage authToken={authToken} API_BASE_URL={API_BASE_URL} />} />
 
-      {/* Litters */}
+      {/* Litters — Overview */}
       <Route path="/litters" element={
-        <LitterManagement
+        <LittersOverviewPage
           key="litters-route"
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
@@ -465,6 +488,55 @@ export function AppRoutes({
           setCachedLitters={setCachedLitters}
           litterCacheTimestamp={litterCacheTimestamp}
           setLitterCacheTimestamp={setLitterCacheTimestamp}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+        />
+      } />
+
+      {/* Litters — canonical routes. Static segments (new) outrank :ctlId in React Router, and the
+          legacy /litter/* paths below stay registered as aliases so old links/bookmarks keep working. */}
+      <Route path="/litters/new" element={<LitterEditorPage {...litterPageProps} />} />
+      <Route path="/litters/:ctlId/edit" element={<LitterEditorPage {...litterPageProps} />} />
+      <Route path="/litters/:ctlId" element={<LitterDetailsPage {...litterPageProps} />} />
+
+      {/* Litter — Create / Edit (shared full-page editor) */}
+      <Route path="/litter/edit" element={
+        <LitterEditorPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          showModalMessage={showModalMessage}
+          onViewAnimal={handleViewAnimal}
+          speciesOptions={speciesOptions}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+        />
+      } />
+      <Route path="/litter/edit/:litterId" element={
+        <LitterEditorPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          showModalMessage={showModalMessage}
+          onViewAnimal={handleViewAnimal}
+          speciesOptions={speciesOptions}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
+        />
+      } />
+
+      {/* Litter — Details (full read-oriented breeding record) */}
+      <Route path="/litter/:ctilid" element={
+        <LitterDetailsPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          showModalMessage={showModalMessage}
+          onViewAnimal={handleViewAnimal}
+          speciesOptions={speciesOptions}
           breedingLineDefs={breedingLineDefs}
           animalBreedingLines={animalBreedingLines}
         />

@@ -2,6 +2,7 @@
  * Shared utilities for tree components (FamilyTree)
  * Extracted to reduce duplication (~50+ lines saved per component)
  */
+import dagre from 'dagre';
 import { formatAnimalAge, formatDateShort } from './dateFormatter';
 
 /**
@@ -105,7 +106,7 @@ export const buildTreeGraph = (animals, relationships = [], config = {}) => {
     const animalMap = new Map(animals.map(a => [a.id_public, a]));
     
     // Create dagre graph for layout
-    const g = new window.dagre.graphlib.Graph();
+    const g = new dagre.graphlib.Graph();
     g.setGraph({ rankdir: layout === 'horizontal' ? 'LR' : 'TB', marginx: 50, marginy: 50 });
     g.setDefaultEdgeLabel(() => ({}));
     
@@ -141,8 +142,8 @@ export const buildTreeGraph = (animals, relationships = [], config = {}) => {
     }
     
     // Calculate layout using Dagre
-    window.dagre.graphlib.alg.preorder(g, g.nodes()[0]);
-    window.dagre.layout(g);
+    dagre.graphlib.alg.preorder(g, g.nodes()[0]);
+    dagre.layout(g);
     
     // Apply calculated positions to ReactFlow nodes
     g.nodes().forEach(nodeId => {

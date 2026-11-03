@@ -45,9 +45,6 @@ import GeneralTaskModal from '../GeneralTaskModal';
 import QuickAddAnimalModal from '../QuickAddAnimalModal';
 import { API_BASE_URL } from '../../utils/apiConfig';
 
-// The Reproduction tab's + Add opens the shared entry form (formOnly mode of Litter Management).
-const LitterEntryForm = React.lazy(() => import('../LitterManagement'));
-
 const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
@@ -279,7 +276,8 @@ const AnimalList = ({
     locations,
     fetchLocations,
     // Standalone (not animal/enclosure-linked) Feeding & Care tasks
-    generalTasksState
+    generalTasksState,
+    onBulkTransferSelected,
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -456,7 +454,10 @@ const AnimalList = ({
     }, []);
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [bulkArchiveMode, setBulkArchiveMode] = useState({}); // { species: true/false }
+    const [bulkTransferMode, setBulkTransferMode] = useState({});
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
+    const [liteBulkTransferMode, setLiteBulkTransferMode] = useState(false);
+    const [liteTransferSelectedIds, setLiteTransferSelectedIds] = useState(new Set());
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     const [filtersExpanded, setFiltersExpanded] = useState(false); // toggle filter panel visibility
@@ -708,8 +709,6 @@ const AnimalList = ({
         });
     };
 
-    // "+ Add" on the Reproduction tab opens the shared entry form (components/LitterManagement, formOnly)
-    const [showAddEntryForm, setShowAddEntryForm] = useState(false);
     const [showQuickAdd, setShowQuickAdd] = useState(false); // Lite mode's Add Animal flow (see QuickAddAnimalModal)
 
     // Assign Quarantine/Treatment modal state
@@ -1676,7 +1675,7 @@ useEffect(() => {
         }
     }, [logEnclosureHistory]);
 
-    const handleOpenDetail = (enclosure) => {
+    const handleOpenDetail = useCallback((enclosure) => {
         setSelectedEnclosure(enclosure);
         setShowDetailModal(true);
         setLoadingAnimals(false); // Not loading from API anymore
@@ -1688,7 +1687,18 @@ useEffect(() => {
 
         const occupants = allAnimalsRaw.filter(a => a.enclosureId === enclosureId); // This is correct
         setEnclosureAnimals(occupants);
-    };
+    }, [allAnimalsRaw, getLocationPath, locations]);
+
+    useEffect(() => {
+        const requestedEnclosureId = new URLSearchParams(routerLocation.search).get('open');
+        if (!requestedEnclosureId || routerLocation.pathname !== '/enclosures') return;
+
+        const enclosure = enclosures.find(item => String(item._id || item.id) === requestedEnclosureId);
+        if (!enclosure) return;
+
+        handleOpenDetail(enclosure);
+        routerNavigate(routerLocation.pathname, { replace: true, state: null });
+    }, [routerLocation.pathname, routerLocation.search, enclosures, routerNavigate, handleOpenDetail]);
 
     const assignableAnimals = useMemo(() => {
         if (!selectedEnclosure) return [];
@@ -2535,6 +2545,11 @@ useEffect(() => {
         setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
     };
 
+    const toggleBulkTransferMode = (species) => {
+        setBulkTransferMode(prev => ({ ...prev, [species]: !prev[species] }));
+        setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+    };
+
     const toggleAnimalSelection = (species, animalId) => {
         setSelectedAnimals(prev => {
             const current = prev[species] || [];
@@ -2750,7 +2765,9 @@ useEffect(() => {
 
     const handleListSelectAll = (e) => {
         if (e.target.checked) {
-            setListSelectedIds(new Set(displayedAnimalsForList.map(a => a.id_public)));
+            setListSelectedIds(new Set(displayedAnimalsForList
+                .filter(animal => animal.isOwned !== false && !animal.pendingTransferId)
+                .map(animal => animal.id_public)));
         } else {
             setListSelectedIds(new Set());
         }
@@ -4147,14 +4164,169 @@ useEffect(() => {
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColor}`}>{statusLabel}</span>
                 </div>
 
-                {/* Actions */}
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
-                </div>
-            </div>
-        );
-    };
+{/* Actions */}
+<div className="sm:text-right flex items-center gap-1 justify-end">
+  {animal.isPlannedMating && (
+    <>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPlannedMating: false,
+            isInMating: true,
+            matingDate: new Date().toISOString().slice(0, 10),
+          })
+        }
+        className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"
+      >
+        <Hourglass size={12} /> Mated today
+      </button>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPlannedMating: false,
+            isInMating: false,
+            isPregnant: false,
+            isNursing: false,
+          })
+        }
+        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+        title="Clear Status"
+      >
+        <X size={12} />
+      </button>
+    </>
+  )}
+
+  {animal.isInMating && (
+    <>
+      {animal.gender !== 'Male' && (
+        <button
+          onClick={(e) =>
+            handleReproStatusUpdate(e, animal, {
+              isInMating: false,
+              isPregnant: true,
+              pregnancyDate: new Date().toISOString().slice(0, 10),
+            })
+          }
+          className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"
+        >
+          <ScanHeart size={12} /> Assign Pregnant
+        </button>
+      )}
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isInMating: false,
+            isPregnant: false,
+            isNursing: false,
+          })
+        }
+        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+        title="Clear Status"
+      >
+        <X size={12} />
+      </button>
+    </>
+  )}
+
+  {animal.isPregnant && animal.gender !== 'Male' && (
+    <>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPregnant: false,
+            isNursing: true,
+            birthDate: new Date().toISOString().slice(0, 10),
+          })
+        }
+        className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"
+      >
+        <Droplet size={12} /> Born today
+      </button>
+      <button
+        onClick={(e) =>
+          handleReproStatusUpdate(e, animal, {
+            isPregnant: false,
+            isInMating: false,
+            isNursing: false,
+          })
+        }
+        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+        title="Clear Status"
+      >
+        <X size={12} />
+      </button>
+    </>
+  )}
+
+  {/* Nursing / Weaning Actions */}
+  {animal.isNursing &&
+    animal.gender !== 'Male' &&
+    (() => {
+      const litterBirthDate = animal.litterBirthDate; // TODO: Get from actual litter data source
+const daysSinceBirth = litterBirthDate 
+    ? Math.floor((new Date() - new Date(litterBirthDate)) / (1000 * 60 * 60 * 24)) 
+    : 0;
+const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSinceBirth <= 90 && !animal.weaningDate;
+
+      return (
+        <>
+          {showWeanedButton && (
+            <button
+              onClick={(e) =>
+                handleReproStatusUpdate(e, animal, {
+                  isNursing: false,
+                  weaningDate: new Date().toISOString().slice(0, 10),
+                  weaningConfirmed: true,
+                })
+              }
+              className="flex items-center gap-1 whitespace-nowrap text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
+            >
+              <Check size={12} /> Mark Weaned
+            </button>
+          )}
+
+          <button
+            onClick={(e) =>
+              handleReproStatusUpdate(e, animal, {
+                isNursing: false,
+                isPregnant: false,
+                isInMating: false,
+              })
+            }
+            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+            title="Clear Status"
+          >
+            <X size={12} />
+          </button>
+        </>
+      );
+    })()}
+
+  {/* Weaned Status */}
+  {!animal.isNursing &&
+    animal.gender !== 'Male' &&
+    animal.weaningConfirmed &&
+    animal.weaningDate && (
+      <span className="text-xs text-gray-400 dark:text-dark-text-muted ml-2">
+        Weaned
+      </span>
+    )}
+
+  {/* Edit Animal */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      onEditAnimal(animal);
+    }}
+    className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+    title="Edit Animal"
+  >
+    <Edit size={14} />
+  </button>
+</div>
+</div>
+)}
 
     const HealthAnimalBar = ({ animal, type, onViewAnimal, onEditAnimal, handleUnquarantine, handleDischargeTreatment, handleMedicationAction, parseArrayField, calcNextDose, formatNextDose }) => {
         const isQuarantine = type === 'quarantine';
@@ -6327,7 +6499,45 @@ useEffect(() => {
                             <>
                                 <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
                                     <button
-                                        onClick={() => setOwnedFilterMode('owned')}
+                                        onClick={() => {
+                                            if (!liteBulkTransferMode) {
+                                                setLiteBulkTransferMode(true);
+                                                setLiteTransferSelectedIds(new Set());
+                                                return;
+                                            }
+                                            const selected = animals.filter(
+                                                animal => liteTransferSelectedIds.has(animal.id_public)
+                                                    && animal.isOwned !== false
+                                                    && !animal.pendingTransferId,
+                                            );
+                                            if (selected.length) onBulkTransferSelected?.(selected);
+                                            setLiteBulkTransferMode(false);
+                                            setLiteTransferSelectedIds(new Set());
+                                        }}
+                                        disabled={liteBulkTransferMode && liteTransferSelectedIds.size === 0}
+                                        className="btn btn-ghost btn-sm flex items-center rounded-md bg-white p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 dark:btn-ghost-active disabled:opacity-50"
+                                        title={liteBulkTransferMode ? 'Transfer selected animals' : 'Select animals to transfer'}
+                                    >
+                                        <ArrowLeftRight className="h-4 w-4" />
+                                        <span className="text-xs">
+                                            {liteBulkTransferMode
+                                                ? `Send (${liteTransferSelectedIds.size})`
+                                                : 'Transfer'}
+                                        </span>
+                                    </button>
+                                    {liteBulkTransferMode && (
+                                        <button
+                                            onClick={() => {
+                                                setLiteBulkTransferMode(false);
+                                                setLiteTransferSelectedIds(new Set());
+                                            }}
+                                            className="btn btn-ghost btn-sm rounded-md p-1.5"
+                                            title="Cancel bulk transfer"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                    <button
                                         className={`px-2.5 sm:px-3 py-1 sm:py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                                         title="Show only animals you own"
                                     >
@@ -6355,7 +6565,7 @@ useEffect(() => {
                         )}
                         {/* Add Enclosure button */}
                         {animalView === 'reproduction' ? (
-                            <button onClick={() => setShowAddEntryForm(true)} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
+                            <button onClick={() => routerNavigate('/litters/new')} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add</span>
                             </button>
                         ) : animalView === 'health' ? (
@@ -6647,6 +6857,14 @@ useEffect(() => {
                             onViewAnimal={onViewAnimal}
                             toggleAnimalOwned={toggleAnimalOwned}
                             onUpdateAnimal={onUpdateAnimal}
+                            isSelectable={liteBulkTransferMode && animal.isOwned !== false && !animal.pendingTransferId}
+                            isSelected={liteTransferSelectedIds.has(animal.id_public)}
+                            onToggleSelect={() => setLiteTransferSelectedIds((previous) => {
+                                const next = new Set(previous);
+                                if (next.has(animal.id_public)) next.delete(animal.id_public);
+                                else next.add(animal.id_public);
+                                return next;
+                            })}
                         />
                     ))}
                 </div>
@@ -6663,6 +6881,30 @@ useEffect(() => {
                             ))}
                         </div>
                     )}
+                    {onBulkTransferSelected && listSelectedIds.size > 0 && (
+                        <div className="mb-2 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const selected = displayedAnimalsForList.filter(
+                                        animal => listSelectedIds.has(animal.id_public)
+                                            && animal.isOwned !== false
+                                            && !animal.pendingTransferId,
+                                    );
+                                    if (selected.length) onBulkTransferSelected(selected);
+                                    setListSelectedIds(new Set());
+                                }}
+                                disabled={!displayedAnimalsForList.some(
+                                    animal => listSelectedIds.has(animal.id_public)
+                                        && animal.isOwned !== false
+                                        && !animal.pendingTransferId,
+                                )}
+                                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Transfer Selected ({listSelectedIds.size})
+                            </button>
+                        </div>
+                    )}
                     <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-dark-border shadow-sm">
                     <table className="min-w-full text-xs divide-y divide-gray-200 dark:divide-dark-border">
                         <thead className="bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary uppercase text-[10px] sticky top-0 z-10 border-b dark:border-dark-text-muted">
@@ -6672,8 +6914,17 @@ useEffect(() => {
                                         type="checkbox"
                                         className="w-4 h-4 cursor-pointer rounded"
                                         onChange={handleListSelectAll}
-                                        checked={displayedAnimalsForList.length > 0 && listSelectedIds.size === displayedAnimalsForList.length}
-                                        ref={el => el && (el.indeterminate = listSelectedIds.size > 0 && listSelectedIds.size < displayedAnimalsForList.length)}
+                                        checked={displayedAnimalsForList.some(animal => animal.isOwned !== false && !animal.pendingTransferId)
+                                            && displayedAnimalsForList.filter(animal => animal.isOwned !== false && !animal.pendingTransferId)
+                                                .every(animal => listSelectedIds.has(animal.id_public))}
+                                        ref={el => {
+                                            if (!el) return;
+                                            const eligible = displayedAnimalsForList.filter(
+                                                animal => animal.isOwned !== false && !animal.pendingTransferId,
+                                            );
+                                            const selected = eligible.filter(animal => listSelectedIds.has(animal.id_public));
+                                            el.indeterminate = selected.length > 0 && selected.length < eligible.length;
+                                        }}
                                     />
                                 </th>
                                 {listViewColumns.animal && <th className="px-3 py-2 text-left font-semibold">Animal</th>}
@@ -6710,6 +6961,7 @@ useEffect(() => {
                                                 type="checkbox"
                                                 checked={listSelectedIds.has(animal.id_public)}
                                                 onChange={() => handleListToggle(animal.id_public)}
+                                                disabled={animal.isOwned === false || Boolean(animal.pendingTransferId)}
                                                 className="w-4 h-4 cursor-pointer rounded"
                                                 onClick={e => e.stopPropagation()}
                                             />
@@ -6776,7 +7028,8 @@ useEffect(() => {
             ) : (
                 <div className="space-y-3 sm:space-y-4">
                     {speciesNames.map(species => {
-                        const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species] || false;
+                        const isTransferMode = bulkTransferMode[species] || false;
+                        const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species] || isTransferMode;
                         const isArchiveMode = bulkArchiveMode[species] || false;
                         const selected = selectedAnimals[species] || [];
                         const isCollapsed = collapsedSpecies[species] || false;
@@ -6854,6 +7107,31 @@ useEffect(() => {
                                                         Cancel
                                                     </button>
                                                 </>
+                                            ) : isTransferMode ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => {
+                                                            const selectedTransferAnimals = groupedAnimals[species].filter(
+                                                                animal => selected.includes(animal.id_public) && animal.isOwned !== false && !animal.pendingTransferId,
+                                                            );
+                                                            if (selectedTransferAnimals.length) {
+                                                                onBulkTransferSelected?.(selectedTransferAnimals);
+                                                                toggleBulkTransferMode(species);
+                                                            }
+                                                        }}
+                                                        disabled={selected.length === 0 || !onBulkTransferSelected}
+                                                        className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <span className="hidden sm:inline">Transfer Selected</span>
+                                                        <span className="sm:hidden">Transfer</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBulkTransferMode(species)}
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:text-dark-text text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
                                             ) : (
                                                 <>
                                                     <button
@@ -6905,6 +7183,15 @@ useEffect(() => {
                                             >
                                                 <Archive className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600 dark:text-dark-text-secondary" />
                                             </button>
+                                            {onBulkTransferSelected && (
+                                                <button
+                                                    onClick={() => toggleBulkTransferMode(species)}
+                                                    className="p-1 sm:p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
+                                                    title="Transfer Multiple"
+                                                >
+                                                    <ArrowLeftRight className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-blue-600 dark:text-blue-400" />
+                                                </button>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -6918,7 +7205,7 @@ useEffect(() => {
                                             animal={animal} 
                                             onEditAnimal={onEditAnimal}
                                             species={species}
-                                            isSelectable={isBulkMode}
+                                            isSelectable={isBulkMode && (!isTransferMode || (animal.isOwned !== false && !animal.pendingTransferId))}
                                             isSelected={selected.includes(animal.id_public)}
                                             onToggleSelect={toggleAnimalSelection}
                                             onTogglePrivacy={toggleAnimalPrivacy}
@@ -7024,23 +7311,6 @@ useEffect(() => {
                     onClose={() => setShowQuickAdd(false)}
                     onCreated={async () => { setShowQuickAdd(false); await handleRefresh(); }}
                 />
-            )}
-            {showAddEntryForm && (
-                <React.Suspense fallback={null}>
-                    <LitterEntryForm
-                        formOnly
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        showModalMessage={showModalMessage}
-                        onViewAnimal={onViewAnimal}
-                        speciesOptions={speciesOptions}
-                        breedingLineDefs={breedingLineDefs}
-                        animalBreedingLines={animalBreedingLines}
-                        onFormClosed={() => setShowAddEntryForm(false)}
-                        onEntrySaved={() => { fetchLitters(); handleRefresh(); }}
-                    />
-                </React.Suspense>
             )}
             </div>
         </>

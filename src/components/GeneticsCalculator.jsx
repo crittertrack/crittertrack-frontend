@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MOUSE_PHENOTYPE_EXAMPLES } from '../data/mousePhenotypeExamples';
 import { X, Book, User, Search } from 'lucide-react';
 import InfoButton from './shared/InfoButton';
 import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI, RAT_POSSIBLE_HET_LOCI } from '../data/fancyRatPhenotypeRules';
@@ -6,10 +7,8 @@ import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_G
 import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
 import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
 import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabel, getBallPythonDisplayPhenotype, BALL_PYTHON_POSSIBLE_HET_LOCI } from '../data/ballPythonPhenotypeRules';
-
-// A-locus allele dominance, highest first. Aw (white-bellied agouti) sits between Avy and A:
-// dominant over A/at/a/ae, recessive to Ay and Avy.
-const A_LOCUS_DOMINANCE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
+import PunnettSquare from './PunnettSquare';
+import { combineAlleles, createCombinedPunnettSquare } from '../utils/punnettSquare';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1981,6 +1980,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   const [showExamples, setShowExamples] = useState(false);
   const [activeTab, setActiveTab] = useState('self');
   const [offspringResults, setOffspringResults] = useState(null);
+  const [punnettSquareData, setPunnettSquareData] = useState(null);
+  const [offspringDisplayMode, setOffspringDisplayMode] = useState('summary');
   const [showWildcardNote, setShowWildcardNote] = useState(false);
   const [expandedPhenotypes, setExpandedPhenotypes] = useState({});
   const [feedbackGenotype, setFeedbackGenotype] = useState(null);
@@ -2024,6 +2025,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         setParent1PossibleHets([]);
         setParent2PossibleHets([]);
         setOffspringResults(null);
+        setPunnettSquareData(null);
+        setOffspringDisplayMode('summary');
         return;
       }
 
@@ -2045,6 +2048,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           setParent1PossibleHets([]);
           setParent2PossibleHets([]);
           setOffspringResults(null);
+          setPunnettSquareData(null);
+          setOffspringDisplayMode('summary');
         } else {
           console.error('Failed to fetch genetics data, falling back to Fancy Mouse');
           setSelectedSpecies('Fancy Mouse');
@@ -2158,6 +2163,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     setParent2PossibleHets([]);
     setActiveTab('self');
     setOffspringResults(null);
+    setPunnettSquareData(null);
+    setOffspringDisplayMode('summary');
     setShowWildcardNote(false);
     setExpandedPhenotypes({});
     setFeedbackGenotype(null);
@@ -2386,19 +2393,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       const locusWeights = {};
       for (const a1 of parent1Alleles) {
         for (const a2 of parent2Alleles) {
-          const alleles = [a1, a2].sort((a, b) => {
-            // A-locus alleles are ordered by dominance (Ay > Avy > Aw > A > at > a > ae) so the
-            // combo key always matches a GENE_LOCI entry (e.g. 'Ay/Aw', never 'Aw/Ay').
-            if (locus === 'A') {
-              const ra = A_LOCUS_DOMINANCE_ORDER.indexOf(a);
-              const rb = A_LOCUS_DOMINANCE_ORDER.indexOf(b);
-              if (ra !== -1 && rb !== -1) return ra - rb;
-            }
-            if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
-            if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
-            return a.localeCompare(b);
-          });
-          const combo = `${alleles[0]}/${alleles[1]}`;
+          const combo = combineAlleles(a1, a2, locus);
           locusWeights[combo] = (locusWeights[combo] || 0) + 1;
         }
       }
@@ -2605,6 +2600,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     );
     setShowWildcardNote(hasWildcard);
 
+    setPunnettSquareData(activeHetEntries.length
+      ? { reason: 'possible_hets' }
+      : createCombinedPunnettSquare(p1, p2, selectedLoci, geneLoci));
+    setOffspringDisplayMode('summary');
     setOffspringResults(resultsArray);
   };
 
@@ -2825,157 +2824,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   };
 
   // Example varieties
-  const EXAMPLE_TABS = {
-    self: {
-      name: 'Self',
-      examples: [
-        { name: 'Extreme Black', image: '/images/phenotypes/ex-black.png', genotype: { A: 'ae/ae', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Black', image: '/images/phenotypes/black.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolate', image: '/images/phenotypes/chocolate.png', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue', image: '/images/phenotypes/blue.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Lilac', image: '/images/phenotypes/lilac.png', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Champagne', image: '/images/phenotypes/champagne.png', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Dove', image: '/images/phenotypes/dove.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Lavender', image: '/images/phenotypes/lavender.png', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
-        { name: 'Silver', image: '/images/phenotypes/silver.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
-        { name: 'Red', image: '/images/phenotypes/red.png', genotypes: [
-          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' },
-          { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }
-        ] },
-        { name: 'Fawn', image: '/images/phenotypes/fawn.png', genotypes: [
-          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'p/p' },
-          { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' }
-        ] },
-        { name: 'Amber', image: '/images/phenotypes/amber.png', genotypes: [
-          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'e/e', P: 'P/P' },
-          { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }
-        ] },
-        { name: 'Leaden', image: '/images/phenotypes/blue.png', genotypes: [
-          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', Ln: 'ln/ln', P: 'P/P' },
-          { A: 'A/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', Ln: 'ln/ln', P: 'P/P' },
-        ] },
-      ]
-    },
-    ticked: {
-      name: 'Ticked',
-      examples: [
-        { name: 'Agouti', image: '/images/phenotypes/agouti.png', genotype: { A: 'A/-', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Brindle', image: '/images/phenotypes/brindle.png', genotype: { A: 'Avy/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Argente', image: '/images/phenotypes/argente.png', genotype: { A: 'A/-', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Cinnamon', image: '/images/phenotypes/cinnamon.png', genotype: { A: 'A/-', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Agouti', image: '/images/phenotypes/blue-agouti.png', genotype: { A: 'A/-', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Cinnamon Argente', image: '/images/phenotypes/cinnamon-argente.png', genotype: { A: 'A/-', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-      ]
-    },
-    tan: {
-      name: 'Tan',
-      examples: [
-        { name: 'Black Tan', image: '/images/phenotypes/blacktan.png', genotype: { A: 'at/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Tan', image: '/images/phenotypes/bluetan.png', genotype: { A: 'at/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolate Tan', image: '/images/phenotypes/chocolatetan.png', genotype: { A: 'at/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Lilac Tan', image: '/images/phenotypes/lilactan.png', genotype: { A: 'at/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Dove Tan', image: '/images/phenotypes/dovetan.png', genotype: { A: 'at/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Agouti Tan', image: '/images/phenotypes/agoutitan.png', genotype: { A: 'A/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Argente Tan', image: '/images/phenotypes/argentetan.png', genotype: { A: 'A/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Blue Agouti Tan', image: '/images/phenotypes/blueagoutitan.png', genotype: { A: 'A/at', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Champagne Tan', image: '/images/phenotypes/champagnetan.png', genotype: { A: 'at/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Cinnamon Argente Tan', image: '/images/phenotypes/cinnamonargentetan.png', genotype: { A: 'A/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Cinnamon Tan', image: '/images/phenotypes/cinnamontan.png', genotype: { A: 'A/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Lavender Tan', image: '/images/phenotypes/lavendertan.png', genotype: { A: 'at/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
-        { name: 'Silver Tan', image: '/images/phenotypes/silvertan.png', genotype: { A: 'at/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
-        { name: 'Sable', image: '/images/phenotypes/sable.png', genotype: { A: 'Ay/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', U: 'U/u' } },
-      ]
-    },
-    cdilute: {
-      name: 'C-locus',
-      examples: [
-        { name: 'Albino', image: '/images/phenotypes/albino-pew.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Bone', image: '/images/phenotypes/bone.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Stone', image: '/images/phenotypes/bluestone.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Stone', image: '/images/phenotypes/stone.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Sealpoint Himalayan', image: '/images/phenotypes/himalayan.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Sealpoint Siamese', image: '/images/phenotypes/siamese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Bluepoint Siamese', image: '/images/phenotypes/bluesiamese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolatepoint Siamese', image: '/images/phenotypes/chocsiamese.png', genotype: { A: 'a/a', B: 'b/b', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Burmese', image: '/images/phenotypes/burmese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Burmese', image: '/images/phenotypes/blueburmese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Colorpoint Blue', image: '/images/phenotypes/colorpointblue.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Colorpoint Chocolate', image: '/images/phenotypes/colorpointchoc.png', genotype: { A: 'a/a', B: 'b/b', C: 'ce/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Beige', image: '/images/phenotypes/beige.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Colorpoint Beige', image: '/images/phenotypes/colorpointbeige.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Beige', image: '/images/phenotypes/bluebeige.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ce', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Mock Chocolate', image: '/images/phenotypes/mockchoc.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Mock Chocolate', image: '/images/phenotypes/bluemockchoc.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Sepia', image: '/images/phenotypes/black.png', genotype: { A: 'a/a', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Sepia', image: '/images/phenotypes/bluesepia.png', genotype: { A: 'a/a', B: 'B/B', C: 'cch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolate Sepia', image: '/images/phenotypes/chocsepia.png', genotype: { A: 'a/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Cream', image: '/images/phenotypes/cream.png', genotype: { A: 'Ay/-', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Grey Agouti', image: '/images/phenotypes/silveragouti.png', genotype: { A: 'A/-', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-      ]
-    },
-    fox: {
-      name: 'Fox',
-      examples: [
-        { name: 'Sepia Fox', image: '/images/phenotypes/sepiafox.png', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Beige Fox', image: '/images/phenotypes/beigefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Bone Fox', image: '/images/phenotypes/bonefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Burmese Fox', image: '/images/phenotypes/burmesefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Chinchilla', image: '/images/phenotypes/chinchilla.png', genotypes: [
-          { A: 'A/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' },
-          { A: 'Aw/Aw', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' }
-        ], note: 'Some lines are white-bellied agouti (Aw) instead of agouti tan (A/at) • Aw/Aw chinchillas breed true.' },
-        { name: 'Agouti Fox', genotype: { A: 'Aw/Aw', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, note: 'White-bellied agouti (Aw): agouti top with a white/cream/tan belly. Unstandardized; Aw/A, Aw/at, Aw/a and Aw/ae look the same.' },
-        { name: 'Colorpoint Beige Fox', image: '/images/phenotypes/colorpointbeigefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Cream Fox', image: '/images/phenotypes/creamfox.png', genotype: { A: 'Ay/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Sealpoint Himalayan Fox', image: '/images/phenotypes/himalayanfox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Mock Chocolate Fox', image: '/images/phenotypes/mockchocfox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Sealpoint Siamese Fox', image: '/images/phenotypes/siamesefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Stone Fox', image: '/images/phenotypes/stonefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Sepia Fox', image: '/images/phenotypes/bluesepiafox.png', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolate Sepia Fox', image: '/images/phenotypes/chocsepiafox.png', genotype: { A: 'at/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-      ]
-    },
-    marked: {
-      name: 'Marked',
-      examples: [
-        { name: 'Pink Eye White', image: '/images/phenotypes/albino-pew.png', note: 'Possible combinations:', genotypes: [
-          { E: 'e/e', C: 'ch/ch' },
-          { C: 'ch/ch', P: 'p/p' },
-          { C: 'ch/ch', S: 's/s' },
-          { C: 'ch/ch', W: 'W/-' },
-          { P: 'p/p', S: 's/s', W: 'W/-' }
-        ] },
-        { name: 'Black Eye White', image: '/images/phenotypes/bew.png', note: 'Possible combinations:', genotypes: [
-          { E: 'e/e', C: 'c/ce' },
-          { C: 'c/ce', S: 's/s' },
-          { C: 'c/ce', W: 'W/-' },
-          { S: 's/s', W: 'W/-' }
-        ] },
-        { name: 'Pied', image: '/images/phenotypes/pied.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
-        { name: 'Dutch', image: '/images/phenotypes/dutch.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
-        { name: 'Hereford', image: '/images/phenotypes/hereford.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
-        { name: 'Banded', image: '/images/phenotypes/banded.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Wsh/w' } },
-        { name: 'Variegated', image: '/images/phenotypes/variegated.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
-        { name: 'Rumpwhite', image: '/images/phenotypes/rumpwhite.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
-        { name: 'xbrindle', image: '/images/phenotypes/xbrindle.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
-        { name: 'Merle', image: '/images/phenotypes/roan.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'rn/rn' } },
-        { name: 'Pearl/Silvered', image: '/images/phenotypes/pearl.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'si/si' } },
-      ]
-    },
-    coats: {
-      name: 'Coats',
-      examples: [
-        { name: 'Shorthair', genotype: { Go: 'Go/Go', Sa: 'Sa/Sa', Re: 're/re', Rst: 'Rst/Rst', Fz: 'Fz/Fz', Nu: 'nu/nu' } },
-        { name: 'Longhair', genotype: { Go: 'go/go', Sa: 'Sa/Sa', Re: 're/re', Rst: 'Rst/Rst', Fz: 'Fz/Fz', Nu: 'nu/nu' } },
-        { name: 'Satin', genotype: { Go: 'Go/Go', Sa: 'sa/sa', Re: 're/re', Rst: 'Rst/Rst', Fz: 'Fz/Fz', Nu: 'nu/nu' } },
-        { name: 'Astrex', genotype: { Go: 'Go/Go', Sa: 'Sa/Sa', Re: 'Re/re', Rst: 'Rst/Rst', Fz: 'Fz/Fz', Nu: 'nu/nu' } },
-        { name: 'Texel', genotype: { Go: 'go/go', Sa: 'Sa/Sa', Re: 'Re/re', Rst: 'Rst/Rst', Fz: 'Fz/Fz', Nu: 'nu/nu' } },
-        { name: 'Rosette', genotype: { Go: 'Go/Go', Sa: 'Sa/Sa', Re: 're/re', Rst: 'rst/rst', Fz: 'Fz/Fz', Nu: 'nu/nu' } },
-        { name: 'Fuzz', genotype: { Go: 'Go/Go', Sa: 'Sa/Sa', Re: 're/re', Rst: 'Rst/Rst', Fz: 'fz/fz', Nu: 'nu/nu' } },
-        { name: 'Dominant Hairless', genotype: { Go: 'Go/Go', Sa: 'Sa/Sa', Re: 're/re', Rst: 'Rst/Rst', Fz: 'Fz/Fz', Nu: 'Nu/nu' } },
-      ]
-    }
-  };
+  const EXAMPLE_TABS = MOUSE_PHENOTYPE_EXAMPLES;
 
   return (
     <>
@@ -3411,8 +3260,28 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           {/* Offspring Results */}
           {offspringResults && (
             <div className="mt-6 bg-purple-50 dark:bg-dark-accent-purple-bg rounded-lg p-6 border-2 border-purple-300 dark:border-dark-accent-purple/60" data-tutorial-target="offspring-results">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-purple-800 dark:text-dark-accent-purple">Possible Offspring Outcomes</h2>
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-purple-800 dark:text-dark-accent-purple">Possible Offspring Outcomes</h2>
+                  <div className="mt-2 inline-flex rounded-lg bg-white p-1 dark:bg-dark-card-bg" role="group" aria-label="Offspring output format">
+                    <button
+                      type="button"
+                      onClick={() => setOffspringDisplayMode('summary')}
+                      aria-pressed={offspringDisplayMode === 'summary'}
+                      className={`rounded-md px-3 py-1.5 text-sm transition ${offspringDisplayMode === 'summary' ? 'bg-purple-600 text-white dark:bg-purple-700' : 'text-gray-700 hover:bg-gray-100 dark:text-dark-text-secondary dark:hover:bg-dark-surface'}`}
+                    >
+                      Phenotype summary
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOffspringDisplayMode('punnett')}
+                      aria-pressed={offspringDisplayMode === 'punnett'}
+                      className={`rounded-md px-3 py-1.5 text-sm transition ${offspringDisplayMode === 'punnett' ? 'bg-purple-600 text-white dark:bg-purple-700' : 'text-gray-700 hover:bg-gray-100 dark:text-dark-text-secondary dark:hover:bg-dark-surface'}`}
+                    >
+                      Punnett square
+                    </button>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <span className="text-sm font-medium text-purple-700 dark:text-dark-accent-purple bg-purple-200 dark:bg-dark-accent-purple/30 px-3 py-1 rounded-full">
                     {offspringResults.length} phenotypes
@@ -3427,6 +3296,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   <p><strong>Note on "/-" notation:</strong> A genotype like "A/-" indicates that the animal has at least one dominant "A" allele, but the other allele is unknown because one or both parents had an unknown allele at that locus. This is a placeholder for a dominant phenotype where the full genotype isn't certain.</p>
                 </div>
               )}
+              {offspringDisplayMode === 'punnett' ? (
+                <PunnettSquare square={punnettSquareData} offspringResults={offspringResults} species={selectedSpecies} />
+              ) : (
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => {
                   // For offspring display: if phenotype is empty but has carriers, show carrier status.
@@ -3529,6 +3401,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 );
                 })}
               </div>
+              )}
             </div>
           )}
 

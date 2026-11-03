@@ -1,0 +1,21 @@
+// Summary of implemented genetics probability engine for CritterTrack:
+
+// 1. src/utils/expectedOffspring.js - exports two functions:
+//    - computeExpectedOffspring(sireCode, damCode, species) - Punnett square genetics
+//    - computeConfirmedOffspringTraits(offspringCodes, species) - confirmed offspring traits
+
+// 2. computeConfirmedOffspringTraits includes the requested fallback:
+//    - First tries to match against genetic code using species phenotype rules
+//    - If result is "Unknown", falls back to appearance fields: color, markings, coat, earset
+//    - Joins non-null appearance fields as trait description
+//    - Returns [{trait, percentage}] sorted descending
+
+// 3. GeneticsTab.jsx - "Confirmed Offspring" section (lines 119-131) already wired:
+//    - Reads from litter?.confirmedTraits
+//    - Displays {trait, percentage} with percentage bars
+
+// 4. Unit tests added to src/utils/expectedOffspring.test.js covering:
+//    - All 5 species with known pairings
+//    - Missing/invalid inputs returning []
+//    - Fallback to appearance fields when genetic code is Unknown
+//    - Proper precedence (genetic code over appearance)

@@ -5,15 +5,15 @@ import {
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network, Star,
-    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, ScanHeart, Cake, Baby, Dumbbell, Link,
+    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, ScanHeart, Cake, Baby, Dumbbell,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { DeceasedCornerBadge } from '../shared/DeceasedBanner';
 import { isDeadStatus } from '../../utils/constants';
-import { QRCodeSVG } from 'qrcode.react';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { openExternalLink } from '../../utils/externalLink';
 import { animalShareUrl } from '../../utils/publicUrl';
+import { getOrderedLitterImages } from '../../utils/litterGallery';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
@@ -32,6 +32,8 @@ import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // Thi
 import { EnclosureCard } from './EnclosureCard';
 import { RecordsTabContent } from './RecordsTabContent';
 import InfoButton from '../shared/InfoButton';
+import QRCodeLabelModal from '../shared/QRCodeLabelModal';
+import CareSheetButton from '../shared/CareSheetButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 import { resolveLiteMode } from '../../utils/liteMode';
 import { LiteRecordsTabContent } from './LiteRecordsTabContent';
@@ -134,7 +136,6 @@ const AnimalModalV2 = ({
     // Share sheet (QR + copy link), mirroring ViewAnimalModalV2's so the private modal has the
     // same one-tap access to an animal's public link.
     const [showQR, setShowQR] = useState(false);
-    const [copied, setCopied] = useState(false);
     // Absolute public link, resolved against the real site origin (see utils/publicUrl.js
     // the native WebView's own origin is "https://localhost", which is not shareable).
     const shareUrl = animalShareUrl(animal.id_public);
@@ -588,6 +589,12 @@ useEffect(() => {
                                             <Archive size={16} />
                                         </button>
                                     )}
+                                    <CareSheetButton
+                                        type="animal"
+                                        animal={animal}
+                                        enclosureInfo={enclosureInfo}
+                                        compact
+                                    />
                                     {/* Share - same QR + copy-link sheet as ViewAnimalModalV2, so the
                                         private modal has one-tap access to the animal's public link.
                                         The URL is the public /animal/:id_public route, which is what
@@ -1833,30 +1840,27 @@ useEffect(() => {
                                                     </h4>
 
                                                     <div className="flex flex-wrap gap-2">
-                                                        {litter.images.map(
-                                                            (img, idx) => (
+                                                        {getOrderedLitterImages(litter.images).map(
+                                                            ({ image: img, index: idx, isCover }) => (
                                                                 <div
                                                                     key={
                                                                         img.r2Key ||
+                                                                        img.url ||
                                                                         idx
                                                                     }
                                                                     className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-border"
                                                                 >
                                                                     <img
-                                                                        src={
-                                                                            img.url
-                                                                        }
-                                                                        alt={
-                                                                            'Gallery ' +
-                                                                            (idx +
-                                                                                1)
-                                                                        }
+                                                                        src={img.url}
+                                                                        alt={img.caption || `Gallery ${idx + 1}`}
+                                                                        title={[
+                                                                            isCover ? 'Cover image' : '',
+                                                                            img.caption,
+                                                                            img.captureDate ? `Captured ${img.captureDate}` : '',
+                                                                            img.offspringId_public ? `Offspring ${img.offspringId_public}` : '',
+                                                                        ].filter(Boolean).join(' · ')}
                                                                         className="w-full h-full object-cover cursor-pointer"
-                                                                        onClick={() =>
-                                                                            openExternalLink(
-                                                                                img.url
-                                                                            )
-                                                                        }
+                                                                        onClick={() => openExternalLink(img.url)}
                                                                     />
                                                                 </div>
                                                             )
@@ -2650,37 +2654,16 @@ useEffect(() => {
         {/* QR Code Share Modal - mirrors ViewAnimalModalV2's, with inline "Copied" feedback
             instead of an alert() so it does not block the UI. */}
         {showQR && (
-            <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={() => setShowQR(false)}>
-                <div className="bg-white dark:bg-dark-card-bg rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-4 w-72" onClick={e => e.stopPropagation()}>
-                    <div className="flex items-center justify-between w-full">
-                        <h3 className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate pr-2">{animal.name || 'Share'}</h3>
-                        <button onClick={() => setShowQR(false)} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"><X size={18} /></button>
-                    </div>
-                    <div className="p-3 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-xl">
-                        <QRCodeSVG
-                            value={shareUrl}
-                            size={196}
-                            bgColor="#ffffff"
-                            fgColor="#111827"
-                            level="M"
-                        />
-                    </div>
-                    <p className="text-xs text-gray-400 dark:text-dark-text-muted break-all text-center leading-relaxed">
-                        {shareUrl}
-                    </p>
-                    <button
-                        onClick={() => {
-                            navigator.clipboard.writeText(shareUrl);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                        }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
-                    >
-                        {copied ? <Check size={14} /> : <Link size={14} />}
-                        {copied ? 'Copied!' : 'Copy Link'}
-                    </button>
-                </div>
-            </div>
+            <QRCodeLabelModal
+                value={shareUrl}
+                title={[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Animal'}
+                subtitle={animal.id_public}
+                details={[
+                    animal.species,
+                    [animal.gender, animal.status].filter(Boolean).join(' · ')
+                ]}
+                onClose={() => setShowQR(false)}
+            />
         )}
         </>
     );

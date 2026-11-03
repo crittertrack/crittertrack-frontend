@@ -3,12 +3,23 @@ import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check,
 import apiClient from '../utils/apiClient';
 import AnimalImage from './shared/AnimalImage';
 import InfoButton from './shared/InfoButton';
-import { formatDate } from '../utils/dateFormatter';
+import { formatDate, parseLocalDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
 import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 import ContactAssignModal from './Contacts/ContactAssignModal';
 
-const EMPTY_WAITLIST_FORM = { name: '', contactInfo: '', contactId: null, contactName: '', entryDate: new Date().toISOString().slice(0, 10), speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
+const createEmptyWaitlistForm = () => {
+    const now = new Date();
+    const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    return { name: '', contactInfo: '', contactId: null, contactName: '', entryDate: localDate, speciesRequests: [{ species: '', counts: { Male: '', Female: '', Any: '' } }], notes: '' };
+};
+const toWaitlistDateInput = (value) => {
+    if (!value) return '';
+    const date = parseLocalDate(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const pad = (part) => String(part).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
 const GENDER_CHOICES = ['Male', 'Female', 'Any'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR', 'AED'];
 const STATUS_PILL = {
@@ -79,7 +90,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     // Waitlist add/edit form
     const [wlFormVisible, setWlFormVisible] = useState(false);
     const [editingWlId, setEditingWlId] = useState(null);
-    const [wlForm, setWlForm] = useState(EMPTY_WAITLIST_FORM);
+    const [wlForm, setWlForm] = useState(createEmptyWaitlistForm);
     const [wlSaving, setWlSaving] = useState(false);
     // Contact picker for the waitlist form (assign an existing Contacts record).
     const [wlContactModalOpen, setWlContactModalOpen] = useState(false);
@@ -595,13 +606,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 name: entry.name || '', contactInfo: entry.contactInfo || '',
                 contactId: entry.contactId?._id || entry.contactId || null,
                 contactName: entry.contactName || (entry.contactId?.personalName || ''),
-                entryDate: entry.entryDate ? new Date(entry.entryDate).toISOString().slice(0, 10) : '',
+                entryDate: toWaitlistDateInput(entry.entryDate),
                 speciesRequests: reqs.map(r => { const counts = { Male: '', Female: '', Any: '' }; getGenderCounts(r).forEach(c => { counts[c.gender] = String(c.count); }); return { species: r.species || '', counts }; }),
                 notes: entry.notes || '',
             });
             setEditingWlId(entry._id);
         } else {
-            setWlForm(EMPTY_WAITLIST_FORM);
+            setWlForm(createEmptyWaitlistForm());
             setEditingWlId(null);
         }
         setWlFormVisible(true);
@@ -640,7 +651,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 const res = await apiClient.post('/waitlist', payload);
                 setWaitlist(prev => [res.data, ...prev]);
             }
-            setWlForm(EMPTY_WAITLIST_FORM);
+            setWlForm(createEmptyWaitlistForm());
             setEditingWlId(null);
             setWlFormVisible(false);
             showModalMessage?.('Success', editingWlId ? 'Waitlist entry updated' : 'Added to waitlist');
@@ -1169,7 +1180,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                 </div>
                                 </div>
                                 <div className="flex gap-2 justify-end">
-                                    <button onClick={() => { setWlFormVisible(false); setEditingWlId(null); setWlForm(EMPTY_WAITLIST_FORM); }} className="px-3 py-1.5 text-sm text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
+                                    <button onClick={() => { setWlFormVisible(false); setEditingWlId(null); setWlForm(createEmptyWaitlistForm()); }} className="px-3 py-1.5 text-sm text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
                                     <button onClick={handleWlSave} disabled={wlSaving} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1">
                                         {wlSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />} {editingWlId ? 'Update' : 'Add'}
                                     </button>
@@ -1426,4 +1437,3 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
 };
 
 export default ReservationsPage;
-

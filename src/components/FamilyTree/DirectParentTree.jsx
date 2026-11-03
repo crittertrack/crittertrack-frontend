@@ -12,8 +12,13 @@ import { Mars, Venus, Cat } from 'lucide-react';
 const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
   const { image, label } = node.data;
   const isMale = node.data.gender === 'Male';
-  const borderColor = isMale ? 'border-blue-500' : 'border-pink-500';
-  const bgColor = isMale ? 'bg-white' : 'bg-white';
+  const isFemale = node.data.gender === 'Female';
+  const borderColor = isMale
+    ? 'border-blue-500'
+    : isFemale
+    ? 'border-pink-500'
+    : 'border-gray-300';
+  const bgColor = 'bg-white';
 
   const handleClick = () => {
     onNodeClick?.(node.data.id);
@@ -30,7 +35,7 @@ const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
         {image ? (
           <img
             src={image}
-            alt={label}
+            alt=""
             className="max-w-full max-h-full object-cover"
             draggable={false}
           />
@@ -41,8 +46,8 @@ const DirectParentTreeNode = ({ node, onNodeClick, onViewAnimal }) => {
 )}
       </div>
 
-      {/* Name - centered horizontally */}
-      <p className="text-xs font-medium text-gray-800 text-center">{label}</p>
+      {/* Card content (label is a pre-built JSX card from addNode) */}
+      {label}
     </div>
   );
 };
@@ -77,9 +82,12 @@ const CACHE_TTL = 86400000;
 
 const DirectParentTree = ({
   focusAnimalId,
+  focusAnimal = null,
   authToken,
+  maxDepth = 6,
   onNodeClick,
   onViewAnimal,
+  onError,
 }) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -95,10 +103,21 @@ const DirectParentTree = ({
       return;
     }
 
+
+
+    // Litter IDs (CTL…) are never fetchable as animals. When no focusAnimal
+    // is provided for a litter, skip fetching to avoid a 404.
+    if (!focusAnimal && String(focusAnimalId).startsWith('CTL')) {
+
+      setNodes([]);
+      setEdges([]);
+      setLoading(false);
+      return;
+    }
+
     // Check for cached tree data in localStorage
-    const cacheKey = `treeCache_${focusAnimalId}`;
-    const cached = localStorage.getItem(cacheKey);
-    const now = Date.now();
+    // Caching disabled (React elements not serializable). Re-fetch on each view.
+    const cached = null;
 
     let useCache = false;
     let cachedData = null;
@@ -121,6 +140,7 @@ const DirectParentTree = ({
 
     if (!useCache) {
       const fetchOne = async (id) => {
+
         if (!id) return null;
 
         try {
@@ -132,7 +152,8 @@ const DirectParentTree = ({
           );
 
           return response.data;
-        } catch {
+        } catch (error) {
+          if (!cancelled) onError?.(error);
           return { id_public: id, name: 'Unknown' };
         }
       };
@@ -163,8 +184,50 @@ const DirectParentTree = ({
 
         const animalMap = new Map();
         const rootId = String(focusAnimalId);
-        const queue = [{ id: rootId, depth: 0 }];
+        const queue = [];
         const visited = new Set();
+        visited.add(rootId);
+
+        // Resolve the root node: use a pre-resolved focus animal (e.g. a litter)
+        // when provided, otherwise fetch it from the API like a regular animal.
+        let rootAnimal = focusAnimal || null;
+        if (!rootAnimal) {
+          rootAnimal = await fetchOne(rootId);
+        }
+        if (!rootAnimal) {
+          setLoading(false);
+          return;
+        }
+
+        const rootSireId = getParentId(rootAnimal, [
+          'sireId_public',
+          'sireCtuid',
+          'sireId',
+        ]);
+        const rootDamId = getParentId(rootAnimal, [
+          'damId_public',
+          'damCtuid',
+          'damId',
+        ]);
+        // (debug removed)
+
+        animalMap.set(rootId, {
+          id: rootId,
+          animal: rootAnimal,
+          sireId: rootSireId,
+          damId: rootDamId,
+        });
+
+
+
+        if (rootSireId && !visited.has(String(rootSireId))) {
+          queue.push({ id: String(rootSireId), depth: 1 });
+        }
+        if (rootDamId && !visited.has(String(rootDamId))) {
+          queue.push({ id: String(rootDamId), depth: 1 });
+        }
+
+
 
         while (queue.length > 0) {
           if (cancelled) return;
@@ -172,11 +235,7 @@ const DirectParentTree = ({
           const current = queue.shift();
           const id = String(current.id);
 
-          if (
-            !id ||
-            current.depth > MAX_DEPTH ||
-            visited.has(id)
-          ) {
+          if (!id || current.depth > maxDepth || visited.has(id)) {
             continue;
           }
 
@@ -205,7 +264,7 @@ const DirectParentTree = ({
             damId,
           });
 
-          if (current.depth < MAX_DEPTH) {
+          if (current.depth < maxDepth) {
             if (sireId && !visited.has(String(sireId))) {
               queue.push({
                 id: String(sireId),
@@ -244,7 +303,7 @@ const DirectParentTree = ({
 
           const entry = animalMap.get(key);
 
-          if (!entry || depth >= MAX_DEPTH) {
+          if (!entry || depth >= maxDepth) {
             return NODE_WIDTH;
           }
 
@@ -614,18 +673,11 @@ const DirectParentTree = ({
           setEdges(es);
           setLoading(false);
 
-          // Cache the fetched data in localStorage for quicker loading
-          try {
-            const cacheData = {
-              focusAnimalId,
-              timestamp: Date.now(),
-              nodes: ns,
-              edges: es
-            };
-            localStorage.setItem(`treeCache_${focusAnimalId}`, JSON.stringify(cacheData));
-          } catch {
-            // localStorage full or disabled, ignore
-          }
+          // Caching disabled: tree nodes contain pre-built React elements (JSX)
+          // in `label`, which are not serializable via JSON.stringify/parse.
+          // Re-hydrating them from cache produces plain objects that trigger
+          // React error #31. Re-fetching on each view is fast (apiClient
+          // caches GETs offline).
         }
       } catch (error) {
         console.error('Failed to build pedigree tree:', error);
@@ -644,7 +696,7 @@ const DirectParentTree = ({
     return () => {
       cancelled = true;
     };
-  }, [focusAnimalId, authToken]);
+  }, [focusAnimalId, focusAnimal, authToken, maxDepth, onError]);
 
   if (loading) {
     return (

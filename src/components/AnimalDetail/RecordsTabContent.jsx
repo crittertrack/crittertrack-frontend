@@ -17,7 +17,6 @@ const parseJsonArrayField = (data) => {
 
 export const RecordsTabContent = ({ animal }) => {
 
-    // From LegalTabContent
     const hasLicensing = animal.licenseNumber || animal.licenseJurisdiction;
     const hasLegal = animal.insurance || animal.legalStatus;
     const hasRestrictions = animal.breedingRestrictions || animal.exportRestrictions;

@@ -18,3 +18,5 @@ export const absoluteUrl = (path) =>
 // ids — sharing a numeric id would 404 for the recipient.
 export const animalShareUrl = (idPublic) => absoluteUrl(`/animal/${idPublic}`);
 export const userShareUrl = (idPublic) => absoluteUrl(`/user/${idPublic}`);
+// Enclosure records are private; this link opens the owner-only record after sign-in.
+export const enclosureShareUrl = (id) => absoluteUrl(`/enclosures?open=${encodeURIComponent(id)}`);
