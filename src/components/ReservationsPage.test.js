@@ -139,24 +139,41 @@ test('deposit status only shows when a deposit is actually charged', async () =>
     expect(screen.getByLabelText('Deposit status')).toBeTruthy();
 });
 
-test('stats show unassigned, assigned, deposits due and payments due', async () => {
+test('stats show unassigned, assigned, and paid / due deposits and payments', async () => {
     await setup();
     // Peanut + Whiskers are unassigned; Butter is assigned (price 40, deposit 20 already paid).
     expect(within(screen.getByTestId('stat-unassigned')).getByText('2')).toBeTruthy();
     expect(within(screen.getByTestId('stat-assigned')).getByText('1')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-deposits-paid')).getByText('$20')).toBeTruthy();
     expect(within(screen.getByTestId('stat-deposits-due')).getByText('$0')).toBeTruthy();
-    // Deposit is part of the price, so 40 - 20 = 20 is still due.
+    // The deposit is part of the price, so the 20 balance is still due and none is paid.
+    expect(within(screen.getByTestId('stat-payments-paid')).getByText('$0')).toBeTruthy();
     expect(within(screen.getByTestId('stat-payments-due')).getByText('$20')).toBeTruthy();
 });
 
-test('a fully paid reservation counts as nothing due, even with an unpaid deposit', async () => {
+test('a fully paid reservation moves everything to paid, even with an unpaid deposit', async () => {
     const paid = animals.map(a => (a.id_public === 'CTC2'
         ? { ...a, reservedDepositStatus: 'due', reservedPaymentStatus: 'done' } : a));
     await setup({ animals: paid });
+    expect(within(screen.getByTestId('stat-deposits-paid')).getByText('$20')).toBeTruthy();
     expect(within(screen.getByTestId('stat-deposits-due')).getByText('$0')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-payments-paid')).getByText('$20')).toBeTruthy();
     expect(within(screen.getByTestId('stat-payments-due')).getByText('$0')).toBeTruthy();
 });
 
+test('paid and due add up to the total price', async () => {
+    const mixed = [
+        ...animals,
+        { id_public: 'CTC20', name: 'Pip', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Ann', reservedPrice: 15, reservedPaymentStatus: 'done' },
+        { id_public: 'CTC21', name: 'Pop', species: 'Fancy Rat', gender: 'Male', status: 'Booked', reservedBuyerName: 'Bo', reservedPrice: 15, reservedDeposit: 7.5, reservedDepositStatus: 'due', reservedPaymentStatus: 'due' },
+    ];
+    await setup({ animals: mixed });
+    // Butter 40 (20 dep paid + 20 due) + Pip 15 paid + Pop 15 (7.5 dep due + 7.5 due) = 70
+    expect(within(screen.getByTestId('stat-deposits-paid')).getByText('$20')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-deposits-due')).getByText('$7.5')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-payments-paid')).getByText('$15')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-payments-due')).getByText('$27.5')).toBeTruthy();
+});
 test('explains that sales only reach the Budget once finalized', async () => {
     await setup();
     expect(screen.getByTestId('reservations-budget-note').textContent).toMatch(/only added to your Budget once it is finalized/);

@@ -270,18 +270,18 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     // paid deposit of 25, the outstanding payment is 50. The two figures therefore
     // always add up to what is still owed, and never double-count:
     //
-    //   deposit due = the charged deposit, while neither it nor the full price is marked paid
-    //   payment due = the price minus the deposit (the balance), while the
-    //                 payment is not marked done
+    //   deposit paid / due = the charged deposit, paid once it (or the full price) is marked done
+    //   payment paid / due = the price minus the deposit (the balance), by the payment status
+    //   The four figures always add up to the total price.
     //
     //   price 75, deposit 25 unpaid -> 25 deposit due + 50 payment due = 75 owed
     //   price 75, deposit 25 paid   ->  0 deposit due + 50 payment due = 50 owed
     //   price 75, no deposit        ->  0 deposit due + 75 payment due = 75 owed
-    const computeEntryTotals = (assigned) => {
+    const computeEntryTotals = (assigned, includeSettled = false) => {
         const byCurrency = new Map();
         const addTo = (currency, key, amount) => {
             const c = currency || 'USD';
-            if (!byCurrency.has(c)) byCurrency.set(c, { currency: c, depositDue: 0, paymentDue: 0, totalPrice: 0 });
+            if (!byCurrency.has(c)) byCurrency.set(c, { currency: c, depositDue: 0, depositPaid: 0, paymentDue: 0, paymentPaid: 0, totalPrice: 0 });
             byCurrency.get(c)[key] += amount;
         };
         (assigned || []).forEach(a => {
@@ -289,15 +289,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             const deposit = parseFloat(a.reservedDeposit) || 0;
             const price = a.reservedPrice != null ? Number(a.reservedPrice) || 0 : 0;
             if (price > 0) addTo(currency, 'totalPrice', price);
-            // A deposit that is charged and not yet marked paid.
-            if (deposit > 0 && a.reservedDepositStatus !== 'done' && a.reservedPaymentStatus !== 'done') addTo(currency, 'depositDue', deposit);
-            // The outstanding payment is the balance: the price minus the deposit
-            // (the deposit is part of the price). Never below zero.
-            if (price > 0 && a.reservedPaymentStatus !== 'done') {
-                addTo(currency, 'paymentDue', Math.max(0, price - deposit));
-            }
+            const paymentDone = a.reservedPaymentStatus === 'done';
+            // Deposit: paid once it is marked done, or once the whole price is marked paid.
+            if (deposit > 0) addTo(currency, (a.reservedDepositStatus === 'done' || paymentDone) ? 'depositPaid' : 'depositDue', deposit);
+            // Payment = the balance (price minus the deposit, which is part of the price).
+            if (price > 0) addTo(currency, paymentDone ? 'paymentPaid' : 'paymentDue', Math.max(0, price - deposit));
         });
-        return Array.from(byCurrency.values()).filter(t => t.depositDue > 0 || t.paymentDue > 0);
+        return Array.from(byCurrency.values()).filter(t => includeSettled || t.depositDue > 0 || t.paymentDue > 0);
     };
 
     const computeEntryFulfillment = (entry) => {
@@ -366,13 +364,15 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
 
     // Stats across every Available / Booked animal (not narrowed by the filters above).
     const assignedForStats = baseSaleAnimals.filter(isAssigned);
-    const dueTotals = computeEntryTotals(assignedForStats);
+    const dueTotals = computeEntryTotals(assignedForStats, true);
     const dueList = (key) => dueTotals.filter(t => t[key] > 0).map(t => ({ currency: t.currency, amount: t[key] }));
     const reservationStats = {
         assigned: assignedForStats.length,
         unassigned: baseSaleAnimals.length - assignedForStats.length,
         depositDue: dueList('depositDue'),
         paymentDue: dueList('paymentDue'),
+        depositPaid: dueList('depositPaid'),
+        paymentPaid: dueList('paymentPaid'),
     };
     // One figure per currency, since reservations can be priced in different currencies.
     const formatDueTotals = (list) => (list.length
@@ -841,11 +841,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 {activeTab === 'animals' && (
                     <>
                         {/* Reservation stats */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2" data-testid="reservation-stats">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2" data-testid="reservation-stats">
                             {[
                                 ['Unassigned', String(reservationStats.unassigned), 'stat-unassigned'],
                                 ['Assigned', String(reservationStats.assigned), 'stat-assigned'],
+                                ['Deposits paid', formatDueTotals(reservationStats.depositPaid), 'stat-deposits-paid'],
                                 ['Deposits due', formatDueTotals(reservationStats.depositDue), 'stat-deposits-due'],
+                                ['Payments paid', formatDueTotals(reservationStats.paymentPaid), 'stat-payments-paid'],
                                 ['Payments due', formatDueTotals(reservationStats.paymentDue), 'stat-payments-due'],
                             ].map(([label, value, testId]) => (
                                 <div key={testId} className="rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface px-3 py-2" data-testid={testId}>
