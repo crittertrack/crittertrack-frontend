@@ -30,6 +30,7 @@ const OFFSPRING_LABELS = [
     ['deceased', 'Deceased'],
     ['cull', 'Culled'],
 ];
+const STATUS_LABELS = Object.fromEntries(OFFSPRING_LABELS);
 
 const Stat = ({ label, value, testId, hint }) => (
     <div className="rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface px-3 py-2" data-testid={testId}>
@@ -38,12 +39,23 @@ const Stat = ({ label, value, testId, hint }) => (
         {hint && <div className="text-[11px] text-gray-500 dark:text-dark-text-muted">{hint}</div>}
     </div>
 );
-const PriceBadge = ({ value }) => {
-    const paid = value != null && value > 0;
-    return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${paid ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>{value == null ? '-' : formatMoney(value)}</span>;
+
+// Price badge: green = paid, red = still due, gray = not applicable (no price / not tracked).
+const BADGE_STYLES = {
+    paid: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+    due: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+    na: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 };
 
-
+const PriceBadge = ({ value, paid }) => {
+    if (value == null) return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_STYLES.na}`}>-</span>;
+    const tone = paid === true ? 'paid' : paid === false ? 'due' : 'na';
+    return (
+        <span data-tone={tone} className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_STYLES[tone]}`}>
+            {formatMoney(value)}
+        </span>
+    );
+};
 
 export default function FinanceOverviewBody({ kind, data: d }) {
     const isLitter = kind === 'litter';
@@ -90,10 +102,10 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                         <tbody>
                             {d.offspringDetails.map((o, i) => (
                                 <tr key={o.id || i} className="border-t border-gray-100 dark:border-dark-border">
-                                    <td className="py-1">{o.displayName || o.name || 'Offspring'}</td>
-                                    <td className="py-1">{o.status}</td>
-                                    <td className="py-1 text-right"><PriceBadge value={o.deposit} /></td>
-                                    <td className="py-1 text-right"><PriceBadge value={o.amount} /></td>
+                                    <td className="py-1">{[o.prefix, o.name, o.suffix].filter(Boolean).join(' ') || o.displayName || 'Offspring'}</td>
+                                    <td className="py-1">{STATUS_LABELS[o.status] || o.status}</td>
+                                    <td className="py-1 text-right"><PriceBadge value={o.deposit} paid={o.depositPaid} /></td>
+                                    <td className="py-1 text-right"><PriceBadge value={o.amount} paid={o.amountPaid} /></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -128,14 +140,30 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                     <p className="text-[11px] text-gray-500 dark:text-dark-text-muted mb-1">
                         Valued at cost per unit. Not added to Spent, because buying the supplies is already counted there.
                     </p>
-                    <ul className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5">
-                        {usage.bySupply.map(s => (
-                            <li key={`${s.supplyName}|${s.unit}`} className="flex justify-between gap-3">
-                                <span>{s.supplyName} ({s.quantity}{s.unit ? ` ${s.unit}` : ''})</span>
-                                <span>{formatMoney(s.cost)}</span>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="overflow-x-auto" data-testid="finance-supplies">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="text-left text-gray-500 dark:text-dark-text-muted">
+                                    <th className="py-1">Supply</th>
+                                    <th className="py-1 text-right">Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {usage.bySupply.map(s => (
+                                    <tr key={`${s.supplyName}|${s.unit}`} className="border-t border-gray-100 dark:border-dark-border">
+                                        <td>{s.supplyName} ({s.quantity}{s.unit ? ` ${s.unit}` : ''})</td>
+                                        <td className="py-1 text-right">{formatMoney(s.cost)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot>
+                                <tr className="border-t border-gray-200 dark:border-dark-border font-semibold">
+                                    <td className="py-1">Total</td>
+                                    <td className="py-1 text-right">{formatMoney(usage.totalCost)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                     {usage.unpricedCount > 0 && (
                         <p className="mt-1 text-xs text-amber-700 dark:text-amber-400" data-testid="finance-unpriced">
                             {usage.unpricedSupplies.length} suppl{usage.unpricedSupplies.length === 1 ? 'y has' : 'ies have'} no price
