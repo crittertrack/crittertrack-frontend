@@ -24,14 +24,15 @@ const CATEGORY_LABELS = {
 
 const OFFSPRING_LABELS = [
     ['sold', 'Sold'],
-    ['reserved', 'Reserved'],
+    ['booked', 'Booked'],
     ['available', 'Available'],
-    ['kept', 'Kept, no revenue'],
+    ['kept', 'Kept'],
     ['deceased', 'Deceased'],
+    ['cull', 'Culled'],
 ];
 
 const Stat = ({ label, value, testId, hint }) => (
-    <div className="rounded-lg bg-gray-50 dark:bg-dark-surface px-3 py-2" data-testid={testId}>
+    <div className="rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface px-3 py-2" data-testid={testId}>
         <div className="text-xs text-gray-500 dark:text-dark-text-muted">{label}</div>
         <div className="mt-0.5 text-base font-semibold text-gray-900 dark:text-dark-text">{value}</div>
         {hint && <div className="text-[11px] text-gray-500 dark:text-dark-text-muted">{hint}</div>}
@@ -77,14 +78,32 @@ export default function FinanceOverviewBody({ kind, data: d }) {
             </div>
 
             {isLitter && d.offspringDetails && d.offspringDetails.length > 0 && (
-                <ul className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5" data-testid="finance-offspring-details">
-                    {d.offspringDetails.map((o, i) => (
-                        <li key={o.id || i} className="flex justify-between gap-3">
-                            <span>{o.name || 'Offspring'} <span className="text-xs text-gray-500">({o.status})</span></span>
-                            <span>{o.amount == null ? '-' : formatMoney(o.amount)}</span>
-                        </li>
-                    ))}
-                </ul>
+                <div className="overflow-x-auto" data-testid="finance-offspring-details">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="text-left text-gray-500 dark:text-dark-text-muted">
+                                <th className="py-1">Name</th>
+                                <th className="py-1">Status</th>
+                                <th className="py-1 text-right">Expected earning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {d.offspringDetails.map((o, i) => (
+                                <tr key={o.id || i} className="border-t border-gray-100 dark:border-dark-border">
+                                    <td className="py-1">{o.name || 'Offspring'}</td>
+                                    <td className="py-1">{o.status}</td>
+                                    <td className="py-1 text-right">{o.amount == null ? '-' : formatMoney(o.amount)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        <tfoot>
+                            <tr className="border-t border-gray-200 dark:border-dark-border font-semibold">
+                                <td className="py-1" colSpan={2}>Total</td>
+                                <td className="py-1 text-right">{formatMoney(d.offspringDetails.reduce((s, o) => s + (o.amount || 0), 0))}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
             )}
 
             {categories.length > 0 && (

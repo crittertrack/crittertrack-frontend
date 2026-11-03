@@ -416,9 +416,20 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                         </React.Suspense>
             )}
             {activeTab === 'finances' && (
-                <React.Suspense fallback={<TabLoading />}>
-                    {litter.litter_id_public && <FinanceOverviewCard kind="litter" id={litter.litter_id_public} />}
-                </React.Suspense>
+                <div className="space-y-3">
+                    <div className="flex justify-end">
+                        <select
+                            value={localStorage.getItem('budgetCurrency') || 'USD'}
+                            onChange={(e) => { localStorage.setItem('budgetCurrency', e.target.value); window.location.reload(); }}
+                            className="text-sm border rounded px-2 py-1 dark:bg-dark-surface dark:text-dark-text"
+                        >
+                            {['USD','EUR','GBP','AUD','CAD'].map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <React.Suspense fallback={<TabLoading />}>
+                        {litter.litter_id_public && <FinanceOverviewCard key={localStorage.getItem('budgetCurrency')} kind="litter" id={litter.litter_id_public} />}
+                    </React.Suspense>
+                </div>
             )}
 
         </div>
