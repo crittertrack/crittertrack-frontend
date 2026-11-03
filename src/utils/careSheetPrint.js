@@ -192,18 +192,32 @@ const renderSections = (sections) => sections.map(section => `
     </section>
 `).join('');
 
+// "Variety" is not stored on its own: it is the compound of the appearance fields, built the
+// same way as the animal list's Variety column.
+const animalVariety = (animal) =>
+    [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ');
+
+// Compact list of the animals housed in an enclosure: one header line per animal
+// (name + CTC, then species - gender - variety) followed by their care details as dense
+// inline text. Health status is intentionally left out of this list.
 const renderAnimalOccupants = (animals = []) => animals.map(animal => {
     const name = formatAnimalName(animal);
-    const details = animalSections(animal, null);
+    const summary = [animal.species, animal.gender, animalVariety(animal)].filter(Boolean).join(' - ');
+    const details = animalSections(animal, null)
+        .map(section => ({
+            ...section,
+            items: section.items.filter(([label]) => label !== 'Health status'),
+        }))
+        .filter(section => section.items.length > 0);
     return `
         <article class="occupant">
-            <h3>${escapeHtml(name)} <span>${escapeHtml(animal.id_public || '')}</span></h3>
-            <p class="meta">${escapeHtml([animal.species, animal.gender, animal.status].filter(Boolean).join(' · '))}</p>
-            ${renderSections(details)}
+            <h3>${escapeHtml(name)} <span>${escapeHtml(animal.id_public || '')}</span>${summary ? ` <span class="summary">${escapeHtml(summary)}</span>` : ''}</h3>
+            ${details.map(section => `
+                <div class="occupant-section"><strong>${escapeHtml(section.title)}</strong>${section.items.map(([label, value]) => `<span class="item"><em>${escapeHtml(label)}:</em> ${escapeHtml(value)}</span>`).join('')}</div>
+            `).join('')}
         </article>
     `;
 }).join('');
-
 export const buildAnimalCareSheet = (animal, enclosureInfo) => {
     const name = formatAnimalName(animal);
     return {
@@ -248,10 +262,15 @@ export const buildCareSheetHtml = ({ title, subtitle, sections, occupants = '' }
         .box { width: 12px; height: 12px; border: 1px solid #334155; flex: 0 0 12px; margin-top: 1px; }
         .write-lines { margin-top: 14px; }
         .line { height: 22px; border-bottom: 1px solid #94a3b8; }
-        .occupant { break-inside: avoid; margin-top: 12px; padding-top: 6px; border-top: 1px solid #94a3b8; }
-        .occupant section h2 { font-size: 10pt; margin-top: 8px; }
+        .occupant { margin-top: 6px; padding-top: 3px; border-top: 1px solid #cbd5e1; font-size: 8.5pt; line-height: 1.3; }
+        .occupant h3 { font-size: 10pt; margin: 0 0 2px; break-after: avoid; }
+        .occupant h3 .summary { margin-left: 4px; }
+        .occupant-section { margin: 1px 0; }
+        .occupant-section strong { color: #334155; margin-right: 4px; }
+        .occupant-section .item { margin-right: 8px; overflow-wrap: anywhere; }
+        .occupant-section em { font-style: normal; color: #475569; }
         footer { margin-top: 18px; border-top: 1px solid #cbd5e1; padding-top: 5px; color: #64748b; font-size: 8pt; }
-        @media print { .occupant { break-inside: avoid-page; } }
+        @media print { .occupant { break-inside: avoid; } }
     </style>
 </head>
 <body>

@@ -60,6 +60,33 @@ it('includes enclosure environment, cleaning tasks, and assigned animals', () =>
     expect(html).toContain('Every evening');
 });
 
+it('lists enclosure animals compactly as species - gender - variety without status or health', () => {
+    const sheet = buildEnclosureCareSheet({ name: 'Nursery' }, [{
+        prefix: 'Little',
+        name: 'Mochi',
+        suffix: 'of Oz',
+        id_public: 'CTC789',
+        species: 'Fancy Rat',
+        gender: 'Female',
+        status: 'Breeder',
+        color: 'Black',
+        coat: 'Rex',
+        eyeColor: 'Ruby',
+        healthStatus: 'Healthy',
+        feedingSchedule: 'Every evening'
+    }]);
+
+    const html = buildCareSheetHtml(sheet);
+    expect(sheet.occupants).toContain('Little Mochi of Oz');
+    expect(sheet.occupants).toContain('CTC789');
+    expect(sheet.occupants).toContain('Fancy Rat - Female - Black Rex Ruby');
+    expect(sheet.occupants).toContain('Every evening');
+    expect(sheet.occupants).not.toContain('Breeder');
+    expect(sheet.occupants).not.toContain('Healthy');
+    expect(sheet.occupants).not.toContain('Health status');
+    expect(html).toContain('Animals in this Enclosure');
+});
+
 it('escapes record content before writing a printable document', () => {
     const printWindow = {
         document: { write: jest.fn(), close: jest.fn() },
