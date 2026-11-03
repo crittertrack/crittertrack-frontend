@@ -991,6 +991,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                                 <input type="number" min="0" step="0.01" value={f.deposit} onChange={e => setResField(animal, 'deposit', e.target.value)} placeholder="0.00" className={inputCls} />
                                                             </div>
                                                         </div>
+                                                        <p className="text-[11px] text-gray-500 dark:text-dark-text-muted -mt-1" data-testid="price-includes-deposit-note">
+                                                            Price is the full price, including the deposit. The deposit is part of it, not an extra.
+                                                        </p>
 
                                                         {/* Payment status sits under Price, Deposit status under Deposit so each
                                                             status pairs with its own amount. Deposit status is only shown when a
