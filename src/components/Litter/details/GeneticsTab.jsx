@@ -118,6 +118,7 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
             body: animal.body,
             carrierTraits: animal.carrierTraits,
         })),
+        { includeGenes: true },
     );
     const geneticDiscoveries = computeGeneticDiscoveries(
         sireGeneticCode,
@@ -298,6 +299,7 @@ const GeneticsTab = ({ litter, offspring = [], breedingLineDefs = [], animalBree
                         <div key={i} className="py-2">
                             <div className="text-sm mb-1">
                                 <span className="text-gray-700 dark:text-dark-text-secondary">{t.trait || t.name}</span>
+                                {t.gene && <span className="ml-1 italic text-gray-500 dark:text-dark-text-muted">{t.gene}</span>}
                             </div>
                             <PercentBar value={t.percentage} />
                         </div>

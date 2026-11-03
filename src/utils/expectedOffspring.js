@@ -844,8 +844,20 @@ export function computeExpectedOffspring(sireCode, damCode, species, options = {
  * known, using appearance fields as fallback. Other supported species retain
  * their existing appearance-first summaries and use genotype phenotypes when needed.
  */
-export function computeConfirmedOffspringTraits(offspringCodes, species, appearanceFields) {
+export function computeConfirmedOffspringTraits(offspringCodes, species, appearanceFields, options = {}) {
   if (!Array.isArray(offspringCodes) || !offspringCodes.length) return [];
+  // With { includeGenes: true } every trait derived from a genetic code also carries a
+  // `gene` string (e.g. "a/a"), mirroring computeExpectedOffspring. Traits that come only
+  // from appearance fields have no gene.
+  const includeGenes = Boolean(options?.includeGenes);
+  const mouseGenes = new Map(); // trait key -> Set of locus genotypes
+  const traitGenotypes = new Map(); // trait key -> genotypes of offspring showing it
+  const observedGenotypes = [];
+  const recordGenotypeTrait = (trait, genotype) => {
+    const key = trait.toLowerCase();
+    if (!traitGenotypes.has(key)) traitGenotypes.set(key, []);
+    traitGenotypes.get(key).push(genotype);
+  };
 
   const appearanceKeys = [
     ['variety', 'Variety'],
@@ -880,6 +892,17 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
     if (isMouse) {
       traits = Array.from(getMouseTraits(parsedCode));
       if (!Object.keys(parsedCode).length) traits = appearanceTraits;
+      else if (includeGenes) {
+        // Mouse traits are calculated one locus at a time, so a trait's gene is the
+        // genotype at the locus that produces it.
+        Object.entries(normalizeGenotype(parsedCode)).forEach(([locus, genotype]) => {
+          getMouseTraits({ [locus]: genotype }).forEach((trait) => {
+            const key = trait.toLowerCase();
+            if (!mouseGenes.has(key)) mouseGenes.set(key, new Set());
+            mouseGenes.get(key).add(genotype);
+          });
+        });
+      }
     } else if ((isRat || isSyrianHamster || isCampbellsHamster || isRussianHamster) && Object.keys(parsedCode).length) {
       const phenotypeMatch = isRat
         ? matchFancyRatPhenotype(normalizeGenotype(parsedCode))
@@ -892,11 +915,23 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
       if (phenotypeMatch?.carriers?.length) {
         traits.push(...phenotypeMatch.carriers.map((carrier) => `${carrier} (carrier)`));
       }
+      if (includeGenes) {
+        const genotype = normalizeGenotype(parsedCode);
+        observedGenotypes.push(genotype);
+        traits.forEach((trait) => recordGenotypeTrait(trait, genotype));
+      }
     } else {
       traits = appearanceTraits;
       if (!traits.length) {
         const phenotype = matchGenotypePhenotype(parsedCode, species);
-        if (phenotype) traits.push(`Phenotype: ${phenotype}`);
+        if (phenotype) {
+          traits.push(`Phenotype: ${phenotype}`);
+          if (includeGenes) {
+            const genotype = normalizeGenotype(parsedCode);
+            observedGenotypes.push(genotype);
+            recordGenotypeTrait(`Phenotype: ${phenotype}`, genotype);
+          }
+        }
       }
     }
 
@@ -919,9 +954,17 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
   });
 
   return Array.from(traitCounts.values())
-    .map(({ trait, count }) => ({
-      trait,
-      percentage: Math.round((count / offspringCodes.length) * 100),
-    }))
+    .map(({ trait, count }) => {
+      const entry = {
+        trait,
+        percentage: Math.round((count / offspringCodes.length) * 100),
+      };
+      if (!includeGenes) return entry;
+      const key = trait.toLowerCase();
+      const gene = mouseGenes.has(key)
+        ? Array.from(mouseGenes.get(key)).join(' or ')
+        : describeTraitGenes(observedGenotypes, traitGenotypes.get(key) || []);
+      return gene ? { ...entry, gene } : entry;
+    })
     .sort((a, b) => b.percentage - a.percentage || a.trait.localeCompare(b.trait));
 }

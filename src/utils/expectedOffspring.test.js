@@ -270,6 +270,32 @@ describe('computeConfirmedOffspringTraits', () => {
     ]);
   });
 
+  it('adds the gene behind each confirmed trait only when includeGenes is set', () => {
+    const codes = [{ a: 'a/a' }, { a: 'A/a' }];
+    const without = computeConfirmedOffspringTraits(codes, 'syrianHamster', [{}, {}]);
+    expect(without.every((entry) => !('gene' in entry))).toBe(true);
+
+    const result = computeConfirmedOffspringTraits(codes, 'syrianHamster', [{}, {}], { includeGenes: true });
+    expect(result).toEqual(expect.arrayContaining([
+      { trait: 'Black', percentage: 50, gene: 'a/a' },
+      { trait: 'Black (carrier)', percentage: 50, gene: 'A/a' },
+    ]));
+  });
+
+  it('adds the locus genotype behind confirmed Fancy Mouse traits', () => {
+    const result = computeConfirmedOffspringTraits(['a/a', 'A/a'], 'Fancy Mouse', [{}, {}], { includeGenes: true });
+    expect(result.find((entry) => entry.trait === 'Black')).toMatchObject({ percentage: 50, gene: 'a/a' });
+  });
+
+  it('leaves appearance-only confirmed traits without a gene', () => {
+    expect(computeConfirmedOffspringTraits(
+      [{}, {}],
+      'syrianHamster',
+      [{ color: 'Black' }, { color: 'Black' }],
+      { includeGenes: true },
+    )).toEqual([{ trait: 'Color: Black', percentage: 100 }]);
+  });
+
   it('includes a recorded variety in confirmed offspring traits', () => {
     expect(computeConfirmedOffspringTraits(
       [{}, {}, {}],

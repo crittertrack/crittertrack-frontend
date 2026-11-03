@@ -13,6 +13,7 @@ import { isDeadStatus } from '../../utils/constants';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { openExternalLink } from '../../utils/externalLink';
 import { animalShareUrl } from '../../utils/publicUrl';
+import { isFieldHiddenForSpecies } from '../../utils/speciesFieldTemplates';
 import { getOrderedLitterImages } from '../../utils/litterGallery';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
@@ -2659,7 +2660,11 @@ useEffect(() => {
                 title={[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Animal'}
                 subtitle={animal.id_public}
                 details={[
-                    animal.species,
+                    [
+                        animal.species,
+                        !isFieldHiddenForSpecies('breed', animal.species) ? animal.breed : null,
+                        !isFieldHiddenForSpecies('strain', animal.species) ? animal.strain : null
+                    ].filter(Boolean).join(' - '),
                     (() => {
                         const variety = [animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ');
                         return variety ? `Variety: ${variety}` : null;
