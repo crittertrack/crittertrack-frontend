@@ -118,6 +118,7 @@ const DirectParentTree = ({
     // Check for cached tree data in localStorage
     // Caching disabled (React elements not serializable). Re-fetch on each view.
     const cached = null;
+    const now = Date.now();
 
     let useCache = false;
     let cachedData = null;
@@ -229,56 +230,64 @@ const DirectParentTree = ({
 
 
 
-        while (queue.length > 0) {
+        // Fetch one generation at a time, with every animal of that generation
+        // requested in parallel. Fetching ancestors one by one made a 6-generation
+        // tree (up to 126 animals) take minutes, which looked like it was stuck.
+        let currentLevel = queue.splice(0, queue.length);
+
+        while (currentLevel.length > 0) {
           if (cancelled) return;
 
-          const current = queue.shift();
-          const id = String(current.id);
-
-          if (!id || current.depth > maxDepth || visited.has(id)) {
-            continue;
-          }
-
-          visited.add(id);
-
-          const animal = await fetchOne(id);
-
-          if (!animal) continue;
-
-          const sireId = getParentId(animal, [
-            'sireId_public',
-            'sireCtuid',
-            'sireId',
-          ]);
-
-          const damId = getParentId(animal, [
-            'damId_public',
-            'damCtuid',
-            'damId',
-          ]);
-
-          animalMap.set(id, {
-            id,
-            animal,
-            sireId,
-            damId,
+          const batch = [];
+          currentLevel.forEach((current) => {
+            const id = String(current.id);
+            if (!id || current.depth > maxDepth || visited.has(id)) return;
+            visited.add(id);
+            batch.push({ id, depth: current.depth });
           });
 
-          if (current.depth < maxDepth) {
-            if (sireId && !visited.has(String(sireId))) {
-              queue.push({
-                id: String(sireId),
-                depth: current.depth + 1,
-              });
-            }
+          const results = await Promise.all(batch.map((item) => fetchOne(item.id)));
 
-            if (damId && !visited.has(String(damId))) {
-              queue.push({
-                id: String(damId),
-                depth: current.depth + 1,
-              });
+          if (cancelled) return;
+
+          const nextLevel = [];
+
+          batch.forEach((item, index) => {
+            const animal = results[index];
+
+            if (!animal) return;
+
+            const sireId = getParentId(animal, [
+              'sireId_public',
+              'sireCtuid',
+              'sireId',
+            ]);
+
+            const damId = getParentId(animal, [
+              'damId_public',
+              'damCtuid',
+              'damId',
+            ]);
+
+            animalMap.set(item.id, {
+              id: item.id,
+              animal,
+              sireId,
+              damId,
+            });
+
+            if (item.depth < maxDepth) {
+              if (sireId && !visited.has(String(sireId))) {
+                nextLevel.push({ id: String(sireId), depth: item.depth + 1 });
+              }
+
+              if (damId && !visited.has(String(damId))) {
+                nextLevel.push({ id: String(damId), depth: item.depth + 1 });
+              }
             }
-          }
+          });
+
+          currentLevel = nextLevel;
         }
 
         if (cancelled) return;

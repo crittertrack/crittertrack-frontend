@@ -798,10 +798,10 @@ test('the entry number is rendered larger and darker than the surrounding text',
     await setup();
     fireEvent.click(screen.getByText('Waitlist'));
     await screen.findByText('Jane');
-    const number = screen.getByText('#1');
+    const number = screen.getByText('1');
     expect(number.className).toContain('text-xs');
     expect(number.className).toContain('font-bold');
-    expect(number.className).toContain('text-gray-500');
+    expect(number.className).toContain('text-gray-700');
 });
 
 test('the waitlist entry totals the deposit and payment still due across its animals', async () => {
@@ -824,8 +824,9 @@ test('the waitlist entry totals the deposit and payment still due across its ani
     // Only the animal that is still unpaid contributes to the totals.
     expect(screen.getByText('deposit due')).toBeTruthy();
     expect(screen.getByText('payment due')).toBeTruthy();
-    expect(screen.getByText('$20')).toBeTruthy();
-    expect(screen.getByText('$40')).toBeTruthy();
+    // The deposit is part of the price: $20 deposit due + $20 balance (40 - 20) payment due.
+    expect(screen.getAllByText('$20')).toHaveLength(2);
+    expect(screen.queryByText('$40')).toBeNull();
     // The paid animal's amounts are not counted.
     expect(screen.queryByText('$15')).toBeNull();
     expect(screen.queryByText('$30')).toBeNull();
@@ -863,10 +864,11 @@ test('totals are kept separate per currency', async () => {
     fireEvent.click(screen.getByText('Waitlist'));
     await screen.findByText('Mixed');
     // The two currencies are totalled separately, not added together.
-    expect(screen.getByText('$20')).toBeTruthy();
-    expect(screen.getByText('$40')).toBeTruthy();
-    expect(screen.getByText('€25')).toBeTruthy();
-    expect(screen.getByText('€50')).toBeTruthy();
+    // Deposit is part of the price, so each currency shows deposit + balance (price - deposit).
+    expect(screen.getAllByText('$20')).toHaveLength(2);
+    expect(screen.getAllByText('€25')).toHaveLength(2);
+    expect(screen.queryByText('$40')).toBeNull();
+    expect(screen.queryByText('€50')).toBeNull();
 });
 
 test('clicking the animal image opens the full animal modal for that animal', async () => {
