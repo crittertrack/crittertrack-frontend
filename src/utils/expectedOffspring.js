@@ -475,6 +475,9 @@ function mouseTraitGeneNotation(locus, genotype, trait) {
     const semi = MOUSE_SEMI_DOMINANT_A_ALLELES.find((allele) => MOUSE_ALLELE_TRAITS.A[allele] === trait);
     if (semi) return alleles[0] === alleles[1] ? genotype : `-/${semi}`;
   }
+  // Shorthair is dominant: always "Go/-"; the genotypes behind it are listed separately
+  // (see mouseGoLocusDetail), the same way as for the W locus.
+  if (locus === 'Go' && trait === 'Shorthair') return 'Go/-';
   if (locus === 'W') {
     // W-locus traits are dominant: always "<allele>/-"; the genotypes behind it are listed
     // separately (see mouseWLocusDetail) because homozygous is often lethal.
@@ -514,6 +517,19 @@ function mouseWLocusDetail(genotypes, trait) {
   return list.join(' or ');
 }
 
+/**
+ * Text appended to the Shorthair gene: the genotypes this cross can actually produce,
+ * homozygous first, e.g. "Go/Go or Go/go". Only genotypes the cross can produce are listed.
+ */
+function mouseGoLocusDetail(genotypes) {
+  return Array.from(genotypes)
+    .sort((a, b) => {
+      const isHomozygous = (genotype) => { const [first, second] = genotype.split('/'); return first === second; };
+      return Number(isHomozygous(b)) - Number(isHomozygous(a));
+    })
+    .join(' or ');
+}
+
 function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) {
   const parsedSireGenotype = normalizeGenotype(parseGeneticCode(sireCode, 'Fancy Mouse'));
   const parsedDamGenotype = normalizeGenotype(parseGeneticCode(damCode, 'Fancy Mouse'));
@@ -537,6 +553,7 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
   // genotype(s) at the locus that produces it.
   const traitGenes = new Map();
   const traitWGenotypes = new Map();
+  const traitGoGenotypes = new Map();
 
   sharedLoci.forEach((locus) => {
     const distribution = computeLocusOffspringDistribution(
@@ -566,6 +583,10 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
           if (!traitWGenotypes.has(trait)) traitWGenotypes.set(trait, new Set());
           traitWGenotypes.get(trait).add(offspringGenotype);
         }
+        if (locus === 'Go' && trait === 'Shorthair') {
+          if (!traitGoGenotypes.has(trait)) traitGoGenotypes.set(trait, new Set());
+          traitGoGenotypes.get(trait).add(offspringGenotype);
+        }
       });
     });
   });
@@ -583,6 +604,8 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
             genes.sort((a, b) => Number(isHomozygous(b)) - Number(isHomozygous(a)));
           }
           const base = genes.join(' or ');
+          const goDetail = traitGoGenotypes.get(trait);
+          if (goDetail && goDetail.size) return `${base} (${mouseGoLocusDetail(goDetail)})`;
           const wDetail = traitWGenotypes.get(trait);
           return wDetail && wDetail.size ? `${base} (${mouseWLocusDetail(wDetail, trait)})` : base;
         })(),
