@@ -76,12 +76,15 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                 )}
             </div>
 
-            {isLitter && d.offspring && (
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700 dark:text-dark-text-secondary" data-testid="finance-offspring">
-                    {OFFSPRING_LABELS.filter(([key]) => d.offspring[key] > 0).map(([key, label]) => (
-                        <span key={key}>{label}: <strong>{d.offspring[key]}</strong></span>
+            {isLitter && d.offspringDetails && d.offspringDetails.length > 0 && (
+                <ul className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5" data-testid="finance-offspring-details">
+                    {d.offspringDetails.map((o, i) => (
+                        <li key={o.id || i} className="flex justify-between gap-3">
+                            <span>{o.name || 'Offspring'} <span className="text-xs text-gray-500">({o.status})</span></span>
+                            <span>{o.amount == null ? '-' : formatMoney(o.amount)}</span>
+                        </li>
                     ))}
-                </div>
+                </ul>
             )}
 
             {categories.length > 0 && (

@@ -101,7 +101,7 @@ export default function OverviewTab({
 
             <EventDetailsRow litter={litter} status={status} speciesOptions={speciesOptions} />
 
-            {litter.litter_id_public && <FinanceOverviewCard kind="litter" id={litter.litter_id_public} />}
+            {/* finances moved to dedicated Finances tab */}
 
             <Panel title="Additional notes" testId="notes-panel">
                 {isBlank(litter.notes)

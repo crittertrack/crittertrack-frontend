@@ -8,6 +8,7 @@ const GeneticsTab = React.lazy(() => import('./details/GeneticsTab'));
 const OffspringTab = React.lazy(() => import('./details/OffspringTab'));
 const PedigreesTab = React.lazy(() => import('./details/PedigreesTab'));
 const GalleryTab = React.lazy(() => import('./details/GalleryTab'));
+const FinanceOverviewCard = React.lazy(() => import('../shared/FinanceOverviewCard'));
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -15,6 +16,7 @@ const TABS = [
     { id: 'offspring', label: 'Offspring' },
     { id: 'pedigrees', label: 'Pedigrees' },
     { id: 'gallery', label: 'Gallery' },
+    { id: 'finances', label: 'Finances' },
 ];
 
 const TabLoading = () => (
@@ -413,6 +415,12 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                             <GalleryTab images={galleryImages} />
                         </React.Suspense>
             )}
+            {activeTab === 'finances' && (
+                <React.Suspense fallback={<TabLoading />}>
+                    {litter.litter_id_public && <FinanceOverviewCard kind="litter" id={litter.litter_id_public} />}
+                </React.Suspense>
+            )}
+
         </div>
         </div>
     );
