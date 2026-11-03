@@ -7,10 +7,8 @@ import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_G
 import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
 import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
 import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabel, getBallPythonDisplayPhenotype, BALL_PYTHON_POSSIBLE_HET_LOCI } from '../data/ballPythonPhenotypeRules';
-
-// A-locus allele dominance, highest first. Aw (white-bellied agouti) sits between Avy and A:
-// dominant over A/at/a/ae, recessive to Ay and Avy.
-const A_LOCUS_DOMINANCE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
+import PunnettSquare from './PunnettSquare';
+import { combineAlleles, createCombinedPunnettSquare } from '../utils/punnettSquare';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1982,6 +1980,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   const [showExamples, setShowExamples] = useState(false);
   const [activeTab, setActiveTab] = useState('self');
   const [offspringResults, setOffspringResults] = useState(null);
+  const [punnettSquareData, setPunnettSquareData] = useState(null);
+  const [offspringDisplayMode, setOffspringDisplayMode] = useState('summary');
   const [showWildcardNote, setShowWildcardNote] = useState(false);
   const [expandedPhenotypes, setExpandedPhenotypes] = useState({});
   const [feedbackGenotype, setFeedbackGenotype] = useState(null);
@@ -2025,6 +2025,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         setParent1PossibleHets([]);
         setParent2PossibleHets([]);
         setOffspringResults(null);
+        setPunnettSquareData(null);
+        setOffspringDisplayMode('summary');
         return;
       }
 
@@ -2046,6 +2048,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           setParent1PossibleHets([]);
           setParent2PossibleHets([]);
           setOffspringResults(null);
+          setPunnettSquareData(null);
+          setOffspringDisplayMode('summary');
         } else {
           console.error('Failed to fetch genetics data, falling back to Fancy Mouse');
           setSelectedSpecies('Fancy Mouse');
@@ -2159,6 +2163,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     setParent2PossibleHets([]);
     setActiveTab('self');
     setOffspringResults(null);
+    setPunnettSquareData(null);
+    setOffspringDisplayMode('summary');
     setShowWildcardNote(false);
     setExpandedPhenotypes({});
     setFeedbackGenotype(null);
@@ -2387,19 +2393,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       const locusWeights = {};
       for (const a1 of parent1Alleles) {
         for (const a2 of parent2Alleles) {
-          const alleles = [a1, a2].sort((a, b) => {
-            // A-locus alleles are ordered by dominance (Ay > Avy > Aw > A > at > a > ae) so the
-            // combo key always matches a GENE_LOCI entry (e.g. 'Ay/Aw', never 'Aw/Ay').
-            if (locus === 'A') {
-              const ra = A_LOCUS_DOMINANCE_ORDER.indexOf(a);
-              const rb = A_LOCUS_DOMINANCE_ORDER.indexOf(b);
-              if (ra !== -1 && rb !== -1) return ra - rb;
-            }
-            if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
-            if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
-            return a.localeCompare(b);
-          });
-          const combo = `${alleles[0]}/${alleles[1]}`;
+          const combo = combineAlleles(a1, a2, locus);
           locusWeights[combo] = (locusWeights[combo] || 0) + 1;
         }
       }
@@ -2606,6 +2600,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     );
     setShowWildcardNote(hasWildcard);
 
+    setPunnettSquareData(activeHetEntries.length
+      ? { reason: 'possible_hets' }
+      : createCombinedPunnettSquare(p1, p2, selectedLoci, geneLoci));
+    setOffspringDisplayMode('summary');
     setOffspringResults(resultsArray);
   };
 
@@ -3262,8 +3260,28 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           {/* Offspring Results */}
           {offspringResults && (
             <div className="mt-6 bg-purple-50 dark:bg-dark-accent-purple-bg rounded-lg p-6 border-2 border-purple-300 dark:border-dark-accent-purple/60" data-tutorial-target="offspring-results">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-purple-800 dark:text-dark-accent-purple">Possible Offspring Outcomes</h2>
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-purple-800 dark:text-dark-accent-purple">Possible Offspring Outcomes</h2>
+                  <div className="mt-2 inline-flex rounded-lg bg-white p-1 dark:bg-dark-card-bg" role="group" aria-label="Offspring output format">
+                    <button
+                      type="button"
+                      onClick={() => setOffspringDisplayMode('summary')}
+                      aria-pressed={offspringDisplayMode === 'summary'}
+                      className={`rounded-md px-3 py-1.5 text-sm transition ${offspringDisplayMode === 'summary' ? 'bg-purple-600 text-white dark:bg-purple-700' : 'text-gray-700 hover:bg-gray-100 dark:text-dark-text-secondary dark:hover:bg-dark-surface'}`}
+                    >
+                      Phenotype summary
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOffspringDisplayMode('punnett')}
+                      aria-pressed={offspringDisplayMode === 'punnett'}
+                      className={`rounded-md px-3 py-1.5 text-sm transition ${offspringDisplayMode === 'punnett' ? 'bg-purple-600 text-white dark:bg-purple-700' : 'text-gray-700 hover:bg-gray-100 dark:text-dark-text-secondary dark:hover:bg-dark-surface'}`}
+                    >
+                      Punnett square
+                    </button>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <span className="text-sm font-medium text-purple-700 dark:text-dark-accent-purple bg-purple-200 dark:bg-dark-accent-purple/30 px-3 py-1 rounded-full">
                     {offspringResults.length} phenotypes
@@ -3278,6 +3296,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   <p><strong>Note on "/-" notation:</strong> A genotype like "A/-" indicates that the animal has at least one dominant "A" allele, but the other allele is unknown because one or both parents had an unknown allele at that locus. This is a placeholder for a dominant phenotype where the full genotype isn't certain.</p>
                 </div>
               )}
+              {offspringDisplayMode === 'punnett' ? (
+                <PunnettSquare square={punnettSquareData} offspringResults={offspringResults} species={selectedSpecies} />
+              ) : (
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => {
                   // For offspring display: if phenotype is empty but has carriers, show carrier status.
@@ -3380,6 +3401,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 );
                 })}
               </div>
+              )}
             </div>
           )}
 

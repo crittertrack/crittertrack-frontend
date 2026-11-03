@@ -37,6 +37,7 @@ import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import QRCodeLabelModal from '../shared/QRCodeLabelModal';
+import CareSheetButton from '../shared/CareSheetButton';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -559,6 +560,13 @@ useEffect(() => {
                                         <span role="alert" className="basis-full text-right text-xs text-red-600 dark:text-red-400">
                                             {favoriteError}
                                         </span>
+                                    )}
+                                    {isPrivate && (
+                                        <CareSheetButton
+                                            type="animal"
+                                            animal={animal}
+                                            enclosureInfo={enclosureInfo}
+                                        />
                                     )}
                                     
                                     {/* Share Button */}

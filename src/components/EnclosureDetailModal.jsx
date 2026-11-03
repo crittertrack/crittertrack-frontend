@@ -12,6 +12,7 @@ import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 import { getEnclosurePurposeLabel } from '../utils/enclosurePurpose';
 import { enclosureShareUrl } from '../utils/publicUrl';
 import QRCodeLabelModal from './shared/QRCodeLabelModal';
+import CareSheetButton from './shared/CareSheetButton';
 
 const TABS = [
     { id: 'dashboard', label: 'Dashboard', icon: Info },
@@ -454,6 +455,7 @@ const EnclosureDetailModal = ({
                         </p>
                     </div>
                     <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/20 p-1 rounded-lg">
+                        <CareSheetButton type="enclosure" enclosure={enclosure} animals={animals} compact />
                         <button
                             type="button"
                             onClick={() => setShowQRCode(true)}

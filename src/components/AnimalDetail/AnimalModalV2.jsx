@@ -33,6 +33,7 @@ import { EnclosureCard } from './EnclosureCard';
 import { RecordsTabContent } from './RecordsTabContent';
 import InfoButton from '../shared/InfoButton';
 import QRCodeLabelModal from '../shared/QRCodeLabelModal';
+import CareSheetButton from '../shared/CareSheetButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 import { resolveLiteMode } from '../../utils/liteMode';
 import { LiteRecordsTabContent } from './LiteRecordsTabContent';
@@ -588,6 +589,12 @@ useEffect(() => {
                                             <Archive size={16} />
                                         </button>
                                     )}
+                                    <CareSheetButton
+                                        type="animal"
+                                        animal={animal}
+                                        enclosureInfo={enclosureInfo}
+                                        compact
+                                    />
                                     {/* Share - same QR + copy-link sheet as ViewAnimalModalV2, so the
                                         private modal has one-tap access to the animal's public link.
                                         The URL is the public /animal/:id_public route, which is what
