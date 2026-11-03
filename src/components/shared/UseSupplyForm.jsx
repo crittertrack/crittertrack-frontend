@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import apiClient from '../../utils/apiClient';
 import UseSupplyFields from './UseSupplyFields';
 
-// "From supplies" cost entry for a litter or an animal: pick a supply and how much was used.
+// "From supplies" cost entry for a litter: pick a supply and how much was used.
 // Posts to /supplies/use, which lowers stock (with unit conversion) and records a usage entry
 // valued at the supply's cost per unit.
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export default function UseSupplyForm({ litterId = null, animalId = null, onDone, onCancel }) {
+export default function UseSupplyForm({ litterId, onDone, onCancel }) {
     const [supplies, setSupplies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({ supplyId: '', quantity: '', unit: '', date: today(), note: '' });
@@ -41,7 +41,6 @@ export default function UseSupplyForm({ litterId = null, animalId = null, onDone
                 quantity: Number(form.quantity),
                 unit: form.unit || undefined,
                 litterId: litterId || undefined,
-                animalId: animalId || undefined,
                 date: form.date || undefined,
                 note: form.note.trim() || undefined,
             });
@@ -55,7 +54,7 @@ export default function UseSupplyForm({ litterId = null, animalId = null, onDone
 
     return (
         <form onSubmit={submit} className="rounded-lg border border-blue-200 dark:border-blue-700/60 bg-blue-50 dark:bg-blue-900/20 p-3 space-y-2" data-testid="use-supply-form">
-            <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Use supplies for this {litterId ? 'litter' : 'animal'}</p>
+            <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Use supplies for this litter</p>
             {loading ? (
                 <p className="text-sm text-gray-500 dark:text-dark-text-muted">Loading supplies...</p>
             ) : supplies.length === 0 ? (

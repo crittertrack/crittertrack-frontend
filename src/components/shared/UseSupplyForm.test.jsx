@@ -37,7 +37,7 @@ describe('UseSupplyForm', () => {
     });
 
     it('warns when the chosen supply has no price', async () => {
-        render(<UseSupplyForm animalId="CTC1" onDone={jest.fn()} onCancel={jest.fn()} />);
+        render(<UseSupplyForm litterId="CTL1" onDone={jest.fn()} onCancel={jest.fn()} />);
         await screen.findByTestId('use-supply-select');
         fireEvent.change(screen.getByTestId('use-supply-select'), { target: { value: 's2' } });
         expect(screen.getByTestId('use-supply-unpriced')).toBeTruthy();

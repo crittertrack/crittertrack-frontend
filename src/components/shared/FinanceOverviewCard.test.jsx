@@ -120,23 +120,6 @@ describe('FinanceOverviewCard', () => {
         expect(apiClient.post).not.toHaveBeenCalled();
     });
 
-    it('does not offer the manual expense button on an animal', async () => {
-        apiClient.get.mockResolvedValue({ data: { totalCost: 10, totalRevenue: 0, net: -10, expectedRevenue: 0, costByCategory: { food: 10 } } });
-        render(<FinanceOverviewCard kind="animal" id="CTC9" />);
-
-        await screen.findByTestId('finance-net');
-        expect(screen.queryByTestId('open-manual-expense')).toBeNull();
-    });
-
-    it('shows animal net instead of litter-only stats', async () => {
-        apiClient.get.mockResolvedValue({ data: { totalCost: 10, totalRevenue: 0, net: -10, expectedRevenue: 0, costByCategory: { food: 10 } } });
-        render(<FinanceOverviewCard kind="animal" id="CTC9" />);
-
-        await waitFor(() => expect(screen.getByTestId('finance-net')).toBeTruthy());
-        expect(apiClient.get).toHaveBeenCalledWith('/budget/overview/animal/CTC9');
-        expect(screen.queryByTestId('finance-recouped')).toBeNull();
-    });
-
     it('shows a helpful empty message when nothing is recorded', async () => {
         apiClient.get.mockResolvedValue({ data: { totalCost: 0, totalRevenue: 0, net: 0, expectedRevenue: 0, costByCategory: {}, offspring: {} } });
         render(<FinanceOverviewCard kind="litter" id="CTL2" />);
@@ -146,7 +129,7 @@ describe('FinanceOverviewCard', () => {
 
     it('renders nothing when the record is not yours (404)', async () => {
         apiClient.get.mockRejectedValue({ response: { status: 404 } });
-        const { container } = render(<FinanceOverviewCard kind="animal" id="CTC3" />);
+        const { container } = render(<FinanceOverviewCard kind="litter" id="CTL3" />);
 
         await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
         await waitFor(() => expect(container.firstChild).toBeNull());

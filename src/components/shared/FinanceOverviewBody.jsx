@@ -81,11 +81,10 @@ export const formatQuantity = (quantity, unit) => {
     const rounded = Math.round(value * 100) / 100;
     return `${rounded}${label ? ` ${label}` : ''}`;
 };
-export default function FinanceOverviewBody({ kind, data: d }) {
-    const isLitter = kind === 'litter';
+export default function FinanceOverviewBody({ data: d }) {
     const usage = d.usage;
     const categories = Object.entries(d.costByCategory || {}).filter(([, v]) => v > 0);
-    const namedExpenses = isLitter && Array.isArray(d.transactions) ? d.transactions.filter(t => t.type === 'expense' && t.litterId && t.description) : [];
+    const namedExpenses = Array.isArray(d.transactions) ? d.transactions.filter(t => t.type === 'expense' && t.litterId && t.description) : [];
     const hasAnything = d.totalCost > 0 || d.totalRevenue > 0 || d.expectedRevenue > 0;
 
     return (
@@ -93,27 +92,21 @@ export default function FinanceOverviewBody({ kind, data: d }) {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                 <Stat label="Spent" value={formatMoney(d.totalCost)} testId="finance-spent" />
                 <Stat label="Earned from sales" value={formatMoney(d.totalRevenue)} testId="finance-earned" />
-                {isLitter ? (
-                    <>
-                        <Stat
-                            label="Cost recouped"
-                            value={d.costRecoupedPercent == null ? '-' : `${d.costRecoupedPercent}%`}
-                            hint={d.breakEvenRemaining > 0 ? `${formatMoney(d.breakEvenRemaining)} to break even` : undefined}
-                            testId="finance-recouped"
-                        />
-                        <Stat
-                            label="Cost per offspring born"
-                            value={d.costPerOffspringBorn == null ? '-' : formatMoney(d.costPerOffspringBorn)}
-                            testId="finance-per-offspring"
-                        />
-                    </>
-                ) : (
-                    <Stat label="Net" value={formatMoney(d.net)} testId="finance-net" />
-                )}
+                <Stat
+                    label="Cost recouped"
+                    value={d.costRecoupedPercent == null ? '-' : `${d.costRecoupedPercent}%`}
+                    hint={d.breakEvenRemaining > 0 ? `${formatMoney(d.breakEvenRemaining)} to break even` : undefined}
+                    testId="finance-recouped"
+                />
+                <Stat
+                    label="Cost per offspring born"
+                    value={d.costPerOffspringBorn == null ? '-' : formatMoney(d.costPerOffspringBorn)}
+                    testId="finance-per-offspring"
+                />
 
             </div>
 
-            {isLitter && d.offspringDetails && d.offspringDetails.length > 0 && (
+            {d.offspringDetails && d.offspringDetails.length > 0 && (
                 <section className="border-t border-gray-100 dark:border-dark-border pt-3" data-testid="finance-offspring-section">
                 <h4 className="text-sm font-semibold text-gray-800 dark:text-dark-text mb-1">Offspring</h4>
                 <div className="overflow-x-auto" data-testid="finance-offspring-details">
@@ -220,9 +213,7 @@ export default function FinanceOverviewBody({ kind, data: d }) {
             )}
             {!hasAnything && !(usage && usage.count > 0) && (
                 <p className="text-sm text-gray-500 dark:text-dark-text-muted">
-                    {isLitter
-                        ? 'No costs or sales recorded yet. Tag an expense to this litter in Budget to see it here.'
-                        : 'No costs or sales recorded for this animal yet.'}
+                    No costs or sales recorded yet. Tag an expense to this litter in Budget to see it here.
                 </p>
             )}
         </div>

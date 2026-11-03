@@ -5,8 +5,8 @@ import FinanceOverviewBody from './FinanceOverviewBody';
 import UseSupplyForm from './UseSupplyForm';
 import ManualExpenseForm from './ManualExpenseForm';
 
-// Shared money summary for one animal (kind="animal", id = id_public) or one litter
-// (kind="litter", id = litter_id_public). Data comes from GET /budget/overview/:kind/:id.
+// Money summary for one litter (kind="litter", id = litter_id_public). Data comes from
+// GET /budget/overview/litter/:id. Animals have no finance card.
 // This file handles loading/error/hidden states; FinanceOverviewBody renders the numbers.
 
 const buttonCls = 'text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover';
@@ -20,14 +20,14 @@ export default function FinanceOverviewCard({ kind, id, className = '', bare = f
     const [showExpenseForm, setShowExpenseForm] = useState(false);
 
     useEffect(() => {
-        if (!id || (kind !== 'animal' && kind !== 'litter')) return undefined;
+        if (!id || kind !== 'litter') return undefined;
         let cancelled = false;
         setState({ status: 'loading', data: null });
         apiClient.get(`/budget/overview/${kind}/${encodeURIComponent(id)}`)
             .then(res => { if (!cancelled) setState({ status: 'ready', data: res.data }); })
             .catch(err => {
                 if (cancelled) return;
-                // 404 = not your record (e.g. a view-only animal): show nothing rather than an error.
+                // 404 = not your record (e.g. someone else's litter): show nothing rather than an error.
                 const notMine = err?.response?.status === 404;
                 setState({ status: notMine ? 'hidden' : 'error', data: null });
             });
@@ -65,8 +65,7 @@ export default function FinanceOverviewCard({ kind, id, className = '', bare = f
             {showUseForm && (
                 <div className="mb-3">
                     <UseSupplyForm
-                        litterId={kind === 'litter' ? id : null}
-                        animalId={kind === 'animal' ? id : null}
+                        litterId={id}
                         onCancel={() => setShowUseForm(false)}
                         onDone={() => { setShowUseForm(false); refresh(); }}
                     />
@@ -90,7 +89,7 @@ export default function FinanceOverviewCard({ kind, id, className = '', bare = f
                     <button type="button" className="underline" onClick={refresh}>Retry</button>
                 </div>
             )}
-            {state.status === 'ready' && <FinanceOverviewBody kind={kind} data={state.data} />}
+            {state.status === 'ready' && <FinanceOverviewBody data={state.data} />}
         </section>
     );
 }
