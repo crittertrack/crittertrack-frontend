@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { ArrowLeft, Edit, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
 import OverviewTab from './details/OverviewTab';
 const GeneticsTab = React.lazy(() => import('./details/GeneticsTab'));
@@ -44,6 +44,17 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
         if (!candidate) return null;
         return [candidate.litter_id_public, candidate._id].includes(ctilid) ? candidate : null;
     })();
+    // The ordered list shown on the overview, so we can step to the next listed litter.
+    const litterList = Array.isArray(location?.state?.litterList) ? location.state.litterList : null;
+    const nextLitter = (() => {
+        if (!litterList) return null;
+        const idx = litterList.findIndex(l => l && (l.litter_id_public === ctilid || l._id === ctilid));
+        return idx >= 0 && idx < litterList.length - 1 ? litterList[idx + 1] : null;
+    })();
+    const goNext = () => {
+        if (!nextLitter) return;
+        navigate(`/litters/${encodeURIComponent(nextLitter.litter_id_public || nextLitter._id)}`, { state: { litterPreview: nextLitter, litterList } });
+    };
     const hasLitterRef = React.useRef(!!litterPreview);
     const [litter, setLitter] = useState(litterPreview);
     const [loading, setLoading] = useState(!litterPreview);
@@ -308,6 +319,17 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                     >
                         <Edit size={14} /> Edit litter
                     </button>
+                    {nextLitter && (
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            title={`Next litter (${nextLitter.litter_id_public || ''})`}
+                            aria-label="Next litter"
+                            className="shrink-0 px-3 py-2 rounded-lg border border-gray-300 dark:border-dark-border text-sm font-medium text-gray-700 dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-surface flex items-center gap-1.5"
+                        >
+                            Next litter <ArrowRight size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
 

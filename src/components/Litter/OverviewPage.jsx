@@ -581,7 +581,7 @@ const LittersOverviewPage = ({
 
     const goEdit = (litter) => navigate(`/litters/${encodeURIComponent(litter.litter_id_public || litter._id)}/edit`);
     // Pass the litter already in the list so the details page can show it instantly.
-    const goDetails = (litter) => navigate(`/litters/${encodeURIComponent(litter.litter_id_public || litter._id)}`, { state: { litterPreview: litter } });
+    const goDetails = (litter) => navigate(`/litters/${encodeURIComponent(litter.litter_id_public || litter._id)}`, { state: { litterPreview: litter, litterList: filteredLitters } });
     const goNew = () => navigate('/litters/new');
 
     const selectClass = 'px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card-bg text-gray-800 dark:text-dark-text';
