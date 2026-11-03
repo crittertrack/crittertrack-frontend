@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
 import { ArrowLeft, Edit, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { deriveStoredStatus } from '../../utils/litterStatus';
@@ -36,8 +36,17 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     const { ctlId, ctilid: legacyId } = useParams();
     const ctilid = ctlId || legacyId;
     const [searchParams, setSearchParams] = useSearchParams();
-    const [litter, setLitter] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // The overview list passes the litter it already has through the route state, so the page can
+    // render immediately while the full record is fetched in the background.
+    const location = useLocation();
+    const litterPreview = (() => {
+        const candidate = location?.state?.litterPreview;
+        if (!candidate) return null;
+        return [candidate.litter_id_public, candidate._id].includes(ctilid) ? candidate : null;
+    })();
+    const hasLitterRef = React.useRef(!!litterPreview);
+    const [litter, setLitter] = useState(litterPreview);
+    const [loading, setLoading] = useState(!litterPreview);
     const [notFound, setNotFound] = useState(false);
     const daysSinceLitterBirth = litter && litter.birthDate
         ? Math.floor((new Date() - new Date(litter.birthDate)) / (1000 * 60 * 60 * 24))
@@ -123,17 +132,18 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     const activeTab = TABS.some(t => t.id === requestedTab) ? requestedTab : 'overview';
 
     const load = useCallback(async () => {
-        setLoading(true);
+        if (!hasLitterRef.current) setLoading(true);
         setNotFound(false);
         try {
             const res = await apiClient.get(`/litters/${encodeURIComponent(ctilid)}?view=overview`);
             setLitter(res.data);
+            hasLitterRef.current = true;
             return true;
         } catch (err) {
             console.error('[LitterDetailsPage] Failed to load litter:', err);
             if (err?.response?.status === 404) setNotFound(true);
             else if (showModalMessage) showModalMessage('Error', 'Failed to load this litter.');
-            setLitter(null);
+            if (!hasLitterRef.current) setLitter(null);
             return false;
         } finally {
             setLoading(false);

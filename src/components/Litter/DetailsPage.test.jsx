@@ -3,10 +3,12 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import LitterDetailsPage from './DetailsPage';
 import apiClient from '../../utils/apiClient';
 
+let mockLocationState = null;
 jest.mock('react-router-dom', () => {
     const React = require('react');
     return {
         useNavigate: () => jest.fn(),
+        useLocation: () => ({ state: mockLocationState }),
         useParams: () => ({ ctlId: 'CTL9' }),
         useSearchParams: () => React.useState(new URLSearchParams()),
     };
@@ -89,6 +91,22 @@ describe('Litter details page', () => {
         expect(within(objectives).getByText('Both parents may carry dilute')).toBeTruthy();
         expect(within(objectives).getByText('Maybe, depending on results')).toBeTruthy();
         expect(within(objectives).getByText('Some available for placement')).toBeTruthy();
+    });
+
+    it('shows the litter passed from the overview immediately, then refreshes it in the background', async () => {
+        mockLocationState = { litterPreview: { ...litter, litter_id_public: 'CTL9' } };
+        let resolveGet;
+        apiClient.get.mockImplementation(() => new Promise((resolve) => { resolveGet = resolve; }));
+        try {
+            renderPage();
+            // The request has not resolved yet, but the page is already rendered.
+            expect(screen.getByTestId('litter-details')).toBeTruthy();
+            expect(screen.queryByText(/Loading litter/)).toBeNull();
+            resolveGet({ data: { ...litter, breedingPairCodeName: 'Fresh Name' } });
+            await waitFor(() => expect(screen.getByTestId('litter-title').textContent).toContain('Fresh Name'));
+        } finally {
+            mockLocationState = null;
+        }
     });
 
     it('loads the overview without requesting deferred tab data', async () => {

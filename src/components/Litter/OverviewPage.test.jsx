@@ -110,7 +110,7 @@ describe('Litters overview layout', () => {
         expect(mockNavigate).not.toHaveBeenCalled();
 
         fireEvent.click(card);
-        expect(mockNavigate).toHaveBeenCalledWith('/litters/CTL1');
+        expect(mockNavigate).toHaveBeenCalledWith('/litters/CTL1', { state: { litterPreview: expect.objectContaining({ litter_id_public: 'CTL1' }) } });
     });
 
     it('confirms litter deletion, removes the litter, and preserves offspring records', async () => {
