@@ -394,7 +394,41 @@ function getMouseTraits(genotype) {
   return traits;
 }
 
-function computeMouseExpectedOffspring(sireCode, damCode) {
+/**
+ * Describe which genotype(s) produce a trait, e.g. "a/a" for Black or "B/b" for
+ * Chocolate (carrier).
+ *
+ * `combos` is every possible offspring genotype ({ locus: 'x/y' }) and `traitCombos`
+ * the subset that yields the trait. A locus is informative when it varies across all
+ * offspring but is fixed within the trait's offspring (Black -> a/a). When no locus is
+ * fixed, loci that the trait narrows down are listed with their possible values.
+ */
+function describeTraitGenes(combos, traitCombos) {
+  if (!traitCombos.length) return '';
+  const loci = Array.from(new Set(combos.flatMap((combo) => Object.keys(combo)))).sort();
+  const valuesOf = (list, locus) =>
+    Array.from(new Set(list.map((combo) => combo[locus]).filter(Boolean)));
+
+  const fixed = [];
+  const narrowed = [];
+  loci.forEach((locus) => {
+    const all = valuesOf(combos, locus);
+    if (all.length < 2) return;
+    const within = valuesOf(traitCombos, locus);
+    if (within.length === 1) fixed.push(within[0]);
+    else if (within.length > 1 && within.length < all.length) narrowed.push(within.join(' or '));
+  });
+  if (fixed.length) return fixed.join(' ');
+  if (narrowed.length) return narrowed.join(' ');
+
+  // Every locus is identical across all offspring (e.g. a 100% outcome).
+  return loci
+    .map((locus) => valuesOf(traitCombos, locus)[0])
+    .filter(Boolean)
+    .join(' ');
+}
+
+function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) {
   const parsedSireGenotype = normalizeGenotype(parseGeneticCode(sireCode, 'Fancy Mouse'));
   const parsedDamGenotype = normalizeGenotype(parseGeneticCode(damCode, 'Fancy Mouse'));
   const allLoci = new Set([
@@ -413,6 +447,9 @@ function computeMouseExpectedOffspring(sireCode, damCode) {
   const sharedLoci = Array.from(allLoci)
     .filter((locus) => sireGenotype[locus] && damGenotype[locus]);
   const traitProbabilities = new Map();
+  // Mouse traits are calculated one locus at a time, so each trait's gene is the
+  // genotype(s) at the locus that produces it.
+  const traitGenes = new Map();
 
   sharedLoci.forEach((locus) => {
     const distribution = computeLocusOffspringDistribution(
@@ -423,6 +460,8 @@ function computeMouseExpectedOffspring(sireCode, damCode) {
     Object.entries(distribution).forEach(([offspringGenotype, probability]) => {
       getMouseTraits({ [locus]: offspringGenotype }).forEach((trait) => {
         traitProbabilities.set(trait, (traitProbabilities.get(trait) || 0) + probability);
+        if (!traitGenes.has(trait)) traitGenes.set(trait, new Set());
+        traitGenes.get(trait).add(offspringGenotype);
       });
     });
   });
@@ -431,6 +470,7 @@ function computeMouseExpectedOffspring(sireCode, damCode) {
     .map(([trait, probability]) => ({
       trait,
       probability: Math.round(probability * 100),
+      ...(includeGenes ? { gene: Array.from(traitGenes.get(trait) || []).join(' or ') } : {}),
     }))
     .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
 }
@@ -697,12 +737,15 @@ function toPercentages(probabilities) {
  * Loci missing from either parent are excluded because their inheritance cannot
  * be calculated from the available data.
  */
-export function computeExpectedOffspring(sireCode, damCode, species) {
+export function computeExpectedOffspring(sireCode, damCode, species, options = {}) {
+  // With { includeGenes: true } every entry also carries a `gene` string naming the
+  // genotype behind the trait (e.g. "a/a"), so the UI can show it next to the trait.
+  const includeGenes = Boolean(options?.includeGenes);
   if (!species) return [];
   const speciesKey = getSpeciesKey(species);
   if (speciesKey === 'fancymouse' || speciesKey === 'mouse') {
     if (!sireCode && !damCode) return [];
-    return computeMouseExpectedOffspring(sireCode, damCode);
+    return computeMouseExpectedOffspring(sireCode, damCode, includeGenes);
   }
   if (!sireCode || !damCode) return [];
   if (!getSpeciesRules(species)) return [];
@@ -741,6 +784,11 @@ export function computeExpectedOffspring(sireCode, damCode, species) {
 
   const phenotypeProbabilities = {};
   const carrierProbabilities = {};
+  const traitCombos = {};
+  const recordTraitCombo = (trait, genotype) => {
+    if (!traitCombos[trait]) traitCombos[trait] = [];
+    traitCombos[trait].push(genotype);
+  };
   for (const combo of offspringCombos) {
     const ratMatch = speciesKey === 'fancyrat'
       ? matchFancyRatPhenotype(normalizeGenotype(combo.genotype))
@@ -762,6 +810,7 @@ export function computeExpectedOffspring(sireCode, damCode, species) {
       || 'Unknown';
     phenotypeProbabilities[phenotype] =
       (phenotypeProbabilities[phenotype] || 0) + combo.probability;
+    recordTraitCombo(phenotype, combo.genotype);
     [
       ...(ratMatch?.carriers || []),
       ...(syrianMatch?.carriers || []),
@@ -771,6 +820,7 @@ export function computeExpectedOffspring(sireCode, damCode, species) {
       const trait = `${carrier} (carrier)`;
       carrierProbabilities[trait] =
         (carrierProbabilities[trait] || 0) + combo.probability;
+      recordTraitCombo(trait, combo.genotype);
     });
   }
 
@@ -779,7 +829,14 @@ export function computeExpectedOffspring(sireCode, damCode, species) {
     .map(([trait, probability]) => ({ trait, probability: Math.round(probability * 100) }))
     .filter(({ probability }) => probability > 0)
     .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
-  return [...expectedPhenotypes, ...expectedCarriers];
+  const results = [...expectedPhenotypes, ...expectedCarriers];
+  if (!includeGenes) return results;
+
+  const allGenotypes = offspringCombos.map((combo) => combo.genotype);
+  return results.map((entry) => ({
+    ...entry,
+    gene: describeTraitGenes(allGenotypes, traitCombos[entry.trait] || []),
+  }));
 }
 
 /**

@@ -19,6 +19,16 @@ describe('computeExpectedOffspring', () => {
     ]);
   });
 
+  it('adds the gene behind each trait only when includeGenes is set', () => {
+    const result = computeExpectedOffspring({ a: 'a/a' }, { a: 'A/a' }, 'syrianHamster', { includeGenes: true });
+
+    expect(result).toEqual([
+      { trait: '(Golden) Agouti', probability: 50, gene: 'A/a' },
+      { trait: 'Black', probability: 50, gene: 'a/a' },
+      { trait: 'Black (carrier)', probability: 50, gene: 'A/a' },
+    ]);
+  });
+
   it('includes expected Syrian Hamster carrier traits', () => {
     expect(computeExpectedOffspring(
       'a/a B/B',
