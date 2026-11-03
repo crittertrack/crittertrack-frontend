@@ -29,6 +29,101 @@ describe('computeExpectedOffspring', () => {
     ]);
   });
 
+  it('shows Fancy Mouse genes in full on two-allele loci, e.g. a Pied carrier is S/s', () => {
+    const pied = computeExpectedOffspring('S/s', 'S/s', 'Fancy Mouse', { includeGenes: true });
+    expect(pied.find((entry) => entry.trait === 'Pied')).toMatchObject({ gene: 's/s' });
+    expect(pied.find((entry) => entry.trait === 'Pied (carrier)')).toMatchObject({ gene: 'S/s' });
+
+    const coat = computeExpectedOffspring('Go/go', 'Go/go', 'Fancy Mouse', { includeGenes: true });
+    expect(coat.find((entry) => entry.trait === 'Longhair (carrier)')).toMatchObject({ gene: 'Go/go' });
+  });
+
+  it.each([
+    ['W/w', 'w/w', 'Dominant White Spot', 'W/- (W/w)'],
+    ['W/w', 'W/w', 'Dominant White Spot', 'W/- (W/w or W/W)'],
+    ['Wsh/w', 'w/w', 'Variegated', 'Wsh/- (Wsh/w)'],
+    ['Wsh/w', 'Wsh/w', 'Variegated', 'Wsh/- (Wsh/w or Wsh/Wsh)'],
+    ['Rw/w', 'w/w', 'Rumpwhite', 'Rw/- (Rw/w)'],
+    ['Rw/w', 'Rw/w', 'Rumpwhite', 'Rw/- (Rw/w or Rw/Rw)'],
+  ])('shows the W-locus gene for %s x %s', (sire, dam, trait, gene) => {
+    const result = computeExpectedOffspring(sire, dam, 'Fancy Mouse', { includeGenes: true });
+    expect(result.find((entry) => entry.trait === trait)).toMatchObject({ gene });
+  });
+
+  it('never produces a mixed W-locus pair such as Wsh/Rw', () => {
+    const result = computeExpectedOffspring('Wsh/w', 'Rw/w', 'Fancy Mouse', { includeGenes: true });
+    const variegated = result.find((entry) => entry.trait === 'Variegated');
+    const rumpwhite = result.find((entry) => entry.trait === 'Rumpwhite');
+    expect(variegated).toMatchObject({ probability: 33, gene: 'Wsh/- (Wsh/w)' });
+    expect(rumpwhite).toMatchObject({ probability: 33, gene: 'Rw/- (Rw/w)' });
+  });
+
+  it('shows Fancy Mouse W-locus traits as X/- with the possible genotypes in brackets', () => {
+    const het = computeExpectedOffspring('W/w', 'w/w', 'Fancy Mouse', { includeGenes: true });
+    expect(het.find((entry) => entry.trait === 'Dominant White Spot')).toMatchObject({ probability: 50, gene: 'W/- (W/w)' });
+
+    const both = computeExpectedOffspring('W/w', 'W/w', 'Fancy Mouse', { includeGenes: true });
+    expect(both.find((entry) => entry.trait === 'Dominant White Spot')).toMatchObject({ probability: 75, gene: 'W/- (W/w or W/W)' });
+
+    const mixed = computeExpectedOffspring('Wsh/w', 'Rw/w', 'Fancy Mouse', { includeGenes: true });
+    // Mixed pairs such as Rw/Wsh are never listed: only X/X or X/w.
+    expect(mixed.find((entry) => entry.trait === 'Variegated')).toMatchObject({ gene: 'Wsh/- (Wsh/w)' });
+    expect(mixed.find((entry) => entry.trait === 'Rumpwhite')).toMatchObject({ gene: 'Rw/- (Rw/w)' });
+
+    const wsh = computeExpectedOffspring('Wsh/w', 'Wsh/w', 'Fancy Mouse', { includeGenes: true });
+    expect(wsh.find((entry) => entry.trait === 'Variegated')).toMatchObject({ gene: 'Wsh/- (Wsh/w or Wsh/Wsh)' });
+
+    const rw = computeExpectedOffspring('Rw/w', 'Rw/w', 'Fancy Mouse', { includeGenes: true });
+    expect(rw.find((entry) => entry.trait === 'Rumpwhite')).toMatchObject({ gene: 'Rw/- (Rw/w or Rw/Rw)' });
+  });
+
+  it('treats Tan as semi-dominant: never a carrier, shown as at/at or -/at', () => {
+    const cross = computeExpectedOffspring('A/at', 'at/a', 'Fancy Mouse', { includeGenes: true });
+    expect(cross.find((entry) => entry.trait === 'Tan')).toMatchObject({ probability: 75, gene: 'at/at or -/at' });
+    expect(cross.some((entry) => entry.trait === 'Tan (carrier)')).toBe(false);
+
+    const homozygous = computeExpectedOffspring('at/at', 'a/a', 'Fancy Mouse', { includeGenes: true });
+    expect(homozygous.find((entry) => entry.trait === 'Tan')).toMatchObject({ probability: 100, gene: '-/at' });
+    expect(homozygous.some((entry) => entry.trait === 'Tan (carrier)')).toBe(false);
+
+    const withRed = computeExpectedOffspring('Ay/at', 'at/at', 'Fancy Mouse', { includeGenes: true });
+    expect(withRed.find((entry) => entry.trait === 'Tan')).toMatchObject({ probability: 100 });
+    expect(withRed.some((entry) => entry.trait === 'Tan (carrier)')).toBe(false);
+  });
+
+  it('treats White-Bellied Agouti like Agouti: dominant-visible Aw/-, carried when hidden', () => {
+    const cross = computeExpectedOffspring('Aw/a', 'Aw/a', 'Fancy Mouse', { includeGenes: true });
+    expect(cross.find((entry) => entry.trait === 'White-Bellied Agouti')).toMatchObject({ probability: 75, gene: 'Aw/Aw or Aw/-' });
+
+    const het = computeExpectedOffspring('Aw/a', 'a/a', 'Fancy Mouse', { includeGenes: true });
+    expect(het.find((entry) => entry.trait === 'White-Bellied Agouti')).toMatchObject({ probability: 50, gene: 'Aw/-' });
+
+    const hidden = computeExpectedOffspring('Ay/Aw', 'Aw/a', 'Fancy Mouse', { includeGenes: true });
+    expect(hidden.find((entry) => entry.trait === 'White-Bellied Agouti (carrier)')).toMatchObject({ probability: 25, gene: '-/Aw' });
+  });
+
+  it('shows Fancy Mouse C-locus carriers as C/<allele>', () => {
+    const siamese = computeExpectedOffspring('C/ch', 'C/ch', 'Fancy Mouse', { includeGenes: true });
+    expect(siamese.find((entry) => entry.trait === 'Siamese')).toMatchObject({ probability: 25, gene: 'ch/ch' });
+    expect(siamese.find((entry) => entry.trait === 'Siamese (carrier)')).toMatchObject({ probability: 50, gene: 'C/ch' });
+
+    const mixed = computeExpectedOffspring('C/cch', 'ch/ce', 'Fancy Mouse', { includeGenes: true });
+    expect(mixed.find((entry) => entry.trait === 'Chinchilla (carrier)')).toMatchObject({ gene: 'C/cch' });
+    expect(mixed.find((entry) => entry.trait === 'Beige (carrier)')).toMatchObject({ gene: 'C/ce' });
+    expect(mixed.find((entry) => entry.trait === 'Siamese (carrier)')).toMatchObject({ gene: 'C/ch' });
+
+    const albino = computeExpectedOffspring('C/c', 'C/c', 'Fancy Mouse', { includeGenes: true });
+    expect(albino.find((entry) => entry.trait === 'Albino')).toMatchObject({ gene: 'c/c' });
+    expect(albino.find((entry) => entry.trait === 'Albino (carrier)')).toMatchObject({ gene: 'C/c' });
+  });
+
+  it('shows Fancy Mouse dominant traits as X/- and carriers as -/x on multi-allele loci', () => {
+    const result = computeExpectedOffspring('Ay/a', 'a/a', 'Fancy Mouse', { includeGenes: true });
+    expect(result.find((entry) => entry.trait === 'Dominant Red')).toMatchObject({ probability: 50, gene: 'Ay/-' });
+    expect(result.find((entry) => entry.trait === 'Black')).toMatchObject({ probability: 50, gene: 'a/a' });
+    expect(result.find((entry) => entry.trait === 'Black (carrier)')).toMatchObject({ probability: 50, gene: '-/a' });
+  });
+
   it('includes expected Syrian Hamster carrier traits', () => {
     expect(computeExpectedOffspring(
       'a/a B/B',
@@ -311,6 +406,17 @@ describe('computeConfirmedOffspringTraits', () => {
     );
     expect(result.find((entry) => entry.trait === 'Pied (carrier)')).toMatchObject({ gene: 'S/s' });
     expect(result.find((entry) => entry.trait === 'Pied')).toMatchObject({ percentage: 50, gene: 's/s' });
+  });
+
+  it('keeps Pied as s/s and shows S/s only as Pied (carrier), even when variety text also says Pied', () => {
+    const result = computeConfirmedOffspringTraits(
+      ['S/s', 's/s', ''],
+      'Fancy Mouse',
+      [{}, {}, { color: 'Pied' }],
+      { includeGenes: true },
+    );
+    expect(result.find((entry) => entry.trait === 'Pied')).toMatchObject({ percentage: 67, gene: 's/s' });
+    expect(result.find((entry) => entry.trait === 'Pied (carrier)')).toMatchObject({ percentage: 33, gene: 'S/s' });
   });
 
   it('leaves appearance-only confirmed traits without a gene', () => {

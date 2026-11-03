@@ -117,13 +117,17 @@ const MOUSE_DOMINANT_TRAIT_ALLELES = new Set([
 // offspring's trait comes from its variety text and no genetic code is recorded. Recessive
 // traits need two copies (Pied -> "s/s"); dominant ones leave the partner allele unknown
 // (Dominant Red -> "Ay/-").
-const MOUSE_DOMINANT_VISIBLE_AGOUTI_ALLELES = new Set(['A', 'Ay', 'Avy', 'Aw']);
+// Semi-dominant A-locus alleles: always visible when present, so never "carried". They read
+// "x/x" when homozygous and "-/x" otherwise (Tan: at). White-Bellied Agouti (Aw) is treated
+// like Agouti (A): dominant-visible ("Aw/-") and carried when hidden by a higher allele.
+const MOUSE_SEMI_DOMINANT_A_ALLELES = ['at'];
+const MOUSE_DOMINANT_VISIBLE_AGOUTI_ALLELES = new Set(['A', 'Aw', 'Ay', 'Avy']);
 const MOUSE_TRAIT_IMPLIED_GENES = (() => {
   const byTrait = new Map();
   Object.entries(MOUSE_ALLELE_TRAITS).forEach(([locus, alleleTraits]) => {
     Object.entries(alleleTraits).forEach(([allele, trait]) => {
       let gene = `${allele}/${allele}`;
-      if (allele === 'at') gene = 'at/at or at/a';
+      if (locus === 'A' && MOUSE_SEMI_DOMINANT_A_ALLELES.includes(allele)) gene = `${allele}/${allele} or -/${allele}`;
       else if (
         MOUSE_DOMINANT_TRAIT_ALLELES.has(allele)
         || (locus === 'A' && MOUSE_DOMINANT_VISIBLE_AGOUTI_ALLELES.has(allele))
@@ -389,7 +393,11 @@ function getMouseTraits(genotype) {
       })[0];
       if (locusTraits[primaryAllele]) traits.add(locusTraits[primaryAllele]);
       const hiddenAllele = alleles.find((allele) => allele !== primaryAllele);
-      if (hiddenAllele && locusTraits[hiddenAllele]) {
+      // Tan (at) is semi-dominant: it always shows when present, so it is never "carried".
+      MOUSE_SEMI_DOMINANT_A_ALLELES.forEach((allele) => {
+        if (alleles.includes(allele)) traits.add(locusTraits[allele]);
+      });
+      if (hiddenAllele && !MOUSE_SEMI_DOMINANT_A_ALLELES.includes(hiddenAllele) && locusTraits[hiddenAllele]) {
         traits.add(`${locusTraits[hiddenAllele]} (carrier)`);
       }
       continue;
@@ -451,6 +459,61 @@ function describeTraitGenes(combos, traitCombos) {
     .join(' ');
 }
 
+/**
+ * How a mouse trait's gene is displayed for one locus genotype. A homozygous genotype is
+ * shown in full ("a/a"). On multi-allele loci (A, C, W) several partner alleles can sit
+ * next to the one that produces the trait, so only the producing allele is shown and the
+ * hidden partner is "-": a visible dominant trait is "Ay/-" (not "Ay/a") and a carrier is
+ * "-/a" (not "A/a"). On two-allele loci the genotype is fully determined (a Pied carrier can
+ * only be "S/s"), so it is shown in full.
+ */
+function mouseTraitGeneNotation(locus, genotype, trait) {
+  const alleles = typeof genotype === 'string' ? genotype.split('/') : [];
+  if (alleles.length !== 2) return genotype;
+  // Semi-dominant (Tan, White-Bellied Agouti): "x/x" when homozygous, otherwise "-/x".
+  if (locus === 'A') {
+    const semi = MOUSE_SEMI_DOMINANT_A_ALLELES.find((allele) => MOUSE_ALLELE_TRAITS.A[allele] === trait);
+    if (semi) return alleles[0] === alleles[1] ? genotype : `-/${semi}`;
+  }
+  if (locus === 'W') {
+    // W-locus traits are dominant: always "<allele>/-"; the genotypes behind it are listed
+    // separately (see mouseWLocusDetail) because homozygous is often lethal.
+    const wProducing = Object.keys(MOUSE_ALLELE_TRAITS.W).find((allele) => (
+      MOUSE_ALLELE_TRAITS.W[allele] === trait && alleles.includes(allele)
+    ));
+    return wProducing ? `${wProducing}/-` : genotype;
+  }
+  if (alleles[0] === alleles[1]) return genotype;
+  if (Object.keys(MOUSE_ALLELE_TRAITS[locus] || {}).length <= 2) return genotype;
+  const isCarrier = / \(carrier\)$/.test(trait);
+  const baseTrait = trait.replace(/ \(carrier\)$/, '');
+  const locusTraits = MOUSE_ALLELE_TRAITS[locus] || {};
+  const producing = Object.keys(locusTraits).find((allele) => (
+    locusTraits[allele] === baseTrait && alleles.includes(allele)
+  ));
+  if (!producing) return genotype;
+  // C locus: wild-type C is dominant over every other allele, so a carrier is always
+  // C/<allele> (C/ch, C/c, C/cch, C/ce).
+  if (locus === 'C' && isCarrier) return `C/${producing}`;
+  return isCarrier ? `-/${producing}` : `${producing}/-`;
+}
+
+/**
+ * Text appended to a W-locus gene: the genotypes this cross can actually produce for the
+ * trait, heterozygotes (with w) first, e.g. "W/w or W/W". Homozygous is only listed when the
+ * cross can produce it.
+ */
+function mouseWLocusDetail(genotypes, trait) {
+  const allele = Object.keys(MOUSE_ALLELE_TRAITS.W).find((key) => MOUSE_ALLELE_TRAITS.W[key] === trait);
+  const all = Array.from(genotypes);
+  // A W-locus trait is either a homozygous pair (W/W, Rw/Rw, Wsh/Wsh) or the allele with w
+  // (W/w, Rw/w, Wsh/w); mixed pairs such as Rw/Wsh are not listed.
+  const valid = allele ? all.filter((g) => g === `${allele}/${allele}` || g === `${allele}/w` || g === `w/${allele}`) : all;
+  const list = valid.length ? valid : all;
+  list.sort((a, b) => Number(b.split('/').includes('w')) - Number(a.split('/').includes('w')));
+  return list.join(' or ');
+}
+
 function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) {
   const parsedSireGenotype = normalizeGenotype(parseGeneticCode(sireCode, 'Fancy Mouse'));
   const parsedDamGenotype = normalizeGenotype(parseGeneticCode(damCode, 'Fancy Mouse'));
@@ -473,6 +536,7 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
   // Mouse traits are calculated one locus at a time, so each trait's gene is the
   // genotype(s) at the locus that produces it.
   const traitGenes = new Map();
+  const traitWGenotypes = new Map();
 
   sharedLoci.forEach((locus) => {
     const distribution = computeLocusOffspringDistribution(
@@ -480,11 +544,28 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
       damGenotype[locus],
     );
     if (!distribution) return;
-    Object.entries(distribution).forEach(([offspringGenotype, probability]) => {
+    let locusDistribution = distribution;
+    if (locus === 'W') {
+      // Two different W-locus alleles together (e.g. Wsh/Rw) is not a possible genotype, so
+      // those pairs are dropped and the remaining odds are rescaled to add up to 100%.
+      const possible = Object.entries(distribution).filter(([genotype]) => {
+        const [first, second] = genotype.split('/');
+        return first === second || first === 'w' || second === 'w';
+      });
+      const total = possible.reduce((sum, [, probability]) => sum + probability, 0);
+      if (total > 0) {
+        locusDistribution = Object.fromEntries(possible.map(([genotype, probability]) => [genotype, probability / total]));
+      }
+    }
+    Object.entries(locusDistribution).forEach(([offspringGenotype, probability]) => {
       getMouseTraits({ [locus]: offspringGenotype }).forEach((trait) => {
         traitProbabilities.set(trait, (traitProbabilities.get(trait) || 0) + probability);
         if (!traitGenes.has(trait)) traitGenes.set(trait, new Set());
-        traitGenes.get(trait).add(offspringGenotype);
+        traitGenes.get(trait).add(mouseTraitGeneNotation(locus, offspringGenotype, trait));
+        if (locus === 'W') {
+          if (!traitWGenotypes.has(trait)) traitWGenotypes.set(trait, new Set());
+          traitWGenotypes.get(trait).add(offspringGenotype);
+        }
       });
     });
   });
@@ -493,7 +574,19 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
     .map(([trait, probability]) => ({
       trait,
       probability: Math.round(probability * 100),
-      ...(includeGenes ? { gene: Array.from(traitGenes.get(trait) || []).join(' or ') } : {}),
+      ...(includeGenes ? {
+        gene: (() => {
+          const genes = Array.from(traitGenes.get(trait) || []);
+          // Semi-dominant traits read "x/x or -/x": homozygous first.
+          if (MOUSE_SEMI_DOMINANT_A_ALLELES.some((allele) => MOUSE_ALLELE_TRAITS.A[allele] === trait)) {
+            const isHomozygous = (gene) => { const [first, second] = gene.split('/'); return first === second; };
+            genes.sort((a, b) => Number(isHomozygous(b)) - Number(isHomozygous(a)));
+          }
+          const base = genes.join(' or ');
+          const wDetail = traitWGenotypes.get(trait);
+          return wDetail && wDetail.size ? `${base} (${mouseWLocusDetail(wDetail, trait)})` : base;
+        })(),
+      } : {}),
     }))
     .sort((a, b) => b.probability - a.probability || a.trait.localeCompare(b.trait));
 }
