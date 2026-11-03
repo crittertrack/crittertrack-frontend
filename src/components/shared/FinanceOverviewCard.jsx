@@ -11,7 +11,9 @@ import ManualExpenseForm from './ManualExpenseForm';
 
 const buttonCls = 'text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover';
 
-export default function FinanceOverviewCard({ kind, id, className = '' }) {
+// bare: no outer border or "Finances" title (used where the page already has a Finances tab);
+// toolbarExtra: extra controls (e.g. a currency picker) shown at the right of the toolbar.
+export default function FinanceOverviewCard({ kind, id, className = '', bare = false, toolbarExtra = null }) {
     const [state, setState] = useState({ status: 'loading', data: null });
     const [attempt, setAttempt] = useState(0);
     const [showUseForm, setShowUseForm] = useState(false);
@@ -39,14 +41,14 @@ export default function FinanceOverviewCard({ kind, id, className = '' }) {
     return (
         <section
             data-testid="finance-overview"
-            className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4 ${className}`}
+            className={bare ? className : `rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg p-4 ${className}`}
         >
             <div className="flex flex-wrap items-center gap-2 mb-3">
-                <Wallet size={18} className="text-gray-400 dark:text-dark-text-muted" />
-                <h3 className="font-semibold text-gray-900 dark:text-dark-text">Finances</h3>
+                {!bare && <Wallet size={18} className="text-gray-400 dark:text-dark-text-muted" />}
+                {!bare && <h3 className="font-semibold text-gray-900 dark:text-dark-text">Finances</h3>}
                 {state.status === 'ready' && (
-                    <div className="ml-auto flex flex-wrap items-center gap-2">
-                        {!showUseForm && (
+                    <div className={`${bare ? '' : 'ml-auto '}flex flex-wrap items-center gap-2`}>
+                        {kind === 'litter' && !showUseForm && (
                             <button type="button" onClick={() => setShowUseForm(true)} className={buttonCls} data-testid="open-use-supply">
                                 Use supplies
                             </button>
@@ -58,6 +60,7 @@ export default function FinanceOverviewCard({ kind, id, className = '' }) {
                         )}
                     </div>
                 )}
+                {toolbarExtra && <div className="ml-auto" data-testid="finance-toolbar-extra">{toolbarExtra}</div>}
             </div>
             {showUseForm && (
                 <div className="mb-3">

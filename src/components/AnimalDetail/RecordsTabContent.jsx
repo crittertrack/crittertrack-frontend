@@ -3,7 +3,6 @@ import { FileCheck, Key, Ban, Tag, Home, Users, Trophy, Medal, Target, FileText,
 import { formatDate } from '../../utils/dateFormatter';
 import { Link as RouterLink } from 'react-router-dom';
 import { InfoCard, InfoItem } from './DashboardComponents';
-import FinanceOverviewCard from '../shared/FinanceOverviewCard';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -38,7 +37,6 @@ export const RecordsTabContent = ({ animal }) => {
     if (!hasAnyData) {
         return (
             <div className="space-y-6">
-                {animal.id_public && <FinanceOverviewCard kind="animal" id={animal.id_public} />}
                 <div className="flex flex-col items-center justify-center h-64 bg-gray-50 dark:bg-dark-surface rounded-lg text-gray-400 dark:text-dark-text-muted">
                     <FileCheck size={48} className="mb-2" />
                     <p className="text-sm">No records available for this animal.</p>
@@ -49,7 +47,6 @@ export const RecordsTabContent = ({ animal }) => {
 
     return (
         <div className="space-y-6">
-            {animal.id_public && <FinanceOverviewCard kind="animal" id={animal.id_public} />}
             <InfoCard title="Licensing & Permits" icon={<Key size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                 {hasLicensing
                     ? <dl className="space-y-4">

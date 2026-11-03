@@ -57,10 +57,35 @@ const PriceBadge = ({ value, paid }) => {
     );
 };
 
+// Show a supply quantity in the most readable unit of its family (3000 g -> 3 kg, 0.25 l -> 250 ml).
+const UNIT_LADDERS = [
+    [['mcg', 0.000001], ['mg', 0.001], ['g', 1], ['kg', 1000]],
+    [['ml', 1], ['l', 1000]],
+];
+const UNIT_ALIASES = { gram: 'g', grams: 'g', kilogram: 'kg', kilograms: 'kg', milligram: 'mg', milligrams: 'mg', microgram: 'mcg', micrograms: 'mcg', liter: 'l', liters: 'l', litre: 'l', litres: 'l', milliliter: 'ml', milliliters: 'ml', millilitre: 'ml', millilitres: 'ml' };
+export const formatQuantity = (quantity, unit) => {
+    const q = Number(quantity) || 0;
+    const key = String(unit || '').trim().toLowerCase();
+    const u = UNIT_ALIASES[key] || key;
+    const ladder = UNIT_LADDERS.find(l => l.some(([name]) => name === u));
+    let value = q;
+    let label = unit || '';
+    if (ladder) {
+        const factor = ladder.find(([name]) => name === u)[1];
+        const base = q * factor;
+        let pick = ladder[0];
+        for (const step of ladder) { if (Math.abs(base) >= step[1]) pick = step; }
+        value = base / pick[1];
+        label = pick[0];
+    }
+    const rounded = Math.round(value * 100) / 100;
+    return `${rounded}${label ? ` ${label}` : ''}`;
+};
 export default function FinanceOverviewBody({ kind, data: d }) {
     const isLitter = kind === 'litter';
     const usage = d.usage;
     const categories = Object.entries(d.costByCategory || {}).filter(([, v]) => v > 0);
+    const namedExpenses = isLitter && Array.isArray(d.transactions) ? d.transactions.filter(t => t.type === 'expense' && t.litterId && t.description) : [];
     const hasAnything = d.totalCost > 0 || d.totalRevenue > 0 || d.expectedRevenue > 0;
 
     return (
@@ -89,6 +114,8 @@ export default function FinanceOverviewBody({ kind, data: d }) {
             </div>
 
             {isLitter && d.offspringDetails && d.offspringDetails.length > 0 && (
+                <section className="border-t border-gray-100 dark:border-dark-border pt-3" data-testid="finance-offspring-section">
+                <h4 className="text-sm font-semibold text-gray-800 dark:text-dark-text mb-1">Offspring</h4>
                 <div className="overflow-x-auto" data-testid="finance-offspring-details">
                     <table className="w-full text-sm">
                         <thead>
@@ -118,61 +145,79 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                         </tfoot>
                     </table>
                 </div>
+                </section>
             )}
 
-            {categories.length > 0 && (
-                <ul className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5" data-testid="finance-categories">
-                    {categories.map(([cat, amount]) => (
-                        <li key={cat} className="flex justify-between gap-3">
-                            <span>{CATEGORY_LABELS[cat] || cat}</span>
-                            <span>{formatMoney(amount)}</span>
-                        </li>
-                    ))}
-                </ul>
-            )}
+            {(categories.length > 0 || (usage && usage.count > 0) || namedExpenses.length > 0) && (
+                <section className="border-t border-gray-100 dark:border-dark-border pt-3 space-y-3" data-testid="finance-care-supplies">
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-dark-text">Care &amp; supplies</h4>
 
-            {usage && usage.count > 0 && (
-                <div className="border-t border-gray-100 dark:border-dark-border pt-3" data-testid="finance-usage">
-                    <div className="flex justify-between gap-3 text-sm font-medium text-gray-800 dark:text-dark-text">
-                        <span>Supplies used</span>
-                        <span>{formatMoney(usage.totalCost)}</span>
-                    </div>
-                    <p className="text-[11px] text-gray-500 dark:text-dark-text-muted mb-1">
-                        Valued at cost per unit. Not added to Spent, because buying the supplies is already counted there.
-                    </p>
-                    <div className="overflow-x-auto" data-testid="finance-supplies">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="text-left text-gray-500 dark:text-dark-text-muted">
-                                    <th className="py-1">Supply</th>
-                                    <th className="py-1 text-right">Cost</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {usage.bySupply.map(s => (
-                                    <tr key={`${s.supplyName}|${s.unit}`} className="border-t border-gray-100 dark:border-dark-border">
-                                        <td>{s.supplyName} ({s.quantity}{s.unit ? ` ${s.unit}` : ''})</td>
-                                        <td className="py-1 text-right">{formatMoney(s.cost)}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                            <tfoot>
-                                <tr className="border-t border-gray-200 dark:border-dark-border font-semibold">
-                                    <td className="py-1">Total</td>
-                                    <td className="py-1 text-right">{formatMoney(usage.totalCost)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    {usage.unpricedCount > 0 && (
-                        <p className="mt-1 text-xs text-amber-700 dark:text-amber-400" data-testid="finance-unpriced">
-                            {usage.unpricedSupplies.length} suppl{usage.unpricedSupplies.length === 1 ? 'y has' : 'ies have'} no price
-                            ({usage.unpricedSupplies.join(', ')}), so these costs are understated. Set a cost per unit on the Supplies page.
-                        </p>
+                    {usage && usage.count > 0 && (
+                        <div data-testid="finance-usage">
+                            <div className="overflow-x-auto" data-testid="finance-supplies">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="text-left text-gray-500 dark:text-dark-text-muted">
+                                            <th className="py-1">Name</th>
+                                            <th className="py-1 text-right">Quantity</th>
+                                            <th className="py-1 text-right">Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {usage.bySupply.map(s => (
+                                            <tr key={`${s.supplyName}|${s.unit}`} className="border-t border-gray-100 dark:border-dark-border">
+                                                <td className="py-1">{s.supplyName}</td>
+                                                <td className="py-1 text-right">{formatQuantity(s.quantity, s.unit)}</td>
+                                                <td className="py-1 text-right">{formatMoney(s.cost)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr className="border-t border-gray-200 dark:border-dark-border font-semibold">
+                                            <td className="py-1" colSpan={2}>Total</td>
+                                            <td className="py-1 text-right">{formatMoney(usage.totalCost)}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <p className="text-[11px] text-gray-500 dark:text-dark-text-muted mt-1">
+                                Valued at cost per unit. Not added to Spent, because buying the supplies is already counted there.
+                            </p>
+                            {usage.unpricedCount > 0 && (
+                                <p className="mt-1 text-xs text-amber-700 dark:text-amber-400" data-testid="finance-unpriced">
+                                    {usage.unpricedSupplies.length} suppl{usage.unpricedSupplies.length === 1 ? 'y has' : 'ies have'} no price
+                                    ({usage.unpricedSupplies.join(', ')}), so these costs are understated. Set a cost per unit on the Supplies page.
+                                </p>
+                            )}
+                        </div>
                     )}
-                </div>
-            )}
 
+                    {namedExpenses.length > 0 && (
+                        <div data-testid="finance-litter-expenses">
+                            <p className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">Litter expenses</p>
+                            <ul className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5">
+                                {namedExpenses.map(t => (
+                                    <li key={t._id} className="flex justify-between gap-3">
+                                        <span>{t.description}</span>
+                                        <span>{formatMoney(t.price)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {categories.length > 0 && (
+                        <ul className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5" data-testid="finance-categories">
+                            {categories.map(([cat, amount]) => (
+                                <li key={cat} className="flex justify-between gap-3">
+                                    <span>{CATEGORY_LABELS[cat] || cat}</span>
+                                    <span>{formatMoney(amount)}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+            )}
             {!hasAnything && !(usage && usage.count > 0) && (
                 <p className="text-sm text-gray-500 dark:text-dark-text-muted">
                     {isLitter

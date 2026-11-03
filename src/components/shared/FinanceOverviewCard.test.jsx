@@ -86,7 +86,8 @@ describe('FinanceOverviewCard', () => {
 
         const supplies = await screen.findByTestId('finance-supplies');
         expect(supplies.querySelector('table')).toBeTruthy();
-        expect(supplies.textContent).toContain('Aspen (3 kg)');
+        expect(supplies.textContent).toContain('Aspen');
+        expect(supplies.textContent).toContain('3 kg');
     });
 
     it('adds a manual litter expense and refreshes the numbers', async () => {

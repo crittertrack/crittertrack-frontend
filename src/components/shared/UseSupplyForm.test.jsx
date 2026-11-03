@@ -76,7 +76,8 @@ describe('FinanceOverviewCard supplies used', () => {
         apiClient.get.mockResolvedValue({ data });
         render(<FinanceOverviewCard kind="litter" id="CTL1" />);
         await waitFor(() => expect(screen.getByTestId('finance-usage')).toBeTruthy());
-        expect(screen.getByTestId('finance-usage').textContent).toContain('Mash (0.35 kg)');
+        expect(screen.getByTestId('finance-usage').textContent).toContain('Mash');
+        expect(screen.getByTestId('finance-usage').textContent).toContain('350 g');
         expect(screen.getByTestId('finance-unpriced').textContent).toMatch(/Pellets/);
     });
 
