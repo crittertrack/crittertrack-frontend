@@ -55,7 +55,10 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     })();
     const goNext = () => {
         if (!nextLitter) return;
-        navigate(`/litters/${encodeURIComponent(nextLitter.litter_id_public || nextLitter._id)}`, { state: { litterPreview: nextLitter, litterList } });
+        // Keep the current tab (e.g. Finances) when stepping to the next litter.
+        const tab = searchParams.get('tab');
+        const query = tab && TABS.some(t => t.id === tab) ? `?tab=${encodeURIComponent(tab)}` : '';
+        navigate(`/litters/${encodeURIComponent(nextLitter.litter_id_public || nextLitter._id)}${query}`, { state: { litterPreview: nextLitter, litterList } });
     };
     const hasLitterRef = React.useRef(!!litterPreview);
     const [litter, setLitter] = useState(litterPreview);
@@ -238,7 +241,9 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
     const setTab = (id) => {
         const next = new URLSearchParams(searchParams);
         if (id === 'overview') next.delete('tab'); else next.set('tab', id);
-        setSearchParams(next, { replace: true });
+        // Carry the navigation state (litter list + preview) over, otherwise changing tab drops it
+        // and the Next litter button disappears.
+        setSearchParams(next, { replace: true, state: location.state });
     };
 
     const toggleVisibility = async () => {

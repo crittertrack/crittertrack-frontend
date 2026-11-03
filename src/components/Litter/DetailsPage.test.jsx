@@ -4,13 +4,19 @@ import LitterDetailsPage from './DetailsPage';
 import apiClient from '../../utils/apiClient';
 
 let mockLocationState = null;
+const mockNavigate = jest.fn();
+const mockSetSearchParamsOptions = jest.fn();
 jest.mock('react-router-dom', () => {
     const React = require('react');
     return {
-        useNavigate: () => jest.fn(),
+        useNavigate: () => mockNavigate,
         useLocation: () => ({ state: mockLocationState }),
         useParams: () => ({ ctlId: 'CTL9' }),
-        useSearchParams: () => React.useState(new URLSearchParams()),
+        useSearchParams: () => {
+            const [params, setParams] = React.useState(new URLSearchParams());
+            // Mimics the router: a tab change replaces the URL, and only keeps `state` if it is passed along.
+            return [params, (next, options) => { mockSetSearchParamsOptions(options); setParams(next); }];
+        },
     };
 }, { virtual: true });
 jest.mock('../../utils/apiClient', () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), put: jest.fn() } }));
@@ -40,6 +46,8 @@ describe('Litter details page', () => {
         apiClient.get.mockReset();
         apiClient.post.mockReset();
         apiClient.put.mockReset();
+        mockNavigate.mockClear();
+        mockSetSearchParamsOptions.mockClear();
     });
 
     afterEach(() => {
@@ -286,5 +294,49 @@ describe('Litter details page', () => {
         await waitFor(() => expect(showModalMessage).toHaveBeenCalledWith('Error', 'Update denied'));
         expect(apiClient.put).toHaveBeenCalledTimes(1);
         expect(apiClient.get.mock.calls.filter(([url]) => String(url).endsWith('/offspring'))).toHaveLength(1);
+    });
+    it('keeps the current tab when stepping to the next litter', async () => {
+        mockLitter(litter);
+        const next = { ...litter, _id: 'y', litter_id_public: 'CTL10' };
+        mockLocationState = { litterList: [{ ...litter, litter_id_public: 'CTL9' }, next] };
+        try {
+            renderPage();
+            await screen.findByTestId('litter-details');
+            fireEvent.click(screen.getByRole('tab', { name: 'Gallery' }));
+            fireEvent.click(screen.getByLabelText('Next litter'));
+            expect(mockNavigate).toHaveBeenCalledWith('/litters/CTL10?tab=gallery', expect.any(Object));
+        } finally {
+            mockLocationState = null;
+        }
+    });
+
+    it('opens the next litter on Overview when no other tab is selected', async () => {
+        mockLitter(litter);
+        const next = { ...litter, _id: 'y', litter_id_public: 'CTL10' };
+        mockLocationState = { litterList: [{ ...litter, litter_id_public: 'CTL9' }, next] };
+        try {
+            renderPage();
+            await screen.findByTestId('litter-details');
+            fireEvent.click(screen.getByLabelText('Next litter'));
+            expect(mockNavigate).toHaveBeenCalledWith('/litters/CTL10', expect.any(Object));
+        } finally {
+            mockLocationState = null;
+        }
+    });
+    it('keeps the Next litter button while moving through tabs', async () => {
+        mockLitter(litter);
+        const list = [{ ...litter, litter_id_public: 'CTL9' }, { ...litter, _id: 'y', litter_id_public: 'CTL10' }];
+        mockLocationState = { litterList: list };
+        try {
+            renderPage();
+            await screen.findByTestId('litter-details');
+            expect(screen.getByLabelText('Next litter')).toBeTruthy();
+            fireEvent.click(screen.getByRole('tab', { name: 'Gallery' }));
+            // The tab change must hand the navigation state (the litter list) back to the router.
+            expect(mockSetSearchParamsOptions).toHaveBeenLastCalledWith(expect.objectContaining({ replace: true, state: mockLocationState }));
+            expect(screen.getByLabelText('Next litter')).toBeTruthy();
+        } finally {
+            mockLocationState = null;
+        }
     });
 });
