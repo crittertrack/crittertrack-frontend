@@ -8,6 +8,7 @@ import TimelinePanel from './TimelinePanel';
 import StatsPanel from './StatsPanel';
 import ObjectivesPanel from './ObjectivesPanel';
 import EventDetailsRow from './EventDetailsRow';
+import FinanceOverviewCard from '../../shared/FinanceOverviewCard';
 import { getLitterFieldLabel, getLitterSpecies, isEggLayingSpecies } from '../../../utils/litterSpeciesPresentation';
 
 const Summary = ({ label, children, testId }) => (
@@ -99,6 +100,8 @@ export default function OverviewTab({
             </div>
 
             <EventDetailsRow litter={litter} status={status} speciesOptions={speciesOptions} />
+
+            {litter.litter_id_public && <FinanceOverviewCard kind="litter" id={litter.litter_id_public} />}
 
             <Panel title="Additional notes" testId="notes-panel">
                 {isBlank(litter.notes)

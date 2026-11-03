@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info, Paperclip } from 'lucide-react';
+import TransactionAttachments from './TransactionAttachments';
 import apiClient from '../utils/apiClient';
 import DatePicker from './DatePicker';
 import InfoButton from './shared/InfoButton';
+import BudgetUsageView from './BudgetUsageView';
 import { downloadBlob } from '../utils/nativeDownload';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
+    const [litters, setLitters] = useState([]);
+    const [view, setView] = useState('spending'); // 'spending' (paid) | 'usage' (supplies used)
     const [animalsLoading, setAnimalsLoading] = useState(true);
     const [animalSearchQuery, setAnimalSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -70,6 +74,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         buyer: '',
         seller: '',
         category: 'food', // for expense/income: food, housing, medical, equipment, other
+        litterId: '', // optional: tag an expense to a litter (litter_id_public)
         description: '', // for expense/income
         notes: ''
     });
@@ -78,6 +83,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     useEffect(() => {
         fetchTransactions();
         fetchAnimals();
+        fetchLitters();
         fetchUserProfile();
     }, []);
 
@@ -137,6 +143,16 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         }
     };
 
+    // Litters the user can tag an expense to (optional picker on the expense/income form).
+    const fetchLitters = async () => {
+        try {
+            const response = await apiClient.get(`/litters`);
+            setLitters(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Error fetching litters:', error);
+        }
+    };
+
     const resetForm = () => {
         setFormData({
             type: 'animal-sale',
@@ -147,6 +163,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             buyer: '',
             seller: '',
             category: 'food',
+            litterId: '',
             description: '',
             notes: ''
         });
@@ -163,6 +180,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         if (onAddModalOpen) onAddModalOpen();
     };
 
+    // After a file is attached/removed or a receipt number is issued, keep the open form and the
+    // list in step with the saved transaction.
+    const handleAttachmentsChanged = (updated) => {
+        setEditingTransaction(updated);
+        setTransactions(prev => prev.map(t => (t._id === updated._id ? updated : t)));
+    };
+
     const handleEditTransaction = (transaction) => {
         setFormData({
             type: transaction.type || transaction.transactionType || 'animal-sale',
@@ -173,6 +197,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             buyer: transaction.buyer || '',
             seller: transaction.seller || '',
             category: transaction.category || 'food',
+            litterId: transaction.litterId || '',
             description: transaction.description || '',
             notes: transaction.notes || ''
         });
@@ -203,6 +228,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 transactionData.type = 'purchase';
             } else {
                 transactionData.type = formData.type;
+            }
+
+            // Only expenses/income can be tagged to a litter; clear the tag for anything else.
+            if (transactionData.type !== 'expense' && transactionData.type !== 'income') {
+                transactionData.litterId = '';
             }
 
             if (editingTransaction) {
@@ -397,7 +427,26 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     </div>
                 </div>
 
+                {/* Spending = what you paid. Usage = supplies you used (valued at cost per unit). */}
+                <div className="flex gap-1 mb-3 sm:mb-4" role="tablist" aria-label="Budget view" data-testid="budget-view-switch">
+                    {[['spending', 'Spending'], ['usage', 'Usage']].map(([key, label]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            role="tab"
+                            aria-selected={view === key}
+                            onClick={() => setView(key)}
+                            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition ${view === key
+                                ? 'bg-primary dark:bg-dark-primary text-black'
+                                : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
                 {/* Statistics Cards */}
+                {view === 'spending' && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4" data-tutorial-target="budget-overview">
                     <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700/60 rounded-lg p-2 sm:p-4">
                         <div className="text-green-600 dark:text-green-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
@@ -460,8 +509,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         </div>
                     </div>
                 </div>
+                )}
             </div>
 
+            {view === 'usage' && <BudgetUsageView showModalMessage={showModalMessage} />}
+
+            {view === 'spending' && (
+            <>
             {/* Filters */}
             <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
@@ -577,6 +631,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         </td>
                                         <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-500 dark:text-dark-text-muted max-w-xs truncate">
                                             {transaction.notes || '-'}
+                                            {(transaction.attachments || []).length > 0 && (
+                                                <span className="ml-1 inline-flex items-center gap-0.5 text-gray-500" title="Has attached files" data-testid="row-attachments">
+                                                    <Paperclip size={12} />{transaction.attachments.length}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-right">
                                             <button
@@ -601,6 +660,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     </div>
                 )}
             </div>
+            </>
+            )}
 
             {/* Add/Edit Modal */}
             {showAddModal && (
@@ -849,6 +910,28 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                 </div>
                             )}
 
+                            {/* Optional litter tag for expense/income (shows up in that litter's Finances card) */}
+                            {(formData.type === 'expense' || formData.type === 'income') && litters.length > 0 && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                        For litter (optional)
+                                    </label>
+                                    <select
+                                        value={formData.litterId}
+                                        onChange={(e) => setFormData({ ...formData, litterId: e.target.value })}
+                                        className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary"
+                                        data-testid="budget-litter-select"
+                                    >
+                                        <option value="">Not for a specific litter</option>
+                                        {litters.filter(l => l.litter_id_public).map(l => (
+                                            <option key={l.litter_id_public} value={l.litter_id_public}>
+                                                {l.breedingPairCodeName ? `${l.breedingPairCodeName} (${l.litter_id_public})` : l.litter_id_public}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             {/* Buyer/Seller section for animal sales and purchases */}
                             {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && (
                                 <div>
@@ -880,6 +963,20 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary"
                                 />
                             </div>
+
+                            {/* Receipts & attachments need a saved transaction to attach to */}
+                            {editingTransaction ? (
+                                <TransactionAttachments
+                                    transaction={editingTransaction}
+                                    issuerName={userProfile?.breederName || userProfile?.personalName || ''}
+                                    currencySymbol={getCurrencySymbol()}
+                                    onChange={handleAttachmentsChanged}
+                                />
+                            ) : (
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                    Save this transaction first, then edit it to generate a receipt or attach files.
+                                </p>
+                            )}
 
                             <div className="flex gap-3 pt-4">
                                 <button

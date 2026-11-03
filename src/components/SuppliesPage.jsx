@@ -14,8 +14,10 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [supplySaving, setSupplySaving] = useState(false);
     const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
-    const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
+    const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '', litterId: '' });
     const [restockSaving, setRestockSaving] = useState(false);
+    // Litters a restock can be tagged to, so the cost shows up in that litter's Finances card.
+    const [litters, setLitters] = useState([]);
     // Shared with Budget Tracker's currency picker (same localStorage key) so both stay in sync.
     const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
     const currencyOptions = [
@@ -59,7 +61,16 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         setSuppliesLoading(false);
     }, [authToken, API_BASE_URL]);
 
+    const fetchLitters = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await apiClient.get(`/litters`);
+            setLitters(Array.isArray(res.data) ? res.data : []);
+        } catch (err) { console.error('[fetchLitters]', err); }
+    }, [authToken]);
+
     useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
+    useEffect(() => { fetchLitters(); }, [fetchLitters]);
 
     useEffect(() => {
         const handleSupplyUpdated = (event) => {
@@ -142,7 +153,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const openRestock = (item) => {
         setRestockingSupplyId(item._id);
         const suggestCost = item.isFeederAnimal && item.costPerUnit ? '' : '';
-        setRestockForm({ qty: '', cost: suggestCost, date: new Date().toISOString().slice(0, 10), notes: '' });
+        setRestockForm({ qty: '', cost: suggestCost, date: new Date().toISOString().slice(0, 10), notes: '', litterId: '' });
         setSupplyFormVisible(false);
         setEditingSupplyId(null);
     };
@@ -180,6 +191,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                     category: BUDGET_CATEGORY_MAP[item.category] || 'other',
                     description: `Supplies restock: ${item.name}${feederLabel} (${qty}${item.unit ? ' ' + item.unit : ''})`,
                     notes: restockForm.notes || null,
+                    litterId: restockForm.litterId || null,
                 }
             );
             setRestockingSupplyId(null);
@@ -400,6 +412,24 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 <input type="text" value={restockForm.notes} onChange={e => setRestockForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                         </div>
+                                        {litters.length > 0 && (
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-0.5">For litter (optional)</label>
+                                                <select
+                                                    value={restockForm.litterId}
+                                                    onChange={e => setRestockForm(f => ({ ...f, litterId: e.target.value }))}
+                                                    className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                    data-testid="restock-litter-select"
+                                                >
+                                                    <option value="">Not for a specific litter</option>
+                                                    {litters.filter(l => l.litter_id_public).map(l => (
+                                                        <option key={l.litter_id_public} value={l.litter_id_public}>
+                                                            {l.breedingPairCodeName ? `${l.breedingPairCodeName} (${l.litter_id_public})` : l.litter_id_public}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
                                         <div className="flex gap-2 justify-end">
                                             <button onClick={() => setRestockingSupplyId(null)} className="px-2.5 py-1 text-xs text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
                                             <button

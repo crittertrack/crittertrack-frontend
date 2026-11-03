@@ -386,26 +386,16 @@ const EnclosureDetailModal = ({
                 return;
             }
 
-            const updatedTasks = [...enclosure.cleaningTasks];
-            updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], lastDoneDate: new Date().toISOString() };
-
-            const historyEntry = {
-                timestamp: new Date().toISOString(),
-                userId: userProfile._id,
-                userName: userProfile.personalName || userProfile.breederName,
-                action: 'task_complete',
-                details: { taskName: task.taskName, taskType: task.type || 'Other' }
-            };
-
-            // Use PATCH (now supported on backend) for partial updates
-            await apiClient.patch(`/enclosures/${enclosure._id}`, {
-                cleaningTasks: updatedTasks,
-                $push: { history: historyEntry }
+            // The /complete route marks the task done, lowers stock for the task's assigned supplies
+            // (with unit conversion), records the Usage-budget entries and logs the history entry.
+            const res = await apiClient.post(`/enclosures/${enclosure._id}/tasks/${task._id}/complete`, {});
+            (res.data?.supplies || []).forEach(supply => {
+                window.dispatchEvent(new CustomEvent('supply-updated', { detail: supply }));
             });
             onRefresh?.();
         } catch (err) {
             console.error('Failed to update task:', err);
-            showModalMessage?.('Error', 'Failed to update task.');
+            showModalMessage?.('Error', err.response?.data?.message || 'Failed to update task.');
         } finally {
             setUpdatingTask(null);
         }

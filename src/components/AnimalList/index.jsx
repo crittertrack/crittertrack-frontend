@@ -4805,15 +4805,30 @@ const showWeanedButton = animal.gender !== 'Male' && animal.isNursing && daysSin
             const prevTask = prevTasks.find(t => t._id === taskId);
             const updated = prevTasks.map(t => t._id === taskId ? { ...t, lastDoneDate: new Date().toISOString() } : t);
             setEnclosures(prev => prev.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: updated } : enc));
-            const historyEntry = { timestamp: new Date().toISOString(), userId: userProfile?._id, userName: userProfile?.personalName || userProfile?.breederName || 'User', action: 'task_complete', details: { taskName: prevTask?.taskName, taskType: prevTask?.type || 'Other' } };
-            apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: updated, $push: { history: historyEntry } })
-                .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
-            setTaskUndoStack(prev => ({ ...prev, [`enc_${enclosure._id}_${taskId}`]: async () => {
-                const reverted = updated.map(t => t._id === taskId ? prevTask : t);
-                setEnclosures(p => p.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: reverted } : enc));
-                await apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: reverted })
-                    .catch(err => { console.error('Revert enclosure task failed:', err); fetchEnclosures(); });
-            } }));
+            // The /complete route marks the task done, lowers stock for the task's assigned supplies
+            // (with unit conversion), records the Usage-budget entries and logs the history entry.
+            apiClient.post(`/enclosures/${enclosure._id}/tasks/${taskId}/complete`, {})
+                .then(res => {
+                    const { usageIds = [], supplies: usedSupplies = [] } = res.data || {};
+                    usedSupplies.forEach(supply => {
+                        setSupplies(p => p.map(s => s._id === supply._id ? supply : s));
+                        window.dispatchEvent(new CustomEvent('supply-updated', { detail: supply }));
+                    });
+                    setTaskUndoStack(prev => ({ ...prev, [`enc_${enclosure._id}_${taskId}`]: async () => {
+                        const reverted = updated.map(t => t._id === taskId ? prevTask : t);
+                        setEnclosures(p => p.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: reverted } : enc));
+                        await apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: reverted })
+                            .catch(err => { console.error('Revert enclosure task failed:', err); fetchEnclosures(); });
+                        // Removing the usage entries also puts the used quantity back in stock.
+                        await Promise.allSettled(usageIds.map(usageId => apiClient.delete(`/supplies/usage/${usageId}`)));
+                        if (usageIds.length > 0) fetchSupplies();
+                    } }));
+                })
+                .catch(err => {
+                    console.error('Mark enclosure task done failed:', err);
+                    showModalMessage('Task not completed', err.response?.data?.message || 'Could not mark this task as done. Please try again.');
+                    fetchEnclosures();
+                });
         };
 
         const handleDeleteEnclosureCleaningTask = (e, enclosure, taskId) => {
