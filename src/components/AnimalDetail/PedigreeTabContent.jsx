@@ -206,7 +206,11 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
             {showFamilyTree && (
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-dark-surface rounded-xl w-full max-w-6xl h-[80vh] relative overflow-auto">
-                        <button onClick={() => { setShowFamilyTree(false); setTreeFocusId(animal.id_public); }} style={{ position: 'sticky', top: 8, right: 8, zIndex: 20 }} className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300">Close</button>
+                        {/* Zero-height sticky row keeps the Close button pinned to the top-right
+                            without pushing the tree down. */}
+                        <div className="sticky top-2 z-20 h-0 flex justify-end pr-2">
+                            <button onClick={() => { setShowFamilyTree(false); setTreeFocusId(animal.id_public); }} className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300">Close</button>
+                        </div>
                         <DirectParentTree focusAnimalId={treeFocusId} authToken={authToken} onNodeClick={setTreeFocusId} onViewAnimal={handleViewAnimal} />
                     </div>
                 </div>
