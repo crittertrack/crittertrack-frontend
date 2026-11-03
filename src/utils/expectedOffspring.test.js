@@ -287,6 +287,32 @@ describe('computeConfirmedOffspringTraits', () => {
     expect(result.find((entry) => entry.trait === 'Black')).toMatchObject({ percentage: 50, gene: 'a/a' });
   });
 
+  it('derives mouse genes from the trait name when only variety text is recorded', () => {
+    const result = computeConfirmedOffspringTraits(
+      ['', ''],
+      'Fancy Mouse',
+      [{ color: 'Black Pied Longhair' }, { color: 'Dominant Red' }],
+      { includeGenes: true },
+    );
+    expect(result).toEqual(expect.arrayContaining([
+      { trait: 'Black', percentage: 50, gene: 'a/a' },
+      { trait: 'Pied', percentage: 50, gene: 's/s' },
+      { trait: 'Dominant Red', percentage: 50, gene: 'Ay/-' },
+    ]));
+    expect(result.find((entry) => entry.trait === 'Longhair')).toMatchObject({ gene: 'go/go' });
+  });
+
+  it('combines genes from recorded codes with ones implied by variety text', () => {
+    const result = computeConfirmedOffspringTraits(
+      ['S/s', ''],
+      'Fancy Mouse',
+      [{}, { color: 'Pied' }],
+      { includeGenes: true },
+    );
+    expect(result.find((entry) => entry.trait === 'Pied (carrier)')).toMatchObject({ gene: 'S/s' });
+    expect(result.find((entry) => entry.trait === 'Pied')).toMatchObject({ percentage: 50, gene: 's/s' });
+  });
+
   it('leaves appearance-only confirmed traits without a gene', () => {
     expect(computeConfirmedOffspringTraits(
       [{}, {}],

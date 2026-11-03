@@ -113,6 +113,29 @@ const MOUSE_ALLELE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
 const MOUSE_DOMINANT_TRAIT_ALLELES = new Set([
   'U', 'W', 'Wsh', 'Rw', 'Spl', 'Mobr', 'Re', 'Nu',
 ]);
+// Reverse of MOUSE_ALLELE_TRAITS: the genotype implied by a trait name alone, used when an
+// offspring's trait comes from its variety text and no genetic code is recorded. Recessive
+// traits need two copies (Pied -> "s/s"); dominant ones leave the partner allele unknown
+// (Dominant Red -> "Ay/-").
+const MOUSE_DOMINANT_VISIBLE_AGOUTI_ALLELES = new Set(['A', 'Ay', 'Avy', 'Aw']);
+const MOUSE_TRAIT_IMPLIED_GENES = (() => {
+  const byTrait = new Map();
+  Object.entries(MOUSE_ALLELE_TRAITS).forEach(([locus, alleleTraits]) => {
+    Object.entries(alleleTraits).forEach(([allele, trait]) => {
+      let gene = `${allele}/${allele}`;
+      if (allele === 'at') gene = 'at/at or at/a';
+      else if (
+        MOUSE_DOMINANT_TRAIT_ALLELES.has(allele)
+        || (locus === 'A' && MOUSE_DOMINANT_VISIBLE_AGOUTI_ALLELES.has(allele))
+        || allele === 'Go'
+      ) gene = `${allele}/-`;
+      const key = trait.toLowerCase();
+      if (!byTrait.has(key)) byTrait.set(key, []);
+      if (!byTrait.get(key).includes(gene)) byTrait.get(key).push(gene);
+    });
+  });
+  return byTrait;
+})();
 const MOUSE_APPEARANCE_ALIASES = {
   'black eyed white': ['Albino'],
   'pink eyed white': ['Albino', 'Pink Eyed'],
@@ -851,6 +874,7 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
   // from appearance fields have no gene.
   const includeGenes = Boolean(options?.includeGenes);
   const mouseGenes = new Map(); // trait key -> Set of locus genotypes
+  const mouseAppearanceKeys = new Set(); // trait keys seen only through variety text
   const traitGenotypes = new Map(); // trait key -> genotypes of offspring showing it
   const observedGenotypes = [];
   const recordGenotypeTrait = (trait, genotype) => {
@@ -891,8 +915,11 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
 
     if (isMouse) {
       traits = Array.from(getMouseTraits(parsedCode));
-      if (!Object.keys(parsedCode).length) traits = appearanceTraits;
-      else if (includeGenes) {
+      if (!Object.keys(parsedCode).length) {
+        traits = appearanceTraits;
+        // No genetic code recorded: derive the gene from the trait name instead.
+        traits.forEach((trait) => mouseAppearanceKeys.add(trait.toLowerCase()));
+      } else if (includeGenes) {
         // Mouse traits are calculated one locus at a time, so a trait's gene is the
         // genotype at the locus that produces it.
         Object.entries(normalizeGenotype(parsedCode)).forEach(([locus, genotype]) => {
@@ -961,9 +988,17 @@ export function computeConfirmedOffspringTraits(offspringCodes, species, appeara
       };
       if (!includeGenes) return entry;
       const key = trait.toLowerCase();
-      const gene = mouseGenes.has(key)
-        ? Array.from(mouseGenes.get(key)).join(' or ')
-        : describeTraitGenes(observedGenotypes, traitGenotypes.get(key) || []);
+      const isMouseSpecies = ['fancymouse', 'mouse'].includes(getSpeciesKey(species));
+      let gene;
+      if (isMouseSpecies) {
+        const genes = new Set(mouseGenes.get(key) || []);
+        if (mouseAppearanceKeys.has(key)) {
+          (MOUSE_TRAIT_IMPLIED_GENES.get(key) || []).forEach((implied) => genes.add(implied));
+        }
+        gene = Array.from(genes).join(' or ');
+      } else {
+        gene = describeTraitGenes(observedGenotypes, traitGenotypes.get(key) || []);
+      }
       return gene ? { ...entry, gene } : entry;
     })
     .sort((a, b) => b.percentage - a.percentage || a.trait.localeCompare(b.trait));
