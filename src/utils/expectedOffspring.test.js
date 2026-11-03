@@ -102,6 +102,14 @@ describe('computeExpectedOffspring', () => {
     expect(carrierOnly.find((entry) => entry.trait === 'Shorthair')).toMatchObject({ probability: 100, gene: 'Go/- (Go/go)' });
   });
 
+  it('shows Rex as Re/- with the genotypes the cross can produce', () => {
+    const het = computeExpectedOffspring('Re/re', 'Re/re', 'Fancy Mouse', { includeGenes: true });
+    expect(het.find((entry) => entry.trait === 'Rex')).toMatchObject({ probability: 75, gene: 'Re/- (Re/Re or Re/re)' });
+
+    const single = computeExpectedOffspring('Re/Re', 're/re', 'Fancy Mouse', { includeGenes: true });
+    expect(single.find((entry) => entry.trait === 'Rex')).toMatchObject({ probability: 100, gene: 'Re/- (Re/re)' });
+  });
+
   it('treats White-Bellied Agouti like Agouti: dominant-visible Aw/-, carried when hidden', () => {
     const cross = computeExpectedOffspring('Aw/a', 'Aw/a', 'Fancy Mouse', { includeGenes: true });
     expect(cross.find((entry) => entry.trait === 'White-Bellied Agouti')).toMatchObject({ probability: 75, gene: 'Aw/Aw or Aw/-' });

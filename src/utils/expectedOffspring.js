@@ -109,6 +109,8 @@ const MOUSE_ALLELES_BY_LOCUS = {
   Fz: ['Fz', 'fz'],
   Nu: ['Nu', 'nu'],
 };
+// Dominant coat traits shown as "<allele>/- (<genotypes this cross can produce>)".
+const MOUSE_DETAILED_DOMINANT_TRAITS = { Go: 'Shorthair', Re: 'Rex' };
 const MOUSE_ALLELE_ORDER = ['Ay', 'Avy', 'Aw', 'A', 'at', 'a', 'ae'];
 const MOUSE_DOMINANT_TRAIT_ALLELES = new Set([
   'U', 'W', 'Wsh', 'Rw', 'Spl', 'Mobr', 'Re', 'Nu',
@@ -475,9 +477,9 @@ function mouseTraitGeneNotation(locus, genotype, trait) {
     const semi = MOUSE_SEMI_DOMINANT_A_ALLELES.find((allele) => MOUSE_ALLELE_TRAITS.A[allele] === trait);
     if (semi) return alleles[0] === alleles[1] ? genotype : `-/${semi}`;
   }
-  // Shorthair is dominant: always "Go/-"; the genotypes behind it are listed separately
-  // (see mouseGoLocusDetail), the same way as for the W locus.
-  if (locus === 'Go' && trait === 'Shorthair') return 'Go/-';
+  // Shorthair (Go) and Rex (Re) are dominant: always "<allele>/-"; the genotypes behind them
+  // are listed separately (see mouseDominantLocusDetail), the same way as for the W locus.
+  if (MOUSE_DETAILED_DOMINANT_TRAITS[locus] === trait) return `${locus}/-`;
   if (locus === 'W') {
     // W-locus traits are dominant: always "<allele>/-"; the genotypes behind it are listed
     // separately (see mouseWLocusDetail) because homozygous is often lethal.
@@ -518,10 +520,10 @@ function mouseWLocusDetail(genotypes, trait) {
 }
 
 /**
- * Text appended to the Shorthair gene: the genotypes this cross can actually produce,
- * homozygous first, e.g. "Go/Go or Go/go". Only genotypes the cross can produce are listed.
+ * Text appended to a dominant coat gene (Shorthair, Rex): the genotypes this cross can
+ * actually produce, homozygous first, e.g. "Go/Go or Go/go" or "Re/Re or Re/re".
  */
-function mouseGoLocusDetail(genotypes) {
+function mouseDominantLocusDetail(genotypes) {
   return Array.from(genotypes)
     .sort((a, b) => {
       const isHomozygous = (genotype) => { const [first, second] = genotype.split('/'); return first === second; };
@@ -583,7 +585,7 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
           if (!traitWGenotypes.has(trait)) traitWGenotypes.set(trait, new Set());
           traitWGenotypes.get(trait).add(offspringGenotype);
         }
-        if (locus === 'Go' && trait === 'Shorthair') {
+        if (MOUSE_DETAILED_DOMINANT_TRAITS[locus] === trait) {
           if (!traitGoGenotypes.has(trait)) traitGoGenotypes.set(trait, new Set());
           traitGoGenotypes.get(trait).add(offspringGenotype);
         }
@@ -605,7 +607,7 @@ function computeMouseExpectedOffspring(sireCode, damCode, includeGenes = false) 
           }
           const base = genes.join(' or ');
           const goDetail = traitGoGenotypes.get(trait);
-          if (goDetail && goDetail.size) return `${base} (${mouseGoLocusDetail(goDetail)})`;
+          if (goDetail && goDetail.size) return `${base} (${mouseDominantLocusDetail(goDetail)})`;
           const wDetail = traitWGenotypes.get(trait);
           return wDetail && wDetail.size ? `${base} (${mouseWLocusDetail(wDetail, trait)})` : base;
         })(),
