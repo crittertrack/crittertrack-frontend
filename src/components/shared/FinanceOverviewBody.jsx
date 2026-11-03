@@ -38,6 +38,12 @@ const Stat = ({ label, value, testId, hint }) => (
         {hint && <div className="text-[11px] text-gray-500 dark:text-dark-text-muted">{hint}</div>}
     </div>
 );
+const PriceBadge = ({ value }) => {
+    const paid = value != null && value > 0;
+    return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${paid ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>{value == null ? '-' : formatMoney(value)}</span>;
+};
+
+
 
 export default function FinanceOverviewBody({ kind, data: d }) {
     const isLitter = kind === 'litter';
@@ -67,14 +73,7 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                 ) : (
                     <Stat label="Net" value={formatMoney(d.net)} testId="finance-net" />
                 )}
-                {d.expectedRevenue > 0 && (
-                    <Stat
-                        label="Expected (reserved)"
-                        value={formatMoney(d.expectedRevenue)}
-                        hint={d.reservedDeposit > 0 ? `${formatMoney(d.reservedDeposit)} deposit` : undefined}
-                        testId="finance-expected"
-                    />
-                )}
+
             </div>
 
             {isLitter && d.offspringDetails && d.offspringDetails.length > 0 && (
@@ -85,16 +84,16 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                                 <th className="py-1">Name</th>
                                 <th className="py-1">Status</th>
                                 <th className="py-1 text-right">Deposit</th>
-                                <th className="py-1 text-right">Price</th>
+                                <th className="py-1 text-right">Full price</th>
                             </tr>
                         </thead>
                         <tbody>
                             {d.offspringDetails.map((o, i) => (
                                 <tr key={o.id || i} className="border-t border-gray-100 dark:border-dark-border">
-                                    <td className="py-1">{o.name || 'Offspring'}</td>
+                                    <td className="py-1">{o.displayName || o.name || 'Offspring'}</td>
                                     <td className="py-1">{o.status}</td>
-                                    <td className="py-1 text-right">{o.deposit == null ? '-' : formatMoney(o.deposit)}</td>
-                                    <td className="py-1 text-right">{o.amount == null ? '-' : formatMoney(o.amount)}</td>
+                                    <td className="py-1 text-right"><PriceBadge value={o.deposit} /></td>
+                                    <td className="py-1 text-right"><PriceBadge value={o.amount} /></td>
                                 </tr>
                             ))}
                         </tbody>
