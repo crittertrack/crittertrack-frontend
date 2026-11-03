@@ -84,7 +84,8 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                             <tr className="text-left text-gray-500 dark:text-dark-text-muted">
                                 <th className="py-1">Name</th>
                                 <th className="py-1">Status</th>
-                                <th className="py-1 text-right">Expected earning</th>
+                                <th className="py-1 text-right">Deposit</th>
+                                <th className="py-1 text-right">Price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,6 +93,7 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                                 <tr key={o.id || i} className="border-t border-gray-100 dark:border-dark-border">
                                     <td className="py-1">{o.name || 'Offspring'}</td>
                                     <td className="py-1">{o.status}</td>
+                                    <td className="py-1 text-right">{o.deposit == null ? '-' : formatMoney(o.deposit)}</td>
                                     <td className="py-1 text-right">{o.amount == null ? '-' : formatMoney(o.amount)}</td>
                                 </tr>
                             ))}
@@ -99,6 +101,7 @@ export default function FinanceOverviewBody({ kind, data: d }) {
                         <tfoot>
                             <tr className="border-t border-gray-200 dark:border-dark-border font-semibold">
                                 <td className="py-1" colSpan={2}>Total</td>
+                                <td className="py-1 text-right">{formatMoney(d.offspringDetails.reduce((s, o) => s + (o.deposit || 0), 0))}</td>
                                 <td className="py-1 text-right">{formatMoney(d.offspringDetails.reduce((s, o) => s + (o.amount || 0), 0))}</td>
                             </tr>
                         </tfoot>
