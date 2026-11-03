@@ -5,13 +5,14 @@ import apiClient from '../utils/apiClient';
 import DatePicker from './DatePicker';
 import InfoButton from './shared/InfoButton';
 import BudgetUsageView from './BudgetUsageView';
+import BudgetYearEndView from './BudgetYearEndView';
 import { downloadBlob } from '../utils/nativeDownload';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
     const [litters, setLitters] = useState([]);
-    const [view, setView] = useState('spending'); // 'spending' (paid) | 'usage' (supplies used)
+    const [view, setView] = useState('spending'); // 'spending' (paid) | 'usage' (supplies used) | 'yearend'
     const [animalsLoading, setAnimalsLoading] = useState(true);
     const [animalSearchQuery, setAnimalSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -429,7 +430,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
                 {/* Spending = what you paid. Usage = supplies you used (valued at cost per unit). */}
                 <div className="flex gap-1 mb-3 sm:mb-4" role="tablist" aria-label="Budget view" data-testid="budget-view-switch">
-                    {[['spending', 'Spending'], ['usage', 'Usage']].map(([key, label]) => (
+                    {[['spending', 'Spending'], ['usage', 'Usage'], ['yearend', 'Year-end']].map(([key, label]) => (
                         <button
                             key={key}
                             type="button"
@@ -513,6 +514,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             </div>
 
             {view === 'usage' && <BudgetUsageView showModalMessage={showModalMessage} />}
+            {view === 'yearend' && <BudgetYearEndView />}
 
             {view === 'spending' && (
             <>

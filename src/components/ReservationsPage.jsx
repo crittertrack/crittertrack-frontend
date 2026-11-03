@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileText, ClipboardList, Users, Plus, Edit, Trash2, Search, Loader2, Save, Check, CheckCircle, Undo2, RefreshCw, User, Phone, Tag, Mars, Venus, PawPrint, Home, DollarSign, Calendar, AlertTriangle, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from 'lucide-react';
 import apiClient from '../utils/apiClient';
 import AnimalImage from './shared/AnimalImage';
 import InfoButton from './shared/InfoButton';
@@ -7,6 +7,9 @@ import { formatDate, parseLocalDate } from '../utils/dateFormatter';
 import { getCurrencySymbol } from '../utils/locationUtils';
 import { formatAnimalDisplayName } from '../utils/animalDisplayName';
 import ContactAssignModal from './Contacts/ContactAssignModal';
+import { generateInvoicePdf } from '../utils/invoicePdf';
+import { reservationToInvoiceTransaction } from '../utils/reservationInvoice';
+import { downloadBlob } from '../utils/nativeDownload';
 
 const createEmptyWaitlistForm = () => {
     const now = new Date();
@@ -86,6 +89,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     // Contacts book used to spot buyers whose contact is linked to a CritterTrack
     // account (linkedCTUID), so rehoming can offer a true ownership transfer.
     const [contacts, setContacts] = useState([]);
+    // Seller name printed on invoices, and a spinner lock for the card's invoice action.
+    const [issuerName, setIssuerName] = useState('');
+    const [invoicingId, setInvoicingId] = useState(null);
 
     // Waitlist add/edit form
     const [wlFormVisible, setWlFormVisible] = useState(false);
@@ -163,6 +169,12 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     useEffect(() => { fetchWaitlist(); }, [fetchWaitlist]);
     useEffect(() => { fetchSpecies(); }, [fetchSpecies]);
     useEffect(() => { fetchContacts(); }, [fetchContacts]);
+    useEffect(() => {
+        if (!authToken) return;
+        apiClient.get('/users/profile')
+            .then(res => setIssuerName(res.data?.breederName || res.data?.personalName || ''))
+            .catch(() => {});
+    }, [authToken]);
 
     // --- Waitlist multi-species helpers ---------------------------------------
     // A waitlist entry "fits" an animal if ANY of its speciesRequests matches the
@@ -518,6 +530,24 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             showModalMessage?.('Error', err.response?.data?.message || 'Failed to mark payment as done');
         }
         setPaidSavingId(null);
+    };
+
+    // Download a PDF invoice for the reservation. Nothing is saved to the Budget: a sale only
+    // reaches the Budget once the reservation is finalized (the animal is rehomed).
+    const handleInvoice = async (animal) => {
+        setInvoicingId(animal.id_public);
+        try {
+            const code = animal.reservedPriceCurrency || currency;
+            const transaction = reservationToInvoiceTransaction(animal, new Date().toISOString());
+            const { blob, filename } = await generateInvoicePdf({
+                transaction, issuerName, currencySymbol: getCurrencySymbol(code),
+            });
+            await downloadBlob(blob, filename);
+        } catch (err) {
+            console.error('[reservationInvoice]', err);
+            showModalMessage?.('Error', 'Could not create the invoice. Please try again.');
+        }
+        setInvoicingId(null);
     };
 
     // Find the Contacts record behind a reservation's buyer, so rehoming can offer a true
@@ -1072,6 +1102,13 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                                                         <button onClick={() => handleMarkPaid(animal)} disabled={paidSavingId === animal.id_public} title="Mark payment as done"
                                                             className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 border border-green-500/60 hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-lg transition font-medium disabled:opacity-50">
                                                             {paidSavingId === animal.id_public ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />} Paid
+                                                        </button>
+                                                    )}
+                                                    {/* Invoice needs a price to bill; it is a download only and never touches the Budget. */}
+                                                    {hasReservation && !isEditing && Number(animal.reservedPrice) > 0 && (
+                                                        <button onClick={() => handleInvoice(animal)} disabled={invoicingId === animal.id_public} title="Download an invoice PDF (not added to your Budget until finalized)" data-testid={`invoice-${animal.id_public}`}
+                                                            className="flex items-center gap-1 text-xs text-gray-600 dark:text-dark-text-secondary border border-gray-300 dark:border-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition font-medium disabled:opacity-50">
+                                                            {invoicingId === animal.id_public ? <Loader2 size={11} className="animate-spin" /> : <FileText size={11} />} Invoice
                                                         </button>
                                                     )}
                                                     <button onClick={() => handleRehome(animal)} disabled={rehomingId === animal.id_public}

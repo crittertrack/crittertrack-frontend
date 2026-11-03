@@ -2,12 +2,16 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import apiClient from '../utils/apiClient';
 import ReservationsPage from './ReservationsPage';
+import { generateInvoicePdf } from '../utils/invoicePdf';
+import { downloadBlob } from '../utils/nativeDownload';
 
 jest.mock('../utils/apiClient', () => ({
     __esModule: true,
     default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), patch: jest.fn(), delete: jest.fn() },
 }));
 jest.mock('react-router-dom', () => ({ useNavigate: () => jest.fn() }), { virtual: true });
+jest.mock('../utils/invoicePdf', () => ({ generateInvoicePdf: jest.fn() }));
+jest.mock('../utils/nativeDownload', () => ({ downloadBlob: jest.fn() }));
 
 const animals = [
     { id_public: 'CTC1', name: 'Peanut', species: 'Fancy Rat', gender: 'Female', status: 'Available', imageUrl: null },
@@ -32,6 +36,7 @@ const setup = async (overrides = {}) => {
     apiClient.get.mockImplementation((url) => {
         if (url === '/animals') return Promise.resolve({ data: animalState.map(a => ({ ...a })) });
         if (url === '/waitlist') return Promise.resolve({ data: overrides.waitlist || waitlist });
+        if (url === '/users/profile') return Promise.resolve({ data: { breederName: 'Happy Rats' } });
         if (url === '/species') return Promise.resolve({ data: [{ name: 'Fancy Rat' }, { name: 'Fancy Mouse' }, { name: 'Fancy Gerbil' }] });
         if (url === '/contacts') return Promise.resolve({ data: overrides.contacts || contacts });
         if (url === '/public/profiles/search') return Promise.resolve({ data: overrides.profilesSearch || [] });
@@ -922,4 +927,25 @@ test('edits made in the animal modal (animal-updated) are reflected in the list'
     // ...and moving Butter to Retired drops it from the sale list entirely
     window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: 'CTC2', status: 'Retired' } }));
     await waitFor(() => expect(cardIds()).toEqual(['CTC1']));
+});
+test('an invoice can be downloaded for a reservation with a price, and is not saved to the Budget', async () => {
+    generateInvoicePdf.mockResolvedValue({ blob: new Blob(['x']), filename: 'invoice-CTC2.pdf' });
+    await setup();
+    // Peanut has no reservation, so only Butter (Booked, price 40) offers an invoice.
+    expect(screen.queryByTestId('invoice-CTC1')).toBeNull();
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/users/profile'));
+    fireEvent.click(screen.getByTestId('invoice-CTC2'));
+
+    await waitFor(() => expect(downloadBlob).toHaveBeenCalledWith(expect.any(Blob), 'invoice-CTC2.pdf'));
+    const args = generateInvoicePdf.mock.calls[0][0];
+    expect(args.transaction).toMatchObject({ type: 'sale', price: 40, buyer: 'Jane', reservedDeposit: 20, reservedDepositStatus: 'done' });
+    expect(args.currencySymbol).toBe('$');
+    // Nothing is created in the Budget by an invoice.
+    expect(apiClient.post).not.toHaveBeenCalledWith(expect.stringContaining('/budget'), expect.anything());
+});
+
+test('the invoice button is hidden when there is no price to bill', async () => {
+    const noPrice = animals.map(a => (a.id_public === 'CTC2' ? { ...a, reservedPrice: null, reservedDeposit: null } : a));
+    await setup({ animals: noPrice });
+    expect(screen.queryByTestId('invoice-CTC2')).toBeNull();
 });

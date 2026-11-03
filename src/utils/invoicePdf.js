@@ -30,7 +30,8 @@ export const generateInvoicePdf = async ({ transaction, issuerName, currencySymb
     y += Math.max(1, doc.splitTextToSize(content.description, 88).length) * 5 + 3;
     doc.setFont('helvetica','bold'); doc.text('Total', left, y); doc.text(content.total, right, y, { align: 'right' }); y += 6;
     doc.text('Paid', left, y); doc.text(content.totalPaid, right, y, { align: 'right' }); y += 6;
-    doc.text('Balance due', left, y); doc.text(content.balanceDue, right, y, { align: 'right' });
+    doc.text('Balance due', left, y); doc.text(content.balanceDue, right, y, { align: 'right' }); y += 6;
+    doc.text('Status', left, y); doc.text(content.statusLabel, right, y, { align: 'right' });
 
     return { blob: doc.output('blob'), filename: content.filename };
 };
