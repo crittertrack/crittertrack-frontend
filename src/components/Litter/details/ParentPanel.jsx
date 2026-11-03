@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import apiClient from '../../../utils/apiClient';
 import { Mars, Venus, SquareArrowOutUpRight } from 'lucide-react';
 import { formatDate, calculateBreedingAge } from '../../../utils/dateFormatter';
 import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
@@ -15,6 +16,8 @@ const Line = ({ label, children }) => (
 
 const NA = <Muted>Not recorded</Muted>;
 
+const codeText = (code) => (typeof code === 'string' && code.trim() ? code : null);
+
 /** Age of the parent on the mating date, or null if either date is missing. */
 const ageAtMating = (animal, matingDate) => {
     if (!animal?.birthDate || !matingDate) return null;
@@ -29,6 +32,26 @@ export default function ParentPanel({
 }) {
     const isSire = role === 'Sire';
     const id = animal?.id_public || fallbackId || null;
+    // The litter overview payload / list preview can omit the parent's genetic code, so fetch it
+    // when missing instead of showing a false "Not recorded" while it is still loading.
+    const litterCode = codeText(animal?.geneticCode || animal?.genetic_code);
+    const [fetchedCode, setFetchedCode] = useState(null);
+    const [codeLoading, setCodeLoading] = useState(false);
+    useEffect(() => {
+        setFetchedCode(null);
+        if (litterCode || !id) { setCodeLoading(false); return undefined; }
+        let cancelled = false;
+        setCodeLoading(true);
+        apiClient.get(`/animals/any/${encodeURIComponent(id)}`)
+            .then(res => {
+                if (cancelled) return;
+                setFetchedCode(codeText(res?.data?.geneticCode || res?.data?.genetic_code));
+            })
+            .catch(error => { if (!cancelled) console.error('Error fetching parent genetic code:', error); })
+            .finally(() => { if (!cancelled) setCodeLoading(false); });
+        return () => { cancelled = true; };
+    }, [id, litterCode]);
+    const geneticCode = litterCode || fetchedCode;
     const img = animal?.imageUrl || animal?.photoUrl || null;
     const Icon = isSire ? Mars : Venus;
     const iconClass = isSire ? 'text-primary' : 'text-accent';
@@ -76,7 +99,7 @@ export default function ParentPanel({
                         </div>
                         <div className="text-xs text-gray-500 dark:text-dark-text-muted absolute bottom-2 right-2">{id}</div>
                         <Line label="Variety">{variety || NA}</Line>
-                        <Line label="Genetic code">{animal?.geneticCode || NA}</Line>
+                        <Line label="Genetic code">{geneticCode || (codeLoading ? <Muted>Loading…</Muted> : NA)}</Line>
                         <Line label="Born">{animal?.birthDate ? formatDate(animal.birthDate) : NA}</Line>
                         <Line label="Age at mating">{age || NA}</Line>
                         <div className="text-sm leading-snug flex flex-wrap items-center gap-x-1.5 gap-y-1">

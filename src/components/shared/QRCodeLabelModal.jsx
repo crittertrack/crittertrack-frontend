@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Check, Download, Link, Printer, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
@@ -163,8 +164,13 @@ const QRCodeLabelModal = ({ value, title, subtitle, details = [], onClose }) => 
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    return createPortal(
+        <div
+            className="fixed inset-0 z-[600] flex items-center justify-center bg-black/60 p-4"
+            onClick={event => { event.stopPropagation(); onClose(); }}
+            onMouseDown={event => event.stopPropagation()}
+            onTouchStart={event => event.stopPropagation()}
+        >
             <div className="bg-white dark:bg-dark-card-bg rounded-2xl shadow-2xl p-5 flex flex-col items-center gap-3 w-full max-w-sm" onClick={event => event.stopPropagation()}>
                 <div className="flex items-center justify-between w-full">
                     <h3 className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate pr-2">{title || 'QR Code'}</h3>
@@ -196,7 +202,8 @@ const QRCodeLabelModal = ({ value, title, subtitle, details = [], onClose }) => 
                     {copied ? 'Copied!' : 'Copy Link'}
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
