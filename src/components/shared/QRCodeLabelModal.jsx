@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Check, Download, Link, Printer, X } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { downloadBlob } from '../../utils/nativeDownload';
 
 const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, character => ({
@@ -11,6 +12,53 @@ const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, character 
     "'": '&#39;',
 })[character]);
 
+const loadSvgImage = (svg) => new Promise((resolve, reject) => {
+    const markup = new XMLSerializer().serializeToString(svg);
+    const url = URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml;charset=utf-8' }));
+    const image = new Image();
+    image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+    image.onerror = (event) => { URL.revokeObjectURL(url); reject(event); };
+    image.src = url;
+});
+
+const canvasToBlob = (canvas) => new Promise((resolve, reject) => {
+    canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error('Could not create image.'))), 'image/png');
+});
+
+// Renders a PNG: just the QR, or a full label (QR + text) when withLabel is true.
+const renderPng = async (svg, { withLabel, title, subtitle, details }) => {
+    const image = await loadSvgImage(svg);
+    const qrSize = 600;
+    const pad = 40;
+    const canvas = document.createElement('canvas');
+    const textHeight = withLabel ? 260 : 0;
+    canvas.width = qrSize + pad * 2;
+    canvas.height = qrSize + pad * 2 + textHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, pad, pad, qrSize, qrSize);
+    if (withLabel) {
+        ctx.fillStyle = '#111827';
+        ctx.textAlign = 'center';
+        let y = qrSize + pad * 2 + 20;
+        ctx.font = 'bold 48px Arial, sans-serif';
+        ctx.fillText(String(title || '').slice(0, 30), canvas.width / 2, y + 40);
+        y += 40;
+        if (subtitle) {
+            ctx.font = 'bold 32px Arial, sans-serif';
+            y += 50;
+            ctx.fillText(String(subtitle).slice(0, 40), canvas.width / 2, y);
+        }
+        ctx.font = '28px Arial, sans-serif';
+        details.filter(Boolean).slice(0, 2).forEach(detail => {
+            y += 40;
+            ctx.fillText(String(detail).slice(0, 45), canvas.width / 2, y);
+        });
+    }
+    return canvasToBlob(canvas);
+};
+
 const QRCodeLabelModal = ({ value, title, subtitle, details = [], onClose }) => {
     const qrContainerRef = useRef(null);
     const [copied, setCopied] = useState(false);
@@ -20,10 +68,18 @@ const QRCodeLabelModal = ({ value, title, subtitle, details = [], onClose }) => 
         try {
             const svg = qrContainerRef.current?.querySelector('svg');
             if (!svg) throw new Error('QR code is not ready to download.');
-            const svgMarkup = new XMLSerializer().serializeToString(svg);
-            const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
             const safeName = (title || 'label').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'label';
-            await downloadBlob(blob, `${safeName}-qr.svg`);
+            let blob;
+            let extension = 'png';
+            try {
+                if (!Capacitor.isNativePlatform()) throw new Error('SVG download on web');
+                blob = await renderPng(svg, { withLabel: false });
+            } catch (renderError) {
+                const svgMarkup = new XMLSerializer().serializeToString(svg);
+                blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+                extension = 'svg';
+            }
+            await downloadBlob(blob, `${safeName}-qr.${extension}`);
             setError('');
         } catch (downloadError) {
             console.error('Failed to download QR code:', downloadError);
@@ -31,10 +87,23 @@ const QRCodeLabelModal = ({ value, title, subtitle, details = [], onClose }) => 
         }
     };
 
-    const handlePrint = () => {
+    const handlePrint = async () => {
         const svg = qrContainerRef.current?.querySelector('svg');
         if (!svg) {
             setError('QR code is not ready to print.');
+            return;
+        }
+        // The Android WebView can't open print windows; share a label image instead.
+        if (Capacitor.isNativePlatform()) {
+            try {
+                const blob = await renderPng(svg, { withLabel: true, title, subtitle, details });
+                const safeName = (title || 'label').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'label';
+                await downloadBlob(blob, `${safeName}-label.png`);
+                setError('');
+            } catch (printError) {
+                console.error('Failed to share label:', printError);
+                setError('Could not prepare the label. Please try again.');
+            }
             return;
         }
         const printWindow = window.open('', '_blank');

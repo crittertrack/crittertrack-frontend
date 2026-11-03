@@ -311,6 +311,8 @@ const EnclosureDetailModal = ({
 
     useEffect(() => {
         const handleClickOutside = (event) => {
+            // The QR dialog renders outside modalRef; don't treat clicks in it as outside clicks.
+            if (showQRCode) return;
             if (modalRef.current && !modalRef.current.contains(event.target)) {
                 onClose();
             }
@@ -319,7 +321,7 @@ const EnclosureDetailModal = ({
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, showQRCode]);
 
     if (!isOpen) return null;
 
@@ -1050,16 +1052,18 @@ const EnclosureDetailModal = ({
                 )}
             </div>
             {showQRCode && enclosureId && (
-                <QRCodeLabelModal
-                    value={enclosureShareUrl(enclosureId)}
-                    title={enclosure.name || 'Enclosure'}
-                    subtitle={enclosure.enclosureType || 'Enclosure'}
-                    details={[
-                        `ID: ${enclosureId}`,
-                        enclosure.locationName || enclosure.location
-                    ]}
-                    onClose={() => setShowQRCode(false)}
-                />
+                <div onClick={event => event.stopPropagation()}>
+                    <QRCodeLabelModal
+                        value={enclosureShareUrl(enclosureId)}
+                        title={enclosure.name || 'Enclosure'}
+                        subtitle={enclosure.enclosureType || 'Enclosure'}
+                        details={[
+                            `ID: ${enclosureId}`,
+                            enclosure.locationName || enclosure.location
+                        ]}
+                        onClose={() => setShowQRCode(false)}
+                    />
+                </div>
             )}
         </div>
     );
