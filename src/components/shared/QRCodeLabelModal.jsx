@@ -32,7 +32,8 @@ const renderPng = async (svg, { withLabel, title, subtitle, details }) => {
     const qrSize = 600;
     const pad = 40;
     const canvas = document.createElement('canvas');
-    const textHeight = withLabel ? 260 : 0;
+    const visibleDetails = withLabel ? (details || []).filter(Boolean).slice(0, 5) : [];
+    const textHeight = withLabel ? 200 + visibleDetails.length * 40 : 0;
     canvas.width = qrSize + pad * 2;
     canvas.height = qrSize + pad * 2 + textHeight;
     const ctx = canvas.getContext('2d');
@@ -52,9 +53,9 @@ const renderPng = async (svg, { withLabel, title, subtitle, details }) => {
             ctx.fillText(String(subtitle).slice(0, 40), canvas.width / 2, y);
         }
         ctx.font = '28px Arial, sans-serif';
-        details.filter(Boolean).slice(0, 2).forEach(detail => {
+        visibleDetails.forEach(detail => {
             y += 40;
-            ctx.fillText(String(detail).slice(0, 45), canvas.width / 2, y);
+            ctx.fillText(String(detail).slice(0, 48), canvas.width / 2, y);
         });
     }
     return canvasToBlob(canvas);
@@ -73,7 +74,6 @@ const QRCodeLabelModal = ({ value, title, subtitle, details = [], onClose }) => 
             let blob;
             let extension = 'png';
             try {
-                if (!Capacitor.isNativePlatform()) throw new Error('SVG download on web');
                 blob = await renderPng(svg, { withLabel: false });
             } catch (renderError) {
                 const svgMarkup = new XMLSerializer().serializeToString(svg);

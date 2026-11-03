@@ -2632,6 +2632,11 @@ useEffect(() => {
                     subtitle={animal.id_public}
                     details={[
                         animal.species,
+                        (() => {
+                            const variety = [animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ');
+                            return variety ? `Variety: ${variety}` : null;
+                        })(),
+                        enclosureInfo?.name ? `Enclosure: ${enclosureInfo.name}` : null,
                         [animal.gender, animal.status].filter(Boolean).join(' · ')
                     ]}
                     onClose={() => setShowQR(false)}

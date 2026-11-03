@@ -1058,9 +1058,18 @@ const EnclosureDetailModal = ({
                         title={enclosure.name || 'Enclosure'}
                         subtitle={enclosure.enclosureType || 'Enclosure'}
                         details={[
+                            (() => {
+                                const dims = enclosure.dimensions;
+                                if (dims && typeof dims === 'object') {
+                                    if (!(dims.length || dims.width || dims.height)) return null;
+                                    return `Size: ${dims.length || '?'} x ${dims.width || '?'} x ${dims.height || '?'} ${dims.unit || 'in'}`;
+                                }
+                                return dims ? `Size: ${dims}` : null;
+                            })(),
+                            enclosure.capacity ? `Capacity: ${enclosure.capacity} animals` : null,
                             `ID: ${enclosureId}`,
                             enclosure.locationName || enclosure.location
-                        ]}
+                        ].filter(Boolean)}
                         onClose={() => setShowQRCode(false)}
                     />
                 </div>
