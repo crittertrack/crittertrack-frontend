@@ -1,4 +1,6 @@
 import React from 'react';
+import { Trash2 } from 'lucide-react';
+import apiClient from '../../utils/apiClient';
 
 // Numbers for the Finances card. Wording notes (agreed with the user): litters are never sold as a
 // unit and most offspring are kept, so unsold offspring are NOT presented as a "loss". We lead with
@@ -81,7 +83,24 @@ export const formatQuantity = (quantity, unit) => {
     const rounded = Math.round(value * 100) / 100;
     return `${rounded}${label ? ` ${label}` : ''}`;
 };
-export default function FinanceOverviewBody({ data: d }) {
+const TrashButton = ({ label, onClick }) => (
+    <button type="button" onClick={onClick} className="text-red-400 hover:text-red-600 p-1" title={label} aria-label={label}>
+        <Trash2 size={14} />
+    </button>
+);
+
+export default function FinanceOverviewBody({ data: d, onChanged }) {
+    const removeUsage = async (entry) => {
+        if (!window.confirm(`Remove ${entry.supplyName} from this litter and put the quantity back in stock?`)) return;
+        try { await apiClient.delete(`/supplies/usage/${entry._id}`); } catch { window.alert('Could not remove this entry.'); return; }
+        if (onChanged) onChanged();
+    };
+    const removeExpense = async (t) => {
+        if (!window.confirm(`Remove the expense "${t.description}"?`)) return;
+        try { await apiClient.delete(`/budget/transactions/${t._id}`); } catch { window.alert('Could not remove this expense.'); return; }
+        if (onChanged) onChanged();
+    };
+
     const usage = d.usage;
     const categories = Object.entries(d.costByCategory || {}).filter(([, v]) => v > 0);
     const namedExpenses = Array.isArray(d.transactions) ? d.transactions.filter(t => t.type === 'expense' && t.litterId && t.description) : [];
@@ -154,14 +173,16 @@ export default function FinanceOverviewBody({ data: d }) {
                                             <th className="py-1">Name</th>
                                             <th className="py-1 text-right">Quantity</th>
                                             <th className="py-1 text-right">Cost</th>
+                                            <th className="w-8" />
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {usage.bySupply.map(s => (
-                                            <tr key={`${s.supplyName}|${s.unit}`} className="border-t border-gray-100 dark:border-dark-border">
+                                        {(usage.entries || []).map(s => (
+                                            <tr key={s._id} className="border-t border-gray-100 dark:border-dark-border">
                                                 <td className="py-1">{s.supplyName}</td>
                                                 <td className="py-1 text-right">{formatQuantity(s.quantity, s.unit)}</td>
-                                                <td className="py-1 text-right">{formatMoney(s.cost)}</td>
+                                                <td className="py-1 text-right">{s.priced ? formatMoney(s.cost) : '-'}</td>
+                                                <td className="py-1 text-right"><TrashButton label={`Remove ${s.supplyName}`} onClick={() => removeUsage(s)} /></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -169,6 +190,7 @@ export default function FinanceOverviewBody({ data: d }) {
                                         <tr className="border-t border-gray-200 dark:border-dark-border font-semibold">
                                             <td className="py-1" colSpan={2}>Total</td>
                                             <td className="py-1 text-right">{formatMoney(usage.totalCost)}</td>
+                                            <td />
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -192,7 +214,7 @@ export default function FinanceOverviewBody({ data: d }) {
                                 {namedExpenses.map(t => (
                                     <li key={t._id} className="flex justify-between gap-3">
                                         <span>{t.description}</span>
-                                        <span>{formatMoney(t.price)}</span>
+                                        <span className="flex items-center gap-1">{formatMoney(t.price)}<TrashButton label={`Remove ${t.description}`} onClick={() => removeExpense(t)} /></span>
                                     </li>
                                 ))}
                             </ul>

@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import FinanceOverviewCard from './FinanceOverviewCard';
 import apiClient from '../../utils/apiClient';
 
-jest.mock('../../utils/apiClient', () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn() } }));
+jest.mock('../../utils/apiClient', () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), delete: jest.fn() } }));
 
 const litterData = {
     totalCost: 120, totalRevenue: 70, net: -50, costRecoupedPercent: 58, breakEvenRemaining: 50,
@@ -80,7 +80,7 @@ describe('FinanceOverviewCard', () => {
     it('shows the supplies as a table below the offspring table', async () => {
         apiClient.get.mockResolvedValue({ data: {
             ...litterData,
-            usage: { count: 1, totalCost: 6, unpricedCount: 0, unpricedSupplies: [], bySupply: [{ supplyName: 'Aspen', unit: 'kg', quantity: 3, cost: 6 }] },
+            usage: { count: 1, totalCost: 6, unpricedCount: 0, unpricedSupplies: [], entries: [{ _id: 'u1', supplyName: 'Aspen', unit: 'kg', quantity: 3, cost: 6, priced: true }] },
         } });
         render(<FinanceOverviewCard kind="litter" id="CTL1" />);
 
@@ -118,6 +118,44 @@ describe('FinanceOverviewCard', () => {
 
         expect((await screen.findByRole('alert')).textContent).toMatch(/amount/i);
         expect(apiClient.post).not.toHaveBeenCalled();
+    });
+
+    it('removes a supply usage entry after confirming, then reloads', async () => {
+        const withUsage = {
+            ...litterData,
+            usage: { count: 1, totalCost: 6, unpricedCount: 0, unpricedSupplies: [], entries: [{ _id: 'u1', supplyName: 'Aspen', unit: 'kg', quantity: 3, cost: 6, priced: true }] },
+        };
+        apiClient.get.mockResolvedValue({ data: withUsage });
+        apiClient.delete.mockResolvedValue({ data: { message: 'Deleted' } });
+        jest.spyOn(window, 'confirm').mockReturnValue(true);
+        render(<FinanceOverviewCard kind="litter" id="CTL1" />);
+
+        fireEvent.click(await screen.findByLabelText('Remove Aspen'));
+        await waitFor(() => expect(apiClient.delete).toHaveBeenCalledWith('/supplies/usage/u1'));
+        await waitFor(() => expect(apiClient.get).toHaveBeenCalledTimes(2));
+    });
+
+    it('does nothing when the removal is not confirmed', async () => {
+        const withUsage = {
+            ...litterData,
+            usage: { count: 1, totalCost: 6, unpricedCount: 0, unpricedSupplies: [], entries: [{ _id: 'u1', supplyName: 'Aspen', unit: 'kg', quantity: 3, cost: 6, priced: true }] },
+        };
+        apiClient.get.mockResolvedValue({ data: withUsage });
+        jest.spyOn(window, 'confirm').mockReturnValue(false);
+        render(<FinanceOverviewCard kind="litter" id="CTL1" />);
+
+        fireEvent.click(await screen.findByLabelText('Remove Aspen'));
+        expect(apiClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('removes a named litter expense', async () => {
+        apiClient.get.mockResolvedValue({ data: { ...litterData, transactions: [{ _id: 't1', type: 'expense', litterId: 'CTL1', description: 'Vet check', price: 30 }] } });
+        apiClient.delete.mockResolvedValue({ data: {} });
+        jest.spyOn(window, 'confirm').mockReturnValue(true);
+        render(<FinanceOverviewCard kind="litter" id="CTL1" />);
+
+        fireEvent.click(await screen.findByLabelText('Remove Vet check'));
+        await waitFor(() => expect(apiClient.delete).toHaveBeenCalledWith('/budget/transactions/t1'));
     });
 
     it('shows a helpful empty message when nothing is recorded', async () => {

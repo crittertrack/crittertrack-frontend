@@ -89,7 +89,7 @@ export default function FinanceOverviewCard({ kind, id, className = '', bare = f
                     <button type="button" className="underline" onClick={refresh}>Retry</button>
                 </div>
             )}
-            {state.status === 'ready' && <FinanceOverviewBody data={state.data} />}
+            {state.status === 'ready' && <FinanceOverviewBody data={state.data} onChanged={refresh} />}
         </section>
     );
 }

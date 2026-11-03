@@ -66,7 +66,7 @@ test('animals tab lists only Available and Booked animals', async () => {
     // Available / Booked animals are each rendered once as a card (no reservation -> no banner)
     expect(screen.getAllByText('Peanut').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Whiskers').length).toBeGreaterThan(0);
-    // Butter is rendered once as a card, plus once in the "Payments due" banner
+    // Butter is rendered as a card
     expect(screen.getAllByText('Butter').length).toBeGreaterThan(0);
     expect(screen.queryByText('Retired Doe')).toBeNull();
 });
@@ -139,10 +139,27 @@ test('deposit status only shows when a deposit is actually charged', async () =>
     expect(screen.getByLabelText('Deposit status')).toBeTruthy();
 });
 
-test('buyers with outstanding payments are flagged in a banner', async () => {
+test('stats show unassigned, assigned, deposits due and payments due', async () => {
     await setup();
-    // Butter is Booked with payment status due and a buyer -> banner shows (now above the grid).
-    expect(screen.getByText('Payments due:')).toBeTruthy();
+    // Peanut + Whiskers are unassigned; Butter is assigned (price 40, deposit 20 already paid).
+    expect(within(screen.getByTestId('stat-unassigned')).getByText('2')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-assigned')).getByText('1')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-deposits-due')).getByText('$0')).toBeTruthy();
+    // Deposit is part of the price, so 40 - 20 = 20 is still due.
+    expect(within(screen.getByTestId('stat-payments-due')).getByText('$20')).toBeTruthy();
+});
+
+test('a fully paid reservation counts as nothing due, even with an unpaid deposit', async () => {
+    const paid = animals.map(a => (a.id_public === 'CTC2'
+        ? { ...a, reservedDepositStatus: 'due', reservedPaymentStatus: 'done' } : a));
+    await setup({ animals: paid });
+    expect(within(screen.getByTestId('stat-deposits-due')).getByText('$0')).toBeTruthy();
+    expect(within(screen.getByTestId('stat-payments-due')).getByText('$0')).toBeTruthy();
+});
+
+test('explains that sales only reach the Budget once finalized', async () => {
+    await setup();
+    expect(screen.getByTestId('reservations-budget-note').textContent).toMatch(/only added to your Budget once it is finalized/);
 });
 
 test('shows extra assignments even when more animals are assigned than requested', async () => {

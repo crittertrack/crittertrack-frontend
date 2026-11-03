@@ -270,7 +270,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     // paid deposit of 25, the outstanding payment is 50. The two figures therefore
     // always add up to what is still owed, and never double-count:
     //
-    //   deposit due = the charged deposit, while it has not been paid yet
+    //   deposit due = the charged deposit, while neither it nor the full price is marked paid
     //   payment due = the price minus the deposit (the balance), while the
     //                 payment is not marked done
     //
@@ -290,7 +290,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             const price = a.reservedPrice != null ? Number(a.reservedPrice) || 0 : 0;
             if (price > 0) addTo(currency, 'totalPrice', price);
             // A deposit that is charged and not yet marked paid.
-            if (deposit > 0 && a.reservedDepositStatus !== 'done') addTo(currency, 'depositDue', deposit);
+            if (deposit > 0 && a.reservedDepositStatus !== 'done' && a.reservedPaymentStatus !== 'done') addTo(currency, 'depositDue', deposit);
             // The outstanding payment is the balance: the price minus the deposit
             // (the deposit is part of the price). Never below zero.
             if (price > 0 && a.reservedPaymentStatus !== 'done') {
@@ -363,6 +363,21 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
     }, [baseSaleAnimals, searchTerm, speciesFilter, genderFilter, statusFilter, assignedFilter, paymentFilter]);
     const filtersActive = !!(speciesFilter || genderFilter || statusFilter || assignedFilter !== 'all' || paymentFilter || searchTerm.trim());
     const clearFilters = () => { setSpeciesFilter(''); setGenderFilter(''); setStatusFilter(''); setAssignedFilter('all'); setPaymentFilter(''); setSearchTerm(''); };
+
+    // Stats across every Available / Booked animal (not narrowed by the filters above).
+    const assignedForStats = baseSaleAnimals.filter(isAssigned);
+    const dueTotals = computeEntryTotals(assignedForStats);
+    const dueList = (key) => dueTotals.filter(t => t[key] > 0).map(t => ({ currency: t.currency, amount: t[key] }));
+    const reservationStats = {
+        assigned: assignedForStats.length,
+        unassigned: baseSaleAnimals.length - assignedForStats.length,
+        depositDue: dueList('depositDue'),
+        paymentDue: dueList('paymentDue'),
+    };
+    // One figure per currency, since reservations can be priced in different currencies.
+    const formatDueTotals = (list) => (list.length
+        ? list.map(d => `${getCurrencySymbol(d.currency)}${Math.round(d.amount * 100) / 100}`).join(' / ')
+        : `${getCurrencySymbol(currency)}0`);
 
     const activeWaitlist = useMemo(() => waitlist.filter(e => e.isActive !== false), [waitlist]);
     const historyWaitlist = useMemo(() => waitlist.filter(e => e.isActive === false), [waitlist]);
@@ -810,6 +825,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                         </select>
                     </label>
                 </div>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted" data-testid="reservations-budget-note">Reservations are planned sales. A sale is only added to your Budget once it is finalized: when the animal is rehomed, or when its waitlist entry is finalized.</p>
 
                 {/* Tabs */}
                 <div className="flex gap-1 bg-gray-100 dark:bg-dark-surface rounded-xl p-1 w-fit">
@@ -824,15 +840,20 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
 
                 {activeTab === 'animals' && (
                     <>
-                        {/* Outstanding payments up top so overdue buyers are seen first */}
-                        {saleAnimals.some(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName) && (
-                            <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-3">
-                                <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
-                                <div className="text-sm text-amber-700 dark:text-amber-300">
-                                    <span className="font-semibold">Payments due:</span> {saleAnimals.filter(a => (a.reservedPaymentStatus || 'due') === 'due' && a.reservedBuyerName).map(a => formatAnimalDisplayName(a)).join(', ')}
+                        {/* Reservation stats */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2" data-testid="reservation-stats">
+                            {[
+                                ['Unassigned', String(reservationStats.unassigned), 'stat-unassigned'],
+                                ['Assigned', String(reservationStats.assigned), 'stat-assigned'],
+                                ['Deposits due', formatDueTotals(reservationStats.depositDue), 'stat-deposits-due'],
+                                ['Payments due', formatDueTotals(reservationStats.paymentDue), 'stat-payments-due'],
+                            ].map(([label, value, testId]) => (
+                                <div key={testId} className="rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface px-3 py-2" data-testid={testId}>
+                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted">{label}</div>
+                                    <div className="mt-0.5 text-base font-semibold text-gray-900 dark:text-dark-text">{value}</div>
                                 </div>
-                            </div>
-                        )}
+                            ))}
+                        </div>
                         <div className={`${cardCls} p-2 sm:p-4 mb-4`}>
                             <div className="relative">
                                 <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-[18px] sm:h-[18px]" />

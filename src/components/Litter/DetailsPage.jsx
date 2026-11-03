@@ -424,6 +424,8 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                             id={litter.litter_id_public}
                             bare
                             toolbarExtra={(
+                                <div className="flex items-center gap-2">
+                                <button type="button" onClick={() => navigate('/reservations')} data-testid="go-to-reservations" className="text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover">Reservations</button>
                                 <select
                                     aria-label="Currency"
                                     value={localStorage.getItem('budgetCurrency') || 'USD'}
@@ -432,6 +434,7 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
                                 >
                                     {['USD','EUR','GBP','AUD','CAD'].map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
+                                </div>
                             )}
                         />
                     )}

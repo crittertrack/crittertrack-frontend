@@ -68,7 +68,7 @@ describe('FinanceOverviewCard supplies used', () => {
         costRecoupedPercent: 0, breakEvenRemaining: 40, costPerOffspringBorn: 5, offspring: { kept: 8 },
         usage: {
             totalCost: 3.5, count: 3, unpricedCount: 1, unpricedSupplies: ['Pellets'],
-            bySupply: [{ supplyName: 'Mash', unit: 'kg', quantity: 0.35, cost: 3.5 }],
+            entries: [{ _id: 'u1', supplyName: 'Mash', unit: 'kg', quantity: 0.35, cost: 3.5, priced: true }],
         },
     };
 
@@ -95,7 +95,10 @@ describe('FinanceOverviewCard supplies used', () => {
 
         await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith('/supplies/use', expect.objectContaining({ litterId: 'CTL1' })));
         await waitFor(() => expect(screen.queryByTestId('use-supply-form')).toBeNull());
-        const overviewCalls = apiClient.get.mock.calls.filter(([url]) => url === '/budget/overview/litter/CTL1');
-        expect(overviewCalls.length).toBe(2);
+        // The reload request goes out just after the form closes, so wait for it.
+        await waitFor(() => {
+            const overviewCalls = apiClient.get.mock.calls.filter(([url]) => url === '/budget/overview/litter/CTL1');
+            expect(overviewCalls.length).toBe(2);
+        });
     });
 });
