@@ -15,6 +15,7 @@ import BetaSurveyTab from './admin/BetaSurveyTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
 import SpeciesSuggestionsTab from './admin/SpeciesSuggestionsTab';
 import ResourcesManagementTab from './admin/ResourcesManagementTab';
+import CareTemplatesTab from './admin/CareTemplatesTab';
 import BackupManagementTab from './admin/BackupManagementTab';
 import AnalyticsTab from './admin/AnalyticsTab';
 
@@ -624,6 +625,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 items={[
                                     { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
                                     { id: 'resources-management', label: 'Resources Management', icon: BookOpen, requiredRole: 'admin' },
+                                    { id: 'care-templates', label: 'Care Checklist Templates', icon: ClipboardList, requiredRole: 'admin' },
                                     { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
                                 { id: 'species-suggestions', label: 'Species Value Suggestions', icon: PawPrint },
                                     { id: 'beta-survey', label: 'Beta Survey', icon: ClipboardList },
@@ -759,6 +761,13 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
+                            </div>
+                        )}
+
+                        {/* Care Checklist Templates (per-species, admin-curated) */}
+                        {activeSection === 'care-templates' && (
+                            <div className="p-8">
+                                <CareTemplatesTab />
                             </div>
                         )}
 

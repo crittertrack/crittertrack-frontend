@@ -15,6 +15,7 @@ import { registerNativePush, isNativePushGranted } from '../../utils/nativePush'
 import { breedingLineTextStyle, breedingLineGlyph } from '../../utils/breedingLineColor';
 import { API_BASE_URL } from '../../utils/apiConfig';
 import { downloadBlob } from '../../utils/nativeDownload';
+import MedicationReminderSettings from './MedicationReminderSettings';
 
 // Short contextual hints for the Settings page-header info button, keyed by tab id.
 const SETTINGS_TAB_INFO = {
@@ -1142,6 +1143,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         ))}
                                     </div>
                                 )}
+                                {pushSubscribed && <MedicationReminderSettings />}
                             </>
                         )}
                     </div>

@@ -5,6 +5,7 @@ import { computeIsInTreatment, remapLegacyHealthStatus } from '../../utils/medic
 import { DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
 import { isFieldHiddenForSpecies } from '../../utils/speciesFieldTemplates';
+import MedicationDoseHistory from './MedicationDoseHistory';
 
 // Helper to parse fields that might be JSON strings or arrays
 const parseHealthRecords = (data) => {
@@ -39,7 +40,7 @@ const StatusIndicator = ({ status }) => {
     return <span className={`px-2 py-1 text-xs font-bold rounded-full ${style}`}>{status}</span>;
 };
 
-export const HealthTabContent = ({ animal }) => {
+export const HealthTabContent = ({ animal, isPublic = false }) => {
     const species = animal.species;
     const hidden = (field) => isFieldHiddenForSpecies(field, species);
 
@@ -185,6 +186,8 @@ export const HealthTabContent = ({ animal }) => {
                          <p className="text-sm text-gray-400 dark:text-dark-text-muted">No active medical records.</p>
                     )}
                 </InfoCard>
+            {/* Owner-only dose history (given / skipped / missed); renders nothing until a dose was reminded */}
+            {!isPublic && animal.id_public && medications.length > 0 && <MedicationDoseHistory animalId={animal.id_public} />}
             <InfoCard title="Veterinary Care" icon={<Stethoscope size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {hasVetCare ? (
                         <>

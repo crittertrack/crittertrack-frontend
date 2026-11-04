@@ -8,6 +8,8 @@ import {
     Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign, Settings, Check,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
+import MedicationReminderFields from './MedicationReminderFields';
+import ApplyCareTemplateButton from './ApplyCareTemplateButton';
 import themeColors from '../../utils/themeColors';
 import { formatDate, formatDateShort, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
 import { computeIsInTreatment, calculateHealthStatus as calculateHealthStatusShared, remapLegacyHealthStatus } from '../../utils/medicalStatus';
@@ -2019,6 +2021,8 @@ const AnimalFormModalV2 = ({
                 stopDate: newMedication.stopDate || null,
                 intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
                 intervalUnit: newMedication.intervalUnit || 'hours',
+                doseTime: newMedication.doseTime || null,
+                remindersEnabled: newMedication.remindersEnabled !== false,
                 source: 'supply'
             };
             setFormData(prev => ({
@@ -2043,6 +2047,8 @@ const AnimalFormModalV2 = ({
                 stopDate: newMedication.stopDate || null,
                 intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
                 intervalUnit: newMedication.intervalUnit || 'hours',
+                doseTime: newMedication.doseTime || null,
+                remindersEnabled: newMedication.remindersEnabled !== false,
                 source: 'manual'
             };
             setFormData(prev => ({
@@ -4862,6 +4868,7 @@ const AnimalFormModalV2 = ({
                                                             <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                         </div>
                                                     </div>
+                                                    <MedicationReminderFields value={newMedication} onChange={setNewMedication} />
                                                     <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Medication</button>
                                                 </div>
                                             ) : (
@@ -4943,7 +4950,8 @@ const AnimalFormModalV2 = ({
                                                                     <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Additional notes" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                                 </div>
                                                             </div>
-                                                            <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 mt-2 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Add from Supply</button>
+                                                            <div className="mt-2"><MedicationReminderFields value={newMedication} onChange={setNewMedication} /></div>
+                                                        <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 mt-2 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Add from Supply</button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -5791,6 +5799,12 @@ const AnimalFormModalV2 = ({
                                         <datalist id="care-task-suggestions">
                                             {CARE_TASK_SUGGESTIONS.map(s => <option key={s} value={s} />)}
                                         </datalist>
+
+                                        <ApplyCareTemplateButton
+                                            species={formData.species}
+                                            existingTasks={formData.animalCareTasks}
+                                            onApply={(newTasks) => setFormData(prev => ({ ...prev, animalCareTasks: [...(prev.animalCareTasks || []), ...newTasks] }))}
+                                        />
 
                                         {/* Add New Animal-Specific Care Task */}
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">

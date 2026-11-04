@@ -22,6 +22,7 @@ import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import AuthView from './components/Auth/AuthView';
 import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationBar from './components/Notifications/NotificationBar';
+import PendingDosesBar from './components/Notifications/PendingDosesBar';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -2338,6 +2339,9 @@ const App = () => {
                 setShowNotifications={setShowNotifications}
                 setShowMessages={setShowMessages}
             />
+
+            {/* Medication doses due now: Given / Snooze / Skip (renders nothing when none are pending) */}
+            <PendingDosesBar authToken={authToken} />
 
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />

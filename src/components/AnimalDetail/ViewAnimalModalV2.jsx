@@ -2558,7 +2558,7 @@ useEffect(() => {
                         />
                     )}
                     {activeTab === 'health' && (
-                        <HealthTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
+                        <HealthTabContent animal={animal} API_BASE_URL={API_BASE_URL} isPublic={isPublic} />
                     )}
                     {activeTab === 'care' && (
                         <CareTabContent
