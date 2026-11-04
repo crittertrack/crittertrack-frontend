@@ -322,10 +322,10 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                         <div className="border-t border-blue-200 dark:border-blue-700/60 pt-3 space-y-2">
                             <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Nutrition (optional)</p>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                {['kcalPer100g','kcalPerItem','proteinPct','fatPct','fiberPct','moisturePct','itemWeightG'].map(f => (
-                                    <div key={f}>
-                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">{f}</label>
-                                        <input type="number" value={supplyForm[f]} onChange={e => setSupplyForm(prev => ({ ...prev, [f]: e.target.value }))} className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                {[{ key: 'kcalPer100g', label: 'Kcal per 100g' }, { key: 'kcalPerItem', label: 'Kcal per item' }, { key: 'proteinPct', label: 'Protein %' }, { key: 'fatPct', label: 'Fat %' }, { key: 'fiberPct', label: 'Fiber %' }, { key: 'moisturePct', label: 'Moisture %' }, { key: 'itemWeightG', label: 'Item weight (g)' }].map(({ key, label }) => (
+                                    <div key={key}>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">{label}</label>
+                                        <input type="number" value={supplyForm[key]} onChange={e => setSupplyForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                     </div>
                                 ))}
                             </div>
