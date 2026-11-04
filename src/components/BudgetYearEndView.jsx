@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Download } from 'lucide-react';
 import apiClient from '../utils/apiClient';
+import { downloadBlob } from '../utils/nativeDownload';
 import { formatMoney } from './shared/FinanceOverviewBody';
 
 // Budget "Year-end" view: money in and out for one calendar year, from your Budget transactions
@@ -47,6 +49,24 @@ export default function BudgetYearEndView() {
     const months = d ? MONTHS.map((label, i) => ({ label, ...(d.byMonth?.[i + 1] || { cost: 0, revenue: 0, net: 0 }) })) : [];
     const categories = d ? Object.entries(d.costByCategory || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]) : [];
 
+    const downloadReport = () => {
+        if (!d) return;
+        const money = (n) => Number(n || 0).toFixed(2);
+        const cell = (v) => `"${String(v).replace(/"/g, '""')}"`;
+        const rows = [
+            [`Year-end report ${year}`],
+            [],
+            ['Month', 'Earned', 'Spent', 'Net'],
+            ...months.map(m => [m.label, money(m.revenue), money(m.cost), money(m.net)]),
+            ['Total', money(d.totalRevenue), money(d.totalCost), money(d.net)],
+            [],
+            ['Spent by category', 'Amount'],
+            ...categories.map(([cat, amount]) => [CATEGORY_LABELS[cat] || cat, money(amount)]),
+        ];
+        const csv = rows.map(r => r.map(cell).join(',')).join('\n');
+        downloadBlob(new Blob([csv], { type: 'text/csv' }), `year_end_${year}.csv`);
+    };
+
     return (
         <div className="space-y-4" data-testid="budget-year-end-view">
             <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-3 sm:p-6 space-y-4">
@@ -56,6 +76,7 @@ export default function BudgetYearEndView() {
                         Supplies you used are not counted here, because buying them is already part of Spending.
                     </p>
                     {years && years.length > 0 && (
+                        <div className="flex items-center gap-2">
                         <label className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-dark-text-secondary">
                             Year:
                             <select
@@ -66,6 +87,17 @@ export default function BudgetYearEndView() {
                                 {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
                             </select>
                         </label>
+                        <button
+                            type="button"
+                            onClick={downloadReport}
+                            disabled={!d}
+                            data-testid="year-end-download"
+                            className="flex items-center gap-1 px-3 py-1 bg-gray-600 dark:bg-dark-surface hover:bg-gray-700 dark:hover:bg-dark-surface-hover text-white rounded-lg transition text-sm disabled:opacity-50"
+                        >
+                            <Download className="w-4 h-4" />
+                            Download CSV
+                        </button>
+                        </div>
                     )}
                 </div>
 
