@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import apiClient from '../../utils/apiClient';
 import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, CheckSquare, Sun, Wind, Bug, Activity } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { DetailJsonList, parseJsonField, formatScheduleValue } from './utils';
@@ -41,7 +42,14 @@ export const CareTabContent = ({ animal, enclosureInfo, isPublic = false }) => {
     const dietSupplies = parseJsonField(animal.dietSupplies);
     const supplementSupplies = parseJsonField(animal.supplementSupplies);
 
+    const [nutritionSummary, setNutritionSummary] = useState(null);
     const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements || dietSupplies.length > 0 || supplementSupplies.length > 0;
+    const showNutritionCard = nutritionSummary && (nutritionSummary.counted > 0 || (nutritionSummary.missingNutrition || []).length > 0);
+    useEffect(() => {
+        if (!animal?.id_public && !animal?._id) return;
+        const id = animal.id_public || animal._id;
+        apiClient.get(`/animals/${id}/nutrition-summary?days=7`).then(res => setNutritionSummary(res.data)).catch(() => setNutritionSummary(null));
+    }, [animal?.id_public, animal?._id]);
     const hasLegacyHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
@@ -194,7 +202,12 @@ export const CareTabContent = ({ animal, enclosureInfo, isPublic = false }) => {
                 </InfoCard>
             )}
 
-            {/* Scheduled Tasks */}
+            {showNutritionCard && (
+                <InfoCard title="Nutrition (optional)" icon={<UtensilsCrossed size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                    <p className="text-sm">Per day: {nutritionSummary.perDayKcal} kcal {nutritionSummary.targetKcal ? ` / target ${nutritionSummary.targetKcal} (${nutritionSummary.percentOfTarget}%)` : ''}</p>
+                    {(nutritionSummary.missingNutrition || []).length > 0 && <p className="text-xs text-gray-500">Missing nutrition: {nutritionSummary.missingNutrition.join(', ')}</p>}
+                </InfoCard>
+            )}
             <InfoCard title="Scheduled Tasks" icon={<Activity size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                 <TaskList tasks={animalCareTasks} label="Animal-Specific Tasks" />
                 {animalCareTasks.length === 0 && <p className="text-sm text-gray-400 dark:text-dark-text-muted">No scheduled care tasks.</p>}

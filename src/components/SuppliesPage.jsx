@@ -8,7 +8,7 @@ import InfoButton from './shared/InfoButton';
 const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [supplies, setSupplies] = useState([]);
     const [suppliesLoading, setSuppliesLoading] = useState(true);
-    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
+    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months', kcalPer100g: '', kcalPerItem: '', proteinPct: '', fatPct: '', fiberPct: '', moisturePct: '', itemWeightG: '' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
@@ -106,16 +106,21 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         if (!supplyForm.name.trim()) return;
         setSupplySaving(true);
         try {
+            const { kcalPer100g, kcalPerItem, proteinPct, fatPct, fiberPct, moisturePct, itemWeightG, ...rest } = supplyForm;
+            const nutrition = {};
+            const assign = (k, v) => { if (v !== '' && v != null) nutrition[k] = v; };
+            assign('kcalPer100g', kcalPer100g); assign('kcalPerItem', kcalPerItem); assign('proteinPct', proteinPct); assign('fatPct', fatPct); assign('fiberPct', fiberPct); assign('moisturePct', moisturePct); assign('itemWeightG', itemWeightG);
+            const payload = { ...rest, nutrition: Object.keys(nutrition).length ? nutrition : null };
             if (editingSupplyId) {
-                const res = await apiClient.patch(`/supplies/${editingSupplyId}`, supplyForm);
+                const res = await apiClient.patch(`/supplies/${editingSupplyId}`, payload);
                 // Merge, don't replace \u2014 a queued (offline) patch only echoes back the sent
                 // fields, which lack _id and would otherwise break future edits/deletes on this item.
                 setSupplies(prev => prev.map(s => s._id === editingSupplyId ? { ...s, ...res.data } : s));
             } else {
-                const res = await apiClient.post(`/supplies`, supplyForm);
+                const res = await apiClient.post(`/supplies`, payload);
                 setSupplies(prev => [...prev, res.data]);
             }
-            setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
+            setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months', kcalPer100g: '', kcalPerItem: '', proteinPct: '', fatPct: '', fiberPct: '', moisturePct: '', itemWeightG: '' });
             setSupplyFormVisible(false);
             setEditingSupplyId(null);
         } catch (err) { console.error(err); }
@@ -145,6 +150,13 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
             nextOrderDate: item.nextOrderDate ? new Date(item.nextOrderDate).toISOString().split('T')[0] : '',
             orderFrequency: item.orderFrequency ?? '',
             orderFrequencyUnit: item.orderFrequencyUnit || 'months',
+            kcalPer100g: item.nutrition?.kcalPer100g ?? '',
+            kcalPerItem: item.nutrition?.kcalPerItem ?? '',
+            proteinPct: item.nutrition?.proteinPct ?? '',
+            fatPct: item.nutrition?.fatPct ?? '',
+            fiberPct: item.nutrition?.fiberPct ?? '',
+            moisturePct: item.nutrition?.moisturePct ?? '',
+            itemWeightG: item.nutrition?.itemWeightG ?? '',
         });
         setEditingSupplyId(item._id);
         setSupplyFormVisible(true);
@@ -307,8 +319,18 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 </div>
                             </div>
                         </div>
-                        {supplyForm.category === 'Food' && (
-                            <div className="col-span-2">
+                        <div className="border-t border-blue-200 dark:border-blue-700/60 pt-3 space-y-2">
+                            <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Nutrition (optional)</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                {['kcalPer100g','kcalPerItem','proteinPct','fatPct','fiberPct','moisturePct','itemWeightG'].map(f => (
+                                    <div key={f}>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">{f}</label>
+                                        <input type="number" value={supplyForm[f]} onChange={e => setSupplyForm(prev => ({ ...prev, [f]: e.target.value }))} className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                            {supplyForm.category === 'Food' && (
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
                                     <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-blue-600" />
                                     <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">This is a feeder animal (mice, rats, crickets, etc.)</span>
