@@ -575,6 +575,43 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
         return match ? match.linkedCTUID : null;
     };
 
+    // Find the Contacts record behind a reservation's buyer (no CTUID required). Same sources as
+    // findLinkedBuyerCtuid: the waitlist entry's linked contact while the buyer name still matches,
+    // then an exact name match against the contacts book. Returns the contact or null.
+    const findBuyerContact = (animal, buyer) => {
+        if (!buyer) return null;
+        const norm = (s) => (s || '').trim().toLowerCase();
+        const b = norm(buyer);
+        const entry = animal.reservedWaitlistEntryId
+            ? waitlist.find(e => String(e._id) === String(animal.reservedWaitlistEntryId))
+            : null;
+        if (entry?.contactId) {
+            const entryContactId = typeof entry.contactId === 'object' ? entry.contactId._id : entry.contactId;
+            const entryContact = contacts.find(c => String(c._id) === String(entryContactId))
+                || (typeof entry.contactId === 'object' ? entry.contactId : null);
+            if (entryContact && (b === norm(entry.name) || b === norm(entryContact.personalName) || b === norm(entryContact.breederName))) {
+                return entryContact;
+            }
+        }
+        return contacts.find(c => b === norm(c.personalName) || b === norm(c.breederName)) || null;
+    };
+
+    // Record the sold animal on the buyer's contact as an owned (keeper-role) animal so it shows
+    // under the contact's Owned Animals. Mirrors what the animal form does when an owner contact
+    // is picked. Never undoes the sale on failure. If the contact already has the animal as a
+    // breeder, the role becomes 'both' so the breeder link isn't lost.
+    const assignAnimalToBuyerContact = async (animal, buyer) => {
+        const contact = findBuyerContact(animal, buyer);
+        if (!contact?._id) return;
+        try {
+            const existing = (contact.assignedAnimals || []).find(a => a.animalId_public === animal.id_public);
+            const role = existing && (existing.role === 'breeder' || existing.role === 'both') ? 'both' : 'keeper';
+            await apiClient.post(`/contacts/${contact._id}/assign-animal`, { animalId_public: animal.id_public, role });
+        } catch (err) {
+            console.error('[assign-animal] Failed to link sold animal to buyer contact:', err);
+        }
+    };
+
     // Resolve a contact's linkedCTUID to a CritterTrack account and, when the user confirms,
     // send a real ownership-transfer request for the rehomed animal (the buyer accepts it
     // from their own account). Failures never undo the rehome itself.
@@ -636,6 +673,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed', archived: true } }));
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage?.('Success', `${animal.name || animal.id_public} marked as Rehomed • sale logged to Budget`);
+            await assignAnimalToBuyerContact(animal, buyer);
             if (linkedCtuid) await maybeSendTrueTransfer(animal, buyer, linkedCtuid, price);
         } catch (err) {
             console.error('[rehomeAnimal]', err);
@@ -771,6 +809,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                             buyerContact: fullAnimal.reservedBuyerContact || null,
                             ...(linkedCtuid ? { ownerId_public: linkedCtuid } : { manualownerName: fullAnimal.reservedBuyerName }) }
                         : a)));
+                    await assignAnimalToBuyerContact(fullAnimal, fullAnimal.reservedBuyerName);
                     rehomedCount++;
                 } catch (rehomeErr) {
                     console.error(`[finalizeWaitlist] Rehome failed for ${animal.id_public}:`, rehomeErr);

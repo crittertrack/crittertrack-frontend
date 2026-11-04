@@ -4,7 +4,7 @@ import apiClient from '../../utils/apiClient';
 import { Save, X, User, Loader2, Search } from 'lucide-react';
 import { UserSearchModal } from '../Modals/SearchModals';
 import InfoButton from '../shared/InfoButton';
-import { EXTRA_CATEGORIES, toggleCategory } from './contactCategories';
+import CategoryPicker from './CategoryPicker';
 
 const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
     const { contactId } = useParams();
@@ -223,22 +223,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                 {/* Contact Type */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Categories</label>
-                    <div className="flex flex-wrap gap-x-6 gap-y-2">
-                        <div className="flex items-center">
-                            <input id="isKeeper" name="isKeeper" type="checkbox" checked={formData.isKeeper} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" />
-                            <label htmlFor="isKeeper" className="ml-2 block text-sm text-gray-900">Owner</label>
-                        </div>
-                        <div className="flex items-center">
-                            <input id="isBreeder" name="isBreeder" type="checkbox" checked={formData.isBreeder} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" />
-                            <label htmlFor="isBreeder" className="ml-2 block text-sm text-gray-900">Breeder</label>
-                        </div>
-                        {EXTRA_CATEGORIES.map(cat => (
-                            <div key={cat.key} className="flex items-center">
-                                <input id={`cat-${cat.key}`} type="checkbox" checked={formData.categories.includes(cat.key)} onChange={() => setFormData(prev => ({ ...prev, categories: toggleCategory(prev.categories, cat.key) }))} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" />
-                                <label htmlFor={`cat-${cat.key}`} className="ml-2 block text-sm text-gray-900">{cat.label}</label>
-                            </div>
-                        ))}
-                    </div>
+                    <CategoryPicker value={formData} onChange={setFormData} />
                     {formData.isBreeder && (
                         <div className="flex gap-6 mt-3">
                             <div className="flex items-center">

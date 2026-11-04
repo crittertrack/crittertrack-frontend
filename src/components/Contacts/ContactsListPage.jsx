@@ -3,14 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
 import { Users, Plus, Search, UserCheck, Loader2, Cat, Heart, MapPin } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
-import { EXTRA_CATEGORIES, CATEGORY_BADGE_CLASSES, getExtraCategoryLabel } from './contactCategories';
+import { ALL_CATEGORIES, contactHasCategory, getContactCategoryKeys, getCategoryLabel, categoryBadgeClass } from './contactCategories';
 
 const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const [contacts, setContacts] = useState([]);
     const [filteredContacts, setFilteredContacts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filterType, setFilterType] = useState('all'); // 'all', 'keeper' (Owner), 'breeder'
-    const [categoryFilter, setCategoryFilter] = useState(''); // '' or an extra category key
+    const [categoryFilter, setCategoryFilter] = useState(''); // '' = all, otherwise any category key ('owner', 'breeder', 'vet', ...)
     const [breederStatusFilter, setBreederStatusFilter] = useState('all'); // 'all', 'active', 'retired'
     const [searchTerm, setSearchTerm] = useState('');
     const [countryFilter, setCountryFilter] = useState('');
@@ -24,7 +23,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
 
     useEffect(() => {
         applyFilters();
-    }, [contacts, filterType, categoryFilter, breederStatusFilter, searchTerm, countryFilter]);
+    }, [contacts, categoryFilter, breederStatusFilter, searchTerm, countryFilter]);
 
     const fetchContacts = async () => {
         try {
@@ -41,14 +40,8 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
 
     const applyFilters = () => {
         let filtered = [...contacts];
-        if (filterType === 'keeper') {
-            filtered = filtered.filter(c => c.isKeeper);
-        } else if (filterType === 'breeder') {
-            filtered = filtered.filter(c => c.isBreeder);
-        }
-
         if (categoryFilter) {
-            filtered = filtered.filter(c => (c.categories || []).includes(categoryFilter));
+            filtered = filtered.filter(c => contactHasCategory(c, categoryFilter));
         }
 
         if (breederStatusFilter !== 'all') {
@@ -129,19 +122,37 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                 </header>
 
                 <div className="p-4 border-b border-gray-200 dark:border-dark-text-muted">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex-1 relative">
+                    <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3">
+                        <div className="relative md:w-56 md:flex-none">
                             <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                             <input
                                 type="text"
-                                placeholder="Search contacts by name..."
+                                placeholder="Search by name..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted"
                             />
                         </div>
-                        <div className="flex-1 md:flex-grow-0 md:w-48">
+                        <div className="md:w-52 md:flex-none">
                             <select
+                                aria-label="Category"
+                                value={categoryFilter}
+                                onChange={(e) => {
+                                    setCategoryFilter(e.target.value);
+                                    // Breeder status only applies to Breeders; clear it so a hidden filter can't linger.
+                                    if (e.target.value !== 'breeder') setBreederStatusFilter('all');
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
+                            >
+                                <option value="">All Categories</option>
+                                {ALL_CATEGORIES.map(cat => (
+                                    <option key={cat.key} value={cat.key}>{cat.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="md:w-52 md:flex-none">
+                            <select
+                                aria-label="Country"
                                 value={countryFilter}
                                 onChange={(e) => setCountryFilter(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
@@ -154,49 +165,20 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                 ))}
                             </select>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                            <button
-                                onClick={() => setFilterType('all')}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filterType === 'all' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-text-muted/30'}`}
-                            >
-                                All
-                            </button>
-                            <button
-                                onClick={() => setFilterType('keeper')}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filterType === 'keeper' ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-text-muted/30'}`}
-                            >
-                                Owners
-                            </button>
-                            <button
-                                onClick={() => setFilterType('breeder')}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filterType === 'breeder' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-text-muted/30'}`}
-                            >
-                                Breeders
-                            </button>
-                        </div>
-                        <div className="flex-1 md:flex-grow-0 md:w-44">
-                            <select
-                                value={categoryFilter}
-                                onChange={(e) => setCategoryFilter(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
-                            >
-                                <option value="">All Categories</option>
-                                {EXTRA_CATEGORIES.map(cat => (
-                                    <option key={cat.key} value={cat.key}>{cat.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex-1 md:flex-grow-0 md:w-40">
-                            <select
-                                value={breederStatusFilter}
-                                onChange={(e) => setBreederStatusFilter(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
-                            >
-                                <option value="all">All Breeder Status</option>
-                                <option value="active">Active Breeders</option>
-                                <option value="retired">Retired Breeders</option>
-                            </select>
-                        </div>
+                        {categoryFilter === 'breeder' && (
+                            <div className="md:w-56 md:flex-none">
+                                <select
+                                    aria-label="Breeder status"
+                                    value={breederStatusFilter}
+                                    onChange={(e) => setBreederStatusFilter(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
+                                >
+                                    <option value="all">All Breeder Status</option>
+                                    <option value="active">Active Breeders</option>
+                                    <option value="retired">Retired Breeders</option>
+                                </select>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -236,14 +218,10 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-2 flex-shrink-0">
-                                                    {contact.isKeeper && <span className={`text-xs px-2 py-0.5 rounded-full ${CATEGORY_BADGE_CLASSES.owner}`}>Owner</span>}
-                                                    {contact.isBreeder && (
-                                                        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
-                                                            Breeder{(contact.breederStatus || 'active') === 'retired' ? ' (Retired)' : ''}
+                                                    {getContactCategoryKeys(contact).map(key => (
+                                                        <span key={key} className={`text-xs px-2 py-0.5 rounded-full ${categoryBadgeClass(key)}`}>
+                                                            {getCategoryLabel(key)}{key === 'breeder' && (contact.breederStatus || 'active') === 'retired' ? ' (Retired)' : ''}
                                                         </span>
-                                                    )}
-                                                    {(contact.categories || []).map(key => (
-                                                        <span key={key} className={`text-xs px-2 py-0.5 rounded-full ${CATEGORY_BADGE_CLASSES.extra}`}>{getExtraCategoryLabel(key)}</span>
                                                     ))}
                                                 </div>
                                             </div>

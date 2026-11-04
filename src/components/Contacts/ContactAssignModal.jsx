@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
 import { Loader2, Search } from 'lucide-react';
+import { ALL_CATEGORIES, contactHasCategory } from './contactCategories';
 
 // Shared "assign a contact" picker, used by the animal modal (breeder/owner/seller/buyer)
 // and by the Reservations waitlist form. It offers three ways to resolve a person:
@@ -36,7 +37,7 @@ const ContactAssignModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     const [contacts, setContacts] = useState([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
     const [manualName, setManualName] = useState('');
-    const [contactTypeFilter, setContactTypeFilter] = useState('all'); // 'all', 'keeper', 'breeder'
+    const [categoryFilter, setCategoryFilter] = useState(''); // '' = all, otherwise any category key ('owner', 'breeder', 'vet', ...)
     const [showRetiredBreeders, setShowRetiredBreeders] = useState(false);
     const [contactSearch, setContactSearch] = useState('');
 
@@ -62,9 +63,11 @@ const ContactAssignModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     };
 
     const visibleContacts = contacts.filter(contact => {
-        if (contactTypeFilter === 'keeper' && !contact.isKeeper) return false;
-        if (contactTypeFilter === 'breeder' && !contact.isBreeder) return false;
-        if (!showRetiredBreeders && contact.isBreeder && (contact.breederStatus || 'active') === 'retired') return false;
+        if (categoryFilter && !contactHasCategory(contact, categoryFilter)) return false;
+        // Retired breeders are hidden by default, but only where the "Show retired breeders" toggle is
+        // offered (All / Breeder); under other categories (Vet, Judge, ...) they stay visible.
+        const retiredToggleApplies = categoryFilter === '' || categoryFilter === 'breeder';
+        if (retiredToggleApplies && !showRetiredBreeders && contact.isBreeder && (contact.breederStatus || 'active') === 'retired') return false;
         const term = contactSearch.trim().toLowerCase();
         if (term) {
             const haystack = [contact.personalName, contact.breederName, contact.linkedCTUID].filter(Boolean).join(' ').toLowerCase();
@@ -107,15 +110,23 @@ const ContactAssignModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     {activeMode === 'contact' && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between flex-wrap gap-2">
-                                <div className="flex gap-1">
-                                    <button type="button" onClick={() => setContactTypeFilter('all')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'all' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>All</button>
-                                    <button type="button" onClick={() => setContactTypeFilter('keeper')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'keeper' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Owners</button>
-                                    <button type="button" onClick={() => setContactTypeFilter('breeder')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'breeder' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Breeders</button>
-                                </div>
-                                <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-text-secondary cursor-pointer">
-                                    <input type="checkbox" checked={showRetiredBreeders} onChange={e => setShowRetiredBreeders(e.target.checked)} className="h-3.5 w-3.5" />
-                                    Show retired breeders
-                                </label>
+                                <select
+                                    aria-label="Category"
+                                    value={categoryFilter}
+                                    onChange={e => setCategoryFilter(e.target.value)}
+                                    className="p-1.5 text-sm border rounded-md bg-white dark:bg-dark-card-bg"
+                                >
+                                    <option value="">All Categories</option>
+                                    {ALL_CATEGORIES.map(cat => (
+                                        <option key={cat.key} value={cat.key}>{cat.label}</option>
+                                    ))}
+                                </select>
+                                {(categoryFilter === '' || categoryFilter === 'breeder') && (
+                                    <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-text-secondary cursor-pointer">
+                                        <input type="checkbox" checked={showRetiredBreeders} onChange={e => setShowRetiredBreeders(e.target.checked)} className="h-3.5 w-3.5" />
+                                        Show retired breeders
+                                    </label>
+                                )}
                             </div>
                             <input type="text" value={contactSearch} onChange={e => setContactSearch(e.target.value)} placeholder="Filter contacts by name or CTU ID" className="w-full p-2 border rounded-md" />
                             <div className="space-y-1">
