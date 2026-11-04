@@ -8,10 +8,14 @@ import { contactHasCategory, getContactCategoryKeys, withCategory } from './cont
 
 // react-router-dom (v7) doesn't resolve under this jest setup, so like the other suites it is
 // mocked virtually with just the pieces these pages use.
+const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
     __esModule: true,
     Link: ({ to, children, className }) => <a href={to} className={className}>{children}</a>,
-    useNavigate: () => jest.fn(),
+    NavLink: ({ to, children, className }) => <a href={to} className={typeof className === 'function' ? className({ isActive: false }) : className}>{children}</a>,
+    Outlet: () => null,
+    useParams: () => ({ contactId: 'c9' }),
+    useNavigate: () => mockNavigate,
 }), { virtual: true });
 
 jest.mock('../../utils/apiClient', () => ({
@@ -126,6 +130,50 @@ describe('ContactsListPage category filter', () => {
         expect(within(row).getByText('Owner')).toBeTruthy();
         expect(within(row).getByText('Vet')).toBeTruthy();
         expect(within(row).getByText('Judge')).toBeTruthy();
+    });
+});
+
+describe('ContactDetailPage delete', () => {
+    const detail = { _id: 'c9', personalName: 'Duplicate Dan', isKeeper: true, isBreeder: false, categories: [] };
+
+    beforeEach(() => {
+        mockNavigate.mockClear();
+        apiClient.delete = jest.fn().mockResolvedValue({ data: { message: 'Contact deleted successfully' } });
+        apiClient.get.mockImplementation((url) => Promise.resolve({ data: url === '/contacts/c9' ? detail : [] }));
+    });
+
+    const open = async (showModalMessage = jest.fn()) => {
+        const ContactDetailPage = require('./ContactDetailPage').default;
+        render(<ContactDetailPage showModalMessage={showModalMessage} />);
+        await screen.findByRole('button', { name: /delete/i });
+        return showModalMessage;
+    };
+
+    it('deletes the contact after confirmation and returns to the list', async () => {
+        window.confirm = jest.fn(() => true);
+        const showModalMessage = await open();
+        fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+        await waitFor(() => expect(apiClient.delete).toHaveBeenCalledWith('/contacts/c9'));
+        expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('Duplicate Dan'));
+        await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/contacts'));
+        expect(showModalMessage).toHaveBeenCalledWith('Success', expect.stringContaining('Duplicate Dan'));
+    });
+
+    it('does nothing when the confirmation is declined', async () => {
+        window.confirm = jest.fn(() => false);
+        await open();
+        fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+        expect(apiClient.delete).not.toHaveBeenCalled();
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('shows an error and stays on the page when the delete fails', async () => {
+        window.confirm = jest.fn(() => true);
+        apiClient.delete.mockRejectedValue({ response: { data: { message: 'boom' } } });
+        const showModalMessage = await open();
+        fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+        await waitFor(() => expect(showModalMessage).toHaveBeenCalledWith('Error', expect.stringContaining('boom')));
+        expect(mockNavigate).not.toHaveBeenCalledWith('/contacts');
     });
 });
 

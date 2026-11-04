@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
-import { Edit, ArrowLeft } from 'lucide-react';
+import { Edit, ArrowLeft, Trash2 } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
+import { getContactDisplayName } from './ContactAssignModal';
 
-const ContactDetail = ({ API_BASE_URL, authToken }) => {
+const ContactDetail = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const { contactId } = useParams();
     const [contactData, setContactData] = useState({
         details: null,
@@ -13,7 +14,23 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [deleting, setDeleting] = useState(false);
     const navigate = useNavigate();
+
+    const handleDelete = async () => {
+        const name = getContactDisplayName(contactData.details);
+        if (!window.confirm(`Delete ${name}? This removes the contact record only. Your animals are not deleted, and waitlist entries linked to this contact keep their name but lose the link. This cannot be undone.`)) return;
+        setDeleting(true);
+        try {
+            await apiClient.delete(`/contacts/${contactId}`);
+            showModalMessage?.('Success', `${name} was deleted.`);
+            navigate('/contacts');
+        } catch (err) {
+            console.error('Error deleting contact:', err);
+            showModalMessage?.('Error', `Failed to delete contact: ${err.response?.data?.message || err.message}`);
+            setDeleting(false);
+        }
+    };
 
     useEffect(() => {
         const fetchContactData = async () => {
@@ -81,13 +98,23 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
                     </h1>
                     <p className="text-gray-500">Contact Profile</p>
                 </div>
-                <button
-                    onClick={() => navigate(`/contacts/${contactId}/edit`)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
-                >
-                    <Edit size={16} />
-                    Edit
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => navigate(`/contacts/${contactId}/edit`)}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                    >
+                        <Edit size={16} />
+                        Edit
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg transition disabled:opacity-50"
+                    >
+                        <Trash2 size={16} />
+                        {deleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                </div>
             </header>
 
             <nav className="flex space-x-2 border-b-2 border-gray-200 mb-4">

@@ -434,6 +434,7 @@ export function AppRoutes({
         <ContactDetailPage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
+          showModalMessage={showModalMessage}
         />
       }>
         <Route index element={<Navigate to="overview" replace />} />
