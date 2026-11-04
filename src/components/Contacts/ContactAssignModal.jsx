@@ -109,7 +109,7 @@ const ContactAssignModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                             <div className="flex items-center justify-between flex-wrap gap-2">
                                 <div className="flex gap-1">
                                     <button type="button" onClick={() => setContactTypeFilter('all')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'all' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>All</button>
-                                    <button type="button" onClick={() => setContactTypeFilter('keeper')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'keeper' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Keepers</button>
+                                    <button type="button" onClick={() => setContactTypeFilter('keeper')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'keeper' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Owners</button>
                                     <button type="button" onClick={() => setContactTypeFilter('breeder')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'breeder' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Breeders</button>
                                 </div>
                                 <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-text-secondary cursor-pointer">

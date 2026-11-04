@@ -744,6 +744,9 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                 const saleDate = fullAnimal.reservedDate
                     ? new Date(fullAnimal.reservedDate).toISOString().slice(0, 10)
                     : todayStr();
+                // Same owner rule as handleRehome: prefer the linked contact's CTUID,
+                // otherwise record the buyer name as the manual owner.
+                const linkedCtuid = findLinkedBuyerCtuid(fullAnimal, fullAnimal.reservedBuyerName);
                 try {
                     await apiClient.put(`/animals/${animal.id_public}`, {
                         saleDate,
@@ -751,6 +754,7 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                         saleRecordCurrency: fullAnimal.reservedPriceCurrency || 'USD',
                         buyerName: fullAnimal.reservedBuyerName,
                         buyerContact: fullAnimal.reservedBuyerContact || null,
+                        ...(linkedCtuid ? { ownerId_public: linkedCtuid } : { manualownerName: fullAnimal.reservedBuyerName }),
                         reservedBuyerName: null, reservedBuyerContact: null, reservedWaitlistEntryId: null,
                         reservedPrice: null, reservedDeposit: null, reservedDate: null,
                         reservedDepositStatus: null, reservedPaymentStatus: null,
@@ -764,7 +768,8 @@ const ReservationsPage = ({ authToken, API_BASE_URL, showModalMessage, onViewAni
                             saleDate, salePrice: fullAnimal.reservedPrice,
                             saleRecordCurrency: fullAnimal.reservedPriceCurrency || 'USD',
                             buyerName: fullAnimal.reservedBuyerName,
-                            buyerContact: fullAnimal.reservedBuyerContact || null }
+                            buyerContact: fullAnimal.reservedBuyerContact || null,
+                            ...(linkedCtuid ? { ownerId_public: linkedCtuid } : { manualownerName: fullAnimal.reservedBuyerName }) }
                         : a)));
                     rehomedCount++;
                 } catch (rehomeErr) {

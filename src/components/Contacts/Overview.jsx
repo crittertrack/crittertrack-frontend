@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { User, Users, Hash, MapPin, FileText } from 'lucide-react';
+import { getExtraCategoryLabel } from './contactCategories';
 
 const DetailField = ({ icon, label, value }) => {
     if (!value) return null;
@@ -68,11 +69,11 @@ const Overview = () => {
                     <div className="flex items-start gap-3">
                         <div className="text-gray-500 mt-1"><Users size={18} /></div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500">Contact Type</p>
-                            <div className="flex gap-2 mt-1">
+                            <p className="text-sm font-medium text-gray-500">Categories</p>
+                            <div className="flex flex-wrap gap-2 mt-1">
                                 {contact.isKeeper && (
                                     <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                                        Keeper
+                                        Owner
                                     </span>
                                 )}
                                 {contact.isBreeder && (
@@ -80,6 +81,11 @@ const Overview = () => {
                                         Breeder
                                     </span>
                                 )}
+                                {(contact.categories || []).map(key => (
+                                    <span key={key} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                                        {getExtraCategoryLabel(key)}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </div>

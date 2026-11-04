@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../utils/apiClient';
 import { Users, Plus, Search, UserCheck, Loader2, Cat, Heart, MapPin } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
+import { EXTRA_CATEGORIES, CATEGORY_BADGE_CLASSES, getExtraCategoryLabel } from './contactCategories';
 
 const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const [contacts, setContacts] = useState([]);
     const [filteredContacts, setFilteredContacts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filterType, setFilterType] = useState('all'); // 'all', 'keeper', 'breeder'
+    const [filterType, setFilterType] = useState('all'); // 'all', 'keeper' (Owner), 'breeder'
+    const [categoryFilter, setCategoryFilter] = useState(''); // '' or an extra category key
     const [breederStatusFilter, setBreederStatusFilter] = useState('all'); // 'all', 'active', 'retired'
     const [searchTerm, setSearchTerm] = useState('');
     const [countryFilter, setCountryFilter] = useState('');
@@ -22,7 +24,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
 
     useEffect(() => {
         applyFilters();
-    }, [contacts, filterType, breederStatusFilter, searchTerm, countryFilter]);
+    }, [contacts, filterType, categoryFilter, breederStatusFilter, searchTerm, countryFilter]);
 
     const fetchContacts = async () => {
         try {
@@ -43,6 +45,10 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
             filtered = filtered.filter(c => c.isKeeper);
         } else if (filterType === 'breeder') {
             filtered = filtered.filter(c => c.isBreeder);
+        }
+
+        if (categoryFilter) {
+            filtered = filtered.filter(c => (c.categories || []).includes(categoryFilter));
         }
 
         if (breederStatusFilter !== 'all') {
@@ -108,11 +114,11 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                             <Users size={28} className="text-primary" />
                             Contacts
                             <InfoButton title="Contacts" lessonId="contacts-overview">
-                                <p>Keep records of keepers and breeders you deal with • separate from your own animal records.</p>
-                                <p>Mark a contact as a Keeper or Breeder, and view the animals you've bought from or bred with them.</p>
+                                <p>Keep records of the people and organisations you deal with • separate from your own animal records.</p>
+                                <p>Give a contact one or more categories (Owner, Breeder, Vet, Judge and more), and view the animals you've bought from or bred with them.</p>
                             </InfoButton>
                         </h1>
-                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">Manage keepers and breeders</p>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">Manage owners, breeders and other contacts</p>
                     </div>
                     <button
                         onClick={() => navigate('/contacts/new')}
@@ -159,7 +165,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                 onClick={() => setFilterType('keeper')}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filterType === 'keeper' ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-text-muted/30'}`}
                             >
-                                Keepers
+                                Owners
                             </button>
                             <button
                                 onClick={() => setFilterType('breeder')}
@@ -167,6 +173,18 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                             >
                                 Breeders
                             </button>
+                        </div>
+                        <div className="flex-1 md:flex-grow-0 md:w-44">
+                            <select
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
+                            >
+                                <option value="">All Categories</option>
+                                {EXTRA_CATEGORIES.map(cat => (
+                                    <option key={cat.key} value={cat.key}>{cat.label}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="flex-1 md:flex-grow-0 md:w-40">
                             <select
@@ -218,12 +236,15 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-2 flex-shrink-0">
-                                                    {contact.isKeeper && <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">Keeper</span>}
+                                                    {contact.isKeeper && <span className={`text-xs px-2 py-0.5 rounded-full ${CATEGORY_BADGE_CLASSES.owner}`}>Owner</span>}
                                                     {contact.isBreeder && (
                                                         <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
                                                             Breeder{(contact.breederStatus || 'active') === 'retired' ? ' (Retired)' : ''}
                                                         </span>
                                                     )}
+                                                    {(contact.categories || []).map(key => (
+                                                        <span key={key} className={`text-xs px-2 py-0.5 rounded-full ${CATEGORY_BADGE_CLASSES.extra}`}>{getExtraCategoryLabel(key)}</span>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </Link>

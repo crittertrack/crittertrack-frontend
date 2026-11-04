@@ -4,6 +4,7 @@ import apiClient from '../../utils/apiClient';
 import { Save, X, UserPlus, Loader2, User, Search } from 'lucide-react';
 import { UserSearchModal } from '../Modals/SearchModals';
 import InfoButton from '../shared/InfoButton';
+import { EXTRA_CATEGORIES, toggleCategory } from './contactCategories';
 
 
 const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
@@ -16,6 +17,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
         isKeeper: false,
         isBreeder: false,
         breederStatus: 'active',
+        categories: [],
         notes: '',
         linkedCTUID: '',
         address: {
@@ -96,6 +98,10 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
             showModalMessage('Validation Error', 'Please enter at least a personal name or a breeder name.');
             return;
         }
+        if (!formData.isKeeper && !formData.isBreeder && formData.categories.length === 0) {
+            showModalMessage('Validation Error', 'Please select at least one category.');
+            return;
+        }
 
         setIsSaving(true);
         try {
@@ -118,10 +124,10 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     <UserPlus size={28} className="text-primary" />
                     Add New Contact
                     <InfoButton title="Add New Contact" lessonId="contacts-add">
-                        <p>Create a record for a keeper or breeder you deal with, so you can track animals bought from or bred with them.</p>
+                        <p>Create a record for an owner, breeder, vet, judge or other contact, so you can track animals bought from or bred with them.</p>
                     </InfoButton>
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">Create a new record for a keeper or breeder.</p>
+                <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">Create a new contact record.</p>
             </header>
 
             <form onSubmit={handleSubmit} className="bg-white dark:bg-dark-card-bg rounded-lg shadow p-6 space-y-6">
@@ -285,16 +291,22 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
 
                 {/* Contact Type */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Contact Type</label>
-                    <div className="flex gap-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Categories</label>
+                    <div className="flex flex-wrap gap-x-6 gap-y-2">
                         <div className="flex items-center">
                             <input id="isKeeper" name="isKeeper" type="checkbox" checked={formData.isKeeper} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-dark-text-muted rounded" />
-                            <label htmlFor="isKeeper" className="ml-2 block text-sm text-gray-900 dark:text-dark-text">Keeper</label>
+                            <label htmlFor="isKeeper" className="ml-2 block text-sm text-gray-900 dark:text-dark-text">Owner</label>
                         </div>
                         <div className="flex items-center">
                             <input id="isBreeder" name="isBreeder" type="checkbox" checked={formData.isBreeder} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-dark-text-muted rounded" />
                             <label htmlFor="isBreeder" className="ml-2 block text-sm text-gray-900 dark:text-dark-text">Breeder</label>
                         </div>
+                        {EXTRA_CATEGORIES.map(cat => (
+                            <div key={cat.key} className="flex items-center">
+                                <input id={`cat-${cat.key}`} type="checkbox" checked={formData.categories.includes(cat.key)} onChange={() => setFormData(prev => ({ ...prev, categories: toggleCategory(prev.categories, cat.key) }))} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-dark-text-muted rounded" />
+                                <label htmlFor={`cat-${cat.key}`} className="ml-2 block text-sm text-gray-900 dark:text-dark-text">{cat.label}</label>
+                            </div>
+                        ))}
                     </div>
                     {formData.isBreeder && (
                         <div className="flex gap-6 mt-3">
