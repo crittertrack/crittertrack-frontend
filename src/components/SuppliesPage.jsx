@@ -331,12 +331,13 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             </div>
                         </div>
                             {supplyForm.category === 'Food' && (
-                                <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-blue-600" />
-                                    <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">This is a feeder animal (mice, rats, crickets, etc.)</span>
-                                </label>
-                            </div>
-                        )}
+                                <div className="col-span-2">
+                                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-blue-600" />
+                                        <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">This is a feeder animal (mice, rats, crickets, etc.)</span>
+                                    </label>
+                                </div>
+                            )}
                         {supplyForm.category === 'Food' && supplyForm.isFeederAnimal && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/60 rounded-lg p-3">
                                 <div>
