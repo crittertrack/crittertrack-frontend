@@ -3,7 +3,7 @@ import { Mars, Venus, VenusAndMars, Eye, EyeOff, Heart, HeartOff, Loader2, Users
 import { formatAnimalDisplayName } from '../../../utils/animalDisplayName';
 import AddOffspringModal from './AddOffspringModal';
 import apiClient from '../../../utils/apiClient';
-import { getLitterAppearanceFields } from '../../../utils/litterSpeciesPresentation';
+import { varietyOf } from './helpers';
 
 const OffspringTab = ({ litter, offspring, loading, onView, onOffspringChanged, onUnlink, animalBreedingLines = {}, breedingLineDefs = [], speciesOptions = [] }) => {
     const [search, setSearch] = useState('');
@@ -42,10 +42,6 @@ const OffspringTab = ({ litter, offspring, loading, onView, onOffspringChanged, 
         return true;
     });
     const total = offspring.length;
-    const appearanceFields = getLitterAppearanceFields(
-        litter?.species || litter?.sire?.species || litter?.dam?.species || '',
-        speciesOptions
-    );
     const male = offspring.filter(a => a.gender === 'Male').length;
     const female = offspring.filter(a => a.gender === 'Female').length;
     const intersex = offspring.filter(a => a.gender === 'Intersex').length;
@@ -93,10 +89,7 @@ const OffspringTab = ({ litter, offspring, loading, onView, onOffspringChanged, 
                                     <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-dark-surface" />
                                 )}
                                 <div className="text-xs space-y-1 min-w-0">
-                                    <div className="truncate">{a.variety || appearanceFields
-                                        .filter(({ key }) => typeof a[key] === 'string' && a[key].trim())
-                                        .map(({ key, label }) => `${label}: ${a[key].trim()}`)
-                                        .join(' · ') || '—'}</div>
+                                    <div className="truncate">{a.variety || varietyOf(a) || '—'}</div>
                                     <div className="font-mono truncate">{a.geneticCode || '—'}</div>
                                     <div>{a.status || '—'}</div>
                                     <div className="text-gray-500">{a.ownerId_public ? (a.ownerInfo?.breederName || a.ownerInfo?.personalName || a.manualownerName || a.ownerId_public) : (a.manualownerName || creatorNames[a.creatorId_public] || a.creatorId_public || a.owner || a.ownerName || '')}</div>
