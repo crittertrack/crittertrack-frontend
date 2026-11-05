@@ -29,8 +29,8 @@ export const SPECIES_CATEGORY_MAP = {
     // Invertebrate - casing aliases seen in live data (DB entries don't exactly match the catalogued names)
     'Plum isopod': 'Invertebrate', 'Roly-Poly isopod': 'Invertebrate', 'Pill millipede': 'Invertebrate',
     // Invertebrate - custom species added by users (baboon spider/tarantula common names)
-    'Bronze baboon': 'Invertebrate', 'kigoma baboon': 'Invertebrate', 'Rear-Horned Baboon': 'Invertebrate',
-    'pumpkin patch': 'Invertebrate',
+    'Bronze Baboon': 'Invertebrate', 'Kigoma Baboon': 'Invertebrate', 'Rear-Horned Baboon': 'Invertebrate',
+    'Pumpkin Patch': 'Invertebrate',
     // Mammal
     'African Pygmy Dormouse': 'Mammal', 'African Pygmy Mouse': 'Mammal', 'Campbells Dwarf Hamster': 'Mammal',
     'Cat': 'Mammal', 'Chinchilla': 'Mammal', 'Chinese Dwarf Hamster': 'Mammal', 'Deer Mouse': 'Mammal',

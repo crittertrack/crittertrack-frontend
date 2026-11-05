@@ -6,4 +6,4 @@ export const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked
 // it only exists so breeders can tell a deliberate cull from a natural death.
 export const DEAD_STATUSES = ['Deceased', 'Culled'];
 export const isDeadStatus = (status) => DEAD_STATUSES.includes(status);
-export const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
+export const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig', 'Bronze Baboon', 'Kigoma Baboon', 'Rear-Horned Baboon', 'Pumpkin Patch'];

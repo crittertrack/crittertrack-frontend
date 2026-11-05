@@ -1430,7 +1430,11 @@ const App = () => {
                     { name: 'Campbells Dwarf Hamster', category: 'Mammal', isDefault: true },
                     { name: 'Chinese Dwarf Hamster', category: 'Mammal', isDefault: true },
                     { name: 'Syrian Hamster', category: 'Mammal', isDefault: true },
-                    { name: 'Guinea Pig', category: 'Mammal', isDefault: true }
+                    { name: 'Guinea Pig', category: 'Mammal', isDefault: true },
+                    { name: 'Bronze Baboon', category: 'Invertebrate', isDefault: true },
+                    { name: 'Kigoma Baboon', category: 'Invertebrate', isDefault: true },
+                    { name: 'Rear-Horned Baboon', category: 'Invertebrate', isDefault: true },
+                    { name: 'Pumpkin Patch', category: 'Invertebrate', isDefault: true }
                 ]);
             }
         };
