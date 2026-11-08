@@ -10,7 +10,7 @@ import {
     Star, User, Venus, VenusAndMars, X, Settings
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { formatDate } from '../../utils/dateFormatter';
+import { formatDate, formatAnimalAge } from '../../utils/dateFormatter';
 import { userShareUrl } from '../../utils/publicUrl';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
 import { AnimalNameWithFlag, formatAnimalDisplayName } from '../../utils/animalDisplayName';
@@ -1215,10 +1215,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             ? 'Negotiable'
                             : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}`)
                         : null;
-                    const ageStr = animal.birthDate ? (() => {
-                        const months = Math.floor((Date.now() - new Date(animal.birthDate)) / (1000 * 60 * 60 * 24 * 30.44));
-                        return months < 24 ? `${months}mo` : `${Math.floor(months / 12)}yr`;
-                    })() : null;
+                    const age = animal.birthDate ? formatAnimalAge(animal.birthDate) : null;
+                    const ageStr = age ? age.label : null;
                     return (
                         <div onClick={() => onViewAnimal(animal)}
                             className="bg-white dark:bg-dark-card-bg rounded-xl border-2 border-gray-200 dark:border-dark-text hover:border-primary hover:shadow-md transition cursor-pointer overflow-hidden flex flex-col"
