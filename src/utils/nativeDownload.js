@@ -1,6 +1,8 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+
+const MediaSave = registerPlugin('MediaSave');
 
 const blobToBase64 = (blob) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -11,9 +13,9 @@ const blobToBase64 = (blob) => new Promise((resolve, reject) => {
 
 // Clicking an <a download> link with a blob: URL is silently a no-op in the Android
 // WebView used by Capacitor (no download manager is attached to it), so exports/backups/
-// image downloads never actually save anything there. On native, write the file to the
-// app's cache dir instead and hand it to the OS share sheet (lets the user save it to
-// Downloads, Drive, etc). Web keeps the exact original anchor-click download behavior.
+// image downloads never actually save anything there. On native Android, write the file
+// to cache and then use the MediaSave plugin to copy it into public Downloads via MediaStore.
+// Web keeps the exact original anchor-click download behavior. iOS uses the OS share sheet.
 const BRIDGE_CHUNK_SIZE = 8_000_000; // base64 chars per bridge call (multiple of 4)
 
 export const downloadBlob = async (blob, filename) => {
@@ -35,27 +37,45 @@ export const downloadBlob = async (blob, filename) => {
     // large certificates/PDFs produce multi-MB base64 strings that OOM-crash the WebView
     // during that serialization. Writing in bounded chunks keeps each bridge call small.
     if (base64Data.length <= BRIDGE_CHUNK_SIZE) {
-        const { uri } = await Filesystem.writeFile({
+        await Filesystem.writeFile({
             path: filename,
             data: base64Data,
             directory: Directory.Cache,
         });
-        await Share.share({ url: uri });
-        return;
-    }
-
-    await Filesystem.writeFile({
-        path: filename,
-        data: base64Data.slice(0, BRIDGE_CHUNK_SIZE),
-        directory: Directory.Cache,
-    });
-    for (let offset = BRIDGE_CHUNK_SIZE; offset < base64Data.length; offset += BRIDGE_CHUNK_SIZE) {
-        await Filesystem.appendFile({
+    } else {
+        await Filesystem.writeFile({
             path: filename,
-            data: base64Data.slice(offset, offset + BRIDGE_CHUNK_SIZE),
+            data: base64Data.slice(0, BRIDGE_CHUNK_SIZE),
             directory: Directory.Cache,
         });
+        for (let offset = BRIDGE_CHUNK_SIZE; offset < base64Data.length; offset += BRIDGE_CHUNK_SIZE) {
+            await Filesystem.appendFile({
+                path: filename,
+                data: base64Data.slice(offset, offset + BRIDGE_CHUNK_SIZE),
+                directory: Directory.Cache,
+            });
+        }
     }
+
     const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
+
+    if (Capacitor.getPlatform() === 'android') {
+        try {
+            const mimeType = blob.type || (filename.endsWith('.pdf') ? 'application/pdf' : filename.endsWith('.png') ? 'image/png' : 'application/octet-stream');
+            await MediaSave.saveToDownloads({
+                filePath: uri,
+                filename,
+                mimeType,
+            });
+            // Clean up cache file after saving to Downloads
+            try {
+                await Filesystem.deleteFile({ path: filename, directory: Directory.Cache });
+            } catch (ignored) {}
+            return;
+        } catch (err) {
+            console.warn('[downloadBlob] Native MediaSave to Downloads failed, falling back to Share sheet:', err);
+        }
+    }
+
     await Share.share({ url: uri });
 };

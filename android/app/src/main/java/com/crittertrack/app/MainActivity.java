@@ -34,6 +34,7 @@ public class MainActivity extends BridgeActivity {
             window.setStatusBarContrastEnforced(false);
             window.setNavigationBarContrastEnforced(false);
         }
+        registerPlugin(MediaSavePlugin.class);
         super.onCreate(savedInstanceState);
         // Match the WebView background to the app's pink page background so any
         // transient gap (top inset letterbox, keyboard resize) blends invisibly
