@@ -3000,6 +3000,13 @@ const AnimalFormModalV2 = ({
                 // Don't clobber 'Culled' the same deceasedDate field backs both dead statuses.
                 updated.status = 'Deceased';
             }
+            // Setting an animal to Culled or Deceased removes it from the marketplace/sale
+            // listing, so uncheck the "Available for Sale" flag. A dead animal can't be
+            // bred/studied either, so clear that flag too.
+            if (name === 'status' && isDeadStatus(updated.status)) {
+                updated.isForSale = false;
+                updated.availableForBreeding = false;
+            }
             return updated;
         });
         if (isTextField && caret !== null) {
