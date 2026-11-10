@@ -1849,7 +1849,7 @@ const App = () => {
                             <div>
                                 <p className="text-sm font-bold text-red-900 dark:text-red-300">Password reset required</p>
                                 <p className="mt-1 text-sm text-red-800 dark:text-red-400">
-                                    Due to the system issue, previous passwords are no longer valid. For your security, passwords are never stored in our backups, so they could not be restored. Please use <strong>Forgot password?</strong> to reset your password before logging in.
+                                    Due to an unexpected system issue, previous passwords are no longer valid. For your security, passwords are never stored in our backups, so they could not be restored. Please use <strong>Forgot password?</strong> to reset your password before logging in.
                                 </p>
                             </div>
                         </div>
@@ -2361,7 +2361,7 @@ const App = () => {
             <PendingDosesBar authToken={authToken} />
 
             {/* Temporary notice under the notification banner (shown on every page after login): data lost in the database incident */}
-            <div className="max-w-5xl mx-auto px-3 mt-1.5">
+            <div className="max-w-5xl mx-auto px-3 mt-1.5 pb-6">
                 <div
                     role="alert"
                     className="flex items-start gap-3 rounded-lg border-l-4 border-red-600 bg-red-50 p-4 shadow dark:border-red-500 dark:bg-red-900/20"
