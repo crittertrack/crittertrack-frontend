@@ -1840,16 +1840,16 @@ const App = () => {
 
                     {/* MIDDLE: Auth Form */}
                     <div>
-                        {/* Notice shown directly above the login card: passwords were reset by a security update */}
+                        {/* Notice shown directly above the login card: passwords were not recoverable after the database incident */}
                         <div
                             role="alert"
                             className="mb-4 flex items-start gap-3 rounded-lg border-l-4 border-red-600 bg-red-50 p-4 shadow dark:border-red-500 dark:bg-red-900/20"
                         >
                             <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-red-600 dark:text-red-400" />
                             <div>
-                                <p className="text-sm font-bold text-red-900 dark:text-red-300">Security update: Password reset required</p>
+                                <p className="text-sm font-bold text-red-900 dark:text-red-300">Password reset required</p>
                                 <p className="mt-1 text-sm text-red-800 dark:text-red-400">
-                                    As part of a security update, previous passwords are no longer valid. Please use <strong>Forgot password?</strong> to reset your password before logging in.
+                                    Due to the system issue, previous passwords are no longer valid. For your security, passwords are never stored in our backups, so they could not be restored. Please use <strong>Forgot password?</strong> to reset your password before logging in.
                                 </p>
                             </div>
                         </div>
