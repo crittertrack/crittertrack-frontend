@@ -1840,6 +1840,19 @@ const App = () => {
 
                     {/* MIDDLE: Auth Form */}
                     <div>
+                        {/* Notice shown directly above the login card: passwords were reset by a security update */}
+                        <div
+                            role="alert"
+                            className="mb-4 flex items-start gap-3 rounded-lg border-l-4 border-red-600 bg-red-50 p-4 shadow dark:border-red-500 dark:bg-red-900/20"
+                        >
+                            <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-red-600 dark:text-red-400" />
+                            <div>
+                                <p className="text-sm font-bold text-red-900 dark:text-red-300">Security update: Password reset required</p>
+                                <p className="mt-1 text-sm text-red-800 dark:text-red-400">
+                                    As part of a security update, previous passwords are no longer valid. Please use <strong>Forgot password?</strong> to reset your password before logging in.
+                                </p>
+                            </div>
+                        </div>
                         <AuthView 
                             onLoginSuccess={handleLoginSuccess} 
                             showModalMessage={showModalMessage} 
@@ -2346,6 +2359,28 @@ const App = () => {
 
             {/* Medication doses due now: Given / Snooze / Skip (renders nothing when none are pending) */}
             <PendingDosesBar authToken={authToken} />
+
+            {/* Temporary notice under the notification banner (shown on every page after login): data lost in the database incident */}
+            <div className="max-w-5xl mx-auto px-3 mt-1.5">
+                <div
+                    role="alert"
+                    className="flex items-start gap-3 rounded-lg border-l-4 border-red-600 bg-red-50 p-4 shadow dark:border-red-500 dark:bg-red-900/20"
+                >
+                    <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-red-600 dark:text-red-400" />
+                    <div>
+                        <p className="text-sm font-bold text-red-900 dark:text-red-300">Important data notice</p>
+                        <p className="mt-1 text-sm text-red-800 dark:text-red-400">
+                            Due to an unexpected system issue, some data is no longer available or may be incomplete. This includes litter records, breeding history, contact information and waitlist entries.
+                        </p>
+                        <p className="mt-2 text-sm text-red-800 dark:text-red-400">
+                            We are actively investigating available backups and working to recover as much information as possible.
+                        </p>
+                        <p className="mt-2 text-sm text-red-800 dark:text-red-400">
+                            We sincerely apologize for the inconvenience and appreciate your understanding.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
