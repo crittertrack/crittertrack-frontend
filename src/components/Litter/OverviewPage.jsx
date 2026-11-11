@@ -6,6 +6,7 @@ import { formatDateShort } from '../../utils/dateFormatter';
 import { deriveStoredStatus, LITTER_STATUS_LABELS } from '../../utils/litterStatus';
 import { formatAnimalDisplayName } from '../../utils/animalDisplayName';
 import InfoButton from '../shared/InfoButton';
+import AnimalImage from '../shared/AnimalImage';
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
@@ -60,14 +61,20 @@ const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }
             <span className="text-[10px] font-semibold tracking-wider text-gray-400 dark:text-dark-text-muted">{label}</span>
         </div>
         {animal || fallbackId ? (
-            <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); if (onView) onView(animal || { id_public: fallbackId }); }}
-                title={animal ? formatAnimalDisplayName(animal) : fallbackId}
-                className={`block w-full line-clamp-2 break-words text-sm leading-snug font-medium text-gray-800 dark:text-dark-text hover:underline ${align === 'right' ? 'text-right' : 'text-left'}`}
-            >
-                {animal ? formatAnimalDisplayName(animal) : fallbackId}
-            </button>
+            <div className={`mt-1 flex items-center gap-2 ${align === 'right' ? 'flex-row-reverse' : ''}`}>
+                {/* Photo + name work the same for private/transferred parents: the server sends both. */}
+                <div className="shrink-0 w-9 h-9 rounded-md overflow-hidden bg-gray-100 dark:bg-dark-card-bg">
+                    <AnimalImage src={animal?.imageUrl || animal?.photoUrl || null} alt="" iconSize={16} />
+                </div>
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); if (onView) onView(animal || { id_public: fallbackId }); }}
+                    title={animal ? formatAnimalDisplayName(animal) : fallbackId}
+                    className={`block min-w-0 flex-1 line-clamp-2 break-words text-sm leading-snug font-medium text-gray-800 dark:text-dark-text hover:underline ${align === 'right' ? 'text-right' : 'text-left'}`}
+                >
+                    {animal ? formatAnimalDisplayName(animal) : fallbackId}
+                </button>
+            </div>
         ) : (
             <span className="block text-sm text-gray-400 dark:text-dark-text-muted">Unknown</span>
         )}

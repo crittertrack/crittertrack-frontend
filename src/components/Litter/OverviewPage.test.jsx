@@ -96,6 +96,26 @@ describe('Litters overview layout', () => {
         expect(card.textContent).not.toMatch(/[\u2642\u2640]/);
     });
 
+    it('shows the name and photo of a private parent that only the server resolved (sold/transferred animal)', async () => {
+        // The user does not own CTC9 and it is not public, so /animals and /public/animals cannot see it;
+        // GET /litters still returns it as litter.sire / litter.dam.
+        apiClient.get.mockImplementation((url) => {
+            if (url === '/litters') return Promise.resolve({ data: [{
+                _id: 'p', litter_id_public: 'CTL9', sireId_public: 'CTC9', damId_public: 'CTC2', birthDate: '2026-02-01',
+                sire: { id_public: 'CTC9', name: 'Hidden Sire', prefix: 'MM', imageUrl: 'https://example.com/sire.jpg', species: 'Fancy Rat', gender: 'Male' },
+                dam: null,
+            }] });
+            if (url === '/animals') return Promise.resolve({ data: [{ id_public: 'CTC2', name: 'Dam', species: 'Fancy Rat', gender: 'Female' }] });
+            return Promise.resolve({ data: [] });
+        });
+        renderPage();
+        const card = await screen.findByTestId('litter-card');
+        await waitFor(() => expect(text(card)).toContain('MM Hidden Sire'));
+        expect(text(card)).not.toMatch(/\bCTC9\b/);
+        expect(card.querySelector('img[src="https://example.com/sire.jpg"]')).not.toBeNull();
+        expect(text(card)).toContain('Dam');
+    });
+
     it('navigates on card click, but not from Edit, visibility or status-action buttons', async () => {
         renderPage();
         const cards = await screen.findAllByTestId('litter-card');
