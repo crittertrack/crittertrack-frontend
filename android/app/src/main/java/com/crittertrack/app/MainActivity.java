@@ -13,15 +13,28 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import com.getcapacitor.BridgeActivity;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
-import com.google.android.play.core.appupdate.AppUpdateRequest;
-import com.google.android.play.core.appupdate.AppUpdateType;
+import com.google.android.play.core.appupdate.AppUpdateOptions;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
 
 public class MainActivity extends BridgeActivity {
-    private static final int UPDATE_REQUEST_CODE = 1;
     private AppUpdateManager updateManager;
+
+    // If the user dismisses/cancels the forced update, close the app so it can't be used.
+    private final ActivityResultLauncher<IntentSenderRequest> updateLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
+                if (result.getResultCode() != RESULT_OK) {
+                    finishAffinity();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Must be called before super.onCreate() so the androidx compat library actually
@@ -84,71 +97,39 @@ public class MainActivity extends BridgeActivity {
                 ? ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 : ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
 
-        // Check for app update
-        checkForUpdate();
+        updateManager = AppUpdateManagerFactory.create(this);
+        checkForForcedUpdate();
     }
 
-    private void checkForUpdate() {
-        updateManager = AppUpdateManagerFactory.create(this);
-
-        AppUpdateParams params = AppUpdateParams.newBuilder()
-                .setMinimumVersionCode(38)
-                .build();
-
-        Task<AppUpdateInfo> appUpdateInfoTask = updateManager.getAppUpdateInfo();
-        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
-            if (appUpdateInfo.updateAvailability() == AppUpdateAvailability.UPDATE_AVAILABLE) {
-                // Always use IMMEDIATE for this version - user must update before using app
-                startImmediateUpdateFlow();
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Resume an immediate update that was interrupted (e.g. user backgrounded the app).
+        if (updateManager == null) return;
+        updateManager.getAppUpdateInfo().addOnSuccessListener(info -> {
+            if (info.updateAvailability()
+                    == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                startImmediateUpdate(info);
             }
         });
     }
 
-    private void startFlexibleUpdateFlow() {
-        AppUpdateRequest request = new AppUpdateRequest.Builder()
-                .setAppUpdateType(AppUpdateType.FLEXIBLE)
-                .build();
-
-        updateManager.startUpdateFlowForResult(
-                this,
-                request,
-                UPDATE_REQUEST_CODE,
-                this,
-                null
-        );
-    }
-
-    private void startImmediateUpdateFlow() {
-        AppUpdateRequest request = new AppUpdateRequest.Builder()
-                .setAppUpdateType(AppUpdateType.IMMEDIATE)
-                .build();
-
-        updateManager.startUpdateFlowForResult(
-                this,
-                request,
-                UPDATE_REQUEST_CODE,
-                this,
-                null
-        );
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == UPDATE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // User updated successfully
-            } else {
-                // User cancelled the update
+    // Asks Play whether a newer version is published; if so, launches Google's full-screen
+    // IMMEDIATE update flow, which blocks the app until the update is installed.
+    // Only works for installs from Google Play, and only once the new version is live there.
+    private void checkForForcedUpdate() {
+        updateManager.getAppUpdateInfo().addOnSuccessListener(info -> {
+            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                startImmediateUpdate(info);
             }
-        }
+        });
     }
 
-    @Override
-    public void onBackPressed() {
-        if (updateManager != null && updateManager.isUpdateTypeRequired(AppUpdateType.IMMEDIATE)) {
-            return;
-        }
-        super.onBackPressed();
+    private void startImmediateUpdate(AppUpdateInfo info) {
+        updateManager.startUpdateFlowForResult(
+                info,
+                updateLauncher,
+                AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build());
     }
 }

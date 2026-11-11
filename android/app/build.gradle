@@ -59,6 +59,8 @@ tasks.named('preBuild').configure {
 }
 
 repositories {
+    google()
+    mavenCentral()
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
@@ -74,7 +76,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
-    implementation "com.google.android.play:core:1.10.4"
+    implementation "com.google.android.play:app-update:2.1.0"
 }
 
 apply from: 'capacitor.build.gradle'
