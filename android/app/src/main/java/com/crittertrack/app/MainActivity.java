@@ -14,8 +14,14 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.appupdate.AppUpdateRequest;
+import com.google.android.play.core.appupdate.AppUpdateType;
 
 public class MainActivity extends BridgeActivity {
+    private static final int UPDATE_REQUEST_CODE = 1;
+    private AppUpdateManager updateManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Must be called before super.onCreate() so the androidx compat library actually
@@ -77,5 +83,72 @@ public class MainActivity extends BridgeActivity {
         setRequestedOrientation(isTablet
                 ? ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 : ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+
+        // Check for app update
+        checkForUpdate();
+    }
+
+    private void checkForUpdate() {
+        updateManager = AppUpdateManagerFactory.create(this);
+
+        AppUpdateParams params = AppUpdateParams.newBuilder()
+                .setMinimumVersionCode(38)
+                .build();
+
+        Task<AppUpdateInfo> appUpdateInfoTask = updateManager.getAppUpdateInfo();
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == AppUpdateAvailability.UPDATE_AVAILABLE) {
+                // Always use IMMEDIATE for this version - user must update before using app
+                startImmediateUpdateFlow();
+            }
+        });
+    }
+
+    private void startFlexibleUpdateFlow() {
+        AppUpdateRequest request = new AppUpdateRequest.Builder()
+                .setAppUpdateType(AppUpdateType.FLEXIBLE)
+                .build();
+
+        updateManager.startUpdateFlowForResult(
+                this,
+                request,
+                UPDATE_REQUEST_CODE,
+                this,
+                null
+        );
+    }
+
+    private void startImmediateUpdateFlow() {
+        AppUpdateRequest request = new AppUpdateRequest.Builder()
+                .setAppUpdateType(AppUpdateType.IMMEDIATE)
+                .build();
+
+        updateManager.startUpdateFlowForResult(
+                this,
+                request,
+                UPDATE_REQUEST_CODE,
+                this,
+                null
+        );
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // User updated successfully
+            } else {
+                // User cancelled the update
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (updateManager != null && updateManager.isUpdateTypeRequired(AppUpdateType.IMMEDIATE)) {
+            return;
+        }
+        super.onBackPressed();
     }
 }

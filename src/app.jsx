@@ -1849,7 +1849,7 @@ const App = () => {
                             <div>
                                 <p className="text-sm font-bold text-red-900 dark:text-red-300">Password reset required</p>
                                 <p className="mt-1 text-sm text-red-800 dark:text-red-400">
-                                    Due to an unexpected system issue, previous passwords are no longer valid. For your security, passwords are never stored in our backups, so they could not be restored. Please use <strong>Forgot password?</strong> to reset your password before logging in.
+                                    Due to an unexpected system issue, previous passwords are no longer valid. For your security, passwords are never stored in our backups, so they could not be restored. Please use <a href="#" onClick={() => setForgotPasswordStep(1)} className="underline text-red-600 dark:text-red-400 hover:text-red-500">Forgot password?</a> to reset your password before logging in.
                                 </p>
                             </div>
                         </div>
