@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CritterTrack - Service Worker Fix</title>
+</head>
+<body>
+  <h1>Service Worker Fix Applied</h1>
+  <p>The Service Worker update check error has been fixed.</p>
+  <p><strong>Change made:</strong> Removed `{ updateViaCache: 'none' }` from service worker registration in `public/sw-register.js`.</p>
+  <p><strong>Before:</strong> `navigator.serviceWorker.register('/service-worker.js', { updateViaCache: 'none' })</p>
+  <p><strong>After:</strong> `navigator.serviceWorker.register('/service-worker.js')</p>
+  <p>The browser's default service worker update mechanism is now used, which resolves the "Failed to update a ServiceWorker... An unknown error occurred when fetching the script" error.</p>
+</body>
+</html>
