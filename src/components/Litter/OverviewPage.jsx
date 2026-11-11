@@ -371,10 +371,13 @@ const LittersOverviewPage = ({
             const publicMap = new Map(publicResults.flatMap(r => r.data || []).map(a => [a.id_public, a]));
             const getParent = (id_public) => (id_public && (anyMap.get(id_public) || publicMap.get(id_public))) || null;
 
+            // Keep the parent the backend already resolved (GET /litters looks parents up among ALL animals,
+            // including private ones now owned by someone else, e.g. sold animals). The lookups above only see
+            // the user's own and public animals, so without this fallback such parents showed as a bare ID.
             const enriched = littersData.map(litter => ({
                 ...litter,
-                sire: getParent(litter.sireId_public),
-                dam: getParent(litter.damId_public),
+                sire: getParent(litter.sireId_public) || litter.sire || null,
+                dam: getParent(litter.damId_public) || litter.dam || null,
             }));
             setLitters(enriched);
             if (setCachedLitters) setCachedLitters(enriched);
