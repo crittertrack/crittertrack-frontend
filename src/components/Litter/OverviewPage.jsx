@@ -23,6 +23,19 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
+// Runs `worker` over `items` with at most `limit` in flight at once. Firing one request per litter
+// simultaneously (1000+ litters) overwhelms the server/proxy and drops connections (502 / HTTP2 errors).
+const runWithConcurrency = (items, limit, worker) => {
+    let next = 0;
+    const lanes = Array.from({ length: Math.min(limit, items.length) }, async () => {
+        while (next < items.length) {
+            const item = items[next++];
+            try { await worker(item); } catch { /* workers handle their own errors */ }
+        }
+    });
+    return Promise.all(lanes);
+};
+
 // Cards are always white; the status shows through the border colour and the badge.
 const STATUS_COLORS = {
     planned: 'border-indigo-300 dark:border-indigo-800/60 bg-white dark:bg-dark-card-bg',
@@ -115,7 +128,9 @@ const LitterCard = ({
     const sexSum = sexCounts.reduce((s, v) => s + (isNum(v) ? Number(v) : 0), 0);
     const bornRaw = litter.litterSizeBorn ?? litter.numberBorn;
     const born = isNum(bornRaw) ? Number(bornRaw) : (anySexRecorded ? sexSum : null);
-    const linked = Array.isArray(offspring) ? offspring.length : null;
+    const linked = Array.isArray(offspring)
+        ? offspring.length
+        : (Array.isArray(litter.offspringIds_public) ? litter.offspringIds_public.length : null);
     const lossesRaw = litter.lossesCount ?? litter.losses ?? litter.stillbornCount;
     const losses = isNum(lossesRaw) ? Number(lossesRaw) : null;
 
@@ -402,7 +417,7 @@ const LittersOverviewPage = ({
 
             if (littersNeedingCOI.length > 0) {
                 setCoiCalculating(new Set(littersNeedingCOI.map(l => l._id)));
-                littersNeedingCOI.forEach(async (litter) => {
+                runWithConcurrency(littersNeedingCOI, 3, async (litter) => {
                     const cacheKey = `${litter.sireId_public}:${litter.damId_public}`;
                     const coiController = new AbortController();
                     const timeout = setTimeout(() => coiController.abort(), 15000);
@@ -423,14 +438,8 @@ const LittersOverviewPage = ({
                 });
             }
 
-            enriched.forEach(litter => {
-                apiClient.get(`/litters/${litter.litter_id_public}/offspring`).then(res => {
-                    const offspring = Array.isArray(res.data) ? res.data : [];
-                    setLitterOffspringMap(prev => ({ ...prev, [litter._id]: offspring }));
-                }).catch(() => {
-                    setLitterOffspringMap(prev => ({ ...prev, [litter._id]: [] }));
-                });
-            });
+            // No per-litter /offspring fan-out here: the cards only need the linked-offspring count,
+            // which GET /litters already returns as offspringIds_public (see LitterCard).
         } catch (err) {
             showModalMessage('Error', 'Failed to load litters.');
         } finally {
