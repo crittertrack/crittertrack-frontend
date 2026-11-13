@@ -2373,10 +2373,13 @@ const App = () => {
                             Due to an unexpected system issue, some data is no longer available or may be incomplete. This includes litter records, breeding history, contact information and waitlist entries.
                         </p>
                         <p className="mt-2 text-sm text-red-800 dark:text-red-400">
-                            We are actively investigating available backups and working to recover as much information as possible.
+                            Update: We have restored some data from backups, but some records may still be missing or incomplete. Sadly we are not able to recover all lost data, and some information may be permanently unavailable and requires you to re-enter it. We have implemented additional safeguards to prevent future data loss.
                         </p>
                         <p className="mt-2 text-sm text-red-800 dark:text-red-400">
                             We sincerely apologize for the inconvenience and appreciate your understanding.
+                        </p>
+                        <p className="mt-2 text-sm text-red-800 dark:text-red-400">
+                            You can also make a local copy of your data by exporting your animals, litters, enclosures and budget entries from the data portability page under your profile settings.
                         </p>
                     </div>
                 </div>
