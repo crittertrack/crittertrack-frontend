@@ -10,8 +10,6 @@ import UserManagementPanel from './moderation/UserManagementPanel';
 import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
-import FeedbackTab from './admin/FeedbackTab';
-import BetaSurveyTab from './admin/BetaSurveyTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
 import SpeciesSuggestionsTab from './admin/SpeciesSuggestionsTab';
 import ResourcesManagementTab from './admin/ResourcesManagementTab';

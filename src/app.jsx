@@ -17,7 +17,6 @@ import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import MaintenanceMode from './MaintenanceMode';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
-import BetaSurveyModal from './components/BetaSurveyModal';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import AuthView from './components/Auth/AuthView';
 import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
