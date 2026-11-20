@@ -24,6 +24,7 @@ const BackupManagementTab = ({ authToken }) => {
     const [expandedBackup, setExpandedBackup] = useState(null);
     const [showRestoreConfirm, setShowRestoreConfirm] = useState(null);
     const [restoreCollections, setRestoreCollections] = useState([]);
+    const [downloadingCollection, setDownloadingCollection] = useState(null);
 
     useEffect(() => {
         fetchBackups();
@@ -124,6 +125,39 @@ const BackupManagementTab = ({ authToken }) => {
         } catch (err) {
             console.error('Download backup error:', err);
             setError(err.message || 'Failed to download backup');
+        }
+    };
+
+    // Map stat pill keys (file-name form) back to MongoDB collection names.
+    // Most keys match 1:1; only the legacy-renamed ones differ.
+    const COLLECTION_FOR_STAT_KEY = {
+        publicProfiles: 'publicprofiles',
+        publicAnimals: 'publicanimals',
+    };
+    const statKeyToCollection = (key) => COLLECTION_FOR_STAT_KEY[key] || key;
+
+    const downloadCollection = async (collection) => {
+        setDownloadingCollection(collection);
+        setError(null);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/export/${collection}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || `Failed to download ${collection} (${response.status})`);
+            }
+
+            const blob = await response.blob();
+            await downloadBlob(blob, `${collection}.json`);
+            setSuccess(`${collection} downloaded successfully`);
+            setTimeout(() => setSuccess(null), 5000);
+        } catch (err) {
+            console.error(`Download ${collection} error:`, err);
+            setError(err.message || `Failed to download ${collection}`);
+        } finally {
+            setDownloadingCollection(null);
         }
     };
 
@@ -349,11 +383,25 @@ const BackupManagementTab = ({ authToken }) => {
                 <div className="current-stats-section">
                     <h3><Database size={18} /> Current Database</h3>
                     <div className="stats-pills">
-                        {Object.entries(currentStats).map(([key, value]) => (
-                            <span key={key} className="stat-pill">
-                                {key.replace(/([A-Z])/g, ' $1').trim()}: <strong>{value}</strong>
-                            </span>
-                        ))}
+                        {Object.entries(currentStats).map(([key, value]) => {
+                            const collection = statKeyToCollection(key);
+                            const isDownloading = downloadingCollection === collection;
+                            return (
+                                <span key={key} className="stat-pill" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                    {key.replace(/([A-Z])/g, ' $1').trim()}: <strong>{value}</strong>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); downloadCollection(collection); }}
+                                        disabled={isDownloading}
+                                        className="btn-icon-sm"
+                                        title={`Download ${collection} data`}
+                                        aria-label={`Download ${collection}`}
+                                    >
+                                        {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                    </button>
+                                </span>
+                            );
+                        })}
                     </div>
                 </div>
             )}

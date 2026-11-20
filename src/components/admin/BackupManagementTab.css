@@ -123,6 +123,33 @@
     @apply text-red-600;
 }
 
+/* Smaller icon button used inside stat pills (Current Database section) */
+.btn-icon-sm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    @apply bg-gray-100;
+    border: none;
+    border-radius: 6px;
+    @apply text-gray-500;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-icon-sm:hover:not(:disabled) {
+    @apply bg-gray-200;
+    @apply text-gray-700;
+}
+
+.btn-icon-sm:disabled {
+    cursor: not-allowed;
+    @apply opacity-50;
+}
+
 /* Alerts */
 .alert {
     display: flex;
