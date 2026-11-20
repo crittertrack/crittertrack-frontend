@@ -43,7 +43,24 @@ const GENE_LOCI_BY_SPECIES = {
 const MOUSE_ALLELE_TRAITS = {
   A: { A: 'Agouti', a: 'Black', at: 'Tan', Ay: 'Dominant Red', Avy: 'Brindle', Aw: 'White-Bellied Agouti', ae: 'Extreme Black' },
   B: { b: 'Chocolate' },
-  C: { c: 'Albino', ch: 'Siamese', ce: 'Beige', cch: 'Chinchilla' },
+  C: {
+    c: 'Albino',
+    ch: 'Siamese',
+    ce: 'Beige',
+    cch: 'Chinchilla',
+    'ch/cch': 'Burmese',
+    'cch/ch': 'Burmese',
+    'cch/c': 'Stone',
+    'c/cch': 'Stone',
+    'ce/cch': 'Mock Chocolate',
+    'cch/ce': 'Mock Chocolate',
+    'ch/ce': 'Colorpoint Beige',
+    'ce/ch': 'Colorpoint Beige',
+    'c/ch': 'Himalayan',
+    'ch/c': 'Himalayan',
+    'c/ce': 'Bone',
+    'ce/c': 'Bone',
+  },
   D: { d: 'Blue' },
   E: { e: 'Recessive Red' },
   Ln: { ln: 'Leaden' },
@@ -411,6 +428,13 @@ function getMouseTraits(genotype) {
       if (alleles.includes('Go') && alleles.includes('go')) {
         traits.add('Longhair (carrier)');
       }
+      continue;
+    }
+
+    // Check for compound genotypes first (e.g., 'ch/cch' -> 'Burmese')
+    const compoundTrait = locusTraits[notation];
+    if (compoundTrait) {
+      traits.add(compoundTrait);
       continue;
     }
 

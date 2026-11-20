@@ -136,6 +136,21 @@ describe('computeExpectedOffspring', () => {
     expect(albino.find((entry) => entry.trait === 'Albino (carrier)')).toMatchObject({ gene: 'C/c' });
   });
 
+  it('shows Fancy Mouse C-locus compound genotypes (e.g. Burmese, Stone, Mock Chocolate)', () => {
+    // Burmese (ch/cch) from ch/cch x ch/cch
+    const burmese = computeExpectedOffspring('ch/cch', 'ch/cch', 'Fancy Mouse', { includeGenes: true });
+    expect(burmese.find((entry) => entry.trait === 'Burmese')).toMatchObject({ probability: 100, gene: 'ch/cch' });
+
+    // Stone (cch/cch) from cch/cch x cch/cch
+    const stone = computeExpectedOffspring('cch/cch', 'cch/cch', 'Fancy Mouse', { includeGenes: true });
+    expect(stone.find((entry) => entry.trait === 'Stone')).toMatchObject({ probability: 100, gene: 'cch/cch' });
+
+    // Mock Chocolate (cch/ce) from cch/ce x cch/ce
+    const mockChoc = computeExpectedOffspring('cch/ce', 'cch/ce', 'Fancy Mouse', { includeGenes: true });
+    expect(mockChoc.find((entry) => entry.trait === 'Mock Chocolate')).toMatchObject({ probability: 100, gene: 'cch/ce' });
+  });
+});
+
   it('shows Fancy Mouse dominant traits as X/- and carriers as -/x on multi-allele loci', () => {
     const result = computeExpectedOffspring('Ay/a', 'a/a', 'Fancy Mouse', { includeGenes: true });
     expect(result.find((entry) => entry.trait === 'Dominant Red')).toMatchObject({ probability: 50, gene: 'Ay/-' });
