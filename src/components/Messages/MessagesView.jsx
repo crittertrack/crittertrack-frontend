@@ -3,6 +3,7 @@ import apiClient from '../../utils/apiClient';
 import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2, ImagePlus, Maximize2 } from 'lucide-react';
 import { DonationBadge, getDonationBadge } from '../../utils/donationUtils';
 import { compressImageFile } from '../../utils/imageCompression';
+import { readFilesIntoMemory } from '../../utils/pickedFiles';
 import InfoButton from '../shared/InfoButton';
 
 // ==================== MESSAGES VIEW ====================
@@ -174,16 +175,16 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     };
 
     // Image selection handler
-    const handleImageSelect = (e) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) return;
+    const handleImageSelect = async (e) => {
+        const rawFiles = Array.from(e.target.files || []);
+        if (!rawFiles.length) return;
 
         const remaining = MAX_IMAGES_PER_MESSAGE - selectedImages.length;
-        if (files.length > remaining) {
+        if (rawFiles.length > remaining) {
             showModalMessage && showModalMessage('Info', `Maximum ${MAX_IMAGES_PER_MESSAGE} images per message`);
         }
 
-        const newFiles = files.slice(0, remaining);
+        const newFiles = await readFilesIntoMemory(rawFiles.slice(0, remaining));
         
         // Generate preview URLs
         const newPreviews = newFiles.map(file => URL.createObjectURL(file));

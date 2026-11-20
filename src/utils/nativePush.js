@@ -19,6 +19,18 @@ export const registerNativePush = async () => {
             perm = await PushNotifications.requestPermissions();
         }
         if (perm.receive !== 'granted') return;
+
+        // Ensure default notification channel exists for Android 8.0+
+        await PushNotifications.createChannel({
+            id: 'default',
+            name: 'Default Notifications',
+            description: 'General notifications',
+            importance: 5,
+            visibility: 1,
+            sound: 'default',
+            vibration: true,
+        });
+
         await PushNotifications.register();
     } catch (err) {
         console.error('[push] Native registration failed:', err);
@@ -52,6 +64,9 @@ export const initNativePushListeners = async (authToken, API_BASE_URL) => {
         }),
         PushNotifications.addListener('registrationError', (err) => {
             console.error('[push] Registration error:', err);
+        }),
+        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+            console.log('[push] Notification received in foreground:', notification);
         }),
         // Native build uses HashRouter (see index.jsx) — navigate via the hash, not a full href change.
         PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
