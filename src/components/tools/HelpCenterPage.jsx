@@ -89,6 +89,7 @@ const GENETICS_LESSON_IDS = new Set([
   'coi-calculator',
   'target-outcome-calculator',
   'family-tree-explorer',
+  'average-kinship',
 ]);
 const BREEDING_LESSON_IDS = new Set([
   'animal-tab-breeding',

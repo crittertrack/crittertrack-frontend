@@ -830,7 +830,7 @@ useEffect(() => {
                             </div>
                             {(animalCOI != null || loadingCOI) && (
                                 <div className="h-[260px]">
-                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col divide-y divide-gray-200 dark:divide-dark-border overflow-hidden">
+                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col divide-y divide-gray-200 dark:divide-dark-border">
                                         <div className="flex-1 p-3">
                                             <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
                                                 <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding</h3>
@@ -850,7 +850,7 @@ useEffect(() => {
                                         <div className="flex-1 p-3">
                                             <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
                                                 <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Average Kinship</h3>
-                                                <InfoButton title="Average Kinship (AVK)">
+                                                <InfoButton title="Average Kinship (AVK)" lessonId="average-kinship">
                                                     <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data • calculated purely from recorded pedigree relationships).</p>
                                                     <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
                                                 </InfoButton>

@@ -404,6 +404,32 @@ export const ANIMAL_RECORD_TAB_LESSONS = [
     ],
   },
   {
+    id: 'average-kinship',
+    title: 'Animal Record: Average Kinship & COI',
+    description: 'Average Kinship (AVK) and Coefficient of Inbreeding (COI) shown on an animal\'s read-only Dashboard, and how they differ.',
+    searchTerms: ['average kinship', 'AVK', 'kinship', 'COI', 'inbreeding', 'relatedness'],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Average Kinship (AVK)',
+        content: 'Average Kinship shows how represented this animal\'s ancestry is within its owner\'s living, same-species population. It is calculated purely from recorded pedigree relationships - not DNA or genomic data. A lower AVK means this animal\'s lineage is less duplicated elsewhere in the population (generally more valuable for diversity); a higher AVK means its ancestry is already heavily represented. The value is shown as a percentage against the reference population size (for example \"vs. 87 animals\").',
+      },
+      {
+        stepNumber: 2,
+        title: 'AVK vs. COI - what the difference is',
+        content: 'COI measures the animal\'s OWN inbreeding - the chance that two alleles at a locus are identical by descent from shared ancestors. AVK measures how related this animal is, on average, to the rest of the population - i.e. how common its ancestry is across other animals. An animal can have a low COI but a high AVK if its ancestors are widely used across the population, or a high COI but low AVK if its close relatives are uncommon. Both appear side by side on the read-only Dashboard when both parents are linked.',
+      },
+      {
+        stepNumber: 3,
+        title: 'How the values are calculated',
+        content: 'COI is calculated from shared ancestors in the pedigree, plus how many common ancestors it was calculated from. AVK averages the kinship between this animal and every animal in its reference population - the owner\'s living, non-archived, same-species animals. Neither uses DNA test results; both are pedigree-based estimates.',
+      },
+    ],
+    nextSteps: [
+      { articleId: 'coi-calculator', label: 'Test a pairing with the COI Calculator' },
+    ],
+  },
+  {
     id: 'animal-tab-customize',
     title: 'Animal Record: Customize Tab',
     description: 'Hiding tabs and individual sections you don\'t use, per species.',
