@@ -46,9 +46,9 @@ const MOUSE_ALLELE_TRAITS = {
   C: {
     c: 'Albino',
     ch: 'Siamese',
-    ce: 'Beige',
+    'ch/ch': 'Siamese',
     cch: 'Chinchilla',
-    'ch/cch': 'Burmese',
+    'cch/cch': 'Chinchilla',
     'cch/ch': 'Burmese',
     'cch/c': 'Stone',
     'c/cch': 'Stone',
