@@ -16,6 +16,7 @@ import ResourcesManagementTab from './admin/ResourcesManagementTab';
 import CareTemplatesTab from './admin/CareTemplatesTab';
 import BackupManagementTab from './admin/BackupManagementTab';
 import AnalyticsTab from './admin/AnalyticsTab';
+import FeedbackTab from './admin/FeedbackTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -745,7 +746,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {/* Beta Feedback Survey */}
                         {activeSection === 'beta-survey' && (
                             <div className="p-8">
-                                <BetaSurveyTab
+                                <FeedbackTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />

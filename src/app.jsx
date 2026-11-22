@@ -1931,13 +1931,6 @@ const App = () => {
                     onClose={handleDismissWelcomeGuide}
                 />
             )}
-
-            {/* Beta Feedback Survey Modal */}
-            {showBetaSurvey && !showWelcomeGuide && (
-                <BetaSurveyModal
-                    onClose={handleCloseBetaSurvey}
-                />
-            )}
             
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             {showUserSearchModal && (
