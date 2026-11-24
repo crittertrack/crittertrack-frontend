@@ -208,7 +208,7 @@ export default function StatsPanel({
 
             {/* Sex distribution uses only the original born sex counts. */}
             <div className="mt-4">
-                <div className="mb-1 text-xs font-bold text-gray-500 dark:text-dark-text-muted">
+                <div className="mb-1 text-xs font-bold text-gray-900 dark:text-dark-text-muted">
                     Sex distribution
                 </div>
 
@@ -261,7 +261,7 @@ export default function StatsPanel({
 {/* Outcome bar. Culls are separated from postnatal losses. */}
 {s.totalBorn !== null && s.totalBorn !== undefined && (
     <div className="mt-4">
-        <div className="mb-1 text-xs font-bold text-gray-500 dark:text-dark-text-muted">
+        <div className="mb-1 text-xs font-bold text-gray-900 dark:text-dark-text-muted">
             Litter outcome
         </div>
 
@@ -313,7 +313,7 @@ export default function StatsPanel({
 
             {/* Compact rounded breakdown rows */}
             <Divider>
-                <div className="mb-2 text-sm font-bold text-gray-500 dark:text-dark-text-muted">
+                <div className="mb-2 text-sm font-bold text-gray-900 dark:text-dark-text-muted">
                     Breakdown
                 </div>
 
