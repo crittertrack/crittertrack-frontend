@@ -43,11 +43,24 @@ export default function OverviewTab({
     // Raw total born count (before any subtractions)
     const totalBorn = totalBornFromStats !== null ? totalBornFromStats : null;
 
-    // Losses count from the litter
+    // Stillborn count from the litter
+    const stillbornCount = litter.stillbornCount !== null ? litter.stillbornCount : null;
+
+    // Losses count from the litter (postnatal losses, excluding stillborn)
     const lossesCount = litter.lossesCount !== null ? litter.lossesCount : null;
 
-    // Total surviving = total born - stillborn - losses
-    const stillbornCount = litter.stillbornCount !== null ? litter.stillbornCount : null;
+    // Culls count from the litter
+    const cullsCount = litter.hasCulls
+        ? litter.cullsCount !== null ? litter.cullsCount : null
+        : null;
+
+    // Total loss = stillborn + losses + culls (combined)
+    const totalLoss = stillbornCount !== null || lossesCount !== null || cullsCount !== null
+        ? Math.max(0, (stillbornCount || 0) + (lossesCount || 0) + (cullsCount || 0))
+        : null;
+
+    // Total surviving = total born - stillborn - losses (excluding culls from this calculation)
+    // (culls are included in the "total loss" above; surviving = born - stillborn - postnatal losses)
     const totalSurviving = totalBorn !== null && stillbornCount !== null
         ? Math.max(0, totalBorn - stillbornCount - (lossesCount || 0))
         : null;
@@ -78,7 +91,7 @@ export default function OverviewTab({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <Summary label={getLitterFieldLabel('birthDate', species, 'Birth date', speciesOptions)} testId="summary-birth">{birth || <Muted>{status === 'born' ? 'Not recorded' : eggLaying ? 'Not laid or hatched yet' : 'Not born yet'}</Muted>}</Summary>
                 <Summary label="Total born" testId="summary-total-born">{totalBorn === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : totalBorn}</Summary>
-                <Summary label="Total loss" testId="summary-total-loss">{lossesCount === null ? <Muted>—</Muted> : lossesCount}</Summary>
+                <Summary label="Total loss" testId="summary-total-loss">{totalLoss === null ? <Muted>—</Muted> : totalLoss}</Summary>
                 <Summary label="Total surviving" testId="summary-total-surviving">{totalSurviving === null ? <Muted>—</Muted> : totalSurviving}</Summary>
                 <Summary label="Total linked" testId="summary-total-linked">{linkedCount === null ? <Muted>—</Muted> : linkedCount}</Summary>
                 <Summary label="COI" testId="summary-coi">{isBlank(coi) ? <Muted>Not calculated</Muted> : `${Number(coi).toFixed(2)}%`}</Summary>
