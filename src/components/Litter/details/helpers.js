@@ -1,5 +1,5 @@
 
-// Pure calculations for the litter details page. No React, no network.
+ // Pure calculations for the litter details page. No React, no network.
 
 const isNum = (v) =>
     v !== null && v !== undefined && v !== '' && !isNaN(Number(v));
@@ -7,7 +7,6 @@ const isNum = (v) =>
 const numOrNull = (v) => (isNum(v) ? Number(v) : null);
 
 // Convert three sex-specific values into a normalized array.
-// Declared outside computeLitterStats so it is initialized before use.
 const pick = (a, b, c) => [a, b, c].map(numOrNull);
 
 /** Local-midnight Date for a stored date / ISO string, or null. */
@@ -117,24 +116,40 @@ export const computeLitterStats = (litter, status) => {
         : Math.max(0, losses - (culls || 0));
 
     // Weaning: calculate total from recorded sex-specific counts.
-const weanedBySex = pick(
-    litter.maleWeaned,
-    litter.femaleWeaned,
-    litter.unknownWeaned
-);
+    const weanedBySex = pick(
+        litter.maleWeaned,
+        litter.femaleWeaned,
+        litter.unknownWeaned
+    );
 
-const weanedRecorded = weanedBySex.some(v => v !== null);
+    const weanedRecorded = weanedBySex.some(v => v !== null);
 
-const weaned = weanedRecorded
-    ? weanedBySex.reduce((sum, v) => sum + (v || 0), 0)
-    : null;
+    const weaned = weanedRecorded
+        ? weanedBySex.reduce((sum, v) => sum + (v || 0), 0)
+        : null;
 
-// Cap weaned at surviving, without turning missing data into zero.
-const cappedWeaned = weaned === null
-    ? null
-    : surviving !== null
-        ? Math.min(weaned, surviving)
-        : weaned;
+    // Cap weaned at surviving without turning missing data into zero.
+    const cappedWeaned = weaned === null
+        ? null
+        : surviving !== null
+            ? Math.min(weaned, surviving)
+            : weaned;
+
+    // Weaning state.
+    const isBorn = status === 'born';
+    const maxNursingDays = 90;
+
+    const daysSinceBirth = litter.birthDate
+        ? Math.floor(
+            (new Date() - new Date(litter.birthDate)) /
+            (1000 * 60 * 60 * 24)
+        )
+        : null;
+
+    const weanedState =
+        isBorn && daysSinceBirth <= maxNursingDays && !litter.weaningDate
+            ? (cappedWeaned !== null ? 'value' : 'pending')
+            : (isBorn && !litter.weaningConfirmed ? 'pending' : 'missing');
 
     // Survival percentage is based on live-born offspring.
     const survivalPct =
@@ -167,10 +182,10 @@ const cappedWeaned = weaned === null
         culls,
         postnatal,
 
-       weaned: cappedWeaned,
-cappedWeaned,
-weanedBySex,
-weanedState,
+        weaned: cappedWeaned,
+        cappedWeaned,
+        weanedBySex,
+        weanedState,
         survivalPct,
 
         stillbornBySex: pick(
