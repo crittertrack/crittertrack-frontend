@@ -353,7 +353,7 @@ export default function StatsPanel({
                                 speciesOptions
                             )}
                             total={s.weaned}
-                            bySex={[null, null, null]}
+                            bySex={s.weanedBySex}
                         />
                     )}
                 </div>
