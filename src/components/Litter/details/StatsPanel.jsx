@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { computeLitterStats } from './helpers';
 import { Panel, Muted } from './ui';
 import { Big, BreakdownToggle, SEX } from './StatsParts';
@@ -167,6 +167,9 @@ export default function StatsPanel({
         ? 'Post-hatch losses'
         : 'Postnatal losses';
     const liveTitle = eggLaying ? 'Live hatched' : 'Live born';
+
+    // Collapsible state for the breakdown section - collapsed by default
+    const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
 
     return (
         <Panel title="Litter statistics" testId="stats-panel">
@@ -356,6 +359,58 @@ export default function StatsPanel({
 />
                 </div>
             </Divider>
+            <div
+                className="flex items-center gap-2 cursor-pointer select-none"
+                onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)}
+            >
+                <span className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                    {isBreakdownExpanded ? 'Collapse' : 'Expand'} breakdown
+                </span>
+                <span className="inline-flex items-center gap-1">
+                    <svg
+                        className="h-4 w-4 text-gray-500 dark:text-dark-text-muted"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path d="M9 5h6v6h-6zm0-6h6v6h-6zM5 9h14v14H5zM2 5h2v12H2zM5 20H5" />
+                    </svg>
+                </span>
+            </div>
+            {isBreakdownExpanded && (
+                <div className="space-y-1.5">
+                    <BreakdownToggle
+                        title={stillbornTitle}
+                        total={s.stillborn}
+                        bySex={stillbornBySex}
+                    />
+                    <BreakdownToggle
+                        title={lossesTitle}
+                        total={s.postnatal}
+                        bySex={postnatalBySex}
+                        note={s.culls > 0 ? 'Excludes culls' : undefined}
+                    />
+                    <BreakdownToggle
+                        title="Culls"
+                        total={s.culls ?? 0}
+                        bySex={cullsBySex}
+                    />
+                    <BreakdownToggle
+                        title="Surviving"
+                        total={s.surviving}
+                        bySex={survivingBySex}
+                    />
+                    <BreakdownToggle
+                        title={getLitterFieldLabel(
+                            'litterSizeWeaned',
+                            getLitterSpecies(litter),
+                            'Weaned',
+                            speciesOptions
+                        )}
+                        total={s.weaned}
+                        bySex={s.weanedBySex}
+                    />
+                </div>
+            )}
         </Panel>
     );
 }

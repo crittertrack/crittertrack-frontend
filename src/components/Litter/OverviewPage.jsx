@@ -96,8 +96,9 @@ const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }
 
 const Stat = ({ value, label }) => (
     <div className="flex-1 text-center min-w-0">
-        <div className="text-xl font-bold leading-tight text-gray-900 dark:text-dark-text">{value}</div>
-        <div className="text-[11px] text-gray-500 dark:text-dark-text-muted">{label}</div>
+        {/* Use text-base on mobile, sm on lg - keeps it compact but readable */}
+        <div className="text-sm font-medium text-gray-900 dark:text-dark-text">{value}</div>
+        <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">{label}</div>
     </div>
 );
 
@@ -138,17 +139,20 @@ const LitterCard = ({
         ? Math.max(0, (stillborn || 0) + (losses || 0) + cullsCount)
         : null;
     // Total surviving = total born - stillborn - losses
+    // Use Number() to ensure losses is a valid number, default to 0 if null/undefined
     const totalSurviving = born !== null && stillborn !== null
-        ? Math.max(0, born - stillborn - (losses || 0))
+        ? Math.max(0, born - stillborn - (Number(losses) || 0))
         : null;
     const linked = Array.isArray(offspring)
         ? offspring.length
         : (Array.isArray(litter.offspringIds_public) ? litter.offspringIds_public.length : null);
 
-    const showBorn = born !== null && (hasBirth || born > 0);
-    const showLosses = losses !== null && (hasBirth || losses > 0);
-    const showSurviving = totalSurviving !== null && (hasBirth || totalSurviving > 0);
-    const showLinked = linked !== null && (linked > 0 || hasBirth);
+    // Always show all 4 stats on the card, but display '-' when value is null/undefined
+    // This ensures all 4 stats are visible on mobile regardless of birth status or value zeros
+    const showBorn = born !== null;
+    const showLosses = totalLoss !== null;
+    const showSurviving = totalSurviving !== null;
+    const showLinked = linked !== null;
     const statCount = [showBorn, showLosses, showSurviving, showLinked].filter(Boolean).length;
     const showSex = anySexRecorded && (hasBirth || sexSum > 0);
     const males = Number(litter.maleCount) || 0;
