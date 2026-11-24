@@ -88,7 +88,7 @@ export default function OverviewTab({
 
     return (
         <div className="space-y-4" data-testid="litter-overview">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
                 <Summary label={getLitterFieldLabel('birthDate', species, 'Birth date', speciesOptions)} testId="summary-birth">{birth || <Muted>{status === 'born' ? 'Not recorded' : eggLaying ? 'Not laid or hatched yet' : 'Not born yet'}</Muted>}</Summary>
                 <Summary label="Total born" testId="summary-total-born">{totalBorn === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : totalBorn}</Summary>
                 <Summary label="Total loss" testId="summary-total-loss">{totalLoss === null ? <Muted>—</Muted> : totalLoss}</Summary>
