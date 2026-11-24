@@ -116,37 +116,25 @@ export const computeLitterStats = (litter, status) => {
         ? null
         : Math.max(0, losses - (culls || 0));
 
-    // Weaning.
-    // Calculate total weaned from sex breakdown counts.
-    // This ensures the breakdown bar always shows a total when any weaned data is recorded.
-    const weanedBySex = pick(
-        litter.maleWeaned,
-        litter.femaleWeaned,
-        litter.unknownWeaned
-    );
-    const weaned = weanedBySex.reduce(
-        (sum, v) => sum + (v || 0),
-        0
-    ) || null;
+    // Weaning: calculate total from recorded sex-specific counts.
+const weanedBySex = pick(
+    litter.maleWeaned,
+    litter.femaleWeaned,
+    litter.unknownWeaned
+);
 
-    // Guard: weaned cannot exceed surviving (total born - stillborn - all losses including culls)
-    const cappedWeaned = surviving !== null ? Math.min(weaned || 0, surviving) : weaned;
+const weanedRecorded = weanedBySex.some(v => v !== null);
 
-    const isBorn = status === 'born';
+const weaned = weanedRecorded
+    ? weanedBySex.reduce((sum, v) => sum + (v || 0), 0)
+    : null;
 
-    const maxNursingDays = 90;
-
-    const daysSinceBirth = litter.birthDate
-        ? Math.floor(
-            (new Date() - new Date(litter.birthDate)) /
-            (1000 * 60 * 60 * 24)
-        )
-        : null;
-
-    const weanedState =
-        isBorn && daysSinceBirth <= maxNursingDays && !litter.weaningDate
-            ? (cappedWeaned !== null ? 'value' : 'pending')
-            : (isBorn && !litter.weaningConfirmed ? 'pending' : 'missing');
+// Cap weaned at surviving, without turning missing data into zero.
+const cappedWeaned = weaned === null
+    ? null
+    : surviving !== null
+        ? Math.min(weaned, surviving)
+        : weaned;
 
     // Survival percentage is based on live-born offspring.
     const survivalPct =
@@ -179,9 +167,10 @@ export const computeLitterStats = (litter, status) => {
         culls,
         postnatal,
 
-        cappedWeaned,
-        weanedBySex,
-        weanedState,
+       weaned: cappedWeaned,
+cappedWeaned,
+weanedBySex,
+weanedState,
         survivalPct,
 
         stillbornBySex: pick(
