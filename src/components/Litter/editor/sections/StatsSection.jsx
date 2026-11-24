@@ -202,7 +202,7 @@ export default function StatsSection({
                     </span>
                 </label>
                 <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 flex items-center">
-                    These options only determine which counts are deducted from Total Offspring in the litter overview. They do not change recorded litter counts or other statistics.
+                    this checkmark determines if this total is extracted from Total offspring on the overview.
                 </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -266,12 +266,12 @@ export default function StatsSection({
 
                     <span>
                         <span className="font-medium">
-                            Extract losses from total counts
+                            Extract losses & culls from total counts
                         </span>
                     </span>
                 </label>
                 <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 flex items-center">
-                    These options only determine which counts are deducted from Total Offspring in the litter overview. They do not change recorded litter counts or other statistics.
+                    this checkmark determines if these totals are extracted from Total offspring on the overview.
                 </p>
 
                 {/* LOSSES */}

@@ -165,25 +165,13 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                 />
 
                 <Big
-                    label={eggLaying ? 'Male hatchlings' : 'Males'}
-                    value={s.male}
-                    state={st(s.male)}
-                    testId="stat-males"
+                    label="Surviving"
+                    value={s.surviving}
+                    state={st(s.surviving)}
+                    testId="stat-surviving"
                 />
 
-                <Big
-                    label={eggLaying ? 'Female hatchlings' : 'Females'}
-                    value={s.female}
-                    state={st(s.female)}
-                    testId="stat-females"
-                />
-
-                <Big
-                    label={eggLaying ? 'Unknown hatchlings' : 'Unknown'}
-                    value={s.unknown}
-                    state={st(s.unknown)}
-                    testId="stat-unknown"
-                />
+                
 
                 {isBorn && (
                     <Big
@@ -198,27 +186,11 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                         testId="stat-weaned"
                     />
                 )}
-
-                <Big
-                    label={
-                        eggLaying
-                            ? 'Fledged / independent'
-                            : getLitterFieldLabel(
-                                'litterSizeWeaned',
-                                getLitterSpecies(litter),
-                                'Weaned',
-                                speciesOptions
-                            )
-                    }
-                    value={s.weaned}
-                    state={s.weanedState}
-                    testId="stat-weaned"
-                />
             </div>
 
             {isBorn && (
                 <p className="mt-2 text-[11px] text-gray-400 dark:text-dark-text-muted">
-                    Sex counts exclude the losses you extracted from the total.
+                    
                 </p>
             )}
 
@@ -267,6 +239,46 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                     />
                 )}
             </div>
+
+             {/* Distribution bar: stillborn, losses, culls, surviving */}
+{s.totalBorn !== null && (
+    <div className="mt-4">
+        <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
+            Distribution
+        </div>
+        <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-dark-surface" aria-label="Litter distribution">
+            {/* Stillborn section */}
+            <div
+                className="bg-red-500"
+                style={{ width: `{s.totalBorn > 0 ? (s.stillborn / s.totalBorn) * 100 : 0}%` }}
+                aria-label="Stillborn"
+            />
+            {/* Losses section (excluding culls) */}
+            <div
+                className="bg-orange-500"
+                style={{ width: `{s.totalBorn > 0 ? (s.postnatal / s.totalBorn) * 100 : 0}%` }} aria-label="Postnatal losses"
+            />
+            {/* Culls section */}
+            {s.culls !== null && s.cullSexSum > 0 && (
+                <div
+                    className="bg-gray-500"
+                    style={{ width: `{s.totalBorn > 0 ? (s.culls / s.totalBorn) * 100 : 0}%` }} aria-label="Culls"
+                />
+            )}
+            {/* Surviving section */}
+            <div
+                className="bg-green-500"
+                style={{ width: `{s.totalBorn > 0 ? (s.surviving / s.totalBorn) * 100 : 0}%` }} aria-label="Surviving"
+            />
+        </div>
+        <div className="flex justify-between mt-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
+            <span>Stillborn: {s.stillborn !== null ? s.stillborn : '—'}</span>
+            <span>Losses: {s.postnatal !== null ? s.postnatal : '—'}</span>
+            <span>Culls: {s.culls !== null ? s.culls : '—'}</span>
+            <span>Surviving: {s.surviving !== null ? s.surviving : '—'}</span>
+        </div>
+    </div>
+)}         
 
             {/* Losses and outcomes */}
             <Divider>
