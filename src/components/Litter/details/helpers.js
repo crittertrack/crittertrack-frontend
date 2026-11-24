@@ -117,18 +117,26 @@ export const computeLitterStats = (litter, status) => {
         : Math.max(0, losses - (culls || 0));
 
     // Weaning.
-    const weaned = numOrNull(
-        litter.litterSizeWeaned ?? litter.numberWeaned
-    );
-
-    // Guard: weaned cannot exceed surviving (total born - stillborn - all losses including culls)
-    const cappedWeaned = surviving !== null ? Math.min(weaned || 0, surviving) : weaned;
-
+    // Try the stored total first, then fall back to numberWeaned.
+    const weanedFromStorage = litter.litterSizeWeaned ?? litter.numberWeaned;
     const weanedBySex = pick(
         litter.maleWeaned,
         litter.femaleWeaned,
         litter.unknownWeaned
     );
+    // Auto-calculate weaned total from sex breakdown if not already stored.
+    const weanedSexTotal = weanedBySex.reduce(
+        (sum, v) => sum + (v || 0),
+        0
+    );
+    const weaned = weanedFromStorage !== null && weanedFromStorage !== undefined
+        ? weanedFromStorage
+        : weanedSexTotal > 0
+            ? weanedSexTotal
+            : null;
+
+    // Guard: weaned cannot exceed surviving (total born - stillborn - all losses including culls)
+    const cappedWeaned = surviving !== null ? Math.min(weaned || 0, surviving) : weaned;
 
     const isBorn = status === 'born';
 
