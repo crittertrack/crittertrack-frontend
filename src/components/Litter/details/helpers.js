@@ -277,6 +277,17 @@ export const nextMilestone = (
     let date = null;
 
     if (status === 'born') {
+        // If weaning is confirmed and the weaning date has passed, this cycle is complete.
+        // Do not show a "Weaning" milestone for past-due weaning dates.
+        if (litter.weaningConfirmed && litter.weaningDate) {
+            const weaningDate = new Date(litter.weaningDate);
+            if (isNaN(weaningDate.getTime()) || weaningDate <= now) {
+                // Weaning date is confirmed and in the past (or invalid) → cycle complete
+                label = null;
+            }
+        }
+
+        // If weaning is not yet confirmed, only show the milestone if the date is in the future
         if (!litter.weaningConfirmed && litter.weaningDate) {
             const weaningDate = new Date(litter.weaningDate);
 
@@ -284,10 +295,11 @@ export const nextMilestone = (
                 !isNaN(weaningDate.getTime()) &&
                 weaningDate > now
             ) {
-                label = null;
-            } else {
                 label = 'Weaning';
                 date = litter.weaningDate;
+            } else {
+                // Weaning date is not confirmed and is in the past or invalid → treat as complete
+                label = null;
             }
         }
     } else if (
@@ -297,6 +309,9 @@ export const nextMilestone = (
     ) {
         label = 'Mating';
         date = litter.matingDate || litter.pairingDate;
+    } else if (status === 'mated' && !litter.pregnancyDate) {
+        label = 'Pregnancy confirmed';
+        date = litter.matingDate;
     } else if (litter.expectedDueDate) {
         label = 'Birth due';
         date = litter.expectedDueDate;

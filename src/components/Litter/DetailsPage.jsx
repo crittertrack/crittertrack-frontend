@@ -70,9 +70,19 @@ const LitterDetailsPage = ({ showModalMessage, onViewAnimal, handleViewAnimal, b
 
     // Determine if "Mark Weaned" button should show
     // - Litter must be nursing (not yet weaned)
-    // - Within 90-day boundary from litter birth date
+    // - Within auto-weaning cut-off (90 days from litter birth date by default)
     // - weaningDate NOT yet set (per your "date=confirmed" workflow
-    const showWeanedButton = !!litter && !!litter.isNursing && daysSinceLitterBirth <= 90 && !litter.weaningConfirmed;
+    // - Button must NOT show for litters past the auto-weaning cut-off.
+    //   The isNursing flag may not be auto-updated for very old litters,
+    //   so we also explicitly check that the litter is within the nursing window.
+    const showWeanedButton = !!litter && 
+        !!litter.isNursing && 
+        daysSinceLitterBirth <= 90 && 
+        !litter.weaningConfirmed &&
+        // Safety: if birth date exists, ensure litter is within the realistic nursing window.
+        // This prevents the wean button from showing when isNursing flag hasn't been 
+        // auto-updated past the species' maxNursingDays cutoff (DEFAULT_MAX_NURSING_DAYS = 90).
+        (litter.birthDate == null || daysSinceLitterBirth < 365); // 1-year safety margin
 
     // Button onClick - sets BOTH fields (your workflow)
     const handleMarkAsMated = async (litter) => {
