@@ -272,22 +272,22 @@ export default function EditorShell({
                 return (
                     <DatesReproductionSection
                         form={form} setField={setField} setFields={setFields} errors={visibleErrors} original={litter}
-                        species={form.species} speciesOptions={speciesOptions}
+                        species={form?.species ?? ''} speciesOptions={speciesOptions}
                         autoCalcAvailable={autoCalcAvailable}
                         autoCalcDueDate={autoCalcDueDate}
                         autoCalcWeaningDate={autoCalcWeaningDate}
                     />
                 );
             case 'mating':
-                return <MatingBirthSection form={form} setField={setField} setFields={setFields} species={form.species} speciesOptions={speciesOptions} extras={extras} setExtras={setExtras} />;
+                return <MatingBirthSection form={form} setField={setField} setFields={setFields} species={form?.species ?? ''} speciesOptions={speciesOptions} extras={extras} setExtras={setExtras} />;
             case 'stats':
-                return <StatsSection form={form} setForm={setForm} setField={setField} linkedCounts={linkedCounts} warnings={warnings} species={form.species} speciesOptions={speciesOptions} />;
+                return <StatsSection form={form} setForm={setForm} setField={setField} linkedCounts={linkedCounts} warnings={warnings} species={form?.species ?? ''} speciesOptions={speciesOptions} />;
             case 'offspring':
                 return (
                     <OffspringSection
                         form={form} setForm={setForm} myAnimals={myAnimals} animalsLoaded={animalsLoaded}
                         linkedCounts={linkedCounts} createCounts={createCounts} setCreateCounts={setCreateCounts}
-                        isEdit={isEdit} species={form.species} speciesOptions={speciesOptions}
+                        isEdit={isEdit} species={form?.species ?? ''} speciesOptions={speciesOptions}
                     />
                 );
             case 'objectives':
