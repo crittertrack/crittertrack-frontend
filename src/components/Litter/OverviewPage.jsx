@@ -131,6 +131,12 @@ const LitterCard = ({
     const stillborn = litter.stillbornCount ?? null;
     const lossesRaw = litter.lossesCount ?? litter.losses ?? litter.stillbornCount;
     const losses = isNum(lossesRaw) ? Number(lossesRaw) : null;
+    // Culls count from the litter
+    const cullsCount = litter.cullsCount !== null ? litter.cullsCount : 0;
+    // Total loss = stillborn + losses + culls (combined)
+    const totalLoss = stillborn !== null || losses !== null || cullsCount !== 0
+        ? Math.max(0, (stillborn || 0) + (losses || 0) + cullsCount)
+        : null;
     // Total surviving = total born - stillborn - losses
     const totalSurviving = born !== null && stillborn !== null
         ? Math.max(0, born - stillborn - (losses || 0))
