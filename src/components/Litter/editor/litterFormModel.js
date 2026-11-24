@@ -20,7 +20,7 @@ export const EMPTY_LITTER_FORM = {
     litterSizeBorn: null, numberBorn: null, maleCount: null, femaleCount: null, unknownCount: null,
     stillbornCount: null, maleStillborn: null, femaleStillborn: null, unknownStillborn: null,
     lossesCount: null, maleLosses: null, femaleLosses: null, unknownLosses: null,
-    hasCulls: false, cullsCount: null, maleCulls: null, femaleCulls: null, unknownCulls: null,
+    cullsCount: null, maleCulls: null, femaleCulls: null, unknownCulls: null,
     litterSizeWeaned: null, maleWeaned: null, femaleWeaned: null, unknownWeaned: null,
     weaningDate: '', weaningConfirmed: false,
     extractStillbornFromTotal: false, extractLossesFromTotal: false,
@@ -53,11 +53,10 @@ export const formFromLitter = (litter) => ({
     maleLosses: litter.maleLossesCount ?? null,
     femaleLosses: litter.femaleLossesCount ?? null,
     unknownLosses: litter.unknownLossesCount ?? null,
-    hasCulls: !!litter.hasCulls,
-    cullsCount: litter.hasCulls ? (litter.cullsCount ?? null) : null,
-    maleCulls: litter.cullMaleCount ?? null,
-    femaleCulls: litter.cullFemaleCount ?? null,
-    unknownCulls: litter.cullUnknownCount ?? null,
+    cullsCount: litter.cullsCount ?? null,
+maleCulls: litter.cullMaleCount ?? null,
+femaleCulls: litter.cullFemaleCount ?? null,
+unknownCulls: litter.cullUnknownCount ?? null,
     litterSizeWeaned: litter.litterSizeWeaned ?? litter.numberWeaned ?? null,
     maleWeaned: litter.maleWeaned ?? null, femaleWeaned: litter.femaleWeaned ?? null,
     unknownWeaned: litter.unknownWeaned ?? null,
@@ -123,9 +122,6 @@ export const reconcileLitterFormCounts = (form, linkedAnimals = []) => {
     }
     if (fd.litterSizeBorn && weaned > surviving) {
         warnings.push(`Weaned (${weaned}) exceeds Surviving (${surviving}).`);
-    }
-    if (fd.hasCulls && culls > losses) {
-        warnings.push(`Culls (${culls}) exceeds Total Losses (${losses}).`);
     }
     if (fd.litterSizeBorn && (stillborn + losses + weaned) > fd.litterSizeBorn) {
         warnings.push(`Stillborn + Losses + Weaned (${stillborn + losses + weaned}) exceeds Total Born (${fd.litterSizeBorn}).`);
@@ -297,8 +293,10 @@ const sharedPayload = (fd, counts, offspringIds) => ({
     maleLossesCount: fd.maleLosses ?? null,
     femaleLossesCount: fd.femaleLosses ?? null,
     unknownLossesCount: fd.unknownLosses ?? null,
-    hasCulls: !!fd.hasCulls,
     cullsCount: fd.cullsCount ?? null,
+maleCulls: fd.maleCulls ?? null,
+femaleCulls: fd.femaleCulls ?? null,
+unknownCulls: fd.unknownCulls ?? null,
     breedingObjectives: Array.isArray(fd.breedingObjectives) ? fd.breedingObjectives : [],
     expectedOutcomes: fd.expectedOutcomes ?? null,
     geneticNotes: fd.geneticNotes ?? null,

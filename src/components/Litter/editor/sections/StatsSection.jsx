@@ -307,51 +307,20 @@ export default function StatsSection({
                     ))}
                 </div>
 
-                {/* CULLS TOGGLE */}
-                <label className="flex items-start gap-2 text-sm text-[#111B35] dark:text-dark-text cursor-pointer">
-                    <input
-                        type="checkbox"
-                        className="mt-0.5"
-                        checked={!!form.hasCulls}
-                        onChange={(e) =>
-                            setForm(fd => ({
-                                ...fd,
-                                hasCulls: e.target.checked,
-                                cullsCount: e.target.checked
-                                    ? fd.cullsCount
-                                    : null
-                            }))
-                        }
+                /* CULLS - always visible */
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <ReadOnlyTotal
+                        label="Total culls"
+                        value={form.cullsCount}
+                        hint="Auto-calculated"
                     />
 
-                    <span>
-                        <span className="font-medium">
-                            Some losses were culls
-                        </span>
-
-                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">
-                            Culls are a subset of total losses.
-                        </span>
-                    </span>
-                </label>
-
-                {/* CULLS */}
-                {form.hasCulls && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <ReadOnlyTotal
-                            label="Total culls"
-                            value={form.cullsCount}
-                            hint="Auto-calculated"
-                        />
-
-                        {[
-                            ['maleCulls', 'Male'],
-                            ['femaleCulls', 'Female'],
-                            ['unknownCulls', 'Unknown']
-                        ].map(([key, label]) => (
+                    {['maleCulls', 'femaleCulls', 'unknownCulls'].map((key) => {
+                        const labelMap = { maleCulls: 'Male', femaleCulls: 'Female', unknownCulls: 'Unknown' };
+                        return (
                             <FieldRow
                                 key={key}
-                                label={`${label} culls`}
+                                label={`${labelMap[key]} culls`}
                             >
                                 <NumberInput
                                     value={form[key]}
@@ -361,9 +330,9 @@ export default function StatsSection({
                                     className={inputClass}
                                 />
                             </FieldRow>
-                        ))}
-                    </div>
-                )}
+                        );
+                    })}
+                </div>
             </div>
 
             {/* WEANED / INDEPENDENT */}
