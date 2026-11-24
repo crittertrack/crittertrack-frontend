@@ -259,7 +259,7 @@ const LitterCard = ({
                     {statCount > 0 && (
                         <div className="flex items-start divide-x divide-gray-100 dark:divide-dark-border">
                         {showBorn && <Stat value={born} label="Total Born" />}
-                        {showLosses && <Stat value={losses} label="Total Loss" />}
+                        {showLosses && <Stat value={totalLoss} label="Total Loss" />}
                         {showSurviving && <Stat value={totalSurviving} label="Total Surviving" />}    
                         {showLinked && <Stat value={linked} label="Total Linked" />}
                         </div>
