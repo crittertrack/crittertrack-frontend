@@ -13,6 +13,7 @@ import {
     setStillbornSex,
     setLossSex,
     setCullSex,
+    setWeanedSex,
     toggleExtractStillborn,
     toggleExtractLosses
 } from '../litterFormModel';
