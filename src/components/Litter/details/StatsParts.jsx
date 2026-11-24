@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import {
-    ChevronDown,
-    ChevronUp,
     Mars,
     Venus,
     Circle
@@ -33,18 +32,15 @@ export const Big = ({ label, value, state = 'value', testId }) => (
 );
 
 /**
- * Breakdown row styled like the litter statistics reference:
- * category dot, title, total, always-visible sex counts, and expand chevron.
- * Expanding reveals a compact visual distribution of the available sex counts.
+ * Breakdown row with an always-visible sex distribution bar.
+ * Each bar calculates percentages from its own recorded sex total.
  */
 export const BreakdownToggle = ({
     title,
     total,
     bySex = [null, null, null],
-    note,
-    dotColor = 'bg-primary'
+    note
 }) => {
-    const [open, setOpen] = useState(false);
     const safeBySex = Array.isArray(bySex) ? bySex : [null, null, null];
 
     const values = [0, 1, 2].map((index) => {
@@ -69,11 +65,6 @@ export const BreakdownToggle = ({
     return (
         <div className="rounded-xl border border-gray-100 bg-gray-50/80 px-3 py-2 dark:border-dark-border dark:bg-dark-surface/70">
             <div className="flex min-w-0 items-center gap-2">
-                <span
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotColor}`}
-                    aria-hidden="true"
-                />
-
                 <span className="min-w-0 flex-1 truncate text-sm text-gray-700 dark:text-dark-text">
                     {title}
                 </span>
@@ -83,42 +74,17 @@ export const BreakdownToggle = ({
                         ? <Muted>—</Muted>
                         : total}
                 </span>
-
-                <div className="ml-1 flex shrink-0 items-center gap-1.5 sm:gap-3">
-                    {SEX.map(({ key, label, Icon, icon }, index) => (
-                        <span
-                            key={key}
-                            className="inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] tabular-nums text-gray-600 dark:text-dark-text-secondary sm:gap-1 sm:text-xs"
-                            aria-label={`${label}: ${values[index] === null ? 'not recorded' : values[index]}`}
-                        >
-                            <Icon size={13} className={icon} />
-                            <span>{values[index] === null ? '—' : values[index]}</span>
-                        </span>
-                    ))}
-                </div>
-
-                <button
-                    type="button"
-                    onClick={() => setOpen(value => !value)}
-                    aria-expanded={open}
-                    aria-label={`${open ? 'Hide' : 'Show'} ${title.toLowerCase()} distribution`}
-                    className="ml-0.5 shrink-0 rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-200/70 hover:text-gray-700 dark:text-dark-text-muted dark:hover:bg-dark-border dark:hover:text-dark-text"
-                >
-                    {open
-                        ? <ChevronUp size={16} />
-                        : <ChevronDown size={16} />}
-                </button>
             </div>
 
             {note && (
-                <div className="ml-5 mt-1 text-[11px] text-gray-400 dark:text-dark-text-muted">
+                <div className="mt-0.5 text-[11px] text-gray-400 dark:text-dark-text-muted">
                     {note}
                 </div>
             )}
 
-            {open && (
-                <div className="ml-5 mt-2 border-t border-gray-200/80 pt-2 dark:border-dark-border">
-                    {hasRecordedSexCount && sexTotal > 0 ? (
+            <div className="mt-2">
+                {hasRecordedSexCount && sexTotal > 0 ? (
+                    <>
                         <div
                             className="flex h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-dark-border"
                             role="img"
@@ -132,18 +98,37 @@ export const BreakdownToggle = ({
                                     <span
                                         key={key}
                                         className={bar}
-                                        style={{ width: `${(count / sexTotal) * 100}%` }}
+                                        style={{
+                                            width: `${(count / sexTotal) * 100}%`
+                                        }}
                                     />
                                 );
                             })}
                         </div>
-                    ) : (
-                        <p className="text-[11px] text-gray-400 dark:text-dark-text-muted">
-                            Sex breakdown is not recorded.
-                        </p>
-                    )}
-                </div>
-            )}
+
+                        <div className="mt-1 flex justify-between gap-2 text-[10px] text-gray-500 dark:text-dark-text-muted">
+                            {SEX.map(({ key, label, Icon, icon }, index) => (
+                                <span
+                                    key={key}
+                                    className="inline-flex items-center gap-1 whitespace-nowrap"
+                                >
+                                    <Icon size={11} className={icon} />
+                                    {values[index] === null
+                                        ? '—'
+                                        : `${Math.round((values[index] / sexTotal) * 100)}%`}
+                                    <span className="hidden sm:inline">
+                                        {label.toLowerCase()}
+                                    </span>
+                                </span>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <p className="text-[11px] text-gray-400 dark:text-dark-text-muted">
+                        Sex breakdown is not recorded.
+                    </p>
+                )}
+            </div>
         </div>
     );
 };

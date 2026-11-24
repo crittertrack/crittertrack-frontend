@@ -257,42 +257,54 @@ export default function StatsPanel({
                 )}
             </div>
 
-            {/* Outcome bar. Culls are separated from postnatal losses here,
-                but remain included in the helper's total losses calculation. */}
-            {s.totalBorn !== null && s.totalBorn !== undefined && (
-                <div className="mt-4">
-                    <div className="mb-1 text-xs font-medium text-gray-500 dark:text-dark-text-muted">
-                        Litter outcome
-                    </div>
+            
+{/* Outcome bar. Culls are separated from postnatal losses. */}
+{s.totalBorn !== null && s.totalBorn !== undefined && (
+    <div className="mt-4">
+        <div className="mb-1 text-xs font-medium text-gray-500 dark:text-dark-text-muted">
+            Litter outcome
+        </div>
 
-                    <LitterOutcomeBar
-                        totalBorn={s.totalBorn}
-                        stillborn={s.stillborn}
-                        postnatal={s.postnatal}
-                        culls={s.culls}
-                        surviving={s.surviving}
-                    />
+        <LitterOutcomeBar
+            totalBorn={s.totalBorn}
+            stillborn={s.stillborn}
+            postnatal={s.postnatal}
+            culls={s.culls}
+            surviving={s.surviving}
+        />
 
-                    <div className="mt-1 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
-                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
-                            Surviving: {s.surviving ?? '—'}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
-                            {stillbornTitle}: {s.stillborn ?? '—'}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="h-2 w-2 rounded-full bg-orange-500" aria-hidden="true" />
-                            {lossesTitle}: {s.postnatal ?? '—'}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="h-2 w-2 rounded-full bg-gray-500" aria-hidden="true" />
-                            Culls: {s.culls ?? 0}
-                        </span>
-                    </div>
-                </div>
-            )}
+        <div className="mt-1 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
+                Surviving: {s.surviving != null
+                    ? `${((s.surviving / s.totalBorn) * 100).toFixed(1)}%`
+                    : '—'}
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
+                {stillbornTitle}: {s.stillborn != null
+                    ? `${((s.stillborn / s.totalBorn) * 100).toFixed(1)}%`
+                    : '—'}
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-orange-500" aria-hidden="true" />
+                {lossesTitle}: {s.postnatal != null
+                    ? `${((s.postnatal / s.totalBorn) * 100).toFixed(1)}%`
+                    : '—'}
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-gray-500" aria-hidden="true" />
+                Culls: {s.culls != null
+                    ? `${((s.culls / s.totalBorn) * 100).toFixed(1)}%`
+                    : '0.0%'}
+            </span>
+        </div>
+    </div>
+)}
+
 
             {/* Compact rounded breakdown rows */}
             <Divider>
@@ -305,21 +317,18 @@ export default function StatsPanel({
                         title="Born"
                         total={s.totalBorn}
                         bySex={bornBySex}
-                        dotColor="bg-primary"
                     />
 
                     <BreakdownToggle
                         title={stillbornTitle}
                         total={s.stillborn}
                         bySex={stillbornBySex}
-                        dotColor="bg-red-500"
                     />
 
                     <BreakdownToggle
                         title={lossesTitle}
                         total={s.postnatal}
                         bySex={postnatalBySex}
-                        dotColor="bg-orange-500"
                         note={s.culls > 0 ? 'Excludes culls' : undefined}
                     />
 
@@ -327,14 +336,12 @@ export default function StatsPanel({
                         title="Culls"
                         total={s.culls ?? 0}
                         bySex={cullsBySex}
-                        dotColor="bg-gray-500"
                     />
 
                     <BreakdownToggle
                         title="Surviving"
                         total={s.surviving}
                         bySex={survivingBySex}
-                        dotColor="bg-green-500"
                     />
 
                     {isBorn && (
@@ -347,42 +354,8 @@ export default function StatsPanel({
                             )}
                             total={s.weaned}
                             bySex={[null, null, null]}
-                            dotColor="bg-sky-500"
                         />
                     )}
-                </div>
-            </Divider>
-
-            {/* Survival statistics */}
-            <Divider>
-                <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-gray-500 dark:text-dark-text-muted">
-                            {liveTitle}
-                        </span>
-
-                        <span className="font-medium text-gray-900 dark:text-dark-text">
-                            {s.liveBorn === null
-                                ? <Muted>Not recorded</Muted>
-                                : s.liveBorn}
-                        </span>
-                    </div>
-
-                    <div className="flex justify-between">
-                        <span className="text-gray-500 dark:text-dark-text-muted">
-                            {eggLaying
-                                ? 'Survival to independence'
-                                : 'Survival to weaning'}
-                        </span>
-
-                        <span className="font-medium text-gray-900 dark:text-dark-text">
-                            {s.survivalPct !== null
-                                ? `${s.survivalPct}%`
-                                : s.weanedState === 'pending'
-                                    ? <Muted>Pending weaning</Muted>
-                                    : <Muted>Not recorded</Muted>}
-                        </span>
-                    </div>
                 </div>
             </Divider>
         </Panel>

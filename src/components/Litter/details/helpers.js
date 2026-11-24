@@ -61,6 +61,7 @@ export const computeLitterStats = (litter, status) => {
     const postnatal = losses === null ? null : Math.max(0, losses - (culls || 0));
 
     const weaned = numOrNull(litter.litterSizeWeaned ?? litter.numberWeaned);
+    const weanedBySex = pick(litter.maleWeaned, litter.femaleWeaned, litter.unknownWeaned);
     const isBorn = status === 'born';
 
     const maxNursingDays = 90;
@@ -81,7 +82,7 @@ const daysSinceBirth = litter.birthDate
         male, female, unknown, sexRecorded, sexSum,
         sexExcludesLosses: !!(litter.extractStillbornFromTotal || litter.extractLossesFromTotal),
         totalBorn, liveBorn, surviving, effectiveSurviving, stillborn, losses, culls, postnatal,
-        weaned, weanedState, survivalPct,
+        weaned, weanedBySex, weanedState, survivalPct,
         stillbornBySex: pick(litter.maleStillbornCount, litter.femaleStillbornCount, litter.unknownStillbornCount),
         lossesBySex: pick(litter.maleLossesCount, litter.femaleLossesCount, litter.unknownLossesCount),
         cullsBySex: cullBySex,
