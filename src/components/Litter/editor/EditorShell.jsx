@@ -218,7 +218,13 @@ export default function EditorShell({
             onDone(result.litter || litter, result.status);
         } catch (err) {
             console.error('Error saving litter:', err);
-            showModalMessage('Error', err.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} litter`);
+            const errorMessage = err.response?.data?.message || err.message || `Failed to ${isEdit ? 'update' : 'create'} litter`;
+            // Show specific error if available, otherwise generic message
+            showModalMessage('Error', errorMessage);
+            // Additional logging for debugging
+            if (!err.response?.data?.message) {
+                console.warn('Server did not return error message body. Full error:', err);
+            }
         } finally {
             savingRef.current = false;
             setSaving(false);

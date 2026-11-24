@@ -24,9 +24,9 @@ describe('computeLitterStats', () => {
         expect(s.surviving).toBe(6);
     });
 
-    it('adds extracted losses back so total born is the real total', () => {
+    it('totalBorn remains the original entered value regardless of extraction flags', () => {
         const s = computeLitterStats({ litterSizeBorn: 7, maleCount: 4, femaleCount: 3, lossesCount: 2, extractLossesFromTotal: true }, 'born');
-        expect(s.totalBorn).toBe(9);
+        expect(s.totalBorn).toBe(7);
         expect(s.sexExcludesLosses).toBe(true);
     });
 

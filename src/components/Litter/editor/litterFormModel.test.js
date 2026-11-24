@@ -231,18 +231,18 @@ describe('sex breakdown arithmetic', () => {
         const fd = setLossSex(form({ maleCount: 1, litterSizeBorn: 1, extractLossesFromTotal: true }), 'maleLosses', 5);
         expect(fd.maleCount).toBeNull();
     });
-    it('toggleExtractStillborn subtracts then restores the stillborn from M/F/U', () => {
+    it('toggleExtractStillborn only sets the flag, preserving original counts', () => {
         const base = form({ maleCount: 3, femaleCount: 2, unknownCount: 1, litterSizeBorn: 6, maleStillborn: 1, femaleStillborn: 1 });
         const on = toggleExtractStillborn(base, true);
-        expect(on).toMatchObject({ extractStillbornFromTotal: true, maleCount: 2, femaleCount: 1, unknownCount: 1, litterSizeBorn: 4 });
+        expect(on).toMatchObject({ extractStillbornFromTotal: true, maleCount: 3, femaleCount: 2, unknownCount: 1, litterSizeBorn: 6 });
         const off = toggleExtractStillborn(on, false);
         expect(off).toMatchObject({ extractStillbornFromTotal: false, maleCount: 3, femaleCount: 2, unknownCount: 1, litterSizeBorn: 6 });
     });
-    it('toggleExtractLosses clamps at zero and nulls empty counts', () => {
+    it('toggleExtractLosses only sets the flag, preserving original counts', () => {
         const on = toggleExtractLosses(form({ maleCount: 1, femaleCount: 2, litterSizeBorn: 3, maleLosses: 4 }), true);
-        expect(on).toMatchObject({ extractLossesFromTotal: true, maleCount: null, femaleCount: 2, litterSizeBorn: 2 });
+        expect(on).toMatchObject({ extractLossesFromTotal: true, maleCount: 1, femaleCount: 2, litterSizeBorn: 3 });
     });
-    it('extracts unknown-sex losses once; culls remain a subset of losses', () => {
+    it('extracts unknown-sex losses only sets the flag, preserving original counts', () => {
         const base = form({
             unknownCount: 3,
             litterSizeBorn: 3,
@@ -252,8 +252,8 @@ describe('sex breakdown arithmetic', () => {
             cullsCount: 1,
         });
         const extracted = toggleExtractLosses(base, true);
-        expect(extracted).toMatchObject({ unknownCount: 2, litterSizeBorn: 2, lossesCount: 1, cullsCount: 1 });
-        expect(toggleExtractLosses(extracted, false)).toMatchObject({ unknownCount: 3, litterSizeBorn: 3 });
+        expect(extracted).toMatchObject({ extractLossesFromTotal: true, unknownCount: 3, litterSizeBorn: 3, lossesCount: 1, cullsCount: 1 });
+        expect(toggleExtractLosses(extracted, false)).toMatchObject({ extractLossesFromTotal: false, unknownCount: 3, litterSizeBorn: 3 });
     });
 });
 

@@ -38,8 +38,20 @@ export default function OverviewTab({
         : litter.birthDateUnknown ? 'Date unknown' : null;
 
     // Use the litter's lightweight link IDs as a fallback; the offspring records load only on demand.
-    const total = stats.totalBorn !== null
-        ? stats.totalBorn
+    const totalBornFromStats = stats.totalBorn !== null ? stats.totalBorn : null;
+
+    // Compute the Total offspring VIEW: subtract stillborn and/or losses when extraction flags are enabled.
+    const viewTotal = totalBornFromStats !== null
+        ? (() => {
+            let total = totalBornFromStats;
+            if (litter.extractStillbornFromTotal && litter.stillbornCount !== null) {
+                total -= litter.stillbornCount;
+            }
+            if (litter.extractLossesFromTotal && litter.lossesCount !== null) {
+                total -= litter.lossesCount;
+            }
+            return Math.max(0, total);
+        })()
         : (Array.isArray(litter.offspringIds_public) && litter.offspringIds_public.length > 0 ? litter.offspringIds_public.length : null);
 
     const parentProps = { onView, breedingLineDefs, animalBreedingLines, matingDate: litter.matingDate || litter.pairingDate };
@@ -48,7 +60,7 @@ export default function OverviewTab({
         <div className="space-y-4" data-testid="litter-overview">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <Summary label={getLitterFieldLabel('birthDate', species, 'Birth date', speciesOptions)} testId="summary-birth">{birth || <Muted>{status === 'born' ? 'Not recorded' : eggLaying ? 'Not laid or hatched yet' : 'Not born yet'}</Muted>}</Summary>
-                <Summary label="Total offspring" testId="summary-total">{total === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : total}</Summary>
+                <Summary label="Total offspring" testId="summary-total">{viewTotal === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : viewTotal}</Summary>
                 <Summary label="COI" testId="summary-coi">{isBlank(coi) ? <Muted>Not calculated</Muted> : `${Number(coi).toFixed(2)}%`}</Summary>
                 
 <Summary label="Next milestone" testId="summary-milestone">
