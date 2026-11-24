@@ -3,6 +3,7 @@ import React from 'react';
 import { computeLitterStats } from './helpers';
 import { Panel, Muted } from './ui';
 import { Big, BreakdownToggle, SEX } from './StatsParts';
+import { LitterOutcomeBar } from './LitterOutcomeBar';
 import {
     getLitterFieldLabel,
     getLitterSpecies,
@@ -244,33 +245,15 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
 {s.totalBorn !== null && (
     <div className="mt-4">
         <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
-            Distribution
+            Litter outcome
         </div>
-        <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-dark-surface" aria-label="Litter distribution">
-            {/* Stillborn section */}
-            <div
-                className="bg-red-500"
-                style={{ width: `{s.totalBorn > 0 ? (s.stillborn / s.totalBorn) * 100 : 0}%` }}
-                aria-label="Stillborn"
-            />
-            {/* Losses section (excluding culls) */}
-            <div
-                className="bg-orange-500"
-                style={{ width: `{s.totalBorn > 0 ? (s.postnatal / s.totalBorn) * 100 : 0}%` }} aria-label="Postnatal losses"
-            />
-            {/* Culls section */}
-            {s.culls !== null && s.cullSexSum > 0 && (
-                <div
-                    className="bg-gray-500"
-                    style={{ width: `{s.totalBorn > 0 ? (s.culls / s.totalBorn) * 100 : 0}%` }} aria-label="Culls"
-                />
-            )}
-            {/* Surviving section */}
-            <div
-                className="bg-green-500"
-                style={{ width: `{s.totalBorn > 0 ? (s.surviving / s.totalBorn) * 100 : 0}%` }} aria-label="Surviving"
-            />
-        </div>
+        <LitterOutcomeBar
+            totalBorn={s.totalBorn}
+            stillborn={s.stillborn}
+            postnatal={s.postnatal}
+            culls={s.culls}
+            surviving={s.surviving}
+        />
         <div className="flex justify-between mt-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
             <span>Stillborn: {s.stillborn !== null ? s.stillborn : '—'}</span>
             <span>Losses: {s.postnatal !== null ? s.postnatal : '—'}</span>
