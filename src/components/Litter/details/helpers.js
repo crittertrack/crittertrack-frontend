@@ -94,15 +94,17 @@ export const computeLitterStats = (litter, status) => {
     const totalBorn = storedBorn;
 
     // Live born = total born minus stillborn.
+    // Use Number() to ensure stillborn is a valid number, default to 0 if null/undefined
     const liveBorn = totalBorn === null
         ? null
-        : Math.max(0, totalBorn - (stillborn || 0));
+        : Math.max(0, totalBorn - (Number(stillborn) || 0));
 
     // Surviving = live born minus ALL postnatal losses,
     // including culls.
+    // Use Number() to ensure losses is a valid number, default to 0 if null/undefined
     const surviving = liveBorn === null
         ? null
-        : Math.max(0, liveBorn - (losses || 0));
+        : Math.max(0, liveBorn - (Number(losses) || 0));
 
     // Preserve the existing effective surviving calculation.
     const effectiveSurviving =

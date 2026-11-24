@@ -96,8 +96,10 @@ const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }
 
 const Stat = ({ value, label }) => (
     <div className="flex-1 text-center min-w-0">
-        {/* Use text-base on mobile, sm on lg - keeps it compact but readable */}
-        <div className="text-sm font-medium text-gray-900 dark:text-dark-text">{value}</div>
+        {/* Display the value, or '-' if null/undefined */}
+        <div className="text-sm font-medium text-gray-900 dark:text-dark-text">
+          {value != null ? value : '-'}
+        </div>
         <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">{label}</div>
     </div>
 );
@@ -135,8 +137,9 @@ const LitterCard = ({
     // Culls count from the litter
     const cullsCount = litter.cullsCount !== null ? litter.cullsCount : 0;
     // Total loss = stillborn + losses + culls (combined)
+    // Use Number() to ensure stillborn and losses are valid numbers, default to 0 if null/undefined
     const totalLoss = stillborn !== null || losses !== null || cullsCount !== 0
-        ? Math.max(0, (stillborn || 0) + (losses || 0) + cullsCount)
+        ? Math.max(0, (Number(stillborn) || 0) + (Number(losses) || 0) + cullsCount)
         : null;
     // Total surviving = total born - stillborn - losses
     // Use Number() to ensure losses is a valid number, default to 0 if null/undefined
@@ -147,13 +150,15 @@ const LitterCard = ({
         ? offspring.length
         : (Array.isArray(litter.offspringIds_public) ? litter.offspringIds_public.length : null);
 
-    // Always show all 4 stats on the card, but display '-' when value is null/undefined
-    // This ensures all 4 stats are visible on mobile regardless of birth status or value zeros
-    const showBorn = born !== null;
-    const showLosses = totalLoss !== null;
-    const showSurviving = totalSurviving !== null;
-    const showLinked = linked !== null;
-    const statCount = [showBorn, showLosses, showSurviving, showLinked].filter(Boolean).length;
+    // Always show all 4 stats on the card (mobile + desktop).
+    // statCount is used to determine whether to show the stats section;
+    // we set it to 4 so the section always renders.
+    // Individual stat values display '-' when null/undefined.
+    const showBorn = true;
+    const showLosses = true;
+    const showSurviving = true;
+    const showLinked = true;
+    const statCount = 4;
     const showSex = anySexRecorded && (hasBirth || sexSum > 0);
     const males = Number(litter.maleCount) || 0;
     const females = Number(litter.femaleCount) || 0;
