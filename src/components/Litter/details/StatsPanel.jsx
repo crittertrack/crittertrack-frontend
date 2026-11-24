@@ -273,35 +273,40 @@ export default function StatsPanel({
             surviving={s.surviving}
         />
 
-        <div className="mt-1 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
-                Surviving: {s.surviving != null
-                    ? `${((s.surviving / s.totalBorn) * 100).toFixed(1)}%`
-                    : '—'}
-            </span>
+        
+<div className="mt-1 flex justify-between text-[11px] text-gray-600 dark:text-dark-text-secondary">
+    <span className="inline-flex items-center gap-1">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" aria-hidden="true" />
+        {s.surviving != null
+            ? `${((s.surviving / s.totalBorn) * 100).toFixed(1)}%`
+            : '—'}{' '}
+        surviving
+    </span>
 
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
-                {stillbornTitle}: {s.stillborn != null
-                    ? `${((s.stillborn / s.totalBorn) * 100).toFixed(1)}%`
-                    : '—'}
-            </span>
+    <span className="inline-flex items-center gap-1">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-hidden="true" />
+        {s.stillborn != null
+            ? `${((s.stillborn / s.totalBorn) * 100).toFixed(1)}%`
+            : '—'}{' '}
+        {stillbornTitle.toLowerCase()}
+    </span>
 
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                <span className="h-2 w-2 rounded-full bg-orange-500" aria-hidden="true" />
-                {lossesTitle}: {s.postnatal != null
-                    ? `${((s.postnatal / s.totalBorn) * 100).toFixed(1)}%`
-                    : '—'}
-            </span>
+    <span className="inline-flex items-center gap-1">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-orange-500" aria-hidden="true" />
+        {s.postnatal != null
+            ? `${((s.postnatal / s.totalBorn) * 100).toFixed(1)}%`
+            : '—'}{' '}
+        {lossesTitle.toLowerCase()}
+    </span>
 
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                <span className="h-2 w-2 rounded-full bg-gray-500" aria-hidden="true" />
-                Culls: {s.culls != null
-                    ? `${((s.culls / s.totalBorn) * 100).toFixed(1)}%`
-                    : '0.0%'}
-            </span>
-        </div>
+    <span className="inline-flex items-center gap-1">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-gray-500" aria-hidden="true" />
+        {s.culls != null
+            ? `${((s.culls / s.totalBorn) * 100).toFixed(1)}%`
+            : '0.0%'}{' '}
+        culls
+    </span>
+</div>
     </div>
 )}
 
