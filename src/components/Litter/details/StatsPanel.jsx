@@ -319,45 +319,6 @@ export default function StatsPanel({
                 <div className="mb-2 text-sm font-bold text-gray-900 dark:text-dark-text-muted">
                     Breakdown
                 </div>
-
-                <div className="space-y-1.5">
-
-                    <BreakdownToggle
-                        title={stillbornTitle}
-                        total={s.stillborn}
-                        bySex={stillbornBySex}
-                    />
-
-                    <BreakdownToggle
-                        title={lossesTitle}
-                        total={s.postnatal}
-                        bySex={postnatalBySex}
-                        note={s.culls > 0 ? 'Excludes culls' : undefined}
-                    />
-
-                    <BreakdownToggle
-                        title="Culls"
-                        total={s.culls ?? 0}
-                        bySex={cullsBySex}
-                    />
-
-                    <BreakdownToggle
-                        title="Surviving"
-                        total={s.surviving}
-                        bySex={survivingBySex}
-                    />
-
-                    <BreakdownToggle
-                        title={getLitterFieldLabel(
-                            'litterSizeWeaned',
-                            getLitterSpecies(litter),
-                            'Weaned',
-                            speciesOptions
-                        )}
-                        total={s.weaned}
-                        bySex={s.weanedBySex}
-/>
-                </div>
             </Divider>
             <div
                 className="flex items-center gap-2 cursor-pointer select-none"
@@ -371,8 +332,14 @@ export default function StatsPanel({
                         className="h-4 w-4 text-gray-500 dark:text-dark-text-muted"
                         viewBox="0 0 24 24"
                         fill="currentColor"
+                        role="img"
+                        aria-label={isBreakdownExpanded ? 'Collapse breakdown' : 'Expand breakdown'}
                     >
-                        <path d="M9 5h6v6h-6zm0-6h6v6h-6zM5 9h14v14H5zM2 5h2v12H2zM5 20H5" />
+                        <path
+                            d={isBreakdownExpanded
+                                ? 'M9 5h6v6h-6zm0-6h6v6h-6zM5 9h14v14H5zM2 5h2v12H2z'
+                                : 'M9 5h6v6h-6zm0-6h6v6h-6zM5 9h14v14H5zM2 5h2v12H2zM12 3l9 9-9 9l-1.4 1.4a.75.75 0 01-1.1-.2L12 6l-6.29 2.1a.75.75 0 01-1.1-.2L3 6l6.29-2.1a.75.75 0 011.1 0l6.3 2.1-1.4-1.4L12 3z'}
+                        />
                     </svg>
                 </span>
             </div>

@@ -94,15 +94,21 @@ const ParentPanel = ({ icon, label, animal, fallbackId, onView, align = 'left' }
     </div>
 );
 
-const Stat = ({ value, label }) => (
-    <div className="flex-1 text-center min-w-0">
-        {/* Display the value, or '-' if null/undefined */}
-        <div className="text-sm font-medium text-gray-900 dark:text-dark-text">
-          {value != null ? value : '-'}
+const Stat = ({ value, label }) => {
+    // Display '-' if value is null, undefined, empty, or NaN
+    const displayValue = value == null || value !== value // NaN check: NaN !== NaN is true
+        ? '-'
+        : value;
+    
+    return (
+        <div className="flex-1 text-center min-w-0">
+            <div className="text-sm font-medium text-gray-900 dark:text-dark-text">
+              {displayValue}
+            </div>
+            <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">{label}</div>
         </div>
-        <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">{label}</div>
-    </div>
-);
+    );
+};
 
 const isNum = (v) => v !== null && v !== undefined && v !== '' && !isNaN(Number(v));
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;

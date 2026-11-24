@@ -11,12 +11,19 @@ import EventDetailsRow from './EventDetailsRow';
 import FinanceOverviewCard from '../../shared/FinanceOverviewCard';
 import { getLitterFieldLabel, getLitterSpecies, isEggLayingSpecies } from '../../../utils/litterSpeciesPresentation';
 
-const Summary = ({ label, children, testId, className }) => (
-    <div className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-4 py-3 min-w-0 ${className}`} data-testid={testId}>
-        <div className="text-xs text-gray-500 dark:text-dark-text-muted">{label}</div>
-        <div className="mt-0.5 text-lg font-semibold text-gray-900 dark:text-dark-text">{children}</div>
-    </div>
-);
+const Summary = ({ label, children, testId, className }) => {
+    // Display "—" if value is null, undefined, empty, or NaN
+    const displayValue = children === null || children === undefined || children === '' || isNaN(children)
+        ? <span className="text-xs text-gray-500 dark:text-dark-text-muted">—</span>
+        : children;
+    
+    return (
+        <div className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-4 py-3 min-w-0 ${className}`} data-testid={testId}>
+            <div className="text-xs text-gray-500 dark:text-dark-text-muted">{label}</div>
+            <div className="mt-0.5 text-lg font-semibold text-gray-900 dark:text-dark-text">{displayValue}</div>
+        </div>
+    );
+};
 
 export default function OverviewTab({
     litter, status, onView, onEdit,
@@ -130,8 +137,7 @@ export default function OverviewTab({
       );
     })()}
   </div>
-</Summary>
-            </div>
+</div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <ParentPanel role="Sire" animal={litter.sire} fallbackId={litter.sireId_public} {...parentProps} />
