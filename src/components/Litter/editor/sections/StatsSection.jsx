@@ -12,6 +12,7 @@ import {
     setSexCount,
     setStillbornSex,
     setLossSex,
+    setCullSex,
     toggleExtractStillborn,
     toggleExtractLosses
 } from '../litterFormModel';
@@ -315,7 +316,7 @@ export default function StatsSection({
                                 <NumberInput
                                     value={form[key]}
                                     min={0}
-                                    onChange={(v) => setField(key, v)}
+                                   onChange={(v) => setForm(fd => setCullSex(fd, key, v))}
                                     placeholder="0"
                                     className={inputClass}
                                 />

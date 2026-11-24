@@ -377,3 +377,10 @@ export const setLossSex = (fd, key, value) => {
     }
     return next;
 };
+
+/** Edit one of maleCulls / femaleCulls / unknownCulls; Total Culls is their sum. */
+export const setCullSex = (fd, key, value) => {
+    const next = { ...fd, [key]: value };
+    next.cullsCount = orNull(n(next.maleCulls) + n(next.femaleCulls) + n(next.unknownCulls)) || null;
+    return next;
+};
