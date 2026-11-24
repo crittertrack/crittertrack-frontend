@@ -39,9 +39,10 @@ export const computeLitterStats = (litter, status) => {
     const losses = numOrNull(litter.lossesCount ?? litter.losses);
     const culls = litter.hasCulls ? numOrNull(litter.cullsCount) : null;
 
-    const addBack = (litter.extractStillbornFromTotal ? (stillborn || 0) : 0)
-        + (litter.extractLossesFromTotal ? (losses || 0) : 0);
-    const totalBorn = storedBorn === null ? null : storedBorn + addBack;
+    // Counts are always original entered values (toggleExtract no longer modifies them).
+    // totalBorn is the original Born total as entered by the user.
+    const totalBorn = storedBorn;
+    // Surviving always subtracts ALL stillborns and ALL postnatal losses, regardless of extraction state.
     const liveBorn = totalBorn === null ? null : Math.max(0, totalBorn - (stillborn || 0));
     const surviving = liveBorn === null ? null : Math.max(0, liveBorn - (losses || 0));
     const postnatal = losses === null ? null : Math.max(0, losses - (culls || 0));

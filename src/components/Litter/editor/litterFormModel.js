@@ -236,21 +236,12 @@ export const setStillbornSex = (fd, key, value) => {
     };
 };
 const toggleExtract = (fd, flag, lossKeys, on) => {
-    const sign = on ? -1 : 1;
-    const apply = (count, lossKey) => {
-        const v = n(fd[count]) + sign * n(fd[lossKey]);
-        return on ? Math.max(0, v) : v;
-    };
-    const maleCount = apply('maleCount', lossKeys.male);
-    const femaleCount = apply('femaleCount', lossKeys.female);
-    const unknownCount = apply('unknownCount', lossKeys.unknown);
+    // Only set the extraction flag — never modify original entered counts.
+    // Original M/F/U values and litterSizeBorn are always preserved;
+    // calculations that need extraction-aware values use fd + the flag.
     return {
         ...fd,
         [flag]: on,
-        maleCount: orNull(maleCount) || null,
-        femaleCount: orNull(femaleCount) || null,
-        unknownCount: orNull(unknownCount) || null,
-        litterSizeBorn: orNull(maleCount + femaleCount + unknownCount) || null,
     };
 };
 
