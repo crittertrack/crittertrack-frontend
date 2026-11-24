@@ -80,8 +80,8 @@ export default function EditorShell({
     }, []);
 
     // Prefer the full animal record (has deceasedDate) over the trimmed copy on the litter.
-    const sire = useMemo(() => sireAnimal || myAnimals.find(a => a.id_public === form.sireId_public), [myAnimals, form.sireId_public, sireAnimal]);
-    const dam = useMemo(() => damAnimal || myAnimals.find(a => a.id_public === form.damId_public), [myAnimals, form.damId_public, damAnimal]);
+    const sire = useMemo(() => sireAnimal || (form.sireId_public ? myAnimals.find(a => a.id_public === form.sireId_public) : undefined), [myAnimals, form.sireId_public, sireAnimal]);
+    const dam = useMemo(() => damAnimal || (form.damId_public ? myAnimals.find(a => a.id_public === form.damId_public) : undefined), [myAnimals, form.damId_public, damAnimal]);
 
     const errors = useMemo(() => validateLitterForm(form, { sire, dam }), [form, sire, dam]);
     const hasErrors = Object.keys(errors).length > 0;
