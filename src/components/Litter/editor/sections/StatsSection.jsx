@@ -7,6 +7,8 @@ import {
     HeartCrack,
     Milk
 } from 'lucide-react';
+import { n } from '../litterFormModel';
+import { n } from '../litterFormModel';
 
 import {
     setSexCount,

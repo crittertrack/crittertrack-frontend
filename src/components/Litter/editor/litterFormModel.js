@@ -9,6 +9,7 @@ export const toDateInput = (d) => {
 };
 
 const n = (v) => (v === null || v === undefined || v === '' ? 0 : Number(v) || 0);
+export { n };
 const orNull = (v) => (v === 0 && !Number.isFinite(v) ? null : v);
 
 /** Default empty litter form state. */

@@ -68,7 +68,7 @@ export default function OverviewTab({
     // Total linked = offspring with linked records (by ID)
     const linkedCount = Array.isArray(litter.offspringIds_public) && litter.offspringIds_public.length > 0
         ? litter.offspringIds_public.length
-        : null;
+        : 0;
 
     // Compute the Total offspring VIEW: subtract stillborn and/or losses when extraction flags are enabled.
     const viewTotal = totalBornFromStats !== null
