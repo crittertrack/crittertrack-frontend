@@ -277,14 +277,18 @@ export const nextMilestone = (
     let date = null;
 
     if (status === 'born') {
-        // If weaning is confirmed and the weaning date has passed, this cycle is complete.
-        // Do not show a "Weaning" milestone for past-due weaning dates.
+        // If weaning is confirmed and the weaning date has passed, show "Weaned [date]" on the reproductive timeline.
         if (litter.weaningConfirmed && litter.weaningDate) {
             const weaningDate = new Date(litter.weaningDate);
-            if (isNaN(weaningDate.getTime()) || weaningDate <= now) {
-                // Weaning date is confirmed and in the past (or invalid) → cycle complete
+            if (isNaN(weaningDate.getTime())) {
+                // Invalid date: treat as complete, no milestone label
                 label = null;
+            } else if (weaningDate <= now) {
+                // Weaning date is confirmed and in the past (or today) → show "Weaned [date]"
+                label = 'Weaned';
+                date = litter.weaningDate;
             }
+            // If weaning date is in the future, fall through to the unconfirmed logic below
         }
 
         // If weaning is not yet confirmed, handle past/future dates differently:
@@ -303,7 +307,8 @@ export const nextMilestone = (
                 date = litter.weaningDate;
             } else {
                 // Past date or today: auto-confirm weaning and treat cycle as complete
-                label = null;
+                label = 'Weaned';
+                date = litter.weaningDate;
             }
         }
     } else if (
