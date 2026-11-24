@@ -362,7 +362,7 @@ export default function StatsSection({
                         >
                             <NumberInput
                                 value={form[key]}
-                                onChange={(v) => setField(key, v)}
+                                onChange={(v) => setForm(fd => setSexCount(fd, key, v))}
                                 placeholder="0"
                                 className={inputClass}
                             />
