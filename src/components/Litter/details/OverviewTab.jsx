@@ -234,7 +234,7 @@ export default function OverviewTab({
                                     {status === 'born' &&
                                     litter.weaningConfirmed
                                         ? 'Complete'
-                                        : 'None scheduled'}
+                                        : ''}
                                 </Muted>
                             )}
                         </div>
