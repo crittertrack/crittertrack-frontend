@@ -97,7 +97,7 @@ export default function EditorShell({
     const dirty = isFormDirty(form, baseline) || pendingImages.length > 0 || unsavedPhotoKeys.size > 0
         || (createCounts.males || createCounts.females || createCounts.unknown);
 
-    const linkedCounts = useMemo(() => countLinkedBySex(myAnimals, form.linkedOffspringIds), [myAnimals, form.linkedOffspringIds]);
+    const linkedCounts = useMemo(() => countLinkedBySex(myAnimals, form?.linkedOffspringIds || []), [myAnimals, form?.linkedOffspringIds]);
     const warnings = useMemo(() => reconcileLitterFormCounts(form, myAnimals.filter(a => (form.linkedOffspringIds || []).includes(a.id_public))).warnings, [form, myAnimals]);
 
     // Unsaved-changes guard. BrowserRouter has no useBlocker, so cover tab close/refresh here and
