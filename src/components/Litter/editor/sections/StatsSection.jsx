@@ -343,12 +343,19 @@ export default function StatsSection({
                             type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
+                                const stillborn = n(form.stillbornCount);
+                                const losses = n(form.lossesCount);
+                                const culls = n(form.cullsCount);
+                                const surviving = Math.max(0, (form.litterSizeBorn ?? 0) - stillborn - losses - culls);
+                                const maleSurviving = Math.max(0, (form.maleCount ?? 0) - (form.maleStillborn ?? 0) - (form.maleLosses ?? 0) - (form.maleCulls ?? 0));
+                                const femaleSurviving = Math.max(0, (form.femaleCount ?? 0) - (form.femaleStillborn ?? 0) - (form.femaleLosses ?? 0) - (form.femaleCulls ?? 0));
+                                const unknownSurviving = Math.max(0, surviving - maleSurviving - femaleSurviving);
                                 setForm(fd => ({
                                     ...fd,
-                                    maleWeaned: fd.maleCount != null ? Number(fd.maleCount) : 0,
-                                    femaleWeaned: fd.femaleCount != null ? Number(fd.femaleCount) : 0,
-                                    unknownWeaned: fd.unknownCount != null ? Number(fd.unknownCount) : 0,
-                                    litterSizeWeaned: (fd.maleWeaned != null ? Number(fd.maleWeaned) : 0) + (fd.femaleWeaned != null ? Number(fd.femaleWeaned) : 0) + (fd.unknownWeaned != null ? Number(fd.unknownWeaned) : 0),
+                                    maleWeaned: maleSurviving,
+                                    femaleWeaned: femaleSurviving,
+                                    unknownWeaned: unknownSurviving,
+                                    litterSizeWeaned: maleSurviving + femaleSurviving + unknownSurviving,
                                 }));
                             }}
                             className="px-3 py-1.5 rounded-lg text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-dark-surface focus:outline-none focus:ring-2 focus:ring-green-400"
