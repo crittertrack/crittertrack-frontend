@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { computeLitterStats } from './helpers';
 import { Panel, Muted } from './ui';
 import { Big, BreakdownToggle, SEX } from './StatsParts';
@@ -15,9 +17,8 @@ const Divider = ({ children }) => (
 );
 
 /**
- * Displays the outcome buckets as proportions of the original total born.
- * Culls are a subset of losses, so the bar uses postnatal losses excluding
- * culls plus culls as separate, non-overlapping segments.
+ * Displays litter outcomes as proportions of the original total born.
+ * Culls are displayed separately from postnatal losses.
  */
 const LitterOutcomeBar = ({
     totalBorn,
@@ -75,10 +76,15 @@ export default function StatsPanel({
     status,
     speciesOptions = []
 }) {
+    const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
+
     const s = computeLitterStats(litter, status);
     const isBorn = status === 'born';
+
+    const species = getLitterSpecies(litter);
+
     const eggLaying = isEggLayingSpecies(
-        getLitterSpecies(litter),
+        species,
         speciesOptions
     );
 
@@ -103,32 +109,35 @@ export default function StatsPanel({
         value === null || value === undefined ? 'missing' : 'value';
 
     const bornBySex = [s.male, s.female, s.unknown];
+
     const stillbornBySex = s.stillbornBySex || [null, null, null];
 
-    // A per-sex live-born count is only knowable where both the original
-    // born count and the matching stillborn count have been recorded.
+    // Calculate live-born counts per sex.
     const liveBornBySex = bornBySex.map((bornCount, index) => {
         const stillbornCount = stillbornBySex[index];
 
         if (
-            bornCount === null ||
-            bornCount === undefined ||
-            stillbornCount === null ||
-            stillbornCount === undefined
+            bornCount === null || bornCount === undefined ||
+            stillbornCount === null || stillbornCount === undefined
         ) {
             return null;
         }
 
-        return Math.max(0, Number(bornCount) - Number(stillbornCount));
+        return Math.max(
+            0,
+            Number(bornCount) - Number(stillbornCount)
+        );
     });
 
-    // Cull counts are part of the helper's lossesBySex values. Subtract them
-    // here so the Postnatal losses row excludes culls, just like s.postnatal.
-    const cullsBySex = s.culls === null || s.culls === undefined
-        ? [0, 0, 0]
-        : (s.cullsBySex || [null, null, null]);
+    // Culls are included in lossesBySex.
+    const cullsBySex =
+        s.culls === null || s.culls === undefined
+            ? [0, 0, 0]
+            : (s.cullsBySex || [null, null, null]);
 
     const lossesBySex = s.lossesBySex || [null, null, null];
+
+    // Postnatal losses exclude culls.
     const postnatalBySex = lossesBySex.map((lossCount, index) => {
         const cullCount = cullsBySex[index];
 
@@ -139,9 +148,13 @@ export default function StatsPanel({
             return null;
         }
 
-        return Math.max(0, Number(lossCount) - Number(cullCount));
+        return Math.max(
+            0,
+            Number(lossCount) - Number(cullCount)
+        );
     });
 
+    // Surviving counts per sex.
     const survivingBySex = bornBySex.map((bornCount, index) => {
         const stillbornCount = stillbornBySex[index];
         const lossCount = lossesBySex[index];
@@ -156,29 +169,33 @@ export default function StatsPanel({
 
         return Math.max(
             0,
-            Number(bornCount) - Number(stillbornCount) - Number(lossCount)
+            Number(bornCount) -
+            Number(stillbornCount) -
+            Number(lossCount)
         );
     });
 
     const stillbornTitle = eggLaying
         ? 'Unhatched / non-viable eggs'
         : 'Stillborn';
+
     const lossesTitle = eggLaying
         ? 'Post-hatch losses'
         : 'Postnatal losses';
-    const liveTitle = eggLaying ? 'Live hatched' : 'Live born';
 
-    // Collapsible state for the breakdown section - collapsed by default
-    const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
+    const liveTitle = eggLaying
+        ? 'Live hatched'
+        : 'Live born';
 
     return (
         <Panel title="Litter statistics" testId="stats-panel">
-            {/* Main statistics */}
+
+            {/* MAIN STATISTICS */}
             <div className="grid grid-cols-3 gap-x-2 gap-y-4">
                 <Big
                     label={getLitterFieldLabel(
                         'litterSizeBorn',
-                        getLitterSpecies(litter),
+                        species,
                         'Total born',
                         speciesOptions
                     )}
@@ -198,7 +215,7 @@ export default function StatsPanel({
                     <Big
                         label={getLitterFieldLabel(
                             'litterSizeWeaned',
-                            getLitterSpecies(litter),
+                            species,
                             'Weaned',
                             speciesOptions
                         )}
@@ -209,7 +226,7 @@ export default function StatsPanel({
                 )}
             </div>
 
-            {/* Sex distribution uses only the original born sex counts. */}
+            {/* SEX DISTRIBUTION */}
             <div className="mt-4">
                 <div className="mb-1 text-xs font-bold text-gray-900 dark:text-dark-text-muted">
                     Sex distribution
@@ -244,9 +261,11 @@ export default function StatsPanel({
                                     className="inline-flex items-center gap-1"
                                 >
                                     <Icon size={11} className={icon} />
+
                                     {s[key] !== null && s[key] !== undefined
                                         ? `${Math.round((s[key] / s.sexSum) * 100)}% (${s[key]})`
                                         : '—'}{' '}
+
                                     {label.toLowerCase()}
                                 </span>
                             ))}
@@ -260,116 +279,120 @@ export default function StatsPanel({
                 )}
             </div>
 
-            
-{/* Outcome bar. Culls are separated from postnatal losses. */}
-{s.totalBorn !== null && s.totalBorn !== undefined && (
-    <div className="mt-4">
-        <div className="mb-1 text-xs font-bold text-gray-900 dark:text-dark-text-muted">
-            Litter outcome
-        </div>
+            {/* LITTER OUTCOME */}
+            {s.totalBorn !== null && s.totalBorn !== undefined && (
+                <div className="mt-4">
+                    <div className="mb-1 text-xs font-bold text-gray-900 dark:text-dark-text-muted">
+                        Litter outcome
+                    </div>
 
-        <LitterOutcomeBar
-            totalBorn={s.totalBorn}
-            stillborn={s.stillborn}
-            postnatal={s.postnatal}
-            culls={s.culls}
-            surviving={s.surviving}
-        />
+                    <LitterOutcomeBar
+                        totalBorn={s.totalBorn}
+                        stillborn={s.stillborn}
+                        postnatal={s.postnatal}
+                        culls={s.culls}
+                        surviving={s.surviving}
+                    />
 
-        
-<div className="mt-1 flex justify-between text-[11px] text-gray-600 dark:text-dark-text-secondary">
-    <span className="inline-flex items-center gap-1">
-        <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" aria-hidden="true" />
-        {s.surviving != null
-            ? `${((s.surviving / s.totalBorn) * 100).toFixed(1)}%`
-            : '—'}{' '}
-        surviving
-    </span>
+                    <div className="mt-1 flex justify-between gap-2 text-[11px] text-gray-600 dark:text-dark-text-secondary">
 
-    <span className="inline-flex items-center gap-1">
-        <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-hidden="true" />
-        {s.stillborn != null
-            ? `${((s.stillborn / s.totalBorn) * 100).toFixed(1)}%`
-            : '—'}{' '}
-        {stillbornTitle.toLowerCase()}
-    </span>
+                        <span className="inline-flex items-center gap-1">
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" aria-hidden="true" />
+                            {s.surviving != null
+                                ? `${((s.surviving / s.totalBorn) * 100).toFixed(1)}%`
+                                : '—'}{' '}
+                            surviving
+                        </span>
 
-    <span className="inline-flex items-center gap-1">
-        <span className="h-2 w-2 shrink-0 rounded-full bg-orange-500" aria-hidden="true" />
-        {s.postnatal != null
-            ? `${((s.postnatal / s.totalBorn) * 100).toFixed(1)}%`
-            : '—'}{' '}
-        {lossesTitle.toLowerCase()}
-    </span>
+                        <span className="inline-flex items-center gap-1">
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-hidden="true" />
+                            {s.stillborn != null
+                                ? `${((s.stillborn / s.totalBorn) * 100).toFixed(1)}%`
+                                : '—'}{' '}
+                            {stillbornTitle.toLowerCase()}
+                        </span>
 
-    <span className="inline-flex items-center gap-1">
-        <span className="h-2 w-2 shrink-0 rounded-full bg-gray-500" aria-hidden="true" />
-        {s.culls != null
-            ? `${((s.culls / s.totalBorn) * 100).toFixed(1)}%`
-            : '0.0%'}{' '}
-        culls
-    </span>
-</div>
-    </div>
-)}
+                        <span className="inline-flex items-center gap-1">
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-orange-500" aria-hidden="true" />
+                            {s.postnatal != null
+                                ? `${((s.postnatal / s.totalBorn) * 100).toFixed(1)}%`
+                                : '—'}{' '}
+                            {lossesTitle.toLowerCase()}
+                        </span>
 
+                        <span className="inline-flex items-center gap-1">
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-gray-500" aria-hidden="true" />
+                            {s.culls != null
+                                ? `${((s.culls / s.totalBorn) * 100).toFixed(1)}%`
+                                : '0.0%'}{' '}
+                            culls
+                        </span>
 
-            {/* Compact rounded breakdown rows */}
-            <Divider>
-                <div className="mb-2 text-sm font-bold text-gray-900 dark:text-dark-text-muted">
-                    Breakdown
+                    </div>
                 </div>
-            </Divider>
-            <div
-                className="flex items-center gap-2 cursor-pointer select-none"
-                onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)}
-            >
-                <span className="text-sm text-gray-600 dark:text-dark-text-secondary">
-                    {isBreakdownExpanded ? 'Collapse' : 'Expand'} breakdown
-                </span>
-                <span className="inline-flex items-center gap-1">
-                    <svg
-                        className="h-4 w-4 text-gray-500 dark:text-dark-text-muted"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        role="img"
-                        aria-label={isBreakdownExpanded ? 'Collapse breakdown' : 'Expand breakdown'}
-                    >
-                        <path
-                            d={isBreakdownExpanded
-                                ? 'M9 5h6v6h-6zm0-6h6v6h-6zM5 9h14v14H5zM2 5h2v12H2z'
-                                : 'M9 5h6v6h-6zm0-6h6v6h-6zM5 9h14v14H5zM2 5h2v12H2zM12 3l9 9-9 9l-1.4 1.4a.75.75 0 01-1.1-.2L12 6l-6.29 2.1a.75.75 0 01-1.1-.2L3 6l6.29-2.1a.75.75 0 011.1 0l6.3 2.1-1.4-1.4L12 3z'}
+            )}
+
+            {/* COLLAPSIBLE BREAKDOWN */}
+            <Divider>
+                <button
+                    type="button"
+                    onClick={() => setIsBreakdownExpanded(prev => !prev)}
+                    className="flex w-full items-center justify-between gap-3 text-left group"
+                    aria-expanded={isBreakdownExpanded}
+                    aria-controls="litter-statistics-breakdown"
+                >
+                    <span className="text-sm font-bold text-gray-900 dark:text-dark-text-muted group-hover:text-gray-700 dark:group-hover:text-dark-text transition-colors">
+                        Breakdown
+                    </span>
+
+                    {isBreakdownExpanded ? (
+                        <ChevronUp
+                            size={18}
+                            className="shrink-0 text-gray-500 dark:text-dark-text-muted"
                         />
-                    </svg>
-                </span>
-            </div>
+                    ) : (
+                        <ChevronDown
+                            size={18}
+                            className="shrink-0 text-gray-500 dark:text-dark-text-muted"
+                        />
+                    )}
+                </button>
+            </Divider>
+
             {isBreakdownExpanded && (
-                <div className="space-y-1.5">
+                <div
+                    id="litter-statistics-breakdown"
+                    className="space-y-1.5"
+                >
                     <BreakdownToggle
                         title={stillbornTitle}
                         total={s.stillborn}
                         bySex={stillbornBySex}
                     />
+
                     <BreakdownToggle
                         title={lossesTitle}
                         total={s.postnatal}
                         bySex={postnatalBySex}
                         note={s.culls > 0 ? 'Excludes culls' : undefined}
                     />
+
                     <BreakdownToggle
                         title="Culls"
                         total={s.culls ?? 0}
                         bySex={cullsBySex}
                     />
+
                     <BreakdownToggle
                         title="Surviving"
                         total={s.surviving}
                         bySex={survivingBySex}
                     />
+
                     <BreakdownToggle
                         title={getLitterFieldLabel(
                             'litterSizeWeaned',
-                            getLitterSpecies(litter),
+                            species,
                             'Weaned',
                             speciesOptions
                         )}
@@ -378,6 +401,7 @@ export default function StatsPanel({
                     />
                 </div>
             )}
+
         </Panel>
     );
 }
