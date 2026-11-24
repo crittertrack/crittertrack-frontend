@@ -387,3 +387,10 @@ export const setCullSex = (fd, key, value) => {
     next.cullsCount = orNull(n(next.maleCulls) + n(next.femaleCulls) + n(next.unknownCulls)) || null;
     return next;
 };
+
+/** Edit one of maleWeaned / femaleWeaned / unknownWeaned; Total Weaned is their sum. */
+export const setWeanedSex = (fd, key, value) => {
+    const next = { ...fd, [key]: value };
+    next.litterSizeWeaned = orNull(n(next.maleWeaned) + n(next.femaleWeaned) + n(next.unknownWeaned)) || null;
+    return next;
+};
