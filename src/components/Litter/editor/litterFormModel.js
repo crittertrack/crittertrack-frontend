@@ -135,6 +135,7 @@ export const reconcileLitterFormCounts = (form, linkedAnimals = []) => {
 /** Field-level validation. */
 export const validateLitterForm = (form, { sire, dam } = {}) => {
     const errors = {};
+    if (!form) return errors;
     if (!form.sireId_public) errors.sireId_public = 'Select a sire.';
     if (!form.damId_public) errors.damId_public = 'Select a dam.';
     if (form.sireId_public && form.damId_public && form.sireId_public === form.damId_public) {
