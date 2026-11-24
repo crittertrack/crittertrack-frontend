@@ -80,8 +80,12 @@ export default function EditorShell({
     }, []);
 
     // Prefer the full animal record (has deceasedDate) over the trimmed copy on the litter.
-    const sire = useMemo(() => sireAnimal || (form.sireId_public ? myAnimals.find(a => a.id_public === form.sireId_public) : undefined), [myAnimals, form.sireId_public, sireAnimal]);
-    const dam = useMemo(() => damAnimal || (form.damId_public ? myAnimals.find(a => a.id_public === form.damId_public) : undefined), [myAnimals, form.damId_public, damAnimal]);
+    // Compute sire/dam - prefer the sireAnimal/damAnimal records (from the litter),
+    // but also allow lookup from myAnimals when form has sireId_public set.
+    // Using a separate useMemo without form.sireId_public in dependencies avoids
+    // the error when entering cull counts or other count fields.
+    const sire = useMemo(() => sireAnimal || (form.sireId_public ? myAnimals.find(a => a.id_public === form.sireId_public) : null), [myAnimals, sireAnimal]);
+    const dam = useMemo(() => damAnimal || (form.damId_public ? myAnimals.find(a => a.id_public === form.damId_public) : null), [myAnimals, damAnimal]);
 
     const errors = useMemo(() => validateLitterForm(form, { sire, dam }), [form, sire, dam]);
     const hasErrors = Object.keys(errors).length > 0;
