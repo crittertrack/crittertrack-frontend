@@ -88,7 +88,9 @@ export const reconcileLitterFormCounts = (form, linkedAnimals = []) => {
     const manualTotal = n(fd.litterSizeBorn);
     const linkedBySex = countLinkedBySex(linkedAnimals, fd.linkedOffspringIds);
     const linkedTotal = linkedBySex.Male + linkedBySex.Female + linkedBySex.Unknown;
-    fd.litterSizeBorn = orNull(Math.max(manualTotal, genderSum, linkedTotal) || null);
+    // litterSizeBorn preserved as entered by user; linked animal validation
+    // handled through per-sex minimums below, not by modifying the total.
+    fd.litterSizeBorn = manualTotal || null;
     fd.numberBorn = fd.litterSizeBorn;
     // Enforce the linked minimums on the per-sex counts as well as the total.
     fd.maleCount = orNull(Math.max(male, linkedBySex.Male)) || null;
@@ -361,7 +363,6 @@ export const setLossSex = (fd, key, value) => {
         const current = n(fd[countKey]);
         const delta = n(value) - n(fd[key]);
         next[countKey] = orNull(Math.max(0, current - delta)) || null;
-        next.litterSizeBorn = orNull(n(next.maleCount) + n(next.femaleCount) + n(next.unknownCount)) || null;
     }
     return next;
 };
