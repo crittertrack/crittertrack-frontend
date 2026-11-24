@@ -11,8 +11,8 @@ import EventDetailsRow from './EventDetailsRow';
 import FinanceOverviewCard from '../../shared/FinanceOverviewCard';
 import { getLitterFieldLabel, getLitterSpecies, isEggLayingSpecies } from '../../../utils/litterSpeciesPresentation';
 
-const Summary = ({ label, children, testId }) => (
-    <div className="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-4 py-3" data-testid={testId}>
+const Summary = ({ label, children, testId, className }) => (
+    <div className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-4 py-3 ${className}`} data-testid={testId}>
         <div className="text-xs text-gray-500 dark:text-dark-text-muted">{label}</div>
         <div className="mt-0.5 text-lg font-semibold text-gray-900 dark:text-dark-text">{children}</div>
     </div>
@@ -89,16 +89,15 @@ export default function OverviewTab({
     return (
         <div className="space-y-4" data-testid="litter-overview">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
-                <Summary label={getLitterFieldLabel('birthDate', species, 'Birth date', speciesOptions)} testId="summary-birth">{birth || <Muted>{status === 'born' ? 'Not recorded' : eggLaying ? 'Not laid or hatched yet' : 'Not born yet'}</Muted>}</Summary>
-                <Summary label="Total born" testId="summary-total-born">{totalBorn === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : totalBorn}</Summary>
-                <Summary label="Total loss" testId="summary-total-loss">{totalLoss === null ? <Muted>—</Muted> : totalLoss}</Summary>
-                <Summary label="Total surviving" testId="summary-total-surviving">{totalSurviving === null ? <Muted>—</Muted> : totalSurviving}</Summary>
-                <Summary label="Total linked" testId="summary-total-linked">{linkedCount === null ? <Muted>—</Muted> : linkedCount}</Summary>
-                <Summary label="COI" testId="summary-coi">{isBlank(coi) ? <Muted>Not calculated</Muted> : `${Number(coi).toFixed(2)}%`}</Summary>
-                
-<Summary label="Next milestone" testId="summary-milestone">
+                <Summary label={getLitterFieldLabel('birthDate', species, 'Birth date', speciesOptions)} testId="summary-birth" className="flex-1 min-w-0">{birth || <Muted>{status === 'born' ? 'Not recorded' : eggLaying ? 'Not laid or hatched yet' : 'Not born yet'}</Muted>}</Summary>
+                <Summary label="Total born" testId="summary-total-born" className="flex-1 min-w-0">{totalBorn === null ? <Muted>{status === 'born' ? 'Not recorded' : '—'}</Muted> : totalBorn}</Summary>
+                <Summary label="Total loss" testId="summary-total-loss" className="flex-1 min-w-0">{totalLoss === null ? <Muted>—</Muted> : totalLoss}</Summary>
+                <Summary label="Total surviving" testId="summary-total-surviving" className="flex-1 min-w-0">{totalSurviving === null ? <Muted>—</Muted> : totalSurviving}</Summary>
+                <Summary label="Total linked" testId="summary-total-linked" className="flex-1 min-w-0">{linkedCount === null ? <Muted>—</Muted> : linkedCount}</Summary>
+                <Summary label="COI" testId="summary-coi" className="flex-1 min-w-0">{isBlank(coi) ? <Muted>Not calculated</Muted> : `${Number(coi).toFixed(2)}%`}</Summary>
+                <Summary label="Next milestone" testId="summary-milestone" className="flex-1 min-w-0">
   <div className="flex items-center justify-between gap-3 w-full">
-    <div className="min-w-0">
+    <div className="flex-1 min-w-0">
       {milestone ? (
         <>
           <span>{milestoneLabel}</span>
