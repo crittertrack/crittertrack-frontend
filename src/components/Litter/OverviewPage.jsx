@@ -128,16 +128,22 @@ const LitterCard = ({
     const sexSum = sexCounts.reduce((s, v) => s + (isNum(v) ? Number(v) : 0), 0);
     const bornRaw = litter.litterSizeBorn ?? litter.numberBorn;
     const born = isNum(bornRaw) ? Number(bornRaw) : (anySexRecorded ? sexSum : null);
+    const stillborn = litter.stillbornCount ?? null;
+    const lossesRaw = litter.lossesCount ?? litter.losses ?? litter.stillbornCount;
+    const losses = isNum(lossesRaw) ? Number(lossesRaw) : null;
+    // Total surviving = total born - stillborn - losses
+    const totalSurviving = born !== null && stillborn !== null
+        ? Math.max(0, born - stillborn - (losses || 0))
+        : null;
     const linked = Array.isArray(offspring)
         ? offspring.length
         : (Array.isArray(litter.offspringIds_public) ? litter.offspringIds_public.length : null);
-    const lossesRaw = litter.lossesCount ?? litter.losses ?? litter.stillbornCount;
-    const losses = isNum(lossesRaw) ? Number(lossesRaw) : null;
 
     const showBorn = born !== null && (hasBirth || born > 0);
-    const showLinked = linked !== null && (linked > 0 || hasBirth);
     const showLosses = losses !== null && (hasBirth || losses > 0);
-    const statCount = [showBorn, showLinked, showLosses].filter(Boolean).length;
+    const showSurviving = totalSurviving !== null && (hasBirth || totalSurviving > 0);
+    const showLinked = linked !== null && (linked > 0 || hasBirth);
+    const statCount = [showBorn, showLosses, showSurviving, showLinked].filter(Boolean).length;
     const showSex = anySexRecorded && (hasBirth || sexSum > 0);
     const males = Number(litter.maleCount) || 0;
     const females = Number(litter.femaleCount) || 0;
@@ -252,9 +258,10 @@ const LitterCard = ({
                 <div className="space-y-2">
                     {statCount > 0 && (
                         <div className="flex items-start divide-x divide-gray-100 dark:divide-dark-border">
-                            {showBorn && <Stat value={born} label="Total Born" />}
-                            {showLinked && <Stat value={linked} label="Total Linked" />}
-                            {showLosses && <Stat value={losses} label="Total Losses" />}
+                        {showBorn && <Stat value={born} label="Total Born" />}
+                        {showLosses && <Stat value={losses} label="Total Loss" />}
+                        {showSurviving && <Stat value={totalSurviving} label="Total Surviving" />}    
+                        {showLinked && <Stat value={linked} label="Total Linked" />}
                         </div>
                     )}
                     {showSex && (
