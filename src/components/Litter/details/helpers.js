@@ -307,13 +307,13 @@ export const nextMilestone = (
         (litter.matingDate || litter.pairingDate) &&
         dayOf(litter.matingDate || litter.pairingDate) >= startOfDay(now)
     ) {
-        label = 'Mating';
+        label = 'Mated';
         date = litter.matingDate || litter.pairingDate;
     } else if (status === 'mated' && !litter.pregnancyDate) {
-        label = 'Pregnancy confirmed';
+        label = 'Pregnant';
         date = litter.matingDate;
     } else if (litter.expectedDueDate) {
-        label = 'Birth due';
+        label = 'Birth';
         date = litter.expectedDueDate;
     }
 
