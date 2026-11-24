@@ -199,14 +199,11 @@ export default function StatsSection({
                                 ? 'Extract non-viable eggs from total counts'
                                 : 'Extract stillborn from total counts'}
                         </span>
-
-                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">
-                            {eggLaying
-                                ? 'Reduces the M/F/U counts above by the unhatched or non-viable amounts.'
-                                : 'Reduces the M/F/U counts above by the stillborn amounts.'}
-                        </span>
                     </span>
                 </label>
+                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 flex items-center">
+                    These options only determine which counts are deducted from Total Offspring in the litter overview. They do not change recorded litter counts or other statistics.
+                </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <ReadOnlyTotal
@@ -271,12 +268,11 @@ export default function StatsSection({
                         <span className="font-medium">
                             Extract losses from total counts
                         </span>
-
-                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">
-                            Reduces the M/F/U counts above by the loss amounts.
-                        </span>
                     </span>
                 </label>
+                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 flex items-center">
+                    These options only determine which counts are deducted from Total Offspring in the litter overview. They do not change recorded litter counts or other statistics.
+                </p>
 
                 {/* LOSSES */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -307,7 +303,7 @@ export default function StatsSection({
                     ))}
                 </div>
 
-                /* CULLS - always visible */
+                {/* CULLS - always visible */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <ReadOnlyTotal
                         label="Total culls"
