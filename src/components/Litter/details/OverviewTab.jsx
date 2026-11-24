@@ -232,8 +232,7 @@ export default function OverviewTab({
                             ) : (
                                 <Muted>
                                     {status === 'born' &&
-                                    litter.weaningConfirmed &&
-                                    (!litter.weaningDate || new Date(litter.weaningDate) <= new Date())
+                                    litter.weaningConfirmed
                                         ? 'Complete'
                                         : 'None scheduled'}
                                 </Muted>
