@@ -336,6 +336,28 @@ export default function StatsSection({
                     subtitle={independentDescription}
                 />
 
+                {/* Fill from surviving button */}
+                {form.birthDate && !form.weaningConfirmed && (form.maleCount != null || form.femaleCount != null || form.unknownCount != null) && (
+                    <div className="flex items-center gap-2 mt-2">
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setForm(fd => ({
+                                    ...fd,
+                                    maleWeaned: fd.maleCount != null ? Number(fd.maleCount) : 0,
+                                    femaleWeaned: fd.femaleCount != null ? Number(fd.femaleCount) : 0,
+                                    unknownWeaned: fd.unknownCount != null ? Number(fd.unknownCount) : 0,
+                                    litterSizeWeaned: (fd.maleWeaned != null ? Number(fd.maleWeaned) : 0) + (fd.femaleWeaned != null ? Number(fd.femaleWeaned) : 0) + (fd.unknownWeaned != null ? Number(fd.unknownWeaned) : 0),
+                                }));
+                            }}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-dark-surface focus:outline-none focus:ring-2 focus:ring-green-400"
+                            title="Fill weaned counts from surviving animals (M/F/U)"
+                        >
+                            <span className="align-middle">Fill from surviving</span>
+                        </button>
+                    </div>
+                )}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <ReadOnlyTotal
                         label={getLitterFieldLabel(

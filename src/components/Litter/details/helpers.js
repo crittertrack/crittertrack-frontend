@@ -117,23 +117,17 @@ export const computeLitterStats = (litter, status) => {
         : Math.max(0, losses - (culls || 0));
 
     // Weaning.
-    // Try the stored total first, then fall back to numberWeaned.
-    const weanedFromStorage = litter.litterSizeWeaned ?? litter.numberWeaned;
+    // Calculate total weaned from sex breakdown counts.
+    // This ensures the breakdown bar always shows a total when any weaned data is recorded.
     const weanedBySex = pick(
         litter.maleWeaned,
         litter.femaleWeaned,
         litter.unknownWeaned
     );
-    // Auto-calculate weaned total from sex breakdown if not already stored.
-    const weanedSexTotal = weanedBySex.reduce(
+    const weaned = weanedBySex.reduce(
         (sum, v) => sum + (v || 0),
         0
-    );
-    const weaned = weanedFromStorage !== null && weanedFromStorage !== undefined
-        ? weanedFromStorage
-        : weanedSexTotal > 0
-            ? weanedSexTotal
-            : null;
+    ) || null;
 
     // Guard: weaned cannot exceed surviving (total born - stillborn - all losses including culls)
     const cappedWeaned = surviving !== null ? Math.min(weaned || 0, surviving) : weaned;
