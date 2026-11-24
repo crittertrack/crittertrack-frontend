@@ -33,7 +33,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
     const bornSubtitle = eggLaying ? 'Record the clutch or brood size and any hatchlings recorded.' : 'Record the number of live born animals.';
     const nonViableTitle = eggLaying ? 'Unhatched / non-viable eggs' : 'Stillborn';
     const nonViableSubtitle = eggLaying ? 'Record eggs that did not hatch or were not viable.' : 'Record stillborn animals.';
-    const lossesTitle = eggLaying ? 'Post-hatch losses' : 'Losses';
+    const lossesTitle = 'Losses & Culls';
     const lossDescription = eggLaying ? 'Record losses after hatching (not unhatched eggs).' : 'Record any losses after birth (not stillborn).';
     const independentTitle = eggLaying ? 'Fledged / independent' : 'Weaned';
     const independentDescription = eggLaying ? 'Record how many young fledged or became independent.' : 'Record how many animals were weaned from this litter.';
@@ -67,7 +67,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
                     <input type="checkbox" className="mt-0.5" checked={!!form.extractStillbornFromTotal} onChange={(e)=>setForm(fd=>toggleExtractStillborn(fd,e.target.checked))} />
                     <span>
                         <span className="font-medium">{eggLaying ? 'Extract non-viable eggs from total counts' : 'Extract stillborn from total counts'}</span>
-                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">{eggLaying ? 'Reduces the M/F/U counts above by the unhatched or non-viable amounts.' : 'Reduces the M/F/U counts above by the stillborn amounts, leaving only live-born.'}</span>
+                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">{eggLaying ? 'Reduces the M/F/U counts above by the unhatched or non-viable amounts.' : 'Reduces the M/F/U counts above by the stillborn amounts.'}</span>
                     </span>
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -86,7 +86,7 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
                     <input type="checkbox" className="mt-0.5" checked={!!form.extractLossesFromTotal} onChange={(e)=>setForm(fd=>toggleExtractLosses(fd,e.target.checked))} />
                     <span>
                         <span className="font-medium">Extract losses from total counts</span>
-                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">Reduces the M/F/U counts above by the loss amounts, leaving only survivors.</span>
+                        <span className="block text-xs text-[#7284A3] dark:text-dark-text-muted">Reduces the M/F/U counts above by the loss amounts.</span>
                     </span>
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -105,8 +105,13 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
                     </span>
                 </label>
                 {form.hasCulls && (
-                    <div className="max-w-xs">
-                        <FieldRow label="Culls"><NumberInput value={form.cullsCount} onChange={(v)=>setField("cullsCount",v)} placeholder="0" className={inputClass} /></FieldRow>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <ReadOnlyTotal label="Total culls" value={form.cullsCount} hint="Auto-calculated" />
+                        {["maleCulls","Female","Unknown"].map(([key,label]) => (
+                            <FieldRow key={key} label={`${label} culls`}>
+                                <NumberInput value={form[key]} min={0} onChange={(v)=>setForm(fd=>setField(key,v))} placeholder="0" className={inputClass} />
+                            </FieldRow>
+                        ))}
                     </div>
                 )}
             </div>
