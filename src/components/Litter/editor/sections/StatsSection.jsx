@@ -196,14 +196,11 @@ export default function StatsSection({
                     <span>
                         <span className="font-medium">
                             {eggLaying
-                                ? 'Extract non-viable eggs from total counts'
-                                : 'Extract stillborn from total counts'}
+                                ? 'Extract non-viable eggs from total offspring on overview'
+                                : 'Extract stillborn from total offspring on overview'}
                         </span>
                     </span>
                 </label>
-                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 flex items-center">
-                    this checkmark determines if this total is extracted from Total offspring on the overview.
-                </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <ReadOnlyTotal
@@ -266,13 +263,10 @@ export default function StatsSection({
 
                     <span>
                         <span className="font-medium">
-                            Extract losses & culls from total counts
+                            Extract losses & culls from total offspring on overview
                         </span>
                     </span>
                 </label>
-                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 flex items-center">
-                    this checkmark determines if these totals are extracted from Total offspring on the overview.
-                </p>
 
                 {/* LOSSES */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
