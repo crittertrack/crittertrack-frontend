@@ -233,6 +233,15 @@ export const setSexCount = (fd, key, value) => {
     return { ...next, litterSizeBorn: orNull(n(next.maleCount) + n(next.femaleCount) + n(next.unknownCount)) || null };
 };
 
+/** Edit one of maleCulls / femaleCulls / unknownCulls / cullsCount; also sets hasCulls: true. */
+export const setCullCount = (fd, key, value) => {
+    const next = { ...fd, [key]: value, hasCulls: true };
+    // Also update cullsCount to be the sum of individual cull counts
+    const male = n(next.maleCulls), female = n(next.femaleCulls), unknown = n(next.unknownCulls);
+    next.cullsCount = orNull(male + female + unknown) || null;
+    return next;
+};
+
 /** Edit one of maleStillborn / femaleStillborn / unknownStillborn; Total Stillborn is their sum. */
 export const setStillbornSex = (fd, key, value) => {
     const next = { ...fd, [key]: value };

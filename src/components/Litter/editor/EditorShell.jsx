@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ArrowLeft, Check, Loader2, UserRound, CalendarDays, Heart, ChartNoAxesColumn, PawPrint, Target, Images } from 'lucide-react';
 import apiClient from '../../../utils/apiClient';
-import { reconcileLitterFormCounts } from './litterFormModel';
+import { reconcileLitterFormCounts, setCullCount } from './litterFormModel';
 import {
     EMPTY_LITTER_FORM, formFromLitter, initialExtras, validateLitterForm, isFormDirty, countLinkedBySex,
 } from './litterFormModel';

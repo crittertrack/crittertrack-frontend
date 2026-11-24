@@ -106,8 +106,8 @@ export default function StatsSection({ form, setForm, setField, linkedCounts, wa
                 </label>
                 {form.hasCulls && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <ReadOnlyTotal label="Total culls" value={form.cullsCount} hint="Auto-calculated" />
-                        {["maleCulls","Female","Unknown"].map(([key,label]) => (
+                        <ReadOnlyTotal label="Total culls X" value={form.cullsCount} hint="Auto-calculated" />
+                        {["maleCulls,","Female","Unknown"].map(([key,label]) => (
                             <FieldRow key={key} label={`${label} culls`}>
                                 <NumberInput value={form[key]} min={0} onChange={(v)=>setForm(fd=>setField(key,v))} placeholder="0" className={inputClass} />
                             </FieldRow>
