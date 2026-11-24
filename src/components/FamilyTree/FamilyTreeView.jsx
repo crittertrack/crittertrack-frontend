@@ -184,8 +184,8 @@ const FamilyTreeView = ({
                 const animalData = await fetchAnimalData(currentId);
                 if (animalData) {
                     nodes[currentId] = animalData;
-                    const sireId = animalData.sireId_public;
-                    const damId = animalData.damId_public;
+                    const sireId = animalData?.sireId_public;
+                    const damId = animalData?.damId_public;
                     if (sireId) ancestorQueue.push(sireId);
                     if (damId) ancestorQueue.push(damId);
                 }
@@ -197,8 +197,8 @@ const FamilyTreeView = ({
             const focusAnimalData = nodes[focusAnimalId];
             if (focusAnimalData) {
                 const parents = [
-                    focusAnimalData.sireId_public,
-                    focusAnimalData.damId_public
+                    focusAnimalData?.sireId_public,
+                    focusAnimalData?.damId_public
                 ].filter(Boolean);
 
                 parents.forEach(pId => idsToFetchOffspringFor.add(pId));
@@ -207,8 +207,8 @@ const FamilyTreeView = ({
                     const parentNode = nodes[parentId];
                     if (parentNode) {
                         const grandparents = [
-                            parentNode.sireId_public,
-                            parentNode.damId_public
+                            parentNode?.sireId_public,
+                            parentNode?.damId_public
                         ].filter(Boolean);
                         grandparents.forEach(gpId => idsToFetchOffspringFor.add(gpId));
                     }
@@ -307,8 +307,8 @@ const FamilyTreeView = ({
                   nodes[currentId] = animalData;
 
                   // Enqueue parents
-                  const sireId = animalData.sireId_public;
-                  const damId = animalData.damId_public;
+                  const sireId = animalData?.sireId_public;
+                  const damId = animalData?.damId_public;
                   if (sireId && !enqueued.has(sireId)) { enqueued.add(sireId); queue.push(sireId); }
                   if (damId && !enqueued.has(damId)) { enqueued.add(damId); queue.push(damId); }
 
