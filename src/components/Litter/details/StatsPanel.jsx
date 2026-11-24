@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { computeLitterStats } from './helpers';
 import { Panel, Muted } from './ui';
@@ -15,53 +14,68 @@ const Divider = ({ children }) => (
     </div>
 );
 
-const LitterOutcomeBar = ({ totalBorn, stillborn, postnatal, culls, surviving }) => {
-    const totalBornNum = totalBorn || 0;
-    const stillbornPct = totalBornNum > 0 ? Math.round((stillborn / totalBornNum) * 100) : 0;
-    const postnatalPct = totalBornNum > 0 ? Math.round((postnatal / totalBornNum) * 100) : 0;
-    const cullsPct = totalBornNum > 0 ? Math.round((culls / totalBornNum) * 100) : 0;
-    const survivingPct = totalBornNum > 0 ? Math.round((surviving / totalBornNum) * 100) : 0;
+const LitterOutcomeBar = ({
+    totalBorn,
+    stillborn,
+    postnatal,
+    culls,
+    surviving
+}) => {
+    const total = Number(totalBorn) || 0;
 
-    const colors = {
-        surviving: 'bg-green-500',
-        stillborn: 'bg-red-500',
-        postnatal: 'bg-orange-500',
-        culls: 'bg-gray-500',
-    };
+    if (total <= 0) {
+        return (
+            <div
+                className="h-2.5 w-full rounded-full bg-gray-100 dark:bg-dark-surface"
+                aria-label="No litter outcome data"
+            />
+        );
+    }
+
+    const segments = [
+        { key: 'surviving', value: surviving, color: 'bg-green-500', label: 'Surviving' },
+        { key: 'stillborn', value: stillborn, color: 'bg-red-500', label: 'Stillborn' },
+        { key: 'postnatal', value: postnatal, color: 'bg-orange-500', label: 'Postnatal losses' },
+        { key: 'culls', value: culls, color: 'bg-gray-500', label: 'Culls' }
+    ];
 
     return (
-        <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-dark-surface">
-            <div style={{ width: `${survivingPct}%`, backgroundColor: colors.surviving }} aria-label="Surviving" />
-            <div style={{ width: `${stillbornPct}%`, backgroundColor: colors.stillborn }} aria-label="Stillborn" />
-            <div style={{ width: `${postnatalPct}%`, backgroundColor: colors.postnatal }} aria-label="Postnatal losses" />
-            <div style={{ width: `${cullsPct}%`, backgroundColor: colors.culls }} aria-label="Culls" />
+        <div
+            className="flex h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-dark-surface"
+            role="img"
+            aria-label="Litter outcome distribution"
+        >
+            {segments.map((segment) => {
+                if (segment.value === null || segment.value === undefined) {
+                    return null;
+                }
+
+                const value = Math.max(0, Number(segment.value) || 0);
+                const width = Math.min(100, (value / total) * 100);
+
+                if (width <= 0) {
+                    return null;
+                }
+
+                return (
+                    <div
+                        key={segment.key}
+                        className={segment.color}
+                        style={{ width: `${width}%` }}
+                        aria-label={`${segment.label}: ${value}`}
+                        title={`${segment.label}: ${value}`}
+                    />
+                );
+            })}
         </div>
     );
 };
 
-const LitterOutcomeLegend = ({ totalBorn, stillborn, postnatal, culls, surviving }) => {
-    const totalBornNum = totalBorn || 0;
-
-    const items = [
-        { label: 'Surviving', count: surviving, pct: totalBornNum > 0 ? Math.round((surviving / totalBornNum) * 100) : 0, color: 'bg-green-500' },
-        { label: 'Stillborn', count: stillborn, pct: totalBornNum > 0 ? Math.round((stillborn / totalBornNum) * 100) : 0, color: 'bg-red-500' },
-        { label: 'Postnatal losses', count: postnatal, pct: totalBornNum > 0 ? Math.round((postnatal / totalBornNum) * 100) : 0, color: 'bg-orange-500' },
-        culls !== null ? { label: 'Culls', count: culls, pct: totalBornNum > 0 ? Math.round((culls / totalBornNum) * 100) : 0, color: 'bg-gray-500' } : null,
-    ].filter(Boolean);
-
-    return (
-        <div className="flex flex-wrap gap-2 mt-2 text-[11px]">
-            {items.map((item, i) => (
-                <span key={i} className="flex items-center gap-1">
-                    <span className={item.color} width={12} height={12} aria-hidden="true" />
-                    <span>{item.label}: {item.count === null ? '—' : item.count}{item.pct > 0 ? ` (${item.pct}%)` : ''}</span>
-                </span>
-            ))}
-        </div>
-    );
-};
-
-export default function StatsPanel({ litter, status, speciesOptions = [] }) {
+export default function StatsPanel({
+    litter,
+    status,
+    speciesOptions = []
+}) {
     const s = computeLitterStats(litter, status);
     const isBorn = status === 'born';
     const eggLaying = isEggLayingSpecies(
@@ -69,10 +83,15 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
         speciesOptions
     );
 
-    if (!isBorn && s.totalBorn === null && !s.sexRecorded && !s.anyLossRecorded) {
+    if (
+        !isBorn &&
+        s.totalBorn === null &&
+        !s.sexRecorded &&
+        !s.anyLossRecorded
+    ) {
         return (
             <Panel title="Litter statistics" testId="stats-panel">
-                <p className="text-sm text-gray-400 dark:text-dark-text-muted py-6 text-center">
+                <p className="py-6 text-center text-sm text-gray-400 dark:text-dark-text-muted">
                     {status === 'planned'
                         ? 'Planned — no offspring recorded yet.'
                         : 'No offspring recorded yet.'}
@@ -81,77 +100,37 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
         );
     }
 
-    const st = (v) => (v === null ? 'missing' : 'value');
+    const valueState = (value) => (
+        value === null || value === undefined ? 'missing' : 'value'
+    );
 
-    // Compute breakdown rows in the specified order
-    const breakdownRows = [];
+    const bornBySex = [s.male, s.female, s.unknown];
+    const stillbornBySex = s.stillbornBySex || [null, null, null];
+    const liveBornBySex = bornBySex.map((bornCount, index) => {
+        const stillbornCount = stillbornBySex[index];
 
-    // 1. Born
-    breakdownRows.push({
-        label: 'Born',
-        total: s.totalBorn,
-        male: s.male,
-        female: s.female,
-        unknown: s.unknown,
-        computedTotal: s.totalBorn,
+        if (
+            bornCount === null ||
+            bornCount === undefined ||
+            stillbornCount === null ||
+            stillbornCount === undefined
+        ) {
+            return null;
+        }
+
+        return Math.max(0, Number(bornCount) - Number(stillbornCount));
     });
-
-    // 2. Stillborn
-    breakdownRows.push({
-        label: 'Stillborn',
-        total: s.stillborn,
-        male: s.stillbornBySex[0],
-        female: s.stillbornBySex[1],
-        unknown: s.stillbornBySex[2],
-        computedTotal: s.stillborn,
-    });
-
-    // 3. Postnatal losses
-    breakdownRows.push({
-        label: 'Postnatal losses',
-        total: s.postnatal,
-        male: s.lossesBySex[0],
-        female: s.lossesBySex[1],
-        unknown: s.lossesBySex[2],
-        computedTotal: s.postnatal,
-    });
-
-    // 4. Culls (when applicable)
-    if (s.culls !== null && s.cullSexSum > 0) {
-        breakdownRows.push({
-            label: 'Culls',
-            total: s.culls,
-            male: s.cullsBySex[0],
-            female: s.cullsBySex[1],
-            unknown: s.cullsBySex[2],
-            computedTotal: s.cullSexSum,
-        });
-    }
-
-    // 5. Surviving
-    breakdownRows.push({
-        label: 'Surviving',
-        total: s.surviving,
-        male: null,
-        female: null,
-        unknown: null,
-        computedTotal: s.surviving,
-    });
-
-    // 6. Weaned
-    breakdownRows.push({
-        label: 'Weaned',
-        total: s.weaned,
-        male: null,
-        female: null,
-        unknown: null,
-        computedTotal: s.weaned,
-    });
+    const stillbornTitle = eggLaying
+        ? 'Unhatched / non-viable eggs'
+        : 'Stillborn';
+    const lossesTitle = eggLaying
+        ? 'Post-hatch losses'
+        : 'Postnatal losses';
 
     return (
         <Panel title="Litter statistics" testId="stats-panel">
-            {/* Main statistics - three prominent stats: Total born, Males/Females, Weaned */}
-            <div className="grid grid-cols-3 gap-y-4 gap-x-2">
+            {/* Main statistics */}
+            <div className="grid grid-cols-3 gap-x-2 gap-y-4">
                 <Big
                     label={getLitterFieldLabel(
                         'litterSizeBorn',
@@ -160,18 +139,16 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                         speciesOptions
                     )}
                     value={s.totalBorn}
-                    state={st(s.totalBorn)}
+                    state={valueState(s.totalBorn)}
                     testId="stat-born"
                 />
 
                 <Big
                     label="Surviving"
                     value={s.surviving}
-                    state={st(s.surviving)}
+                    state={valueState(s.surviving)}
                     testId="stat-surviving"
                 />
-
-                
 
                 {isBorn && (
                     <Big
@@ -188,46 +165,45 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                 )}
             </div>
 
-            {isBorn && (
-                <p className="mt-2 text-[11px] text-gray-400 dark:text-dark-text-muted">
-                    
-                </p>
-            )}
-
-            {/* Sex distribution - percentages calculated against total born */}
+            {/* Sex distribution: based on the recorded born sex counts only. */}
             <div className="mt-4">
-                <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
+                <div className="mb-1 text-xs font-medium text-gray-500 dark:text-dark-text-muted">
                     Sex distribution
                 </div>
 
                 {s.sexSum > 0 ? (
                     <>
                         <div
-                            className="flex h-2.5 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-dark-surface"
+                            className="flex h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-dark-surface"
                             role="img"
                             aria-label={`Males ${s.male !== null ? Math.round((s.male / s.sexSum) * 100) : 0}%, females ${s.female !== null ? Math.round((s.female / s.sexSum) * 100) : 0}%, unknown ${s.unknown !== null ? Math.round((s.unknown / s.sexSum) * 100) : 0}%`}
                         >
-                            {SEX.map(({ key, bar }) =>
-                                s[key] ? (
+                            {SEX.map(({ key, bar }) => {
+                                const count = Number(s[key]) || 0;
+
+                                return count > 0 ? (
                                     <div
                                         key={key}
                                         className={bar}
                                         style={{
-                                            width: `${(s[key] / s.sexSum) * 100}%`
+                                            width: `${(count / s.sexSum) * 100}%`
                                         }}
                                     />
-                                ) : null
-                            )}
+                                ) : null;
+                            })}
                         </div>
 
-                        <div className="flex justify-between mt-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
+                        <div className="mt-1 flex justify-between text-[11px] text-gray-600 dark:text-dark-text-secondary">
                             {SEX.map(({ key, label, Icon, icon }) => (
                                 <span
                                     key={key}
                                     className="inline-flex items-center gap-1"
                                 >
                                     <Icon size={11} className={icon} />
-                                    {(s[key] / s.sexSum * 100) | 0}% {label.toLowerCase()}
+                                    {s[key] !== null && s[key] !== undefined && s.sexSum > 0
+                                        ? `${Math.round((s[key] / s.sexSum) * 100)}%`
+                                        : '—'}{' '}
+                                    {label.toLowerCase()}
                                 </span>
                             ))}
                         </div>
@@ -240,118 +216,106 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                 )}
             </div>
 
-             {/* Distribution bar: stillborn, losses, culls, surviving */}
-{s.totalBorn !== null && (
-    <div className="mt-4">
-        <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
-            Litter outcome
-        </div>
-        <LitterOutcomeBar
-            totalBorn={s.totalBorn}
-            stillborn={s.stillborn}
-            postnatal={s.postnatal}
-            culls={s.culls}
-            surviving={s.surviving}
-        />
-        <div className="flex justify-between mt-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
-            <span>Stillborn: {s.stillborn !== null ? s.stillborn : '—'}</span>
-            <span>Losses: {s.postnatal !== null ? s.postnatal : '—'}</span>
-            <span>Culls: {s.culls !== null ? s.culls : '—'}</span>
-            <span>Surviving: {s.surviving !== null ? s.surviving : '—'}</span>
-        </div>
-    </div>
-)}         
+            {/* Outcome categories are displayed as recorded/calculated.
+                This display does not change any litter values or Overview totals. */}
+            {s.totalBorn !== null && s.totalBorn !== undefined && (
+                <div className="mt-4">
+                    <div className="mb-1 text-xs font-medium text-gray-500 dark:text-dark-text-muted">
+                        Litter outcome
+                    </div>
 
-            {/* Losses and outcomes */}
+                    <LitterOutcomeBar
+                        totalBorn={s.totalBorn}
+                        stillborn={s.stillborn}
+                        postnatal={s.postnatal}
+                        culls={s.culls}
+                        surviving={s.surviving}
+                    />
+
+                    <div className="mt-1 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11px] text-gray-600 dark:text-dark-text-secondary">
+                        <span>Stillborn: {s.stillborn ?? '—'}</span>
+                        <span>Losses: {s.postnatal ?? '—'}</span>
+                        <span>Culls: {s.culls ?? '—'}</span>
+                        <span>Surviving: {s.surviving ?? '—'}</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Breakdown: these are the recorded litter figures, not Overview-adjusted figures. */}
             <Divider>
-                <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
-                    {eggLaying ? 'Egg / hatchling losses' : 'Losses'}
+                <div className="mb-1 text-xs font-medium text-gray-500 dark:text-dark-text-muted">
+                    Breakdown
                 </div>
 
-                {s.anyLossRecorded ? (
-                    <div className="divide-y divide-gray-100 dark:divide-dark-border">
+                <div className="divide-y divide-gray-100 dark:divide-dark-border">
+                    <BreakdownToggle
+                        title="Born"
+                        total={s.totalBorn}
+                        bySex={bornBySex}
+                    />
+
+                    <BreakdownToggle
+                        title={stillbornTitle}
+                        total={s.stillborn}
+                        bySex={stillbornBySex}
+                    />
+
+                    <BreakdownToggle
+                        title={lossesTitle}
+                        total={s.postnatal}
+                        bySex={s.lossesBySex}
+                        note={s.culls > 0 ? 'Excludes culls' : undefined}
+                    />
+
+                    {s.culls !== null && s.culls !== undefined && (
                         <BreakdownToggle
-                            title={
-                                eggLaying
-                                    ? 'Unhatched / non-viable eggs'
-                                    : 'Stillborn'
-                            }
-                            total={s.stillborn}
-                            bySex={s.stillbornBySex}
+                            title="Culls"
+                            total={s.culls}
+                            bySex={s.cullsBySex || [null, null, null]}
                         />
+                    )}
 
+                    {s.liveBorn !== null && s.liveBorn !== undefined && (
                         <BreakdownToggle
-                            title={
-                                eggLaying
-                                    ? 'Post-hatch losses'
-                                    : 'Postnatal losses'
-                            }
-                            total={s.postnatal}
-                            bySex={s.lossesBySex}
-                            note={s.culls ? 'Excludes culls' : undefined}
+                            title={eggLaying ? 'Live hatched' : 'Live born'}
+                            total={s.liveBorn}
+                            bySex={liveBornBySex}
+                            note="After stillborn / non-viable outcomes"
                         />
+                    )}
 
-                        {s.culls !== null && (
-                            <BreakdownToggle
-                                title="Culls"
-                                total={s.culls}
-                                bySex={[null, null, null]}
-                            />
-                        )}
+                    <BreakdownToggle
+                        title="Surviving"
+                        total={s.surviving}
+                        bySex={[null, null, null]}
+                        note="After recorded stillborn and postnatal losses"
+                    />
 
-                        {s.liveBorn !== null && (
-                            <BreakdownToggle
-                                title="Live"
-                                total={s.liveBorn}
-                                bySex={[s.male, s.female, s.unknown]}
-                                note="Live born offspring"
-                            />
-                        )}
-                    </div>
-                ) : (
-                    <p className="text-sm text-gray-400 dark:text-dark-text-muted">
-                        {isBorn ? 'No losses recorded.' : 'Not recorded.'}
-                    </p>
-                )}
-
-                {/* Cull sex distribution */}
-                {s.cullSexRecorded && (
-                    <div className="mt-3">
-                        <div className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
-                            Cull distribution
-                        </div>
-
-                        <div
-                            className="flex h-2.5 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-dark-surface"
-                            aria-label="Cull sex distribution"
-                        >
-                            {s.cullSexSum > 0 &&
-                                SEX.map(({ key, bar }) =>
-                                    s.cullsBySex[key] ? (
-                                        <div
-                                            key={key}
-                                            className={bar}
-                                            style={{
-                                                width: `${(s.cullsBySex[key] / s.cullSexSum) * 100}%`
-                                            }}
-                                        />
-                                    ) : null
-                                )}
-                        </div>
-                    </div>
-                )}
+                    {isBorn && (
+                        <BreakdownToggle
+                            title={getLitterFieldLabel(
+                                'litterSizeWeaned',
+                                getLitterSpecies(litter),
+                                'Weaned',
+                                speciesOptions
+                            )}
+                            total={s.weaned}
+                            bySex={[null, null, null]}
+                        />
+                    )}
+                </div>
             </Divider>
 
             {/* Survival statistics */}
             <Divider>
-                <div className="text-sm space-y-1">
+                <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                         <span className="text-gray-500 dark:text-dark-text-muted">
                             {eggLaying ? 'Live hatched' : 'Live born'}
                         </span>
 
                         <span className="font-medium text-gray-900 dark:text-dark-text">
-                            {s.liveBorn === null
+                            {s.liveBorn === null || s.liveBorn === undefined
                                 ? <Muted>Not recorded</Muted>
                                 : s.liveBorn}
                         </span>
@@ -365,7 +329,7 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
                         </span>
 
                         <span className="font-medium text-gray-900 dark:text-dark-text">
-                            {s.survivalPct !== null
+                            {s.survivalPct !== null && s.survivalPct !== undefined
                                 ? `${s.survivalPct}%`
                                 : s.weanedState === 'pending'
                                     ? <Muted>Pending weaning</Muted>
@@ -377,4 +341,3 @@ export default function StatsPanel({ litter, status, speciesOptions = [] }) {
         </Panel>
     );
 }
-
