@@ -12,7 +12,7 @@ import FinanceOverviewCard from '../../shared/FinanceOverviewCard';
 import { getLitterFieldLabel, getLitterSpecies, isEggLayingSpecies } from '../../../utils/litterSpeciesPresentation';
 
 const Summary = ({ label, children, testId, className }) => (
-    <div className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg ${className}`} data-testid={testId}>
+    <div className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-4 py-3 min-w-0 ${className}`} data-testid={testId}>
         <div className="text-xs text-gray-500 dark:text-dark-text-muted">{label}</div>
         <div className="mt-0.5 text-lg font-semibold text-gray-900 dark:text-dark-text">{children}</div>
     </div>
