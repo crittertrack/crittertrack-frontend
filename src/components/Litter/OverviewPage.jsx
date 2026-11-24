@@ -138,7 +138,7 @@ const LitterCard = ({
     const bornRaw = litter.litterSizeBorn ?? litter.numberBorn;
     const born = isNum(bornRaw) ? Number(bornRaw) : (anySexRecorded ? sexSum : null);
     const stillborn = litter.stillbornCount ?? null;
-    const lossesRaw = litter.lossesCount ?? litter.losses ?? litter.stillbornCount;
+    const lossesRaw = litter.lossesCount ?? litter.losses;
     const losses = isNum(lossesRaw) ? Number(lossesRaw) : null;
     // Culls count from the litter
     const cullsCount = litter.cullsCount !== null ? litter.cullsCount : 0;
@@ -148,18 +148,19 @@ const LitterCard = ({
         ? Math.max(0, (Number(stillborn) || 0) + (Number(losses) || 0) + cullsCount)
         : null;
     // Total surviving = total born - stillborn - losses
-    // Use Number() to ensure losses is a valid number, default to 0 if null/undefined
-    const totalSurviving = totalBorn !== null
+    // Culls are not subtracted from this calculation (same as OverviewTab)
+    // Use 'born' variable which equals totalBorn (from litterSizeBorn / numberBorn)
+    const totalSurviving = born !== null
         ? Math.max(
             0,
-            totalBorn -
-            (stillbornCount || 0) -
-            (lossesCount || 0)
+            born -
+            (stillborn || 0) -
+            (losses || 0)
         )
         : null;
-    const linked = Array.isArray(offspring)
-        ? offspring.length
-        : (Array.isArray(litter.offspringIds_public) ? litter.offspringIds_public.length : null);
+    const linked = Array.isArray(litter.offspringIds_public)
+        ? litter.offspringIds_public.length
+        : 0;
 
     // Always show all 4 stats on the card (mobile + desktop).
     // statCount is used to determine whether to show the stats section;
