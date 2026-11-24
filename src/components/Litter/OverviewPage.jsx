@@ -149,8 +149,13 @@ const LitterCard = ({
         : null;
     // Total surviving = total born - stillborn - losses
     // Use Number() to ensure losses is a valid number, default to 0 if null/undefined
-    const totalSurviving = born !== null && stillborn !== null
-        ? Math.max(0, born - stillborn - (Number(losses) || 0))
+    const totalSurviving = totalBorn !== null
+        ? Math.max(
+            0,
+            totalBorn -
+            (stillbornCount || 0) -
+            (lossesCount || 0)
+        )
         : null;
     const linked = Array.isArray(offspring)
         ? offspring.length
