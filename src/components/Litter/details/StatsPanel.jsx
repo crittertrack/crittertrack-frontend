@@ -344,18 +344,16 @@ export default function StatsPanel({
                         bySex={survivingBySex}
                     />
 
-                    {isBorn && (
-                        <BreakdownToggle
-                            title={getLitterFieldLabel(
-                                'litterSizeWeaned',
-                                getLitterSpecies(litter),
-                                'Weaned',
-                                speciesOptions
-                            )}
-                            total={s.weaned}
-                            bySex={s.weanedBySex}
-                        />
-                    )}
+                    <BreakdownToggle
+                        title={getLitterFieldLabel(
+                            'litterSizeWeaned',
+                            getLitterSpecies(litter),
+                            'Weaned',
+                            speciesOptions
+                        )}
+                        total={s.weaned}
+                        bySex={s.weanedBySex}
+/>
                 </div>
             </Divider>
         </Panel>
