@@ -3,7 +3,6 @@ import React from 'react';
 import { computeLitterStats } from './helpers';
 import { Panel, Muted } from './ui';
 import { Big, BreakdownToggle, SEX } from './StatsParts';
-import { LitterOutcomeBar } from './LitterOutcomeBar';
 import {
     getLitterFieldLabel,
     getLitterSpecies,
