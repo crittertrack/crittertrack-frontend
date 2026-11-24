@@ -39,12 +39,25 @@ export const computeLitterStats = (litter, status) => {
     const losses = numOrNull(litter.lossesCount ?? litter.losses);
     const culls = litter.hasCulls ? numOrNull(litter.cullsCount) : null;
 
+    // Cull breakdown by sex
+    const cullMale = numOrNull(litter.cullMaleCount);
+    const cullFemale = numOrNull(litter.cullFemaleCount);
+    const cullUnknown = numOrNull(litter.cullUnknownCount);
+    const cullBySex = [cullMale, cullFemale, cullUnknown];
+    const cullSexRecorded = cullBySex.some(v => v !== null);
+    const cullSexSum = (cullMale || 0) + (cullFemale || 0) + (cullUnknown || 0);
+
     // Counts are always original entered values (toggleExtract no longer modifies them).
     // totalBorn is the original Born total as entered by the user.
     const totalBorn = storedBorn;
     // Surviving always subtracts ALL stillborns and ALL postnatal losses, regardless of extraction state.
     const liveBorn = totalBorn === null ? null : Math.max(0, totalBorn - (stillborn || 0));
     const surviving = liveBorn === null ? null : Math.max(0, liveBorn - (losses || 0));
+
+    // If extractCullsFromTotal is true, the surviving count excludes culls
+    const effectiveSurviving = litter.extractCullsFromTotal && cullSexSum !== null
+        ? surviving - cullSexSum
+        : surviving;
     const postnatal = losses === null ? null : Math.max(0, losses - (culls || 0));
 
     const weaned = numOrNull(litter.litterSizeWeaned ?? litter.numberWeaned);
@@ -67,11 +80,14 @@ const daysSinceBirth = litter.birthDate
     return {
         male, female, unknown, sexRecorded, sexSum,
         sexExcludesLosses: !!(litter.extractStillbornFromTotal || litter.extractLossesFromTotal),
-        totalBorn, liveBorn, surviving, stillborn, losses, culls, postnatal,
+        totalBorn, liveBorn, surviving, effectiveSurviving, stillborn, losses, culls, postnatal,
         weaned, weanedState, survivalPct,
         stillbornBySex: pick(litter.maleStillbornCount, litter.femaleStillbornCount, litter.unknownStillbornCount),
         lossesBySex: pick(litter.maleLossesCount, litter.femaleLossesCount, litter.unknownLossesCount),
+        cullsBySex: cullBySex,
         anyLossRecorded: stillborn !== null || losses !== null || culls !== null,
+        cullSexRecorded: cullSexRecorded,
+        cullSexSum: cullSexSum,
     };
 };
 
@@ -98,7 +114,7 @@ export const buildTimeline = (litter, status) => {
             key: 'weaning',
             label: litter.weaningConfirmed ? 'Weaned' : 'Expected weaning',
             date: litter.weaningDate || null,
-            done: !!litter.weaningConfirmed,
+            done: litter.weaningConfirmed && (!litter.weaningDate || new Date(litter.weaningDate) <= new Date()),
         },
     ];
     return steps.map(s => ({ ...s, missing: !s.date && !s.note }));
@@ -110,7 +126,16 @@ export const nextMilestone = (litter, status, now = new Date()) => {
     let label = null;
     let date = null;
     if (status === 'born') {
-        if (!litter.weaningConfirmed && litter.weaningDate) { label = 'Weaning'; date = litter.weaningDate; }
+        if (!litter.weaningConfirmed && litter.weaningDate) {
+            // Only show weaning as next milestone if weaningDate is not in the future
+            const weaningDate = new Date(litter.weaningDate);
+            if (!isNaN(weaningDate.getTime()) && weaningDate > now) {
+                // weaningDate is in the future, don't show it as the next milestone
+                label = null;
+            } else {
+                label = 'Weaning'; date = litter.weaningDate;
+            }
+        }
     } else if (status === 'planned' && (litter.matingDate || litter.pairingDate) && dayOf(litter.matingDate || litter.pairingDate) >= startOfDay(now)) {
         label = 'Mating'; date = litter.matingDate || litter.pairingDate;
     } else if (litter.expectedDueDate) {

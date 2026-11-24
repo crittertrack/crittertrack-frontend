@@ -36,6 +36,35 @@ describe('computeLitterStats', () => {
         expect(s.weanedState).toBe('value');
         expect(s.survivalPct).toBe(75);
     });
+
+    it('includes cull breakdown by sex', () => {
+        const s = computeLitterStats({
+            litterSizeBorn: 10,
+            hasCulls: true,
+            cullsCount: 3,
+            cullMaleCount: 1,
+            cullFemaleCount: 1,
+            cullUnknownCount: 1,
+        }, 'born');
+        expect(s.cullsBySex).toEqual([1, 1, 1]);
+        expect(s.cullSexRecorded).toBe(true);
+        expect(s.cullSexSum).toBe(3);
+        expect(s.culls).toBe(3);
+    });
+
+    it('computes effectiveSurviving when extractCullsFromTotal is true', () => {
+        const s = computeLitterStats({
+            litterSizeBorn: 10,
+            hasCulls: true,
+            cullsCount: 3,
+            cullMaleCount: 1,
+            cullFemaleCount: 1,
+            cullUnknownCount: 1,
+            extractCullsFromTotal: true,
+        }, 'born');
+        expect(s.effectiveSurviving).toBe(6); // 10 - 1 - 1 - 1 - 1 = 6 (total - culls)
+        expect(s.surviving).toBe(7); // 10 - 3 losses = 7
+    });
 });
 
 describe('buildTimeline', () => {
