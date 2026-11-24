@@ -287,9 +287,10 @@ export const nextMilestone = (
             }
         }
 
-        // If weaning is not yet confirmed, only show the milestone if the date is in the future.
-        // Do NOT auto-complete weaning merely because a past weaning date exists — that should
-        // require the explicit "Wean Today" confirmation action.
+        // If weaning is not yet confirmed, handle past/future dates differently:
+        // - Past weaning date: auto-confirm weaning (treat as complete, cycle ends)
+        // - Future weaning date: show "Weaning" milestone but do NOT auto-confirm
+        //   (requires explicit "Wean Today" confirmation action)
         if (!litter.weaningConfirmed && litter.weaningDate) {
             const weaningDate = new Date(litter.weaningDate);
 
@@ -297,11 +298,13 @@ export const nextMilestone = (
                 !isNaN(weaningDate.getTime()) &&
                 weaningDate > now
             ) {
+                // Future date: show milestone but do NOT auto-confirm
                 label = 'Weaning';
                 date = litter.weaningDate;
+            } else {
+                // Past date or today: auto-confirm weaning and treat cycle as complete
+                label = null;
             }
-            // If the date is in the past or invalid and unconfirmed, leave label as null
-            // (no "Weaning" milestone shown) rather than auto-confirming.
         }
     } else if (
         status === 'planned' &&
