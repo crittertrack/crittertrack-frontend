@@ -121,6 +121,9 @@ export const computeLitterStats = (litter, status) => {
         litter.litterSizeWeaned ?? litter.numberWeaned
     );
 
+    // Guard: weaned cannot exceed surviving (total born - stillborn - all losses including culls)
+    const cappedWeaned = surviving !== null ? Math.min(weaned || 0, surviving) : weaned;
+
     const weanedBySex = pick(
         litter.maleWeaned,
         litter.femaleWeaned,
@@ -140,16 +143,16 @@ export const computeLitterStats = (litter, status) => {
 
     const weanedState =
         isBorn && daysSinceBirth <= maxNursingDays && !litter.weaningDate
-            ? (weaned !== null ? 'value' : 'pending')
+            ? (cappedWeaned !== null ? 'value' : 'pending')
             : (isBorn && !litter.weaningConfirmed ? 'pending' : 'missing');
 
     // Survival percentage is based on live-born offspring.
     const survivalPct =
-        weaned !== null &&
+        cappedWeaned !== null &&
         liveBorn !== null &&
         liveBorn > 0 &&
-        (litter.weaningConfirmed || weaned > 0)
-            ? Math.min(100, Math.round((weaned / liveBorn) * 100))
+        (litter.weaningConfirmed || cappedWeaned > 0)
+            ? Math.min(100, Math.round((cappedWeaned / liveBorn) * 100))
             : null;
 
     return {
@@ -174,7 +177,7 @@ export const computeLitterStats = (litter, status) => {
         culls,
         postnatal,
 
-        weaned,
+        cappedWeaned,
         weanedBySex,
         weanedState,
         survivalPct,
