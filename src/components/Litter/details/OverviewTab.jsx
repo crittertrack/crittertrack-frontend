@@ -222,7 +222,7 @@ export default function OverviewTab({
                 <Summary
                     label="Next milestone"
                     testId="summary-milestone"
-                    className="min-w-0"
+                    className="min-w-0 col-span-3 lg:col-span-1"
                 >
                     <div className="flex items-center justify-between gap-3 w-full">
                         <div className="flex-1 min-w-0">
