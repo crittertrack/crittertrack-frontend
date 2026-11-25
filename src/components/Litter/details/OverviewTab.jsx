@@ -28,13 +28,13 @@ const Summary = ({ label, children, testId, className }) => {
 
     return (
         <div
-            className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-4 py-3 min-w-0 ${className || ''}`}
+            className={`rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg px-3 py-3 sm:px-4 min-w-0 ${className || ''}`}
             data-testid={testId}
         >
             <div className="text-xs text-gray-500 dark:text-dark-text-muted">
                 {label}
             </div>
-            <div className="mt-0.5 text-lg font-semibold text-gray-900 dark:text-dark-text">
+            <div className="mt-0.5 text-base sm:text-lg font-semibold text-gray-900 dark:text-dark-text">
                 {displayValue}
             </div>
         </div>
@@ -153,7 +153,7 @@ export default function OverviewTab({
         <div className="space-y-4" data-testid="litter-overview">
 
             {/* SUMMARY CARDS */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-3">
 
                 <Summary
                     label={getLitterFieldLabel('birthDate', species, 'Birth date', speciesOptions)}
