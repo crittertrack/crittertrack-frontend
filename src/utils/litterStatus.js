@@ -2,13 +2,14 @@
 // follows the dates the user fills in:
 //   birth date, or "born, date unknown"  -> born
 //   (a stored pregnancy date, no birth)  -> pregnant   (set elsewhere; never derived from the form)
+//   pregnancy lost flagged, no birth     -> lost       (terminal; ends the cycle)
 //   mating date after today              -> planned    (a scheduled mating)
 //   mating date today or earlier         -> mated
 //   nothing entered                      -> planned
 // The server keeps using the existing isPlanned flag, so reminders, the calendar and the
 // parent reproductive status keep working unchanged.
 
-export const LITTER_STATUS_LABELS = { planned: 'Planned', mated: 'Mated', pregnant: 'Pregnant', born: 'Born' };
+export const LITTER_STATUS_LABELS = { planned: 'Planned', mated: 'Mated', pregnant: 'Pregnant', born: 'Born', lost: 'Pregnancy lost' };
 
 const dayOf = (d) => (d ? String(d).substring(0, 10) : '');
 
@@ -18,6 +19,9 @@ const startOfToday = (now) => { const t = new Date(now); t.setHours(0, 0, 0, 0);
 export const deriveLitterFormStatus = (fd, original = null, now = new Date()) => {
     if (!fd) return 'planned';
     if (fd.birthDate || fd.birthDateUnknown) return 'born';
+    // A recorded pregnancy loss is a terminal state; no birth is ever expected, so it takes
+    // precedence over an open mating/pregnancy date still present on the record.
+    if ((fd.pregnancyLost || (original && original.pregnancyLost)) && !fd.birthDate && !fd.birthDateUnknown) return 'lost';
     if (original && original.pregnancyDate) return 'pregnant';
     const mating = dayOf(fd.matingDate);
     if (mating) {
@@ -31,6 +35,8 @@ export const deriveLitterFormStatus = (fd, original = null, now = new Date()) =>
 export const deriveStoredStatus = (litter) => {
     if (!litter) return 'planned';
     if (litter.birthDate || litter.birthDateUnknown) return 'born';
+    // A lost pregnancy never reaches birth, so it is its own terminal status (not pregnant/mated).
+    if (litter.pregnancyLost) return 'lost';
     if (litter.pregnancyDate) return 'pregnant';
     if (litter.isPlanned) return 'planned';
     return litter.matingDate ? 'mated' : 'planned';

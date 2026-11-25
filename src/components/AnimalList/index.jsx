@@ -2337,7 +2337,7 @@ useEffect(() => {
                     [dam, sire].filter(Boolean).forEach(animal => items.push({ animal, reason: dueLabel(days, 'Planned mating date is today'), view: 'planned' }));
                 }
             }
-            if (litter.pregnancyDate && !litter.birthDate && litter.expectedDueDate && dam) {
+            if (litter.pregnancyDate && !litter.birthDate && !litter.pregnancyLost && litter.expectedDueDate && dam) {
                 const days = daysSince(litter.expectedDueDate);
                 if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Due date is today'), view: 'pregnant' });
             }

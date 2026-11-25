@@ -42,6 +42,7 @@ const STATUS_COLORS = {
     mated: 'border-sky-300 dark:border-sky-800/60 bg-white dark:bg-dark-card-bg',
     pregnant: 'border-pink-300 dark:border-pink-800/60 bg-white dark:bg-dark-card-bg',
     born: 'border-gray-400 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg',
+    lost: 'border-rose-300 dark:border-rose-800/60 bg-white dark:bg-dark-card-bg',
 };
 
 // The app's coloured gender icons (same colours as the animal cards and lists).
@@ -55,6 +56,7 @@ const STATUS_BADGE_BG = {
     mated: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300',
     pregnant: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
     born: 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text',
+    lost: 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
 };
 
 const getStatusColor = (status) => STATUS_COLORS[status] || STATUS_COLORS.born;
@@ -197,17 +199,21 @@ const LitterCard = ({
         ? `Born ${formatDateShort(litter.birthDate)}${ageStr ? ` · ${ageStr}` : ''}`
         : litter.birthDateUnknown
             ? 'Born, date unknown'
-            : litter.pregnancyDate
-                ? `Pregnant since ${formatDateShort(litter.pregnancyDate)}`
-                : litter.matingDate
-                    ? `${status === 'planned' ? 'Planned mating' : 'Mated'} ${formatDateShort(litter.matingDate)}`
-                    : 'No dates set';
+            : status === 'lost'
+                ? `Pregnancy lost${litter.pregnancyLostReason ? ` · ${litter.pregnancyLostReason}` : ''}`
+                : litter.pregnancyDate
+                    ? `Pregnant since ${formatDateShort(litter.pregnancyDate)}`
+                    : litter.matingDate
+                        ? `${status === 'planned' ? 'Planned mating' : 'Mated'} ${formatDateShort(litter.matingDate)}`
+                        : 'No dates set';
 
-    const emptyHint = status === 'planned'
-        ? 'Planned — no offspring recorded yet'
-        : litter.expectedDueDate
-            ? `Due ${formatDateShort(litter.expectedDueDate)}`
-            : 'No offspring recorded yet';
+    const emptyHint = status === 'lost'
+        ? `Pregnancy lost${litter.pregnancyLostReason ? ` — ${litter.pregnancyLostReason}` : ''} — no offspring recorded`
+        : status === 'planned'
+            ? 'Planned — no offspring recorded yet'
+            : litter.expectedDueDate
+                ? `Due ${formatDateShort(litter.expectedDueDate)}`
+                : 'No offspring recorded yet';
 
     // Born litters already confirmed as weaned, or past the 90-day nursing cutoff, have no further transition.
     const daysSinceBirth = litter.birthDate

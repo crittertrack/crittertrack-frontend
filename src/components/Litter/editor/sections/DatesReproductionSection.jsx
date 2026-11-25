@@ -11,6 +11,7 @@ const STATUS_HINTS = {
     mated: 'Mating date is today or earlier.',
     pregnant: 'A pregnancy has been confirmed.',
     born: 'A birth date (or "born, date unknown") is recorded.',
+    lost: 'The pregnancy was lost; no birth is expected.',
 };
 
 export default function DatesReproductionSection({ form, setField, setFields, errors, original, species = '', speciesOptions = [], autoCalcDueDate, autoCalcWeaningDate, autoCalcAvailable }) {
@@ -30,12 +31,14 @@ export default function DatesReproductionSection({ form, setField, setFields, er
         mated: 'Pairing date is today or earlier.',
         pregnant: 'A gravid or egg-producing state has been confirmed.',
         born: 'A laying, hatching, or birth date (or unknown date) is recorded.',
+        lost: 'The eggs or clutch were lost; no hatch is expected.',
     } : STATUS_HINTS;
     const statusLabels = eggLaying ? {
         ...LITTER_STATUS_LABELS,
         mated: 'Paired',
         pregnant: 'Gravid',
         born: 'Eggs laid / offspring recorded',
+        lost: 'Eggs / clutch lost',
     } : LITTER_STATUS_LABELS;
 
     return (
