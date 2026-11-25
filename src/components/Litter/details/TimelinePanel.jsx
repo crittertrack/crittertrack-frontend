@@ -14,6 +14,7 @@ export default function TimelinePanel({ litter, status, speciesOptions = [] }) {
             due: 'Expected hatch',
             birth: 'Eggs laid / offspring hatched',
             weaning: litter.weaningConfirmed ? 'Independent' : 'Expected independence',
+            pregnancyLost: 'Eggs / clutch lost',
         };
         return { ...step, label: labels[step.key] || step.label };
     });

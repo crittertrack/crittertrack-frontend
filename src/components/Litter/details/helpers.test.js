@@ -76,6 +76,19 @@ describe('buildTimeline', () => {
         expect(steps[4].label).toBe('Expected weaning');
         expect(buildTimeline({ weaningDate: '2026-03-01', weaningConfirmed: true }, 'born')[4].label).toBe('Weaned');
     });
+
+    it('ends the cycle at a recorded pregnancy loss', () => {
+        const steps = buildTimeline({
+            matingDate: '2026-01-01',
+            pregnancyDate: '2026-01-10',
+            pregnancyLost: true,
+            pregnancyLostReason: 'Reabsorbed',
+        }, 'pregnant');
+        expect(steps.map(s => s.key)).toEqual(['mating', 'pregnancy', 'pregnancyLost']);
+        expect(steps[2].done).toBe(true);
+        expect(steps[2].missing).toBe(false);
+        expect(steps[2].note).toBe('Reabsorbed');
+    });
 });
 
 describe('nextMilestone', () => {

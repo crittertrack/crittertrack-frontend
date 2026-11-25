@@ -217,6 +217,7 @@ export const computeLitterStats = (litter, status) => {
 /** Ordered reproductive timeline. `done` = the step has happened; `missing` = nothing recorded. */
 export const buildTimeline = (litter, status) => {
     const born = status === 'born';
+    const lost = !!litter.pregnancyLost;
 
     const steps = [
         {
@@ -231,6 +232,13 @@ export const buildTimeline = (litter, status) => {
             label: 'Pregnancy confirmed',
             date: litter.pregnancyDate || null,
             done: !!litter.pregnancyDate
+        },
+        {
+            key: 'pregnancyLost',
+            label: 'Pregnancy lost',
+            date: null,
+            note: litter.pregnancyLostReason || 'Pregnancy lost',
+            done: lost
         },
         {
             key: 'due',
@@ -259,7 +267,16 @@ export const buildTimeline = (litter, status) => {
         }
     ];
 
-    return steps.map(s => ({
+    // A lost pregnancy ends the reproductive cycle at "Pregnancy lost": there will be no
+    // due date, birth or weaning, so those steps are omitted. A normal litter omits the
+    // loss step instead.
+    const visible = steps.filter(s =>
+        lost
+            ? s.key !== 'due' && s.key !== 'birth' && s.key !== 'weaning'
+            : s.key !== 'pregnancyLost'
+    );
+
+    return visible.map(s => ({
         ...s,
         missing: !s.date && !s.note
     }));

@@ -55,6 +55,7 @@ export default function OverviewTab({
 }) {
     const stats = computeLitterStats(litter, status);
     const milestone = nextMilestone(litter, status);
+    const cycleComplete = litter.pregnancyLost || (status === 'born' && litter.weaningConfirmed);
     const coi = litter.inbreedingCoefficient;
 
     const species = getLitterSpecies(litter);
@@ -159,15 +160,19 @@ export default function OverviewTab({
                     testId="summary-birth"
                     className="min-w-0"
                 >
-                    {birth || (
-                        <Muted>
-                            {status === 'born'
-                                ? 'Not recorded'
-                                : eggLaying
-                                    ? 'Not laid or hatched yet'
-                                    : 'Not born yet'}
-                        </Muted>
-                    )}
+                    {birth
+                        ? birth
+                        : litter.pregnancyLost
+                            ? null
+                            : (
+                                <Muted>
+                                    {status === 'born'
+                                        ? 'Not recorded'
+                                        : eggLaying
+                                            ? 'Not laid or hatched yet'
+                                            : 'Not born yet'}
+                                </Muted>
+                            )}
                 </Summary>
 
                 <Summary
@@ -231,10 +236,7 @@ export default function OverviewTab({
                                 </>
                             ) : (
                                 <Muted>
-                                    {status === 'born' &&
-                                    litter.weaningConfirmed
-                                        ? 'Complete'
-                                        : ''}
+                                    {cycleComplete ? 'Complete' : ''}
                                 </Muted>
                             )}
                         </div>
@@ -247,7 +249,7 @@ export default function OverviewTab({
                                 : status === 'born' ? 'weaned'
                                 : null;
 
-                            if (!action || !handleQuickAction) {
+                            if (litter.pregnancyLost || !action || !handleQuickAction) {
                                 return null;
                             }
 
