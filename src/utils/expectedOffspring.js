@@ -340,7 +340,11 @@ function normalizeGenotype(genotype) {
   for (const [locus, value] of Object.entries(genotype || {})) {
     if (typeof value !== 'string') continue;
     const alleles = value.split('/').map((allele) => allele.trim());
-    if (alleles.length !== 2 || !alleles.every(Boolean)) continue;
+    // Validate that exactly 2 alleles are present per locus
+    if (alleles.length !== 2 || !alleles.every(Boolean)) {
+      // Skip invalid genotype entries (e.g., ch/ch/ch/ch with 4 alleles)
+      continue;
+    }
     const [a, b] = alleles;
 
     if (locus === 'A') {
